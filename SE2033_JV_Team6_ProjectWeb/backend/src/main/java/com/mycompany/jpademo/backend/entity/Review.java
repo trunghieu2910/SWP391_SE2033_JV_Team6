@@ -30,7 +30,7 @@ public class Review {
     @Column(name = "treatmentPlan", nullable = false)
     private String treatmentPlan;
 
-    @Column(name = "note", nullable = true)
+    @Column(name = "note")
     private String note;
 
     @CreationTimestamp

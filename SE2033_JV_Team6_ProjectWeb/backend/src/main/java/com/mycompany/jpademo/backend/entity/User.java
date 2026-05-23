@@ -25,13 +25,13 @@ public class User {
     @Column(name = "fullName", length = 100)
     private String fullName;
 
-    @Column(name = "passwordHash", nullable = false, length = 255)
+    @Column(name = "passwordHash", nullable = false)
     private String passwordHash;
 
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(name = "certificate", length = 255)
+    @Column(name = "certificate")
     private String certificate;
 
     @Column(name = "phoneNumber", length = 20)
