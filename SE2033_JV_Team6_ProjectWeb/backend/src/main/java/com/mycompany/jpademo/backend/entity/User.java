@@ -1,14 +1,56 @@
 package com.mycompany.jpademo.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "User")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer userID;
     
-    // User entity fields
-}
+    @Column(name = "username", nullable = false, unique = true, length = 50)
+    private String username;
 
+    @Column(name = "fullName", length = 100)
+    private String fullName;
+
+    @Column(name = "passwordHash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Column(name = "email", nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(name = "certificate", length = 255)
+    private String certificate;
+
+    @Column(name = "phoneNumber", length = 20)
+    private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 50)
+    private String status;
+
+    @CreationTimestamp
+    @Column(name = "createdAt")
+    private LocalDateTime createdAt;
+
+    @Column(name = "nationalID", length = 12)
+    private String nationalID;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "roleID", nullable = false)
+    private Role role;
+
+    @OneToOne(mappedBy = "user")
+    private Patient patient;
+}
