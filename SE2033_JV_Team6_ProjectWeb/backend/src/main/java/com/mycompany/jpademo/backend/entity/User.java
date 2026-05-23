@@ -33,7 +33,7 @@ public class User {
     @Column(name = "certificate", length = 255)
     private String certificate;
 
-    @Column(name = "phoneNumber", length = 20)
+    @Column(name = "phoneNumber", length = 20, unique = true)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
