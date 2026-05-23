@@ -29,7 +29,7 @@ public class Patient {
     @Column(name = "dob")
     private LocalDate dob;
 
-    @Column(name = "address", length = 255)
+    @Column(name = "address")
     private String address;
 
     @Column(name = "healthInsurance", length = 8)
