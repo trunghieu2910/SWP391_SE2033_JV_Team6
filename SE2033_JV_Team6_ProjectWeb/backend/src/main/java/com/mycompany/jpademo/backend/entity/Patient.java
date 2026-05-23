@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer patientID;
+    private Integer patientId;
 
     @Column(name = "firstName", length = 50)
     private String firstName;

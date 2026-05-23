@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -19,7 +20,7 @@ import java.util.List;
 public class DiagnosisSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer sessionID;
+    private Integer sessionId;
 
     @NotNull
     @Positive
@@ -33,7 +34,8 @@ public class DiagnosisSession {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50, nullable = false)
-    private String status;
+    @Builder.Default
+    private DiagnosisSessionStatus status = DiagnosisSessionStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
@@ -55,4 +57,7 @@ public class DiagnosisSession {
 
     @OneToMany(mappedBy = "diagnosisSession")
     private List<MedicalImage> medicalImages;
+
+    @OneToOne(mappedBy = "diagnosisSession")
+    private Review review;
 }

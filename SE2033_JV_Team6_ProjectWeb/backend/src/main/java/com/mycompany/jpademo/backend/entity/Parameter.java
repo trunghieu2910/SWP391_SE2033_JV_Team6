@@ -15,7 +15,7 @@ import java.util.List;
 public class Parameter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer parameterID;
+    private Integer parameterId;
 
     @Column(name = "parameterName", unique = true, length = 100, nullable = false)
     private String parameterName;
