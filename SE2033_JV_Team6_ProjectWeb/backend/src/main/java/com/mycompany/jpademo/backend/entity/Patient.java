@@ -32,7 +32,7 @@ public class Patient {
     @Column(name = "address")
     private String address;
 
-    @Column(name = "healthInsurance", length = 8)
+    @Column(name = "healthInsurance", length = 10)
     private String healthInsurance;
 
     @OneToOne

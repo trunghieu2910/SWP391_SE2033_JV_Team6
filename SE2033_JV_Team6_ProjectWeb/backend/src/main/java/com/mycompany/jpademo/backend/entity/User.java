@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,12 +35,12 @@ public class User {
     @Column(name = "certificate")
     private String certificate;
 
-    @Column(name = "phoneNumber", length = 20)
+    @Column(name = "phoneNumber", length = 20, unique = true)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50)
-    private String status;
+    private UserStatus status;
 
     @CreationTimestamp
     @Column(name = "createdAt")
