@@ -14,6 +14,7 @@ import org.hibernate.annotations.CreationTimestamp;
 public class MedicalImageDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "imageID")
     private Integer imageId;
 
     @Column(name = "imageUrl", unique = true, nullable = false)

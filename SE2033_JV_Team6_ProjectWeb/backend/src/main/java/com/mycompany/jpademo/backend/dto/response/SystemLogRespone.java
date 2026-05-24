@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class SystemLogRespone {
-    private Long logID;
+    private Integer logID;
 
     private String action;
 
@@ -16,11 +16,7 @@ public class SystemLogRespone {
 
     private String targetType;
 
-    private Long targetId;
-
-    private String ipAddress;
-
-    private String performedBy;
+    private Integer targetId;
 
     private LocalDateTime performedAt;
 }

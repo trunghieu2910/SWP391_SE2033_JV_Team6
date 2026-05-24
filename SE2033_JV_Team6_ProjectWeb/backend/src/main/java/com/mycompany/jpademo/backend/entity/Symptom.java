@@ -15,6 +15,7 @@ import java.util.List;
 public class Symptom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "symptomID")
     private Integer symptomId;
 
     @Column(name = "symptomName", unique = true, nullable = false, length = 100)

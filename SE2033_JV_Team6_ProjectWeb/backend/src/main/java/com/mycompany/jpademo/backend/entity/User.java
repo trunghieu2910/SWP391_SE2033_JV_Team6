@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "User")
+@Table(name = "Users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,6 +18,7 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userID")
     private Integer userId;
     
     @Column(name = "username", nullable = false, unique = true, length = 50)

@@ -18,6 +18,7 @@ import java.util.List;
 public class MedicalImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "medicalImageID")
     private Integer medicalImageId;
 
     @Column(name = "imageType", nullable = false)

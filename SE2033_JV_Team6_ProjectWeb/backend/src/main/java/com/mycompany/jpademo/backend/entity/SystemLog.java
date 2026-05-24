@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class SystemLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "logID")
     private Integer logId;
 
     @Column(name = "targetType", nullable = false, length = 50)

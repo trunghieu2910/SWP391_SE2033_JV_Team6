@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class SymptomDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "symptomDetailsID")
     private Integer symptomDetailsId;
 
     @CreationTimestamp

@@ -1,6 +1,6 @@
 package com.mycompany.jpademo.backend.service.impl;
 
-import com.mycompany.jpademo.backend.service.interface.UserService;
+import com.mycompany.jpademo.backend.service.interfaces.UserService;
 import org.springframework.stereotype.Service;
 
 @Service

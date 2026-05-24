@@ -18,6 +18,7 @@ import java.util.List;
 public class LabResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "labResultID")
     private Integer labResultId;
 
     @Column(name = "testType", nullable = false, length = 100)

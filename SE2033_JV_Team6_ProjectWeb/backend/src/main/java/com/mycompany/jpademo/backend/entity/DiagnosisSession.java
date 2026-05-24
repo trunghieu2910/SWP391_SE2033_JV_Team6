@@ -20,6 +20,7 @@ import java.util.List;
 public class DiagnosisSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "sessionID")
     private Integer sessionId;
 
     @NotNull
@@ -55,9 +56,9 @@ public class DiagnosisSession {
     @OneToMany(mappedBy = "diagnosisSession")
     private List<LabResult> labResults;
 
-    @OneToMany(mappedBy = "diagnosisSession")
+    @OneToMany(mappedBy = "diagnosisSession", fetch = FetchType.LAZY)
     private List<MedicalImage> medicalImages;
 
-    @OneToOne(mappedBy = "diagnosisSession")
+    @OneToOne(mappedBy = "diagnosisSession", fetch = FetchType.LAZY)
     private Review review;
 }
