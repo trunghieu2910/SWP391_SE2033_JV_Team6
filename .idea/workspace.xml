@@ -4,21 +4,52 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="Branches Giang">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/ApiResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/InvalidPasswordException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/UserNotFoundException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/RoleRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/jwt/JwtService.java" afterDir="false" />
+    <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="Xây dựng chức năng login (Entity, DTO, Repository, Exception)">
+      <change afterPath="$PROJECT_DIR$/.idea/db-forest-config.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/controller/AuthController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/enums/UserStatusEnum.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/GlobalExceptionHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/SecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetailsService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/factory/AuthFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AITrainerLoginService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminLoginService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AuthServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/DoctorLoginService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/PatientLoginService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/AuthService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/LoginStrategy.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/controller/Test.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/LoginRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/LoginRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/LoginResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/LoginResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/DiagnosisSession.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/LabResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/LabResultParameter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/MedicalImage.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/MedicalImageDetails.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Parameter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Patient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Symptom.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/SymptomDetails.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/enums/Test.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/InvalidPasswordException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/Test.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/filter/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/filter/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/jwt/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/jwt/JwtService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/jwt/JwtUtil.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetails.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/factory/ServiceFactory.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/UserServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interface/UserService.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,10 +123,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Enum" />
         <option value="Interface" />
-        <option value="Exception" />
         <option value="Class" />
+        <option value="Exception" />
+        <option value="Enum" />
       </list>
     </option>
   </component>
@@ -147,10 +178,16 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.Main.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.BackendApplication.executor": "Run",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "git-widget-placeholder": "TranQuocNam__HE194210",
     "ignore.virus.scanning.warn.message": "true",
@@ -161,6 +198,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "D:/FPT_University/Ki_5/SWP391/Project/Code/untitled/src/main/java/fu/hsf302/Main.java",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -191,6 +229,7 @@
       <workItem from="1779508541845" duration="10631000" />
       <workItem from="1779536510295" duration="205000" />
       <workItem from="1779540706270" duration="8923000" />
+      <workItem from="1779581940178" duration="34075000" />
     </task>
     <task id="LOCAL-00001" summary="Branches Giang">
       <option name="closed" value="true" />
@@ -200,7 +239,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779500986431</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Xây dựng chức năng login (Entity, DTO, Repository, Exception)">
+      <option name="closed" value="true" />
+      <created>1779553881563</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1779553881563</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -219,7 +266,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Branches Giang" />
-    <option name="LAST_COMMIT_MESSAGE" value="Branches Giang" />
+    <MESSAGE value="Xây dựng chức năng login (Entity, DTO, Repository, Exception)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Xây dựng chức năng login (Entity, DTO, Repository, Exception)" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

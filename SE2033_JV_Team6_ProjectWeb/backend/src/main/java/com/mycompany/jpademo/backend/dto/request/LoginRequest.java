@@ -8,10 +8,10 @@ import lombok.Setter;
 @Setter
 public class LoginRequest {
 
-    @NotBlank
+    @NotBlank(message = "Tài khoản không được để trống!")
     private String login;
 
-    @NotBlank
+    @NotBlank(message = "Mật khẩu không được để trống!")
     private String password;
 }
 

@@ -13,7 +13,7 @@ public class LoginResponse {
 
     private String tokenType;
 
-    private Long userId;
+    private Integer userId;
 
     private String username;
 
