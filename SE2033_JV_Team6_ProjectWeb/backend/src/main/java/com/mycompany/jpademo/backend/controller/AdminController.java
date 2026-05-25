@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.controller;
 
+import com.mycompany.jpademo.backend.dto.request.*;
 import com.mycompany.jpademo.backend.dto.response.UserRespone;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +25,14 @@ public class AdminController {
         return adminService.searchUsers(keyword, keyword);
     }
 
-    @PatchMapping("/users/ban/{userId}")
-    public ResponseEntity<String> banUser(@PathVariable Integer userId) {
-        return adminService.banUser(userId);
+    @PatchMapping("/users/ban")
+    public ResponseEntity<String> banUser(@RequestBody BanUserRequest request) {
+        return adminService.banUser(request);
     }
 
-    @PatchMapping("/users/unban/{userId}")
-    public ResponseEntity<String> unbanUser(@PathVariable Integer userId) {
-        return adminService.unbanUser(userId);
+    @PatchMapping("/users/unban")
+    public ResponseEntity<String> unbanUser(@RequestBody UnbanRequest request) {
+        return adminService.unbanUser(request);
     }
 
     @GetMapping("/doctors/pending")
@@ -39,13 +40,13 @@ public class AdminController {
         return adminService.getPendingDoctors();
     }
 
-    @PatchMapping("/doctors/approve/{userId}")
-    public ResponseEntity<String> approveDoctor(@PathVariable Integer userId) {
-        return adminService.approveDoctor(userId);
+    @PatchMapping("/doctors/approve")
+    public ResponseEntity<String> approveDoctor(@RequestBody ApproveDoctorRequest request) {
+        return adminService.approveDoctor(request);
     }
 
-    @PatchMapping("/doctors/reject/{userId}")
-    public ResponseEntity<String> rejectDoctor(@PathVariable Integer userId) {
-        return adminService.rejectDoctor(userId);
+    @PatchMapping("/doctors/reject")
+    public ResponseEntity<String> rejectDoctor(@RequestBody RejectDoctorRequest request) {
+        return adminService.rejectDoctor(request);
     }
 }

@@ -1,5 +1,9 @@
 package com.mycompany.jpademo.backend.service.interfaces;
 
+import com.mycompany.jpademo.backend.dto.request.ApproveDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.BanUserRequest;
+import com.mycompany.jpademo.backend.dto.request.RejectDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.UnbanRequest;
 import com.mycompany.jpademo.backend.dto.response.UserRespone;
 import org.springframework.http.ResponseEntity;
 
@@ -10,13 +14,13 @@ public interface AdminService {
 
     List<UserRespone> searchUsers(String username, String email);
 
-    ResponseEntity<String> banUser(Integer userId);
+    ResponseEntity<String> banUser(BanUserRequest request);
 
-    ResponseEntity<String> unbanUser(Integer userId);
+    ResponseEntity<String> unbanUser(UnbanRequest request);
 
     List<UserRespone> getPendingDoctors();
 
-    ResponseEntity<String> approveDoctor(Integer userId);
+    ResponseEntity<String> approveDoctor(ApproveDoctorRequest request);
 
-    ResponseEntity<String> rejectDoctor(Integer userId);
+    ResponseEntity<String> rejectDoctor(RejectDoctorRequest request);
 }

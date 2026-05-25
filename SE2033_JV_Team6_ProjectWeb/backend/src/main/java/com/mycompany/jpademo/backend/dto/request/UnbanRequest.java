@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BanUserRequest {
+public class UnbanRequest {
     @NotNull(message = "User ID cannot be null")
     private int userId;
 

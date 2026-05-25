@@ -10,10 +10,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BanUserRequest {
-    @NotNull(message = "User ID cannot be null")
-    private int userId;
+public class RejectDoctorRequest {
+    @NotNull(message = "Doctor ID cannot be null")
+    private int doctorId;
 
-    @NotNull(message = "Reason cannot be null")
-    private String reason;
+    private String rejectNote;
 }

@@ -1,6 +1,10 @@
 package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
+import com.mycompany.jpademo.backend.dto.request.ApproveDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.BanUserRequest;
+import com.mycompany.jpademo.backend.dto.request.RejectDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.UnbanRequest;
 import com.mycompany.jpademo.backend.dto.response.UserRespone;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
@@ -44,9 +48,9 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @AdminActionLog(action = "BAN_USER",
                     targetType = "User")
-    public ResponseEntity<String> banUser(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    public ResponseEntity<String> banUser(BanUserRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
         user.setStatus(UserStatus.BLOCKED);
         emailService.sendBanEmail(user.getEmail(), "Tài khoản của bạn đã bị khoá", user.getFullName());
         userRepository.save(user);
@@ -56,9 +60,9 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @AdminActionLog(action = "UNBAN_USER",
                     targetType = "User")
-    public ResponseEntity<String> unbanUser(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    public ResponseEntity<String> unbanUser(UnbanRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
         user.setStatus(UserStatus.ACTIVE);
         emailService.sendUnbanEmail(user.getEmail(), "Tài khoản của bạn đã được mở khoá", user.getFullName());
         userRepository.save(user);
@@ -74,9 +78,9 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @AdminActionLog(action = "APPROVE_DOCTOR",
                     targetType = "User")
-    public ResponseEntity<String> approveDoctor(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    public ResponseEntity<String> approveDoctor(ApproveDoctorRequest request) {
+        User user = userRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getDoctorId()));
         if (!user.getRole().getRoleName().equals("DOCTOR")) {
             throw new DoctorApprovalException("User is not a doctor");
         }
@@ -87,9 +91,9 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseEntity<String> rejectDoctor(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+    public ResponseEntity<String> rejectDoctor(RejectDoctorRequest request) {
+        User user = userRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getDoctorId()));
         if (!user.getRole().getRoleName().equals("DOCTOR")) {
             throw new DoctorApprovalException("User is not a doctor");
         }
