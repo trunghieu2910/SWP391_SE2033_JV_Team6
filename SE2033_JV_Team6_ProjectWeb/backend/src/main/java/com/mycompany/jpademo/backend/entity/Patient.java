@@ -13,8 +13,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class Patient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "patientID")
     private Integer patientID;
 
     @Column(name = "firstName", length = 50)
@@ -32,10 +34,10 @@ public class Patient {
     @Column(name = "address", length = 255)
     private String address;
 
-    @Column(name = "healthInsurance", length = 8)
+    @Column(name = "healthInsurance", unique = true, length = 10)
     private String healthInsurance;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID", nullable = false, unique = true)
     private User user;
 }
