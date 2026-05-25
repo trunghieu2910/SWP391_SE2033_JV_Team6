@@ -7,7 +7,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "User")
+
+@Table(name = "`User`")
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,7 +38,7 @@ public class User {
     @Column(name = "phoneNumber", length = 20)
     private String phoneNumber;
 
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "status", length = 50)
     private String status;
 

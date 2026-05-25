@@ -22,7 +22,7 @@ public class MedicalImage {
     @Column(name = "imageType", nullable = false)
     private String imageType;
 
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "status", length = 50)
     private String status;
 

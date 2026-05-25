@@ -31,7 +31,7 @@ public class DiagnosisSession {
     @Column(name = "height", nullable = false)
     private Double  height;
 
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "status", length = 50, nullable = false)
     private String status;
 

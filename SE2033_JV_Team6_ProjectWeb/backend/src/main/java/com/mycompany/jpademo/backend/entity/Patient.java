@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class Patient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer patientID;
@@ -35,7 +36,9 @@ public class Patient {
     @Column(name = "healthInsurance", length = 8)
     private String healthInsurance;
 
+
     @OneToOne
     @JoinColumn(name = "userID", nullable = false, unique = true)
+
     private User user;
 }
