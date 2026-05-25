@@ -7,6 +7,6 @@ import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
-    // Hàm tìm lời phê kết luận của bác sĩ dựa theo mã ca khám (SessionID)
+
     Optional<Review> findBySessionSessionID(Integer sessionID);
 }

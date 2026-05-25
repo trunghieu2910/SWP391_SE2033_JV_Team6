@@ -88,7 +88,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         if (labResults != null) {
             for (LabResult lr : labResults) {
                 MedicalRecordDetailResponse.LabTestDTO labDTO = new MedicalRecordDetailResponse.LabTestDTO();
-                labDTO.setTestName(lr.getTestType()); // 👈 Đúng chuẩn trường testType của ông nhé
+                labDTO.setTestName(lr.getTestType());
                 if (lr.getCreatedAt() != null) {
                     labDTO.setTestedAt(java.sql.Timestamp.valueOf(lr.getCreatedAt()));
                 }
@@ -98,7 +98,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 List<MedicalRecordDetailResponse.ParamDTO> paramDTOs = lrpList.stream().map(lrp -> {
                     MedicalRecordDetailResponse.ParamDTO pDTO = new MedicalRecordDetailResponse.ParamDTO();
                     if (lrp.getParameter() != null) {
-                        pDTO.setParamName(lrp.getParameter().getParameterName()); // 👈 Đúng chuẩn parameterName
+                        pDTO.setParamName(lrp.getParameter().getParameterName());
                         pDTO.setUnit(lrp.getParameter().getUnit());
                     }
                     pDTO.setValue(lrp.getValue());

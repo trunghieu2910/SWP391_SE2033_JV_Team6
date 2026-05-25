@@ -12,5 +12,5 @@ public class MedicalRecordResponse {
     private Integer sessionID;
     private Date createdAt;
     private String status;
-    private String finalDiagnosis; // Lấy từ bảng Review ra hiển thị luôn cho tiện theo dõi
+    private String finalDiagnosis;
 }

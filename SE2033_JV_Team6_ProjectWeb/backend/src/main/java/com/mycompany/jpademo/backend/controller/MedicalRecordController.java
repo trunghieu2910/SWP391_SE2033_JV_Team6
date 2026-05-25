@@ -22,8 +22,8 @@ public class MedicalRecordController {
      * URL test Postman: GET http://localhost:8080/api/medical-records/patient/{patientID}
      */
     @GetMapping("/detail/{id}")
-    public ResponseEntity<?> getDetail(@PathVariable Integer id) { // Sửa thành Integer cho khớp mã ID ca khám của ông
-        // Gọi qua tầng Service Impl để nó tự động gom Patient, LabResult, Review thành cục DTO sạch rác
+    public ResponseEntity<?> getDetail(@PathVariable Integer id) {
+
         com.mycompany.jpademo.backend.dto.response.MedicalRecordDetailResponse detail =
                 medicalRecordService.getMedicalRecordDetail(id);
 
