@@ -91,6 +91,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @AdminActionLog(action = "REJECT_DOCTOR",
+                    targetType = "User")
     public ResponseEntity<String> rejectDoctor(RejectDoctorRequest request) {
         User user = userRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getDoctorId()));
