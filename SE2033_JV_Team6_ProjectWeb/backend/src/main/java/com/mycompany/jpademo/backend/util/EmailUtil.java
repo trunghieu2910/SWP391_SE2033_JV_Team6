@@ -92,27 +92,29 @@ public class EmailUtil {
                 <html>
                 <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
                 <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
-                <h2 style="color: #1565c0;">
-                Tài khoản đã được mở khóa
-                </h2>
-                <p>Xin chào Bác sĩ <b>%s</b></p>
-                <p>
-                Tài khoản của bạn đã được quản trị viên mở khóa thành công.
-                </p>
-                <p>
-                Bạn hiện có thể đăng nhập và tiếp tục sử dụng hệ thống Medical AI System.
-                </p>
-                <br>
-                <p>
-                Cảm ơn bạn đã hợp tác với hệ thống.
-                </p>
-                <br>
-                <p>
-                Trân trọng,<br>
-                <strong>Medical AI System</strong>
-                </p>
+                    <h2 style="color: #d32f2f;">
+                        Đăng ký bác sĩ đã bị từ chối
+                    </h2>
+                    <p>Xin chào Bác sĩ <b>%s</b>,</p>
+                    <p>
+                        Yêu cầu đăng ký tài khoản bác sĩ của bạn đã bị quản trị viên từ chối.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background-color: #ffebee; border-radius: 5px;">
+                        <strong>Lý do từ chối:</strong>
+                        <p>Chứng chỉ bác sĩ của bạn chưa đạt chuẩn.</p>
+                    </div>
+                    <br>
+                    <p>
+                        Vui lòng kiểm tra lại thông tin đăng ký và gửi yêu cầu mới nếu cần.
+                    </p>
+                    <br>
+                    <p>
+                        Trân trọng,<br>
+                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                    </p>
                 </div>
                 </body>
-                </html>""".formatted(name);
+                </html>
+                """.formatted(name);
     }
 }
