@@ -1,8 +1,14 @@
 package com.mycompany.jpademo.backend.controller;
 
+import com.mycompany.jpademo.backend.dto.request.ForgotPasswordRequest;
 import com.mycompany.jpademo.backend.dto.request.LoginRequest;
+import com.mycompany.jpademo.backend.dto.request.ResetPasswordRequest;
+import com.mycompany.jpademo.backend.dto.request.VerifyOtpRequest;
+import com.mycompany.jpademo.backend.dto.response.ApiResponse;
 import com.mycompany.jpademo.backend.dto.response.LoginResponse;
+import com.mycompany.jpademo.backend.dto.response.VerifyOtpResponse;
 import com.mycompany.jpademo.backend.service.interfaces.AuthService;
+import com.mycompany.jpademo.backend.service.interfaces.ForgotPasswordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final ForgotPasswordService forgotPasswordService;
 
     // Convert JSON → LoginRequest
     // Call service
@@ -27,5 +34,38 @@ public class AuthController {
             LoginRequest request
     ) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse> forgotPassword(
+            @Valid
+            @RequestBody
+            ForgotPasswordRequest request
+    ) {
+        return forgotPasswordService.forgotPassword(request);
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<VerifyOtpResponse>
+    verifyOtp(
+            @Valid
+            @RequestBody
+            VerifyOtpRequest request
+    ) {
+
+        return forgotPasswordService
+                .verifyOtp(request);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse>
+    resetPassword(
+            @Valid
+            @RequestBody
+            ResetPasswordRequest request
+    ) {
+
+        return forgotPasswordService
+                .resetPassword(request);
     }
 }
