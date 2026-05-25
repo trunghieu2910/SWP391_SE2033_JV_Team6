@@ -8,7 +8,7 @@ import java.util.List;
 public interface AdminService {
     List<UserRespone> getAllUser();
 
-    List<UserRespone> searchUsers(String keyword);
+    List<UserRespone> searchUsers(String username, String email);
 
     ResponseEntity<String> banUser(Integer userId);
 

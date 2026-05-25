@@ -44,7 +44,7 @@ public class SystemLogServiceImpl implements SystemLogService {
 
     @NonNull
     private List<SystemLogRespone> getSystemLogRespone(List<SystemLog> systemLogs) {
-        List<SystemLogRespone> respones = null;
+        List<SystemLogRespone> respones = new ArrayList<>();
         for (SystemLog systemLog: systemLogs) {
             SystemLogRespone respone = SystemLogRespone.builder()
                     .logID(systemLog.getLogId())

@@ -21,15 +21,15 @@ public class AdminController {
 
     @GetMapping("/users/search")
     public List<UserRespone> searchUsers(@RequestParam String keyword) {
-        return adminService.searchUsers(keyword);
+        return adminService.searchUsers(keyword, keyword);
     }
 
-    @PutMapping("/users/{userId}/ban")
+    @PatchMapping("/users/ban/{userId}")
     public ResponseEntity<String> banUser(@PathVariable Integer userId) {
         return adminService.banUser(userId);
     }
 
-    @PutMapping("/users/{userId}/unban")
+    @PatchMapping("/users/unban/{userId}")
     public ResponseEntity<String> unbanUser(@PathVariable Integer userId) {
         return adminService.unbanUser(userId);
     }
@@ -39,12 +39,12 @@ public class AdminController {
         return adminService.getPendingDoctors();
     }
 
-    @PutMapping("/doctors/{userId}/approve")
+    @PatchMapping("/doctors/approve/{userId}")
     public ResponseEntity<String> approveDoctor(@PathVariable Integer userId) {
         return adminService.approveDoctor(userId);
     }
 
-    @PutMapping("/doctors/{userId}/reject")
+    @PatchMapping("/doctors/reject/{userId}")
     public ResponseEntity<String> rejectDoctor(@PathVariable Integer userId) {
         return adminService.rejectDoctor(userId);
     }

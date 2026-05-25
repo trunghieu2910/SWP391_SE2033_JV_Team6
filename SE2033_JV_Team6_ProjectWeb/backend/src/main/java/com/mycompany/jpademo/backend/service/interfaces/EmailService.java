@@ -1,9 +1,11 @@
 package com.mycompany.jpademo.backend.service.interfaces;
 
 public interface EmailService {
-    void sendBanEmail(String to, String subject);
+    void sendBanEmail(String to, String subject, String name);
 
-    void senUnbanEmail(String to, String subject);
+    void sendUnbanEmail(String to, String subject, String name);
 
-    void senApproveEmail(String to, String subject);
+    void sendApproveEmail(String to, String subject, String name);
+
+    void sendRejectEmail(String to, String subject, String name);
 }

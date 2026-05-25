@@ -3,6 +3,7 @@ package com.mycompany.jpademo.backend.service.impl;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
 import com.mycompany.jpademo.backend.util.EmailUtil;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class EmailSeviceImpl implements EmailService {
+public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
@@ -23,18 +24,26 @@ public class EmailSeviceImpl implements EmailService {
 
     @Async
     @Override
-    public void sendBanEmail(String to, String subject) {
-        sendEmail(to, subject, EmailUtil.buildBanAccountTemplate());
+    public void sendBanEmail(String to, String subject, String name) {
+        sendEmail(to, subject, EmailUtil.buildBanAccountTemplate(name));
     }
 
+    @Async
     @Override
-    public void senUnbanEmail(String to, String subject) {
-        sendEmail(to, subject, EmailUtil.buildDoctorApprovedTemplate());
+    public void sendUnbanEmail(String to, String subject, String name) {
+        sendEmail(to, subject, EmailUtil.buildUnbanAccountTemplate(name));
     }
 
+    @Async
     @Override
-    public void senApproveEmail(String to, String subject) {
-        sendEmail(to, subject, EmailUtil.buildDoctorApprovedTemplate());
+    public void sendRejectEmail(String to, String subject, String name) {
+        sendEmail(to, subject, EmailUtil.buildDoctorRejectedTemplate(name));
+    }
+
+    @Async
+    @Override
+    public void sendApproveEmail(String to, String subject, String name) {
+        sendEmail(to, subject, EmailUtil.buildDoctorApprovedTemplate(name));
     }
 
     private void sendEmail(String to, String subject, String body) {
@@ -44,7 +53,7 @@ public class EmailSeviceImpl implements EmailService {
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(body, true);
-            helper.setFrom(fromEmail, fromName);
+            helper.setFrom(fromEmail, MimeUtility.encodeText(fromName, "UTF-8", "B"));
             mailSender.send(message);
         } catch (Exception e) {
             throw new RuntimeException("Failed to send email");
