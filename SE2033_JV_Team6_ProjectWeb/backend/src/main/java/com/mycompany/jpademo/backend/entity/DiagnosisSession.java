@@ -35,6 +35,7 @@ public class DiagnosisSession {
 
     @Column(name = "status", length = 50, nullable = false)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private DiagnosisSessionStatus status = DiagnosisSessionStatus.PENDING;
 
     @CreationTimestamp

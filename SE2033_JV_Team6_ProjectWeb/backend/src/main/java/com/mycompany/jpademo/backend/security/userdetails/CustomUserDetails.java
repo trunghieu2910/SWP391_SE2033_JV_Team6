@@ -1,6 +1,8 @@
 package com.mycompany.jpademo.backend.security.userdetails;
 
-import lombok.*;
+import com.mycompany.jpademo.backend.entity.User;
+import lombok.Builder;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,43 +11,43 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class CustomUserDetails implements UserDetails {
 
-    private Integer userID;
-    private String username;
-    private String passwordHash;
-    private String status;
-    private String roleName;
+    private final User user;
+
+    public CustomUserDetails(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + roleName);
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName());
         return Collections.singletonList(authority);
     }
 
     @Override
-    public String getPassword() {
-        return passwordHash;
+    public @Nullable String getPassword() {
+        return user.getPasswordHash();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !user.getStatus().equals("BLOCKED");
     }
 
     @Override
@@ -55,6 +57,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return status.equals("ACTIVE");
+        return user.getStatus().equals("ACTIVE");
     }
 }

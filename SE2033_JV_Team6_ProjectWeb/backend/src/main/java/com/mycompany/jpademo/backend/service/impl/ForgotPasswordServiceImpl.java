@@ -1,4 +1,4 @@
-package com.mycompany.jpademo.backend.service.impls;
+package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.dto.request.ForgotPasswordRequest;
 import com.mycompany.jpademo.backend.dto.request.ResetPasswordRequest;

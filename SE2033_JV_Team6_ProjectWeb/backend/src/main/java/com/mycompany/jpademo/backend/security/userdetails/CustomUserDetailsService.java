@@ -20,11 +20,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UserNotFoundException("Thông tin đăng nhập không hợp lệ"));
 
         return CustomUserDetails.builder()
-                .userID(user.getUserID())
-                .username(user.getUsername())
-                .passwordHash(user.getPasswordHash())
-                .status(user.getStatus().toString())
-                .roleName(user.getRole().getRoleName())
+                .user(user)
                 .build();
     }
 

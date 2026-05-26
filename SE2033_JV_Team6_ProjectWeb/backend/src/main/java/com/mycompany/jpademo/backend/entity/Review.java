@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "Review")
@@ -30,8 +31,11 @@ public class Review {
 
     @Column(name = "treatmentPlan", nullable = false)
     private String treatmentPlan;
+    
+    @Column(name = "doctorAdvice", columnDefinition = "NVARCHAR(MAX)")
+    private String doctorAdvice;
 
-    @Column(name = "note")
+    @Column(name = "note", columnDefinition = "NVARCHAR(MAX)")
     private String note;
 
     @CreationTimestamp

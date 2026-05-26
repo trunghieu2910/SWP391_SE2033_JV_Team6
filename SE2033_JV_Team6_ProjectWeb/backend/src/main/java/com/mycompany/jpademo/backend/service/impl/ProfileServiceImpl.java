@@ -1,4 +1,4 @@
-package com.mycompany.jpademo.backend.service.impls;
+package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.dto.request.ChangePasswordRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateProfileRequest;
@@ -142,7 +142,7 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         if (request.getNationalID() != null) {
-            user.setNationalID(request.getNationalID());
+            user.setNationalId(request.getNationalID());
         }
     }
 
@@ -174,7 +174,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     private ProfileResponse mapUserProfile(User user) {
         return ProfileResponse.builder()
-                .userID(user.getUserID())
+                .userID(user.getUserId())
                 .patientID(null)
                 .roleName(getRoleName(user))
                 .username(user.getUsername())
@@ -184,7 +184,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .phoneNumber(user.getPhoneNumber())
                 .status(user.getStatus())
                 .createdAt(user.getCreatedAt())
-                .nationalID(user.getNationalID())
+                .nationalID(user.getNationalId())
                 .firstName(null)
                 .lastName(null)
                 .gender(null)
@@ -196,8 +196,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     private ProfileResponse mapPatientProfile(User user, Patient patient) {
         return ProfileResponse.builder()
-                .userID(user.getUserID())
-                .patientID(patient.getPatientID())
+                .userID(user.getUserId())
+                .patientID(patient.getPatientId())
                 .roleName(getRoleName(user))
                 .username(user.getUsername())
                 .fullName(user.getFullName())
@@ -206,7 +206,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .phoneNumber(user.getPhoneNumber())
                 .status(user.getStatus())
                 .createdAt(user.getCreatedAt())
-                .nationalID(user.getNationalID())
+                .nationalID(user.getNationalId())
                 .firstName(patient.getFirstName())
                 .lastName(patient.getLastName())
                 .gender(patient.getGender())

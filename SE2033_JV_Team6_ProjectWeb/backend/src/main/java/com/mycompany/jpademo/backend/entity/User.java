@@ -1,6 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
-import com.mycompany.jpademo.backend.enums.UserStatusEnum;
+import com.mycompany.jpademo.backend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -49,7 +49,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @Column(name = "nationalID", unique = true, length = 12)
-    private String nationalID;
+    private String nationalId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roleID", nullable = false)

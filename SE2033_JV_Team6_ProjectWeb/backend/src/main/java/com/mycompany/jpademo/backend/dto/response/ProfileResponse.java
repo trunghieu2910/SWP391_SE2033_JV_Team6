@@ -1,6 +1,6 @@
 package com.mycompany.jpademo.backend.dto.response;
 
-import com.mycompany.jpademo.backend.enums.UserStatusEnum;
+import com.mycompany.jpademo.backend.enums.UserStatus;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -23,7 +23,7 @@ public class ProfileResponse {
     private String email;
     private String certificate;
     private String phoneNumber;
-    private UserStatusEnum status;
+    private UserStatus status;
     private LocalDateTime createdAt;
     private String nationalID;
 

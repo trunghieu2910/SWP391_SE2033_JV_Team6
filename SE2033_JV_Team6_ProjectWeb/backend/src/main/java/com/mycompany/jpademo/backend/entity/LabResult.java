@@ -24,6 +24,7 @@ public class LabResult {
     @Column(name = "testType", nullable = false, length = 100)
     private String testType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50)
     @Builder.Default
     private LabResultStatus status = LabResultStatus.PENDING;
