@@ -9,8 +9,6 @@ import com.mycompany.jpademo.backend.dto.response.UserRespone;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.exception.DoctorApprovalException;
-import com.mycompany.jpademo.backend.repository.RoleRepository;
-import com.mycompany.jpademo.backend.repository.SystemLogRepository;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
@@ -26,10 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
-
-    private final RoleRepository roleRepository;
-
-    private final SystemLogRepository systemLogRepository;
 
     private final EmailService emailService;
 
@@ -71,7 +65,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<UserRespone> getPendingDoctors() {
-        List<User> users = userRepository.findByRoleRoleNameAndStatus("DOCTOR", "PENDING");
+        List<User> users = userRepository.findByRoleRoleNameAndStatus("DOCTOR", UserStatus.PENDING);
         return getUserRespones(users);
     }
 
@@ -114,9 +108,9 @@ public class AdminServiceImpl implements AdminService {
                     .username(user.getUsername())
                     .fullName(user.getFullName())
                     .email(user.getEmail())
-                    .roleName(user.getRole().getRoleName())
+                    .roleName(user.getRole() != null ? user.getRole().getRoleName() :"N/A")
                     .status(user.getStatus())
-                    .certificate(user.getCertificate())
+                    .certificate(user.getCertificate() != null ? user.getCertificate() :"N/A")
                     .createdAt(user.getCreatedAt())
                     .build();
             respones.add(respone);
