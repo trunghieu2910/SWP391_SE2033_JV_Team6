@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.LabResultStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,13 +18,15 @@ import java.util.List;
 public class LabResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer labResultID;
+    @Column(name = "labResultID")
+    private Integer labResultId;
 
     @Column(name = "testType", nullable = false, length = 100)
     private String testType;
 
     @Column(name = "status", length = 50)
-    private String status;
+    @Builder.Default
+    private LabResultStatus status = LabResultStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)

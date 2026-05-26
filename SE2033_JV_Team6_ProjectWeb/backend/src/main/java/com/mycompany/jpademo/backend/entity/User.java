@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Users")
@@ -19,8 +20,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userID")
-    private Integer userID;
-
+    private Integer userId;
+    
     @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
 
@@ -41,7 +42,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50)
-    private UserStatusEnum status;
+    private UserStatus status;
 
     @CreationTimestamp
     @Column(name = "createdAt", updatable = false)
@@ -56,4 +57,10 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private Patient patient;
+
+    @OneToOne(mappedBy = "user")
+    private Review review;
+
+    @OneToMany(mappedBy = "user")
+    private List<SystemLog> systemLogs;
 }

@@ -15,9 +15,9 @@ import java.util.List;
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "roleID")
-    private Integer roleID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer roleId;
 
     @Column(name = "roleName", nullable = false, unique = true, length = 50)
     private String roleName;

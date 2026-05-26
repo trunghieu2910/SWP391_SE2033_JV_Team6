@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.MedicalImageStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,13 +18,15 @@ import java.util.List;
 public class MedicalImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer medicalImageID;
+    @Column(name = "medicalImageID")
+    private Integer medicalImageId;
 
     @Column(name = "imageType", nullable = false)
     private String imageType;
 
     @Column(name = "status", length = 50)
-    private String status;
+    @Builder.Default
+    private MedicalImageStatus status = MedicalImageStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)

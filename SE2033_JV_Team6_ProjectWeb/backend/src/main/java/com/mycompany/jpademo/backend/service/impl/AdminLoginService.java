@@ -27,7 +27,7 @@ public class AdminLoginService implements LoginStrategy {
         return LoginResponse.builder()
                 .accessToken(token)
                 .tokenType("Bearer")
-                .userId(user.getUserID())
+                .userId(user.getUserId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole().getRoleName())

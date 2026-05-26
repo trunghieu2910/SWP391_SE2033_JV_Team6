@@ -4,6 +4,7 @@ import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.exception.UserNotFoundException;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
