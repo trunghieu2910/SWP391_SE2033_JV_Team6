@@ -13,12 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Role {
+
     @Id
-    @Column(name = "roleID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "roleID")
     private Integer roleID;
 
-    @Column(name = "roleName", nullable = false, unique = true)
+    @Column(name = "roleName", nullable = false, unique = true, length = 50)
     private String roleName;
 
     @OneToMany(mappedBy = "role")

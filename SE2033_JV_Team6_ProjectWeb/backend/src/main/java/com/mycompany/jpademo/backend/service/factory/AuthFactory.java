@@ -1,9 +1,9 @@
 package com.mycompany.jpademo.backend.service.factory;
 
-import com.mycompany.jpademo.backend.service.impl.AdminLoginService;
-import com.mycompany.jpademo.backend.service.impl.AITrainerLoginService;
-import com.mycompany.jpademo.backend.service.impl.DoctorLoginService;
-import com.mycompany.jpademo.backend.service.impl.PatientLoginService;
+import com.mycompany.jpademo.backend.service.impls.AdminLoginService;
+import com.mycompany.jpademo.backend.service.impls.AITrainerLoginService;
+import com.mycompany.jpademo.backend.service.impls.DoctorLoginService;
+import com.mycompany.jpademo.backend.service.impls.PatientLoginService;
 import com.mycompany.jpademo.backend.service.interfaces.LoginStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
