@@ -1,7 +1,6 @@
 package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
-import com.mycompany.jpademo.backend.util.EmailUtil;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeUtility;
 import lombok.RequiredArgsConstructor;
@@ -24,29 +23,11 @@ public class EmailServiceImpl implements EmailService {
 
     @Async
     @Override
-    public void sendBanEmail(String to, String subject, String name) {
-        sendEmail(to, subject, EmailUtil.buildBanAccountTemplate(name));
+    public void sendEmail(String to, String subject, String name) {
+        buildAndSendEmail(to, subject, name);
     }
 
-    @Async
-    @Override
-    public void sendUnbanEmail(String to, String subject, String name) {
-        sendEmail(to, subject, EmailUtil.buildUnbanAccountTemplate(name));
-    }
-
-    @Async
-    @Override
-    public void sendRejectEmail(String to, String subject, String name) {
-        sendEmail(to, subject, EmailUtil.buildDoctorRejectedTemplate(name));
-    }
-
-    @Async
-    @Override
-    public void sendApproveEmail(String to, String subject, String name) {
-        sendEmail(to, subject, EmailUtil.buildDoctorApprovedTemplate(name));
-    }
-
-    private void sendEmail(String to, String subject, String body) {
+    private void buildAndSendEmail(String to, String subject, String body) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

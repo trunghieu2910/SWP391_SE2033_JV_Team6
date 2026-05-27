@@ -12,6 +12,7 @@ import com.mycompany.jpademo.backend.exception.DoctorApprovalException;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
+import com.mycompany.jpademo.backend.util.EmailUtil;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class AdminServiceImpl implements AdminService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
         user.setStatus(UserStatus.BLOCKED);
-        emailService.sendBanEmail(user.getEmail(), "Tài khoản của bạn đã bị khoá", user.getFullName());
+        emailService.sendEmail(user.getEmail(), "Tài khoản của bạn đã bị khoá", EmailUtil.buildBanAccountTemplate(user.getFullName()));
         userRepository.save(user);
         return ResponseEntity.ok("User banned successfully");
     }
@@ -58,7 +59,7 @@ public class AdminServiceImpl implements AdminService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
         user.setStatus(UserStatus.ACTIVE);
-        emailService.sendUnbanEmail(user.getEmail(), "Tài khoản của bạn đã được mở khoá", user.getFullName());
+        emailService.sendEmail(user.getEmail(), "Tài khoản của bạn đã được mở khoá", EmailUtil.buildUnbanAccountTemplate(user.getFullName()));
         userRepository.save(user);
         return ResponseEntity.ok("User unbanned successfully");
     }
@@ -79,7 +80,7 @@ public class AdminServiceImpl implements AdminService {
             throw new DoctorApprovalException("User is not a doctor");
         }
         user.setStatus(UserStatus.ACTIVE);
-        emailService.sendApproveEmail(user.getEmail(), "Tài khoản bác sĩ của bạn đã được phê duyệt", user.getFullName());
+        emailService.sendEmail(user.getEmail(), "Tài khoản bác sĩ của bạn đã được phê duyệt", EmailUtil.buildDoctorApprovedTemplate(user.getFullName()));
         userRepository.save(user);
         return ResponseEntity.ok("Doctor approved successfully");
     }
@@ -94,7 +95,7 @@ public class AdminServiceImpl implements AdminService {
             throw new DoctorApprovalException("User is not a doctor");
         }
         user.setStatus(UserStatus.REJECTED);
-        emailService.sendRejectEmail(user.getEmail(), "Tài khoản bác sĩ của bạn đã bị từ chối", user.getFullName());
+        emailService.sendEmail(user.getEmail(), "Tài khoản bác sĩ của bạn đã bị từ chối", EmailUtil.buildDoctorRejectedTemplate(user.getFullName()));
         userRepository.save(user);
         return ResponseEntity.ok("Doctor rejected successfully");
     }
