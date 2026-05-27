@@ -23,8 +23,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Async
     @Override
-    public void sendEmail(String to, String subject, String name) {
-        buildAndSendEmail(to, subject, name);
+    public void sendEmail(String to, String subject, String body) {
+        buildAndSendEmail(to, subject, body);
     }
 
     private void buildAndSendEmail(String to, String subject, String body) {
