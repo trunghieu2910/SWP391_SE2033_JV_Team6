@@ -1,14 +1,11 @@
 package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
-import com.mycompany.jpademo.backend.dto.request.ApproveDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.BanUserRequest;
-import com.mycompany.jpademo.backend.dto.request.RejectDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UnbanRequest;
 import com.mycompany.jpademo.backend.dto.response.UserRespone;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
-import com.mycompany.jpademo.backend.exception.DoctorApprovalException;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
@@ -68,36 +65,6 @@ public class AdminServiceImpl implements AdminService {
     public List<UserRespone> getPendingDoctors() {
         List<User> users = userRepository.findByRoleRoleNameAndStatus("DOCTOR", UserStatus.PENDING);
         return getUserRespones(users);
-    }
-
-    @Override
-    @AdminActionLog(action = "APPROVE_DOCTOR",
-                    targetType = "User")
-    public ResponseEntity<String> approveDoctor(ApproveDoctorRequest request) {
-        User user = userRepository.findById(request.getDoctorId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getDoctorId()));
-        if (!user.getRole().getRoleName().equals("DOCTOR")) {
-            throw new DoctorApprovalException("User is not a doctor");
-        }
-        user.setStatus(UserStatus.ACTIVE);
-        emailService.sendEmail(user.getEmail(), "Tài khoản bác sĩ của bạn đã được phê duyệt", EmailUtil.buildDoctorApprovedTemplate(user.getFullName()));
-        userRepository.save(user);
-        return ResponseEntity.ok("Doctor approved successfully");
-    }
-
-    @Override
-    @AdminActionLog(action = "REJECT_DOCTOR",
-                    targetType = "User")
-    public ResponseEntity<String> rejectDoctor(RejectDoctorRequest request) {
-        User user = userRepository.findById(request.getDoctorId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getDoctorId()));
-        if (!user.getRole().getRoleName().equals("DOCTOR")) {
-            throw new DoctorApprovalException("User is not a doctor");
-        }
-        user.setStatus(UserStatus.REJECTED);
-        emailService.sendEmail(user.getEmail(), "Tài khoản bác sĩ của bạn đã bị từ chối", EmailUtil.buildDoctorRejectedTemplate(user.getFullName()));
-        userRepository.save(user);
-        return ResponseEntity.ok("Doctor rejected successfully");
     }
 
     @NonNull

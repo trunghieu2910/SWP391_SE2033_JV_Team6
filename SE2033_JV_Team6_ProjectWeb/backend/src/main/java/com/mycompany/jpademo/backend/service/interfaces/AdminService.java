@@ -1,8 +1,6 @@
 package com.mycompany.jpademo.backend.service.interfaces;
 
-import com.mycompany.jpademo.backend.dto.request.ApproveDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.BanUserRequest;
-import com.mycompany.jpademo.backend.dto.request.RejectDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UnbanRequest;
 import com.mycompany.jpademo.backend.dto.response.UserRespone;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +17,4 @@ public interface AdminService {
     ResponseEntity<String> unbanUser(UnbanRequest request);
 
     List<UserRespone> getPendingDoctors();
-
-    ResponseEntity<String> approveDoctor(ApproveDoctorRequest request);
-
-    ResponseEntity<String> rejectDoctor(RejectDoctorRequest request);
 }

@@ -25,6 +25,7 @@ public class AdminController {
         return adminService.searchUsers(keyword, keyword);
     }
 
+    //Theo dõi log để ban những bot phá web của mình
     @PatchMapping("/users/ban")
     public ResponseEntity<String> banUser(@RequestBody BanUserRequest request) {
         return adminService.banUser(request);
@@ -33,20 +34,5 @@ public class AdminController {
     @PatchMapping("/users/unban")
     public ResponseEntity<String> unbanUser(@RequestBody UnbanRequest request) {
         return adminService.unbanUser(request);
-    }
-
-    @GetMapping("/doctors/pending")
-    public List<UserRespone> getPendingDoctors() {
-        return adminService.getPendingDoctors();
-    }
-
-    @PatchMapping("/doctors/approve")
-    public ResponseEntity<String> approveDoctor(@RequestBody ApproveDoctorRequest request) {
-        return adminService.approveDoctor(request);
-    }
-
-    @PatchMapping("/doctors/reject")
-    public ResponseEntity<String> rejectDoctor(@RequestBody RejectDoctorRequest request) {
-        return adminService.rejectDoctor(request);
     }
 }
