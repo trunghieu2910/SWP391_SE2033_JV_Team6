@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.dto.response;
 
+import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,10 +9,10 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class UserRespone {
+public class UserResponse {
     private Integer userId;
 
-    private String username;
+    private String userName;
 
     private String fullName;
 
@@ -19,9 +20,9 @@ public class UserRespone {
 
     private UserStatus status;
 
-    private String roleName;
+    private RoleName roleName;
 
-    private String certificate;
+    private LocalDateTime lastChangePassTime;
 
     private LocalDateTime createdAt;
 }

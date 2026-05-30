@@ -1,6 +1,7 @@
 package com.mycompany.jpademo.backend.security.userdetails;
 
 import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.enums.UserStatus;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,27 +23,27 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRole().getRoleName()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName().name()));
     }
 
     @Override
-    public @Nullable String getPassword() {
+    public String getPassword() {
         return user.getPasswordHash();
     }
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return user.getUserName();
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return !user.getStatus().equals("BLOCKED");
+        return user.getStatus() != UserStatus.ACTIVE;
     }
 
     @Override
@@ -52,6 +53,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus().equals("ACTIVE");
+        return user.getStatus() == UserStatus.ACTIVE;
     }
 }

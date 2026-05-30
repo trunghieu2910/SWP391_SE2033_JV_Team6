@@ -1,15 +1,13 @@
 package com.mycompany.jpademo.backend.service.impl;
 
-import com.mycompany.jpademo.backend.dto.response.SystemLogRespone;
+import com.mycompany.jpademo.backend.dto.response.SystemLogResponse;
 import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.repository.SystemLogRepository;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,45 +15,43 @@ public class SystemLogServiceImpl implements SystemLogService {
     private final SystemLogRepository systemLogRepository;
 
     @Override
-    public List<SystemLogRespone> getAllLogs() {
-        List<SystemLog> systemLog = systemLogRepository.findAll();
-        return getSystemLogRespone(systemLog);
-    }
-
-    @Override
-    public List<SystemLogRespone> getLogByUser(Integer userId) {
-        List<SystemLog> systemLogs = systemLogRepository.findByUserUserId(userId);
-        return getSystemLogRespone(systemLogs);
-    }
-
-    @Override
-    public List<SystemLogRespone> searchLogs(String keyword) {
-        List<SystemLog> systemLogs = new ArrayList<>();
-        systemLogs.addAll(systemLogRepository.findByDescriptionContaining(keyword));
-        systemLogs.addAll(systemLogRepository.findByTargetTypeContaining(keyword));
-        return getSystemLogRespone(systemLogs);
-    }
-
-    @Override
-    public List<SystemLogRespone> getLogByAction(String action) {
-        List<SystemLog> systemLogs = systemLogRepository.findByAction(action);
-        return getSystemLogRespone(systemLogs);
-    }
-
-    @NonNull
-    private List<SystemLogRespone> getSystemLogRespone(List<SystemLog> systemLogs) {
-        List<SystemLogRespone> respones = new ArrayList<>();
-        for (SystemLog systemLog: systemLogs) {
-            SystemLogRespone respone = SystemLogRespone.builder()
-                    .logID(systemLog.getLogId())
-                    .action(systemLog.getAction())
-                    .targetId(systemLog.getTargetId())
-                    .targetType(systemLog.getTargetType())
-                    .description(systemLog.getDescription())
-                    .performedAt(systemLog.getPerformedAt())
-                    .build();
-            respones.add(respone);
+    public Page<SystemLogResponse> getLogs(Integer userId, String action, String keyword, Pageable pageable) {
+        Page<SystemLog> systemLogs;
+        boolean hasUserId = userId != null;
+        boolean hasAction = action != null && !action.isBlank();
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        if (hasAction && hasUserId && hasKeyword) {
+            systemLogs = systemLogRepository.findByUserUserIdAndActionAndDescriptionContainingIgnoreCase(
+                    userId, action, keyword, pageable);
+        } else if (hasAction && hasUserId) {
+            systemLogs = systemLogRepository.findByUserUserIdAndAction(
+                    userId, action, pageable);
+        } else if (hasAction && hasKeyword) {
+            systemLogs = systemLogRepository.findByActionAndDescriptionContainingIgnoreCase(
+                    action, keyword, pageable);
+        } else if (hasKeyword && hasUserId) {
+            systemLogs = systemLogRepository.findByUserUserIdAndDescriptionContainingIgnoreCase(
+                    userId, keyword, pageable);
+        } else if (hasAction) {
+            systemLogs = systemLogRepository.findByAction(action, pageable);
+        } else if (hasKeyword) {
+            systemLogs = systemLogRepository.findByDescriptionContainingIgnoreCase(keyword, pageable);
+        } else if (hasUserId) {
+            systemLogs = systemLogRepository.findByUserUserId(userId, pageable);
+        } else {
+            systemLogs = systemLogRepository.findAll(pageable);
         }
-        return respones;
+        return systemLogs.map(this::mapToSystemLogRespone);
+    }
+
+    private SystemLogResponse mapToSystemLogRespone(SystemLog systemLog) {
+        return SystemLogResponse.builder()
+                .logId(systemLog.getLogId())
+                .action(systemLog.getAction())
+                .targetId(systemLog.getTargetId())
+                .targetType(systemLog.getTargetType())
+                .description(systemLog.getDescription())
+                .performedAt(systemLog.getPerformedAt())
+                .build();
     }
 }

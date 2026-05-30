@@ -21,8 +21,8 @@ public class User {
     @Column(name = "userID")
     private Integer userId;
     
-    @Column(name = "username", nullable = false, unique = true, length = 50)
-    private String username;
+    @Column(name = "userName", nullable = false, unique = true, length = 50)
+    private String userName;
 
     @Column(name = "fullName", length = 100)
     private String fullName;
@@ -33,9 +33,6 @@ public class User {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(name = "certificate")
-    private String certificate;
-
     @Column(name = "phoneNumber", length = 20, unique = true)
     private String phoneNumber;
 
@@ -43,8 +40,11 @@ public class User {
     @Column(name = "status", length = 50)
     private UserStatus status;
 
+    @Column(name = "lastChangePassTime", nullable = false)
+    private LocalDateTime lastChangePassTime;
+
     @CreationTimestamp
-    @Column(name = "createdAt")
+    @Column(name = "createdAt", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "nationalID", length = 12)

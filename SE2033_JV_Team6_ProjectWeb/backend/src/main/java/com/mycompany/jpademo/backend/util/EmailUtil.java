@@ -117,4 +117,36 @@ public class EmailUtil {
                 </html>
                 """.formatted(name);
     }
+
+    public static String buildCreateDoctorAccountTemplate(String name, String username, String password) {
+        return """
+                <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                    <h2 style="color: #1565c0;">
+                        Tài khoản bác sĩ đã được tạo
+                    </h2>
+                    <p>Xin chào <b>%s</b>,</p>
+                    <p>
+                        Tài khoản bác sĩ của bạn đã được tạo thành công.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 5px;">
+                        <strong>Thông tin tài khoản:</strong>
+                        <p><strong>Tên đăng nhập:</strong> %s</p>
+                        <p><strong>Mật khẩu:</strong> %s</p>
+                    </div>
+                    <br>
+                    <p>
+                        Vui lòng đăng nhập và cập nhật thông tin cá nhân của bạn.
+                    </p>
+                    <br>
+                    <p>
+                        Trân trọng,<br>
+                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                    </p>
+                </div>
+                </body>
+                </html>
+                """.formatted(name, username, password);
+    }
 }

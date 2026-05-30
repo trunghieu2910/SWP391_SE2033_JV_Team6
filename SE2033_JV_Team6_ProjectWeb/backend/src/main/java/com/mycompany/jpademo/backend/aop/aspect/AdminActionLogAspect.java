@@ -1,6 +1,7 @@
 package com.mycompany.jpademo.backend.aop.aspect;
 
 import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
+import com.mycompany.jpademo.backend.aop.interfaces.LoggableTarget;
 import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.repository.SystemLogRepository;
@@ -20,15 +21,17 @@ public class AdminActionLogAspect {
     private final SystemLogRepository systemLogRepository;
 
     @AfterReturning(value = "@annotation(adminActionLog)")
-    public void logAdminAction(JoinPoint joinPoint, AdminActionLog adminActionLog) {
+    public void logAdminAction(JoinPoint joinPoint,
+                               AdminActionLog adminActionLog) {
         Object[] args = joinPoint.getArgs();
         Integer targetID = null;
-        if (args.length > 0 && args[0] instanceof Integer) {
-            targetID = Math.toIntExact((Integer) args[0]);
+        if (args.length > 0 && args[0] instanceof LoggableTarget target) {
+            targetID = target.getTargetId();
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = null;
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+        if (authentication != null && authentication.getPrincipal()
+                instanceof CustomUserDetails customUserDetails) {
             currentUser = customUserDetails.getUser();
         }
         SystemLog systemLog = SystemLog.builder()

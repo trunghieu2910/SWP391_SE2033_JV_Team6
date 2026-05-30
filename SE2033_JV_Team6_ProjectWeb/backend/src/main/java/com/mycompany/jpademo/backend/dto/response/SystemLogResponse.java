@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class SystemLogRespone {
-    private Integer logID;
+public class SystemLogResponse {
+    private Integer logId;
 
     private String action;
 

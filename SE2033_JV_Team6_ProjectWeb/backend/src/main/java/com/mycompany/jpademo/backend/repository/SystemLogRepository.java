@@ -1,18 +1,30 @@
 package com.mycompany.jpademo.backend.repository;
 
 import com.mycompany.jpademo.backend.entity.SystemLog;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
 public interface SystemLogRepository extends JpaRepository<SystemLog, Integer> {
-    List<SystemLog> findByUserUserId(Integer userId);
+    Page<SystemLog> findByUserUserId(Integer userId, Pageable pageable);
 
-    List<SystemLog> findByAction(String action);
+    Page<SystemLog> findByAction(String action, Pageable pageable);
 
-    List<SystemLog> findByDescriptionContaining(String keyword);
+    Page<SystemLog> findByDescriptionContainingIgnoreCase(String keyword, Pageable pageable);
 
-    List<SystemLog> findByTargetTypeContaining(String targetType);
+    Page<SystemLog> findByUserUserIdAndAction(
+            Integer userId, String action, Pageable pageable);
 
-    List<SystemLog> findAllByOrderByPerformedAtDesc();
+    Page<SystemLog> findByUserUserIdAndDescriptionContainingIgnoreCase(
+            Integer userId, String keyword, Pageable pageable);
+
+    Page<SystemLog> findByActionAndDescriptionContainingIgnoreCase(
+            String action, String keyword, Pageable pageable);
+
+    Page<SystemLog> findByUserUserIdAndActionAndDescriptionContainingIgnoreCase(
+            Integer userId, String action, String keyword, Pageable pageable);
+
+    List<SystemLog> findTop10ByUser_UserIdOrderByPerformedAtDesc(Integer userId);
 }

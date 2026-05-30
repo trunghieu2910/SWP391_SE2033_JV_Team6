@@ -31,12 +31,15 @@ public class Review {
     @Column(name = "treatmentPlan", nullable = false)
     private String treatmentPlan;
 
+    @Column(name = "doctorAdvice")
+    private String doctorAdvice;
+
     @Column(name = "note")
     private String note;
 
     @CreationTimestamp
     @Column(name = "reviewedAt", nullable = false, updatable = false)
-    private LocalDateTime reviewAt;
+    private LocalDateTime reviewedAt;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sessionID", nullable = false, unique = true)

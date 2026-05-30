@@ -4,23 +4,98 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="Update email">
+    <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="28/5">
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/aop/interfaces/LoggableTarget.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/CreateDoctorRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/UpdateUserStatusRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/DashboardStatsResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/UserDetailResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/enums/RoleName.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/DuplicateResourceException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/GlobalExceptionHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/UnauthorizedActionException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/DiagnosisSessionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/aop/interfaces/LoggableTarget.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/request/CreateDoctorRequest$CreateDoctorRequestBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/request/CreateDoctorRequest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/request/UpdateUserStatusRequest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/DashboardStatsResponse$DashboardStatsResponseBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/DashboardStatsResponse.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/SystemLogResponse$SystemLogResponseBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/SystemLogResponse.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserDetailResponse$UserDetailResponseBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserDetailResponse.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserResponse$UserResponseBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserResponse.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/enums/RoleName.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/exception/DuplicateResourceException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/exception/GlobalExceptionHandler.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/exception/UnauthorizedActionException.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/repository/DiagnosisSessionRepository.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/config/MailConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/aop/aspect/AdminActionLogAspect.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/aop/aspect/AdminActionLogAspect.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/ApproveDoctorRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/RejectDoctorRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/DoctorApprovalException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/UnauthorizedException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/controller/LogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/controller/LogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/BanUserRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/UnbanRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/SystemLogRespone.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/SystemLogResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/UserRespone.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/UserResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Patient.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Patient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Review.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Review.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/Role.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/entity/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/RoleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/RoleRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/SystemLogRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/SystemLogRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetails.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetailsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetailsService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/EmailServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/EmailServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/SystemLogServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/SystemLogServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/UserServiceImpl.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/AdminService.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/AdminService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/SystemLogService.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/SystemLogService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/UserService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/util/EmailUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/util/EmailUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/aop/aspect/AdminActionLogAspect.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/aop/aspect/AdminActionLogAspect.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/config/MailConfig.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/controller/AdminController.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/controller/AdminController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/controller/LogController.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/controller/LogController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/request/ApproveDoctorRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/request/BanUserRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/request/RejectDoctorRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/request/UnbanRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/SystemLogRespone$SystemLogResponeBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/SystemLogRespone.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserRespone$UserResponeBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserRespone.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Patient$PatientBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Patient$PatientBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Patient.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Patient.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Review$ReviewBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Review$ReviewBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Review.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Review.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Role$RoleBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Role$RoleBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Role.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/Role.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/User$UserBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/User$UserBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/entity/User.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/exception/DoctorApprovalException.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/exception/UnauthorizedException.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/repository/RoleRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/repository/RoleRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/repository/SystemLogRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/repository/SystemLogRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/repository/UserRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/repository/UserRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetails.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetails.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetailsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/security/userdetails/CustomUserDetailsService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/impl/EmailServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/impl/EmailServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/impl/SystemLogServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/impl/SystemLogServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/impl/UserServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/AdminService.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/AdminService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/EmailService.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/EmailService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/SystemLogService.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/SystemLogService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/UserService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/util/EmailUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/target/classes/com/mycompany/jpademo/backend/util/EmailUtil.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,10 +160,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Exception" />
-        <option value="Enum" />
         <option value="Interface" />
         <option value="Class" />
+        <option value="Enum" />
+        <option value="Exception" />
       </list>
     </option>
   </component>
@@ -209,7 +284,12 @@
       <workItem from="1779773577822" duration="10913000" />
       <workItem from="1779789634804" duration="80000" />
       <workItem from="1779850920007" duration="10135000" />
-      <workItem from="1779950639035" duration="3201000" />
+      <workItem from="1779950639035" duration="3235000" />
+      <workItem from="1779955099445" duration="80000" />
+      <workItem from="1779955472148" duration="4407000" />
+      <workItem from="1780014712755" duration="3365000" />
+      <workItem from="1780032028289" duration="11606000" />
+      <workItem from="1780106764780" duration="10548000" />
     </task>
     <task id="LOCAL-00001" summary="Branches Giang">
       <option name="closed" value="true" />
@@ -315,7 +395,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779851510312</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="28/5">
+      <option name="closed" value="true" />
+      <created>1779954623459</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1779954623460</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -343,7 +431,8 @@
     <MESSAGE value="Update" />
     <MESSAGE value="Update 26/5" />
     <MESSAGE value="Update email" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update email" />
+    <MESSAGE value="28/5" />
+    <option name="LAST_COMMIT_MESSAGE" value="28/5" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -351,6 +440,10 @@
         <breakpoint enabled="true" type="java-exception">
           <properties class="org.hibernate.query.QueryArgumentException" package="org.hibernate.query" />
           <option name="timeStamp" value="1" />
+        </breakpoint>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="org.springframework.data.mapping.PropertyReferenceException" package="org.springframework.data.mapping" />
+          <option name="timeStamp" value="2" />
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -1,20 +1,23 @@
 package com.mycompany.jpademo.backend.service.interfaces;
 
-import com.mycompany.jpademo.backend.dto.request.BanUserRequest;
-import com.mycompany.jpademo.backend.dto.request.UnbanRequest;
-import com.mycompany.jpademo.backend.dto.response.UserRespone;
+import com.mycompany.jpademo.backend.dto.request.CreateDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
+import com.mycompany.jpademo.backend.dto.response.DashboardStatsResponse;
+import com.mycompany.jpademo.backend.dto.response.UserDetailResponse;
+import com.mycompany.jpademo.backend.dto.response.UserResponse;
+import com.mycompany.jpademo.backend.enums.UserStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
-
 public interface AdminService {
-    List<UserRespone> getAllUser();
+    Page<UserResponse> getUser(String keyword, String role, UserStatus status, Pageable pageable);
 
-    List<UserRespone> searchUsers(String username, String email);
+    ResponseEntity<String> updateUserStatus(UpdateUserStatusRequest request);
 
-    ResponseEntity<String> banUser(BanUserRequest request);
+    ResponseEntity<String> createDoctor(CreateDoctorRequest request);
 
-    ResponseEntity<String> unbanUser(UnbanRequest request);
+    DashboardStatsResponse getDashboardStats();
 
-    List<UserRespone> getPendingDoctors();
+    UserDetailResponse getUserDetail(Integer userId);
 }
