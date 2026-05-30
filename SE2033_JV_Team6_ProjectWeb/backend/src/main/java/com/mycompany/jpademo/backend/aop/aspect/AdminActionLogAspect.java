@@ -2,8 +2,10 @@ package com.mycompany.jpademo.backend.aop.aspect;
 
 import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
 import com.mycompany.jpademo.backend.aop.interfaces.LoggableTarget;
+import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.repository.SystemLogRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,16 @@ public class AdminActionLogAspect {
         if (args.length > 0 && args[0] instanceof LoggableTarget target) {
             targetID = target.getTargetId();
         }
+        String action = adminActionLog.action();
+        for (Object arg: args) {
+            if (arg instanceof UpdateUserStatusRequest req) {
+                if (req.getStatus() == UserStatus.BANNED) {
+                    action = "BAN_USER";
+                } else if (req.getStatus() == UserStatus.ACTIVE) {
+                    action = "UNBAN_USER";
+                }
+            }
+        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = null;
         if (authentication != null && authentication.getPrincipal()
@@ -36,10 +48,10 @@ public class AdminActionLogAspect {
         }
         SystemLog systemLog = SystemLog.builder()
                 .user(currentUser)
-                .action(adminActionLog.action())
+                .action(action)
                 .targetType(adminActionLog.targetType())
                 .targetId(targetID)
-                .description("Admin executed action: " + adminActionLog.action())
+                .description("Admin action: " + action + " on " + adminActionLog.targetType())
                 .build();
         systemLogRepository.save(systemLog);
     }

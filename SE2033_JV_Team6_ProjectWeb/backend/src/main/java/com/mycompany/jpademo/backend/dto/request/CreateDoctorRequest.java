@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CreateDoctorRequest {
-    @NotBlank(message = "")
+    @NotBlank(message = "Username is required!")
     private String userName;
 
     @NotBlank(message = "Fullname is required!")

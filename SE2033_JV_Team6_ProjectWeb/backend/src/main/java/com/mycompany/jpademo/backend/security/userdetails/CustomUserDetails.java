@@ -23,7 +23,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName().name()));
+        List<SimpleGrantedAuthority> authorities =
+                List.of(new SimpleGrantedAuthority(
+                        "ROLE_" + user.getRole().getRoleName().name()));
+        System.out.println("Authorities: " + authorities);
+        return authorities;
     }
 
     @Override
@@ -43,7 +47,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return user.getStatus() != UserStatus.ACTIVE;
+        return user.getStatus() == UserStatus.ACTIVE;
     }
 
     @Override

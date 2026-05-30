@@ -96,18 +96,28 @@ public class AdminServiceImpl implements AdminService {
                     .body("User already has status: " + request.getStatus());
         }
         user.setStatus(request.getStatus());
+        if (request.getStatus() == UserStatus.BANNED) {
+            user.setStatus(UserStatus.BANNED);
+        } else {
+            user.setStatus(UserStatus.ACTIVE);
+        }
         userRepository.save(user);
         sendStatusEmail(user, request.getStatus());
         return ResponseEntity.ok("User status updated successfully");
     }
 
     @Override
+    @AdminActionLog(action = "CREATE_DOCTOR",
+                    targetType = "User")
     public ResponseEntity<String> createDoctor(CreateDoctorRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email is already in use: " + request.getEmail());
         }
         if (userRepository.findByUserName(request.getUserName()).isPresent()) {
             throw new DuplicateResourceException("Username is already exists: " + request.getUserName());
+        }
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new DuplicateResourceException("Phone number is already in use: " + request.getPhoneNumber());
         }
         User user = new User();
         user.setUserName(request.getUserName());
@@ -121,16 +131,6 @@ public class AdminServiceImpl implements AdminService {
         String rawPassword = UUID.randomUUID().toString().substring(0, 8);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         userRepository.save(user);
-        systemLogRepository.save(
-                SystemLog.builder()
-                        .user(user)
-                        .action("CREATE_DOCTOR")
-                        .targetType("User")
-                        .targetId(user.getUserId())
-                        .description("Admin created doctor account with username: "
-                                + user.getUserName())
-                        .build()
-        );
         emailService.sendEmail(
                 user.getEmail(),
                 "Tài khoản bác sĩ đã được tạo",
@@ -147,7 +147,7 @@ public class AdminServiceImpl implements AdminService {
                 .totalUsers(userRepository.count())
                 .totalDoctors(userRepository.countByRoleRoleName(RoleName.DOCTOR))
                 .totalPatients(userRepository.countByRoleRoleName(RoleName.PATIENT))
-                .blockedUsers(userRepository.countByStatus(UserStatus.BLOCKED))
+                .blockedUsers(userRepository.countByStatus(UserStatus.BANNED))
                 .totalDiagnosisSessions(diagnosisSessionRepository.count())
                 .build();
     }
@@ -190,7 +190,7 @@ public class AdminServiceImpl implements AdminService {
 
     private void sendStatusEmail(User user, UserStatus userStatus) {
         switch (userStatus) {
-            case BLOCKED:
+            case BANNED:
                 emailService.sendEmail(
                         user.getEmail(),
                         "Tài khoản của bạn đã bị khoá",

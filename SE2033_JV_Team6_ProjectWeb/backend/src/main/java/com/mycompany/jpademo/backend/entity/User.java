@@ -44,13 +44,13 @@ public class User {
     private LocalDateTime lastChangePassTime;
 
     @CreationTimestamp
-    @Column(name = "createdAt", nullable = false)
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "nationalID", length = 12)
     private String nationalID;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "roleID", nullable = false)
     private Role role;
 
