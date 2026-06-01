@@ -13,17 +13,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class Patient {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "patientID")
-    private Integer patientID;
-
-    @Column(name = "firstName", length = 50)
-    private String firstName;
-
-    @Column(name = "lastName", length = 50)
-    private String lastName;
+    private Integer patientId;
 
     @Column(name = "gender", length = 10)
     private String gender;
@@ -31,13 +24,10 @@ public class Patient {
     @Column(name = "dob")
     private LocalDate dob;
 
-    @Column(name = "address", length = 255)
+    @Column(name = "address")
     private String address;
 
-    @Column(name = "healthInsurance", unique = true, length = 10)
-    private String healthInsurance;
-
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "userID", nullable = false, unique = true)
     private User user;
 }

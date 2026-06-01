@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,14 +14,14 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Role {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "roleID")
-    private Integer roleID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer roleId;
 
-    @Column(name = "roleName", nullable = false, unique = true, length = 50)
-    private String roleName;
+    @Column(name = "roleName", nullable = false, unique = true)
+    @Enumerated(EnumType.STRING)
+    private RoleName roleName;
 
     @OneToMany(mappedBy = "role")
     private List<User> users;
