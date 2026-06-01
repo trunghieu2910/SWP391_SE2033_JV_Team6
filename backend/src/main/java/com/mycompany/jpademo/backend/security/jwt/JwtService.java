@@ -1,5 +1,7 @@
 package com.mycompany.jpademo.backend.security.jwt;
 
+import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
@@ -27,7 +31,7 @@ public class JwtService {
                 .claim("role", userDetails.getAuthorities())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignKey(),  SignatureAlgorithm.HS256)
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -48,8 +52,22 @@ public class JwtService {
         return extractClaims(token).getSubject();
     }
 
+    public Date extractIssuedAt(String token) {
+        return extractClaims(token).getIssuedAt();
+    }
+
     public boolean validateToken(String token, UserDetails userDetails) {
         String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()));
+        Date issuedAt = extractIssuedAt(token);
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+        User user = customUserDetails.getUser();
+
+        return (username.equals(userDetails.getUsername()))
+                && (user.getLastLogoutTime() == null
+                        || issuedAt.after(Timestamp.valueOf(user.getLastLogoutTime())))
+                && (user.getLastChangePassTime() == null
+                        || issuedAt.after(Timestamp.valueOf(user.getLastChangePassTime())))
+                ;
     }
 }
