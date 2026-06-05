@@ -15,7 +15,6 @@ public class AdminLoginService implements LoginStrategy {
 
     private final JwtService jwtService;
 
-
     @Override
     public LoginResponse login(User user) {
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
