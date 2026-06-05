@@ -1,15 +1,43 @@
-import { createContext, useState } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react'
+import { getToken, setToken, removeToken, decodeToken } from '../utils/tokenUtils'
 
-export const AuthContext = createContext();
+const AuthContext = createContext()
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  return (
-    <AuthContext.Provider value={{ user, setUser, isAuthenticated, setIsAuthenticated }}>
-      {children}
-    </AuthContext.Provider>
-  );
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider')
+  }
+  return context
 }
 
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const token = getToken()
+    if (token) {
+      const decoded = decodeToken(token)
+      setUser(decoded)
+    }
+    setLoading(false)
+  }, [])
+
+  const login = (token) => {
+    setToken(token)
+    const decoded = decodeToken(token)
+    setUser(decoded)
+  }
+
+  const logout = () => {
+    removeToken()
+    setUser(null)
+  }
+
+  return (
+      <AuthContext.Provider value={{ user, login, logout, loading }}>
+        {children}
+      </AuthContext.Provider>
+  )
+}

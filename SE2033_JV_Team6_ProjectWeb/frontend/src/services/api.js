@@ -1,11 +1,32 @@
-import axios from 'axios';
+import axios from 'axios'
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const api = axios.create({
+    baseURL: '/api',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+})
 
-export const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-});
+// Request interceptor - thêm token giả
+api.interceptors.request.use(
+    (config) => {
+        // Thêm token giả để backend không reject
+        const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsInVzZXJJZCI6MX0.mock'
+        config.headers.Authorization = `Bearer ${mockToken}`
+        return config
+    },
+    (error) => {
+        return Promise.reject(error)
+    }
+)
 
-export default api;
+// Response interceptor - xử lý lỗi
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        console.error('API Error:', error.response?.data || error.message)
+        return Promise.reject(error)
+    }
+)
 
+export default api

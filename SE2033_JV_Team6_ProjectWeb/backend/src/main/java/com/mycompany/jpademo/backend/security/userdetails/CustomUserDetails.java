@@ -2,7 +2,6 @@ package com.mycompany.jpademo.backend.security.userdetails;
 
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +25,6 @@ public class CustomUserDetails implements UserDetails {
         List<SimpleGrantedAuthority> authorities =
                 List.of(new SimpleGrantedAuthority(
                         "ROLE_" + user.getRole().getRoleName().name()));
-        System.out.println("Authorities: " + authorities);
         return authorities;
     }
 

@@ -12,7 +12,7 @@ public class CreateDoctorRequest {
     @NotBlank(message = "Username is required!")
     private String userName;
 
-    @NotBlank(message = "Fullname is required!")
+    @NotBlank(message = "Full name is required!")
     private String fullName;
 
     @Email(message = "Email should be valid!")
@@ -20,6 +20,6 @@ public class CreateDoctorRequest {
     private String email;
 
     @NotBlank(message = "Phone number is required!")
-    @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$", message = "Invalid phone number")
+    @Pattern(regexp = "^(0|\\+84)[0-9]{9}$", message = "Invalid phone number")
     private String phoneNumber;
 }
