@@ -42,6 +42,9 @@ public class DiagnosisSession {
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "isShared")
+    private Boolean isShared;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patientID", nullable = false)
     private Patient patient;
@@ -50,8 +53,8 @@ public class DiagnosisSession {
     @JoinColumn(name = "userID", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "diagnosisSession")
-    private List<SymptomDetails> symptomDetailsList;
+    @OneToOne(mappedBy = "diagnosisSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private SymptomResult symptomResult;
 
     @OneToMany(mappedBy = "diagnosisSession")
     private List<LabResult> labResults;

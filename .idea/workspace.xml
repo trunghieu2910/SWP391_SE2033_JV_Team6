@@ -5,33 +5,55 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="Hoàn thiện backend chức năng login. Đăng nhập bằng Username or Email or phoneNumber và mật khẩu. Mật khẩu mã hóa theo BCrypt. Đã tạo token sau khi đăng nhập. Đã thực hiện Unit Testing.">
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/cache/OtpData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/ForgotPasswordRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/ResetPasswordRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/VerifyOtpRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/VerifyOtpResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/EmailSendingException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/InvalidOtpException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/InvalidResetTokenException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/WeakPasswordException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/security/jwt/ResetPasswordJwtService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/EmailServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/ForgotPasswordServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/EmailService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/ForgotPasswordService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/util/EmailUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/util/OtpUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/util/PasswordPolicyUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/controller/DoctorDiagnosisController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/UpdateSessionShareRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/UpdateSessionStatusRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/UpdateSymptomsRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/DoctorSessionResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/SymptomResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/entity/SymptomResult.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/enums/SymptomResultStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/SymptomResultRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/DoctorDiagnosisServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/DoctorDiagnosisService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/controller/DoctorDiagnosisController.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/request/UpdateSessionShareRequest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/request/UpdateSessionStatusRequest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/request/UpdateSymptomsRequest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/response/DoctorSessionResponse$DoctorSessionResponseBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/response/DoctorSessionResponse.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/response/SymptomResponse$SymptomResponseBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/response/SymptomResponse.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/SymptomResult$SymptomResultBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/SymptomResult.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/enums/SymptomResultStatus.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/SymptomResultRepository.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/DoctorDiagnosisServiceImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/DoctorDiagnosisService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/db-forest-config.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/db-forest-config.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/exception/ResourceNotFoundException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/java/com/mycompany/jpademo/backend/util/DateUtil.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/SE2033_JV_Team6_ProjectWeb/backend/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/controller/MedicalRecordController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/entity/DiagnosisSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/entity/DiagnosisSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/entity/SymptomDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/entity/SymptomDetails.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/DiagnosisSessionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/DiagnosisSessionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/SymptomDetailsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/SymptomDetailsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/MedicalRecordServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/controller/MedicalRecordController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/DiagnosisSession$DiagnosisSessionBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/DiagnosisSession$DiagnosisSessionBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/DiagnosisSession.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/DiagnosisSession.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/SymptomDetails$SymptomDetailsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/SymptomDetails$SymptomDetailsBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/SymptomDetails.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/SymptomDetails.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/DiagnosisSessionRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/DiagnosisSessionRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/SymptomDetailsRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/SymptomDetailsRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/MedicalRecordServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +63,7 @@
   <component name="CopilotChats">
     <option name="panelChat">
       <chat>
-        <option name="activeSessionId" value="08348df5-a120-4577-8348-cd7dbb861e18" />
+        <option name="activeSessionId" value="2bc7d374-f3a3-4b7d-bc1d-1d32c57404dd" />
         <option name="sessions">
           <session>
             <option name="chatType" value="PANEL" />
@@ -93,6 +115,23 @@
             <option name="modelValue" value="auto" />
             <option name="targetType" value="LOCAL" />
           </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="380b42d5-da8d-41d8-833f-3dac655a0d66" />
+            <option name="modeId" value="Ask" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="2bc7d374-f3a3-4b7d-bc1d-1d32c57404dd" />
+            <option name="modeId" value="Ask" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="status" value="Completed" />
+            <option name="targetType" value="LOCAL" />
+          </session>
         </option>
         <option name="type" value="PANEL" />
       </chat>
@@ -114,17 +153,17 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Enum" />
+        <option value="Exception" />
         <option value="Interface" />
         <option value="Class" />
-        <option value="Exception" />
+        <option value="Enum" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="LuuTienGiang_HE194888" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -138,7 +177,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/trunghieu2910/SWP391_SE2033_JV_Team6.git&quot;,
-    &quot;accountId&quot;: &quot;4b4bc37f-f361-4973-94ce-5becc2c202da&quot;
+    &quot;accountId&quot;: &quot;a0f6ec41-9448-4a16-97ef-e01c5103c140&quot;
   }
 }</component>
   <component name="McpProjectServerCommands">
@@ -186,7 +225,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;TranQuocNam__HE194210&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/TS-60-update-and-view-clinical-and-update-diagnose-session&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;D:/FPT_University/Ki_5/SWP391/Project/Code&quot;,
@@ -278,6 +317,7 @@
       <workItem from="1779693615670" duration="799000" />
       <workItem from="1779697706446" duration="5911000" />
       <workItem from="1779715906364" duration="5054000" />
+      <workItem from="1780724192948" duration="4491000" />
     </task>
     <task id="LOCAL-00001" summary="Branches Giang">
       <option name="closed" value="true" />
