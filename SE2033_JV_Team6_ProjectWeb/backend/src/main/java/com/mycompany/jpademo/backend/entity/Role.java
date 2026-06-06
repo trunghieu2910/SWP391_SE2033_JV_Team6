@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,10 +17,11 @@ public class Role {
     @Id
     @Column(name = "roleID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer roleID;
+    private Integer roleId;
 
     @Column(name = "roleName", nullable = false, unique = true)
-    private String roleName;
+    @Enumerated(EnumType.STRING)
+    private RoleName roleName;
 
     @OneToMany(mappedBy = "role")
     private List<User> users;

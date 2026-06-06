@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface LabResultRepository extends JpaRepository<LabResult, Integer> {
-    List<LabResult> findByDiagnosisSessionSessionId(Integer sessionId);
+    List<LabResult> findByDiagnosisSession_SessionId(Integer sessionId);
 }

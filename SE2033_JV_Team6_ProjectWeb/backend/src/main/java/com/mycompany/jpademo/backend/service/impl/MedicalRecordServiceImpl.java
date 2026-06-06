@@ -8,9 +8,13 @@ import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.repository.*;
 import com.mycompany.jpademo.backend.service.interfaces.MedicalRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,10 +29,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Autowired private LabResultParameterRepository labResultParameterRepository;
     @Autowired private MedicalImageRepository medicalImageRepository;
     @Autowired private MedicalImageDetailsRepository medicalImageDetailsRepository;
+    @Autowired private SymptomResultRepository symptomResultRepository;
 
     // ===== MAP TỪ RAW SQL SANG DTO =====
     private MedicalRecordResponse mapToMedicalRecordResponse(Map<String, Object> row) {
-        
         Boolean isShared = false;
         Object rawShared = row.get("isShared");
         if (rawShared instanceof Boolean) {
@@ -45,40 +49,29 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .symptoms((String) row.get("symptoms"))
                 .prescription((String) row.get("prescription"))
                 .doctorNotes((String) row.get("doctorNotes"))
-                .isShared(isShared)  
+                .isShared(isShared)
                 .build();
     }
 
-    // ===== DANH SÁCH CHO BÁC SĨ =====
+    // ===== LẤY DANH SÁCH (CÓ PHÂN TRANG) =====
     @Override
-    public List<MedicalRecordResponse> getAllMedicalRecords() {
-        List<Map<String, Object>> rawRecords = sessionRepository.findAllMedicalRecords();
-        return rawRecords.stream()
+    public Page<MedicalRecordResponse> getMedicalRecords(String keyword, String status, Boolean isShared, Pageable pageable) {
+        List<Map<String, Object>> rawRecords = sessionRepository.getMedicalRecords(keyword, status, isShared);
+
+        List<MedicalRecordResponse> records = rawRecords.stream()
                 .map(this::mapToMedicalRecordResponse)
                 .collect(Collectors.toList());
-    }
 
-    // ===== DANH SÁCH CHO BỆNH NHÂN =====
-    @Override
-    public List<MedicalRecordResponse> getPatientMedicalRecords(Integer patientID) {
-        List<Map<String, Object>> rawRecords = sessionRepository.findMedicalRecordsByPatientId(patientID);
-        return rawRecords.stream()
-                .map(this::mapToMedicalRecordResponse)
-                .collect(Collectors.toList());
-    }
-
-    // ===== BẬT / TẮT CÔNG BỐ BỆNH ÁN =====
-    @Override
-    public void toggleRecordVisibility(Integer sessionId, Integer doctorId, boolean isShared) {
-        DiagnosisSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiên khám"));
-
-        if (!session.getUser().getUserId().equals(doctorId)) {
-            throw new BadRequestException("Bạn không phải là bác sĩ phụ trách ca khám này, không có quyền công bố!");
+        //  CHỐNG SẬP PHÂN TRANG
+        int start = (int) pageable.getOffset();
+        if (start >= records.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, records.size());
         }
 
-        session.setIsShared(isShared);
-        sessionRepository.save(session);
+        int end = Math.min((start + pageable.getPageSize()), records.size());
+        List<MedicalRecordResponse> pageContent = records.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, records.size());
     }
 
     // ===== CHI TIẾT BỆNH ÁN (CÓ DATA MASKING) =====
@@ -96,7 +89,6 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         detail.setWeight(session.getWeight());
         detail.setHeight(session.getHeight());
 
-
         Patient patient = session.getPatient();
         if (patient != null && patient.getUser() != null) {
             User patientUser = patient.getUser();
@@ -106,11 +98,11 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 detail.setPatientDob(java.sql.Date.valueOf(patient.getDob()));
             }
             detail.setPatientGender(patient.getGender());
-            detail.setPatientPhone(patientUser.getPhoneNumber());   // phoneNumber từ bảng Users
+            detail.setPatientPhone(patientUser.getPhoneNumber());
         }
 
         // Lấy triệu chứng
-        List<SymptomDetails> symptomDetailsList = symptomDetailsRepository.findByDiagnosisSessionSessionId(sessionID);
+        List<SymptomDetails> symptomDetailsList = symptomDetailsRepository.findBySymptomResult_DiagnosisSession_SessionId(sessionID);
         if (symptomDetailsList != null && !symptomDetailsList.isEmpty()) {
             SymptomDetails firstDetail = symptomDetailsList.get(0);
             if (firstDetail.getSymptom() != null) {
@@ -119,8 +111,15 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             }
         }
 
+        // 🛠️ ĐÃ CHUYỂN VỊ TRÍ: Lấy SymptomResult (Đưa ra ngoài cho an toàn)
+        symptomResultRepository.findByDiagnosisSession_SessionId(sessionID).ifPresent(sr -> {
+            detail.setMenopauseStatus(sr.getMenopauseStatus());
+            detail.setSymptomDuration(sr.getSymptomDuration());
+            detail.setSymptomProgressing(sr.getSymptomProgressing());
+        });
+
         // Lấy xét nghiệm
-        List<LabResult> labResults = labResultRepository.findByDiagnosisSessionSessionId(sessionID);
+        List<LabResult> labResults = labResultRepository.findByDiagnosisSession_SessionId(sessionID);
         List<MedicalRecordDetailResponse.LabTestDTO> labTestDTOs = new ArrayList<>();
         if (labResults != null) {
             for (LabResult lr : labResults) {
@@ -146,7 +145,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         detail.setLabTests(labTestDTOs);
 
         // Lấy hình ảnh y tế
-        List<MedicalImage> images = medicalImageRepository.findByDiagnosisSessionSessionId(sessionID);
+        List<MedicalImage> images = medicalImageRepository.findByDiagnosisSession_SessionId(sessionID);
         List<MedicalRecordDetailResponse.ImageDTO> imageDTOs = new ArrayList<>();
         if (images != null) {
             imageDTOs = images.stream().map(img -> {
@@ -175,9 +174,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 detail.setDoctorAdvice(r.getDoctorAdvice());
                 detail.setNote(r.getNote());
             } else {
+                detail.setVerdict("BẢO MẬT");
                 detail.setFinalDiagnosis("Đang chờ bác sĩ công bố...");
-                detail.setTreatmentPlan("Bảo mật - Chờ công bố");
-                detail.setDoctorAdvice("Bảo mật - Chờ công bố");
+                detail.setIcd10Code("BẢO MẬT");
+                detail.setTreatmentPlan("Chờ công bố");
+                detail.setDoctorAdvice("Chờ công bố");
+                detail.setNote("Bảo mật");
             }
         });
 

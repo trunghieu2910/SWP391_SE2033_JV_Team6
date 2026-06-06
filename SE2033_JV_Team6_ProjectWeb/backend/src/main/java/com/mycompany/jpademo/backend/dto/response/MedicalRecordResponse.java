@@ -19,13 +19,14 @@ public class MedicalRecordResponse {
     private String symptoms;
     private String prescription;
     private String doctorNotes;
-
-
     private Boolean isShared;
+
+
 
     // Chi tiết (detail view)
     private Integer sessionID;
     private Date createdAt;
     private DiagnosisSessionStatus status;
     private String finalDiagnosis;
+
 }

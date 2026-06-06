@@ -32,6 +32,9 @@ public class MedicalRecordDetailResponse {
     private String treatmentPlan;
     private String doctorAdvice;
     private String note;
+    private String menopauseStatus;
+    private String symptomDuration;
+    private Boolean symptomProgressing;
 
 
 

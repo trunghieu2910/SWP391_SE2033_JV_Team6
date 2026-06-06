@@ -1,17 +1,17 @@
 package com.mycompany.jpademo.backend.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ApiResponse {
-    private boolean success;
+
+    private Boolean success;
+
     private String message;
+
     private Object data;
 }
-

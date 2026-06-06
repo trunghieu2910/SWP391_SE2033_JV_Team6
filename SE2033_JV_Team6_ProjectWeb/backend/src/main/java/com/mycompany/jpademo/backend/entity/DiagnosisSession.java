@@ -26,21 +26,25 @@ public class DiagnosisSession {
     @NotNull
     @Positive
     @Column(name = "weight", nullable = false)
-    private Double  weight;
+    private Double weight;
 
     @NotNull
     @Positive
     @Column(name = "height", nullable = false)
-    private Double  height;
+    private Double height;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50, nullable = false)
     @Builder.Default
-    @Enumerated(EnumType.STRING)
     private DiagnosisSessionStatus status = DiagnosisSessionStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "isShared")
+    @Builder.Default
+    private Boolean isShared = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patientID", nullable = false)
@@ -50,8 +54,8 @@ public class DiagnosisSession {
     @JoinColumn(name = "userID", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "diagnosisSession")
-    private List<SymptomDetails> symptomDetailsList;
+    @OneToOne(mappedBy = "diagnosisSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private SymptomResult symptomResult;
 
     @OneToMany(mappedBy = "diagnosisSession")
     private List<LabResult> labResults;
@@ -61,6 +65,4 @@ public class DiagnosisSession {
 
     @OneToOne(mappedBy = "diagnosisSession", fetch = FetchType.LAZY)
     private Review review;
-    @Column(name = "isShared")
-    private Boolean isShared;
 }

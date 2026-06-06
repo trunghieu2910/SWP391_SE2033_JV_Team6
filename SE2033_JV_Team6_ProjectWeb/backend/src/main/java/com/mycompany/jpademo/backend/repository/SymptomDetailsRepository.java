@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface SymptomDetailsRepository extends JpaRepository<SymptomDetails, Integer> {
-    List<SymptomDetails> findByDiagnosisSessionSessionId(Integer sessionId);
+    List<SymptomDetails> findBySymptomResult_DiagnosisSession_SessionId(Integer sessionId);
 }
