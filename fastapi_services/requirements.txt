@@ -1,0 +1,22 @@
+# ============================================================
+# requirements.txt - FastAPI AI Service cho YOLO26s-seg
+# ============================================================
+# Cài đặt: pip install -r requirements.txt
+# ============================================================
+
+# --- Web Framework ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9      # Để FastAPI nhận file upload
+
+# --- AI / Computer Vision ---
+ultralytics>=8.3.0            # YOLO framework (hỗ trợ .pt, .onnx, .engine, openvino, ncnn)
+opencv-python-headless>=4.8.0 # OpenCV không GUI (phù hợp server)
+numpy>=1.24.0
+
+# --- Chỉ cần cài thêm nếu dùng format tương ứng ---
+# onnxruntime>=1.17.0         # Cho ONNX CPU
+# onnxruntime-directml>=1.17.0  # Cho ONNX DirectML (Windows GPU)
+# onnxruntime-gpu>=1.17.0     # Cho ONNX CUDA GPU
+# openvino>=2024.0            # Cho OpenVINO format
+# tensorrt>=8.6               # Cho TensorRT .engine (cần CUDA)
