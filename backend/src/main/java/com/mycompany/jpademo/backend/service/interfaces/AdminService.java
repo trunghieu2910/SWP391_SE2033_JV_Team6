@@ -1,10 +1,10 @@
 package com.mycompany.jpademo.backend.service.interfaces;
 
-import com.mycompany.jpademo.backend.dto.request.CreateDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
-import com.mycompany.jpademo.backend.dto.response.DashboardStatsResponse;
-import com.mycompany.jpademo.backend.dto.response.UserDetailResponse;
-import com.mycompany.jpademo.backend.dto.response.UserResponse;
+import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
+import com.mycompany.jpademo.backend.dto.response.*;
+import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,9 +15,14 @@ public interface AdminService {
 
     ResponseEntity<String> updateUserStatus(UpdateUserStatusRequest request);
 
-    ResponseEntity<String> createDoctor(CreateDoctorRequest request);
-
     DashboardStatsResponse getDashboardStats();
 
     UserDetailResponse getUserDetail(Integer userId);
+
+    InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin);
+
+    ResponseEntity<String> verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin);
+
+    ChartStatsResponse getChartStats();
 }
+

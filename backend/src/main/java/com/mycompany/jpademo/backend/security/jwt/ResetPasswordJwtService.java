@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.security.jwt;
 
+import com.mycompany.jpademo.backend.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -23,10 +24,11 @@ public class ResetPasswordJwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateResetToken(String email) {
+    public String generateResetToken(User user) {
         return Jwts.builder()
-                .subject(email)
+                .subject(user.getEmail())
                 .claim("type", "RESET_PASSWORD")
+                .claim("oldHash", user.getPasswordHash())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(getSignKey())
@@ -40,6 +42,15 @@ public class ResetPasswordJwtService {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public String extractOldHash(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("oldHash").toString();
     }
 
     public boolean isValid(String token) {

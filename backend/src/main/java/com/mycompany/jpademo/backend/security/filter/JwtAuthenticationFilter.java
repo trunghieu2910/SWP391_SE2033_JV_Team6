@@ -19,9 +19,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
 
     @Override
-    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request, 
-                                    jakarta.servlet.http.HttpServletResponse response, 
-                                    jakarta.servlet.FilterChain filterChain) 
+    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request,
+                                    jakarta.servlet.http.HttpServletResponse response,
+                                    jakarta.servlet.FilterChain filterChain)
             throws jakarta.servlet.ServletException, java.io.IOException {
 
         // Read the header

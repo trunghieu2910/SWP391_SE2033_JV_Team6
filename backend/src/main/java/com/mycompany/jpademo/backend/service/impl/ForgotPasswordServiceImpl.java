@@ -7,10 +7,7 @@ import com.mycompany.jpademo.backend.dto.request.VerifyOtpRequest;
 import com.mycompany.jpademo.backend.dto.response.ApiResponse;
 import com.mycompany.jpademo.backend.dto.response.VerifyOtpResponse;
 import com.mycompany.jpademo.backend.entity.User;
-import com.mycompany.jpademo.backend.exception.InvalidOtpException;
-import com.mycompany.jpademo.backend.exception.InvalidResetTokenException;
-import com.mycompany.jpademo.backend.exception.UserNotFoundException;
-import com.mycompany.jpademo.backend.exception.WeakPasswordException;
+import com.mycompany.jpademo.backend.exception.*;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.security.jwt.ResetPasswordJwtService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
@@ -46,9 +43,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         emailService.sendOtpEmail(user.getEmail(),user.getFullName(), otp);
 
         return ResponseEntity.ok(ApiResponse.builder()
-                        .success(true)
-                        .message("OTP đã được gửi đến email của bạn")
-                        .build());
+                .success(true)
+                .message("OTP đã được gửi đến email của bạn")
+                .build());
     }
 
     @Override
@@ -61,10 +58,13 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
 
         OtpUtil.removeOtp(request.getEmail());
 
-        String token = resetPasswordJwtService.generateResetToken(request.getEmail());
+        User user = userRepository.findByEmail(request.getEmail()).
+                orElseThrow(() -> new UserNotFoundException("Thông tin email không hợp lệ"));
+        String token = resetPasswordJwtService.generateResetToken(user);
+
         return ResponseEntity.ok(VerifyOtpResponse.builder()
-                        .resetToken(token)
-                        .build());
+                .resetToken(token)
+                .build());
     }
 
     @Override
@@ -79,8 +79,18 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         }
 
         String email = resetPasswordJwtService.extractEmail(request.getResetToken());
+        String hashFromToken = resetPasswordJwtService.extractOldHash(request.getResetToken());
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Thông tin email không hợp lệ"));
+                .orElseThrow(() -> new UserNotFoundException("Mã đặt lại không hợp lệ hoặc đã hết hạn"));
+
+        if (!user.getPasswordHash().equals(hashFromToken)) {
+            // Nếu không giống, tức là mật khẩu đã được đổi trước đó rồi.
+            throw new UseResetTokenAgainException();
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash())) {
+            throw new DuplicatePasswordException();
+        }
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         user.setLastChangePassTime(LocalDateTime.now());
@@ -88,8 +98,8 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         userRepository.save(user);
 
         return ResponseEntity.ok(ApiResponse.builder()
-                        .success(true)
-                        .message("Mật khẩu đã được đặt lại thành công")
-                        .build());
+                .success(true)
+                .message("Mật khẩu đã được đặt lại thành công")
+                .build());
     }
 }

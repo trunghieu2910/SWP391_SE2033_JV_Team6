@@ -78,7 +78,8 @@ public class AuthServiceImpl implements AuthService {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             User currentUser = userDetails.getUser();
 
-
+            currentUser.setLastLogoutTime(LocalDateTime.now());
+            userRepository.save(currentUser);
         }
 
         SecurityContextHolder.clearContext();
@@ -120,7 +121,7 @@ public class AuthServiceImpl implements AuthService {
         patient.setDob(request.getDob());
         patient.setAddress(request.getAddress());
         patient.setUser(user);
-        
+
         patientRepository.save(patient);
 
         String otp = OtpUtil.generateOtp();

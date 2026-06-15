@@ -33,7 +33,10 @@ public class MedicalRecordDetailResponse {
     private String doctorAdvice;
     private String note;
 
-
+    // Các field mới từ SymptomResult (DB mới)
+    private String menopauseStatus;
+    private String symptomDuration;
+    private Boolean symptomProgressing;
 
     @Data
     public static class LabTestDTO {

@@ -104,7 +104,6 @@ com\mycompany\jpademo\backend\entity\DiagnosisSession.class
 com\mycompany\jpademo\backend\exception\BadRequestException.class
 com\mycompany\jpademo\backend\service\impl\AuthServiceImpl.class
 com\mycompany\jpademo\backend\aop\aspect\LoggingAspect.class
-com\mycompany\jpademo\backend\controller\MedicalRecordController.class
 com\mycompany\jpademo\backend\dto\response\DashboardStatsResponse$DashboardStatsResponseBuilder.class
 com\mycompany\jpademo\backend\dto\response\MedicalRecordDetailResponse$ImageDTO.class
 com\mycompany\jpademo\backend\entity\MedicalImage$MedicalImageBuilder.class
@@ -136,7 +135,6 @@ com\mycompany\jpademo\backend\dto\response\MedicalRecordResponse$MedicalRecordRe
 com\mycompany\jpademo\backend\dto\response\VerifyOtpResponse.class
 com\mycompany\jpademo\backend\service\impl\InMemoryOtpStore.class
 com\mycompany\jpademo\backend\service\interfaces\ForgotPasswordService.class
-com\mycompany\jpademo\backend\service\impl\MedicalRecordServiceImpl.class
 com\mycompany\jpademo\backend\entity\LabResult$LabResultBuilder.class
 com\mycompany\jpademo\backend\exception\DuplicateResourceException.class
 com\mycompany\jpademo\backend\repository\Test.class

@@ -24,10 +24,10 @@ public class SymptomDetails {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "symptomResultID", nullable = false)
-    private SymptomResult symptomResult;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "symptomID", nullable = false)
     private Symptom symptom;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "symptomResultID", nullable = false)
+    private SymptomResult symptomResult;
 }

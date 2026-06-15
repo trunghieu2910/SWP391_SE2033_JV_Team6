@@ -4,6 +4,7 @@ D:\SU26\SWP391\Project\backend\src\main\java\com\mycompany\jpademo\backend\dto\r
 D:\SU26\SWP391\Project\backend\src\main\java\com\mycompany\jpademo\backend\controller\ProfileController.java
 D:\SU26\SWP391\Project\backend\src\main\java\com\mycompany\jpademo\backend\service\factory\AuthFactory.java
 D:\SU26\SWP391\Project\backend\src\main\java\com\mycompany\jpademo\backend\dto\response\UserRespone.java
+D:\SU26\SWP391\Project\backend\src\main\java\com\mycompany\jpademo\backend\enums\SymptomResultStatus.java
 D:\SU26\SWP391\Project\backend\src\main\java\com\mycompany\jpademo\backend\service\impl\AdminLoginService.java
 D:\SU26\SWP391\Project\backend\src\main\java\com\mycompany\jpademo\backend\service\impl\EmailServiceImpl.java
 D:\SU26\SWP391\Project\backend\src\main\java\com\mycompany\jpademo\backend\service\impl\PatientLoginService.java

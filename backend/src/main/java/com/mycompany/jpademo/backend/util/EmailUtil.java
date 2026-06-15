@@ -29,93 +29,102 @@ public class EmailUtil {
                 """.formatted(name);
     }
 
-    public static String buildBanAccountTemplate(String name) {
+    public static String buildBanAccountTemplate(String name, String reason) {
         return """
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
-                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
-                    <h2 style="color: #c62828;">
-                        Tài khoản đã bị khóa
-                    </h2>
-                    <p>Xin chào <b>%s</b></p>
-                    <p>
-                        Tài khoản của bạn đã bị khóa bởi quản trị viên hệ thống.
-                    </p>
-                    <br>
-                    <p>
-                        Nếu bạn cho rằng đây là nhầm lẫn,
-                        vui lòng liên hệ quản trị viên hoặc bộ phận hỗ trợ.
-                    </p>
-                    <br>
-                    <p>
-                        Trân trọng,<br>
-                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
-                    </p>
-                </div>
-                </body>
-                </html>
-                """.formatted(name);
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #c62828;">
+                    Tài khoản đã bị khóa
+                </h2>
+                <p>Xin chào <b>%s</b></p>
+                <p>
+                    Tài khoản của bạn đã bị khóa bởi quản trị viên hệ thống.
+                </p>
+                <p>
+                    <strong>Lý do:</strong> %s
+                </p>
+                <br>
+                <p>
+                    Nếu bạn cho rằng đây là nhầm lẫn,
+                    vui lòng liên hệ quản trị viên hoặc bộ phận hỗ trợ.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(name, reason);
     }
 
-    public static String buildUnbanAccountTemplate(String name) {
+    public static String buildUnbanAccountTemplate(String name, String reason) {
         return  """
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
-                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
-                    <h2 style="color: #1565c0;">
-                        Tài khoản đã được mở khóa
-                    </h2>
-                    <p>Xin chào <b>%s</b></p>
-                    <p>
-                        Tài khoản của bạn đã được quản trị viên mở khóa thành công.
-                    </p>
-                    <p>
-                        Bạn hiện có thể đăng nhập và tiếp tục sử dụng Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung.
-                    </p>
-                    <br>
-                    <p>
-                        Cảm ơn bạn đã hợp tác với hệ thống.
-                    </p>
-                    <br>
-                    <p>
-                        Trân trọng,<br>
-                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
-                    </p>
-                </div>
-                </body>
-                </html>
-                """.formatted(name);
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #1565c0;">
+                    Tài khoản đã được mở khóa
+                </h2>
+                <p>Xin chào <b>%s</b></p>
+                <p>
+                    Tài khoản của bạn đã được quản trị viên mở khóa thành công.
+                </p>
+                <p>
+                    <strong>Lý do:</strong> %s
+                </p>
+                <p>
+                    Bạn hiện có thể đăng nhập và tiếp tục sử dụng Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung.
+                </p>
+                <br>
+                <p>
+                    Cảm ơn bạn đã hợp tác với hệ thống.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(name, reason);
     }
 
-    public static String buildDoctorRejectedTemplate(String name) {
+    public static String buildInactiveAccountTemplate(String name, String reason) {
         return """
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
-                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
-                    <h2 style="color: #d32f2f;">
-                        Đăng ký bác sĩ đã bị từ chối
-                    </h2>
-                    <p>Xin chào Bác sĩ <b>%s</b>,</p>
-                    <p>
-                        Yêu cầu đăng ký tài khoản bác sĩ của bạn đã bị quản trị viên từ chối.
-                    </p>
-                    <div style="margin-top: 20px; padding: 15px; background-color: #ffebee; border-radius: 5px;">
-                        <strong>Lý do từ chối:</strong>
-                        <p>Chứng chỉ bác sĩ của bạn chưa đạt chuẩn.</p>
-                    </div>
-                    <br>
-                    <p>
-                        Vui lòng kiểm tra lại thông tin đăng ký và gửi yêu cầu mới nếu cần.
-                    </p>
-                    <br>
-                    <p>
-                        Trân trọng,<br>
-                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
-                    </p>
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #ff9800;">
+                    Tài khoản đã được chuyển sang trạng thái không hoạt động
+                </h2>
+                <p>Xin chào <b>%s</b>,</p>
+                <p>
+                    Tài khoản của bạn đã được quản trị viên chuyển sang trạng thái <strong>KHÔNG HOẠT ĐỘNG</strong>.
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background-color: #fff3e0; border-radius: 5px;">
+                    <strong>Lý do:</strong>
+                    <p>%s</p>
                 </div>
-                </body>
-                </html>
-                """.formatted(name);
+                <br>
+                <p>
+                    Ở trạng thái này, bạn sẽ không thể đăng nhập và sử dụng hệ thống.
+                </p>
+                <p>
+                    Nếu có thắc mắc, vui lòng liên hệ quản trị viên để được hỗ trợ.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(name, reason);
     }
 
     public static String buildOtpEmailTemplate(String name, String otp) {
@@ -176,5 +185,39 @@ public class EmailUtil {
                 </body>
                 </html>
                 """.formatted(name, username, password);
+    }
+
+    public static String buildCreateDoctorOtpForAdmin(String adminName, String otp) {
+        return """
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #1565c0;">Xác nhận tạo tài khoản bác sĩ</h2>
+                <p>Xin chào <b>%s</b>,</p>
+                <p>
+                    Bạn vừa yêu cầu tạo tài khoản Bác sĩ.
+                </p>
+                <p>
+                    Vui lòng sử dụng mã OTP bên dưới để xác nhận thao tác này.
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
+                    <h1 style="color: #1565c0; letter-spacing: 6px; margin: 0;">%s</h1>
+                </div>
+                <p style="margin-top: 12px;">
+                    Mã OTP có hiệu lực trong <strong>10 phút</strong>. Không chia sẻ mã này với người khác.
+                </p>
+                <br>
+                <p>
+                    Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ bộ phận quản trị.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(adminName, otp);
     }
 }

@@ -43,6 +43,9 @@ public class User {
     @Column(name = "lastChangePassTime")
     private LocalDateTime lastChangePassTime;
 
+    @Column(name = "lastLogoutTime")
+    private LocalDateTime lastLogoutTime;
+
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;

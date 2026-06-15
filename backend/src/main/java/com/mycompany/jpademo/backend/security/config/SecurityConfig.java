@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -46,11 +48,11 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/register/verify-otp",
                                 "/api/auth/register/resend-otp",
-                                "/api/auth/forgot-password",
+                                "/api/auth/forgot-password/verify-otp",
                                 "/api/auth/verify-otp",
-                                "/api/auth/reset-password").permitAll()
+                                "/api/auth/forgot-password/reset-password").permitAll()
 
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
 
                 .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 

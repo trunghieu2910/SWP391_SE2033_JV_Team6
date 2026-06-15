@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -21,9 +22,9 @@ public class UpdateSymptomsRequest {
     private List<Integer> symptomIds;
 
     @NotNull(message = "Menopause status must not be null")
-    private Boolean menopauseStatus;
+    private String menopauseStatus;
 
-    @NotNull(message = "Symptom duration must not be null")
+    @NotBlank(message = "Symptom duration must not be null")
     private String symptomDuration;
 
     @NotNull(message = "Symptom progressing must not be null")

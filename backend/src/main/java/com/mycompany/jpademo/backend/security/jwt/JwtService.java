@@ -68,7 +68,9 @@ public class JwtService {
         return (username.equals(userDetails.getUsername()))
                 && !isTokenExpired(token)
                 && (user.getLastChangePassTime() == null
-                        || issuedAt.after(Timestamp.valueOf(user.getLastChangePassTime())))
+                || issuedAt.after(Timestamp.valueOf(user.getLastChangePassTime())))
+                && (user.getLastLogoutTime() == null
+                || issuedAt.after(Timestamp.valueOf(user.getLastLogoutTime())))
                 ;
     }
 }

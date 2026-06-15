@@ -100,7 +100,7 @@ public class AuthController {
                 .build());
     }
 
-    @PostMapping("/verify-otp")
+    @PostMapping("/forgot-password/verify-otp")
     public ResponseEntity<VerifyOtpResponse>
     verifyOtp(
             @Valid
@@ -112,7 +112,7 @@ public class AuthController {
                 .verifyOtp(request);
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping("/forgot-password/reset-password")
     public ResponseEntity<ApiResponse>
     resetPassword(
             @Valid
