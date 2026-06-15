@@ -1,6 +1,4 @@
 package com.mycompany.jpademo.backend.service.impl;
-
-import com.mycompany.jpademo.backend.aop.annotation.LogActivity;
 import com.mycompany.jpademo.backend.dto.response.LoginResponse;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.security.jwt.JwtService;

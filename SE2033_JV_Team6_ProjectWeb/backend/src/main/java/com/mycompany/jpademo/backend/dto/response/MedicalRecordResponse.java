@@ -15,12 +15,14 @@ public class MedicalRecordResponse {
     private Integer id;
     private String patientName;
     private String diagnosis;
-    private String visitDate;
+    private Date visitDate;
     private String symptoms;
     private String prescription;
     private String doctorNotes;
     private Boolean isShared;
-
+    private String nationalID;
+    private String gender;
+    private Integer age;
 
 
     // Chi tiết (detail view)

@@ -15,9 +15,13 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     @Query(value = "SELECT " +
             "s.sessionID as id, " +
             "s.isShared as isShared, " +
+            "s.status as status, " +
             "u.fullName as patientName, " +
+          "  u.nationalID as nationalID, " +
+            "  p.gender as gender, " +
+
             "ISNULL(r.finalDiagnosis, N'Chưa có chẩn đoán') as diagnosis, " +
-            "CONVERT(VARCHAR, s.createdAt, 105) as visitDate, " +
+            "s.createdAt as visitDate, " +
             "ISNULL((SELECT TOP 1 sym.symptomName FROM SymptomResult sr " +
             "  JOIN SymptomDetails sd ON sd.symptomResultID = sr.symptomResultID " +
             "  JOIN Symptom sym ON sd.symptomID = sym.symptomID " +
@@ -28,7 +32,8 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "JOIN Patient p ON s.patientID = p.patientID " +
             "JOIN [Users] u ON p.userID = u.userID " +
             "LEFT JOIN Review r ON s.sessionID = r.sessionID " +
-            "WHERE (:keyword IS NULL OR u.fullName LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%')) " +
+            "WHERE (:keyword IS NULL OR u.fullName COLLATE Latin1_General_CI_AI\n" +
+            "LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%')) " +
             "  AND (:status IS NULL OR s.status = :status) " +
             "  AND (:isShared IS NULL OR s.isShared = :isShared) " +
             "ORDER BY s.createdAt DESC",
