@@ -18,23 +18,21 @@ public class UpdateProfileRequest {
     @Size(max = 100, message = "Full name không được vượt quá 100 ký tự")
     private String fullName;
 
-    private String certificate;
-
     private String phoneNumber;
-
-    @Size(min = 12, max = 12, message = "National ID phải có đúng 12 ký tự")
-    private String nationalID;
 
     private String firstName;
 
     private String lastName;
+
+    @Size(min = 10, max = 10, message = "Health insurance phải có đúng 10 ký tự")
+    private String healthInsurance;
+
+    @Size(min = 12, max = 12, message = "National ID phải có đúng 12 ký tự")
+    private String nationalID;
 
     private String gender;
 
     private LocalDate dob;
 
     private String address;
-
-    @Size(min = 10, max = 10, message = "Health insurance phải có đúng 10 ký tự")
-    private String healthInsurance;
 }

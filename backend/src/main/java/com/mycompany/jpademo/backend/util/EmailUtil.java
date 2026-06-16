@@ -118,6 +118,34 @@ public class EmailUtil {
                 """.formatted(name);
     }
 
+    public static String buildOtpEmailTemplate(String name, String otp) {
+        return """
+                <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                    <h2 style="color: #1565c0;">
+                        Mã OTP đặt lại mật khẩu
+                    </h2>
+                    <p>Xin chào <b>%s</b>,</p>
+                    <p>
+                        Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng sử dụng mã OTP dưới đây:
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
+                        <h1 style="color: #1565c0; letter-spacing: 8px;">%s</h1>
+                    </div>
+                    <p>Mã OTP có hiệu lực trong <strong>5 phút</strong>.</p>
+                    <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+                    <br>
+                    <p>
+                        Trân trọng,<br>
+                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                    </p>
+                </div>
+                </body>
+                </html>
+                """.formatted(name, otp);
+    }
+
     public static String buildCreateDoctorAccountTemplate(String name, String username, String password) {
         return """
                 <html>

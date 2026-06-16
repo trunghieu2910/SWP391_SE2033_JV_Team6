@@ -7,11 +7,13 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApiResponse {
+public class ApiResponse<T> {
+
+    private Integer code;
 
     private Boolean success;
 
     private String message;
 
-    private Object data;
+    private T data;
 }

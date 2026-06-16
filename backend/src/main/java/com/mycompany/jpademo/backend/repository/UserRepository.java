@@ -6,23 +6,40 @@ import com.mycompany.jpademo.backend.enums.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-    Optional<User> findByUserName(String username);
+
+    // Tìm bằng userName (field trong TS-49)
+    Optional<User> findByUserName(String userName);
+
+    // Tìm bằng email (dùng cho ForgotPassword)
+    Optional<User> findByEmail(String email);
+
+    // Tìm bằng nhiều loại login (username / email / phone / nationalID)
+    @Query("SELECT u FROM User u WHERE u.userName = :login OR u.email = :email OR u.phoneNumber = :phone OR u.nationalID = :nationalId")
+    Optional<User> findByEmailOrUsernameOrPhoneNumberOrNationalId(
+            @Param("login") String login,
+            @Param("email") String email,
+            @Param("phone") String phone,
+            @Param("nationalId") String nationalId
+    );
+
+    boolean existsByUserName(String userName);
 
     boolean existsByEmail(String email);
 
     boolean existsByPhoneNumber(String phoneNumber);
+    
+    boolean existsByNationalID(String nationalID);
 
     Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            String username, String password, Pageable pageable);
+            String username, String email, Pageable pageable);
 
-    Page<User> findByRoleRoleNameAndStatus(RoleName roleName, UserStatus status,
-                                           Pageable pageable);
+    Page<User> findByRoleRoleNameAndStatus(RoleName roleName, UserStatus status, Pageable pageable);
 
     Page<User> findByRoleRoleName(RoleName roleName, Pageable pageable);
 
@@ -42,5 +59,4 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatus(
             String username, String email, RoleName roleName, UserStatus status, Pageable pageable);
-
 }

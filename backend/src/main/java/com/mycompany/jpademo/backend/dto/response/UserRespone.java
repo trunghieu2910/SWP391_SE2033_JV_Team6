@@ -22,7 +22,7 @@ public class UserRespone {
 
     private String roleName;
 
-    private String certificate;
+    private String phoneNumber;
 
     private LocalDateTime createdAt;
 }

@@ -4,16 +4,14 @@ import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
@@ -27,25 +25,25 @@ public class JwtService {
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
+                .subject(userDetails.getUsername())
                 .claim("role", userDetails.getAuthorities())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignKey())
                 .compact();
     }
 
-    private Key getSignKey() {
+    private SecretKey getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public Claims extractClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+        return Jwts.parser()
+                .verifyWith(getSignKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public String extractUsername(String token) {
@@ -56,6 +54,10 @@ public class JwtService {
         return extractClaims(token).getIssuedAt();
     }
 
+    public boolean isTokenExpired(String token) {
+        return extractClaims(token).getExpiration().before(new Date());
+    }
+
     public boolean validateToken(String token, UserDetails userDetails) {
         String username = extractUsername(token);
         Date issuedAt = extractIssuedAt(token);
@@ -64,10 +66,11 @@ public class JwtService {
         User user = customUserDetails.getUser();
 
         return (username.equals(userDetails.getUsername()))
-                && (user.getLastLogoutTime() == null
-                        || issuedAt.after(Timestamp.valueOf(user.getLastLogoutTime())))
+                && !isTokenExpired(token)
                 && (user.getLastChangePassTime() == null
                         || issuedAt.after(Timestamp.valueOf(user.getLastChangePassTime())))
+                && (user.getLastLogoutTime() == null
+                        || issuedAt.after(Timestamp.valueOf(user.getLastLogoutTime())))
                 ;
     }
 }

@@ -36,6 +36,14 @@ public class EmailServiceImpl implements EmailService {
         buildAndSendEmail(to, subject, body);
     }
 
+    @Async
+    @Override
+    public void sendOtpEmail(String to, String fullName, String otp) {
+        String subject = "Mã OTP đặt lại mật khẩu";
+        String body = EmailUtil.buildOtpEmailTemplate(fullName, otp);
+        buildAndSendEmail(to, subject, body);
+    }
+
     private void buildAndSendEmail(String to, String subject, String body) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -46,6 +54,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setFrom(fromEmail, MimeUtility.encodeText(fromName, "UTF-8", "B"));
             mailSender.send(message);
         } catch (Exception e) {
+            log.error("Failed to send email to {}: {}", to, e.getMessage());
             throw new RuntimeException("Failed to send email");
         }
     }

@@ -14,11 +14,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.Min;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
+@Validated
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
@@ -42,7 +45,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserDetailResponse> getUserDetail(@PathVariable Integer id) {
+    public ResponseEntity<UserDetailResponse> getUserDetail(@PathVariable @Min(value = 1, message = "Validation Error") Integer id) {
         return ResponseEntity.ok(adminService.getUserDetail(id));
     }
 

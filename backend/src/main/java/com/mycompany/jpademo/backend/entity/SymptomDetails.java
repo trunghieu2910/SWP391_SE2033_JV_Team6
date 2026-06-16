@@ -28,6 +28,8 @@ public class SymptomDetails {
     private Symptom symptom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sessionID", nullable = false)
-    private DiagnosisSession diagnosisSession;
+    @JoinColumn(name = "symptomResultID", nullable = false)
+    private SymptomResult symptomResult;
+
+    // THÊM 1 THUỘC TÍNH LÀ STATUS
 }

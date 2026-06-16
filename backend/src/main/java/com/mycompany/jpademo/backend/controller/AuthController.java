@@ -2,6 +2,9 @@ package com.mycompany.jpademo.backend.controller;
 
 import com.mycompany.jpademo.backend.dto.request.ForgotPasswordRequest;
 import com.mycompany.jpademo.backend.dto.request.LoginRequest;
+import com.mycompany.jpademo.backend.dto.request.OtpVerificationRequest;
+import com.mycompany.jpademo.backend.dto.request.RegisterRequest;
+import com.mycompany.jpademo.backend.dto.request.ResendOtpRequest;
 import com.mycompany.jpademo.backend.dto.request.ResetPasswordRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyOtpRequest;
 import com.mycompany.jpademo.backend.dto.response.ApiResponse;
@@ -58,7 +61,46 @@ public class AuthController {
         return forgotPasswordService.forgotPassword(request);
     }
 
-    @PostMapping("/verify-otp")
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse> register(
+            @Valid
+            @RequestBody
+            RegisterRequest request
+    ) {
+        authService.register(request);
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .message("Đăng ký thành công. Vui lòng kiểm tra email để nhận OTP xác thực.")
+                .build());
+    }
+
+    @PostMapping("/register/verify-otp")
+    public ResponseEntity<ApiResponse> verifyRegistrationOtp(
+            @Valid
+            @RequestBody
+            OtpVerificationRequest request
+    ) {
+        authService.verifyRegistrationOtp(request);
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .message("Xác thực OTP thành công. Tài khoản đã kích hoạt.")
+                .build());
+    }
+
+    @PostMapping("/register/resend-otp")
+    public ResponseEntity<ApiResponse> resendRegistrationOtp(
+            @Valid
+            @RequestBody
+            ResendOtpRequest request
+    ) {
+        authService.resendRegistrationOtp(request);
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .message("OTP mới đã được gửi lại. Vui lòng kiểm tra email.")
+                .build());
+    }
+
+    @PostMapping("/forgot-password/verify-otp")
     public ResponseEntity<VerifyOtpResponse>
     verifyOtp(
             @Valid
@@ -70,7 +112,7 @@ public class AuthController {
                 .verifyOtp(request);
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping("/forgot-password/reset-password")
     public ResponseEntity<ApiResponse>
     resetPassword(
             @Valid

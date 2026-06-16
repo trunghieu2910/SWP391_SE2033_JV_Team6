@@ -69,7 +69,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private User getUserByUsername(String username) {
-        return userRepository.findByUsername(username)
+        return userRepository.findByUserName(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
     }
 
@@ -77,22 +77,20 @@ public class ProfileServiceImpl implements ProfileService {
         if (user.getRole() == null || user.getRole().getRoleName() == null) {
             throw new BadRequestException("User chưa có role hợp lệ");
         }
-
-        return user.getRole().getRoleName();
+        // RoleName là Enum, trả về tên String của nó
+        return user.getRole().getRoleName().name();
     }
 
     private void updateUserFields(User user, UpdateProfileRequest request) {
         if (request.getUsername() != null) {
-            user.setUsername(request.getUsername());
+            user.setUserName(request.getUsername());
         }
 
         if (request.getFullName() != null) {
             user.setFullName(request.getFullName());
         }
 
-        if (request.getCertificate() != null) {
-            user.setCertificate(request.getCertificate());
-        }
+
 
         if (request.getPhoneNumber() != null) {
             user.setPhoneNumber(request.getPhoneNumber());
@@ -104,13 +102,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private void updatePatientFields(Patient patient, UpdateProfileRequest request) {
-        if (request.getFirstName() != null) {
-            patient.setFirstName(request.getFirstName());
-        }
 
-        if (request.getLastName() != null) {
-            patient.setLastName(request.getLastName());
-        }
 
         if (request.getGender() != null) {
             patient.setGender(request.getGender());
@@ -124,52 +116,48 @@ public class ProfileServiceImpl implements ProfileService {
             patient.setAddress(request.getAddress());
         }
 
-        if (request.getHealthInsurance() != null) {
-            patient.setHealthInsurance(request.getHealthInsurance());
-        }
+
     }
 
     private ProfileResponse mapUserProfile(User user) {
         return ProfileResponse.builder()
-                .userID(user.getUserID())
+                .userID(user.getUserId())
                 .patientID(null)
                 .roleName(getRoleName(user))
-                .username(user.getUsername())
+                .username(user.getUserName())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
-                .certificate(user.getCertificate())
+
                 .phoneNumber(user.getPhoneNumber())
-                .status(user.getStatus())
+                .status(user.getStatus() != null ? user.getStatus().name() : null)
                 .createdAt(user.getCreatedAt())
                 .nationalID(user.getNationalID())
-                .firstName(null)
-                .lastName(null)
+
                 .gender(null)
                 .dob(null)
                 .address(null)
-                .healthInsurance(null)
+
                 .build();
     }
 
     private ProfileResponse mapPatientProfile(User user, Patient patient) {
         return ProfileResponse.builder()
-                .userID(user.getUserID())
-                .patientID(patient.getPatientID())
+                .userID(user.getUserId())
+                .patientID(patient.getPatientId())
                 .roleName(getRoleName(user))
-                .username(user.getUsername())
+                .username(user.getUserName())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
-                .certificate(user.getCertificate())
+
                 .phoneNumber(user.getPhoneNumber())
-                .status(user.getStatus())
+                .status(user.getStatus() != null ? user.getStatus().name() : null)
                 .createdAt(user.getCreatedAt())
                 .nationalID(user.getNationalID())
-                .firstName(patient.getFirstName())
-                .lastName(patient.getLastName())
+
                 .gender(patient.getGender())
                 .dob(patient.getDob())
                 .address(patient.getAddress())
-                .healthInsurance(patient.getHealthInsurance())
+
                 .build();
     }
 }

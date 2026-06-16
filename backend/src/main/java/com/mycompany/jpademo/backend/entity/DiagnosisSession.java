@@ -2,7 +2,6 @@ package com.mycompany.jpademo.backend.entity;
 
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,20 +22,18 @@ public class DiagnosisSession {
     @Column(name = "sessionID")
     private Integer sessionId;
 
-    @NotNull
     @Positive
-    @Column(name = "weight", nullable = false)
-    private Double  weight;
+    @Column(name = "weight", nullable = true)
+    private Double weight;
 
-    @NotNull
     @Positive
-    @Column(name = "height", nullable = false)
-    private Double  height;
+    @Column(name = "height", nullable = true)
+    private Double height;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50, nullable = false)
     @Builder.Default
-    private DiagnosisSessionStatus status = DiagnosisSessionStatus.PENDING;
+    private DiagnosisSessionStatus status = DiagnosisSessionStatus.PROCESSING;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
@@ -50,8 +47,8 @@ public class DiagnosisSession {
     @JoinColumn(name = "userID", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "diagnosisSession")
-    private List<SymptomDetails> symptomDetailsList;
+    @OneToOne(mappedBy = "diagnosisSession", fetch = FetchType.LAZY)
+    private SymptomResult symptomResult;
 
     @OneToMany(mappedBy = "diagnosisSession")
     private List<LabResult> labResults;
@@ -61,4 +58,8 @@ public class DiagnosisSession {
 
     @OneToOne(mappedBy = "diagnosisSession", fetch = FetchType.LAZY)
     private Review review;
+
+    @Column(name = "isShared")
+    @Builder.Default
+    private Boolean isShared = false;
 }

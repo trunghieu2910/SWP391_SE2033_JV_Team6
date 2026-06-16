@@ -20,7 +20,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userID")
     private Integer userId;
-    
+
     @Column(name = "userName", nullable = false, unique = true, length = 50)
     private String userName;
 
@@ -40,8 +40,11 @@ public class User {
     @Column(name = "status", length = 50)
     private UserStatus status;
 
-    @Column(name = "lastChangePassTime", nullable = false)
+    @Column(name = "lastChangePassTime")
     private LocalDateTime lastChangePassTime;
+
+    @Column(name = "lastLogoutTime")
+    private LocalDateTime lastLogoutTime;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
@@ -54,7 +57,7 @@ public class User {
     @JoinColumn(name = "roleID", nullable = false)
     private Role role;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user" ,cascade = CascadeType.ALL)
     private Patient patient;
 
     @OneToOne(mappedBy = "user")

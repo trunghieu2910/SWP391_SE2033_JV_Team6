@@ -27,7 +27,7 @@ public class Patient {
     @Column(name = "address")
     private String address;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "userID", nullable = false, unique = true)
     private User user;
 }

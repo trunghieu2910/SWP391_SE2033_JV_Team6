@@ -19,9 +19,9 @@ public class AdminLoginService implements LoginStrategy {
     @Override
     public LoginResponse login(User user) {
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
+                .username(user.getUserName())
                 .password(user.getPasswordHash())
-                .roles(user.getRole().getRoleName())
+                .roles(user.getRole().getRoleName().name())
                 .build();
 
         String token = jwtService.generateToken(userDetails);
@@ -30,9 +30,9 @@ public class AdminLoginService implements LoginStrategy {
                 .accessToken(token)
                 .tokenType("Bearer")
                 .userId(user.getUserId())
-                .username(user.getUsername())
+                .username(user.getUserName())
                 .email(user.getEmail())
-                .role(user.getRole().getRoleName())
+                .role(user.getRole().getRoleName().name())
                 .build();
     }
 }
