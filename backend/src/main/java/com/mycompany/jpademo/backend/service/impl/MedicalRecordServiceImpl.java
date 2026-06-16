@@ -83,6 +83,24 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         return new PageImpl<>(pageContent, pageable, records.size());
     }
 
+    // ===== DANH SÁCH CHO BÁC SĨ =====
+    @Override
+    public List<MedicalRecordResponse> getAllMedicalRecords() {
+        List<Map<String, Object>> rawRecords = sessionRepository.findAllMedicalRecords();
+        return rawRecords.stream()
+                .map(this::mapToMedicalRecordResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ===== DANH SÁCH CHO BỆNH NHÂN =====
+    @Override
+    public List<MedicalRecordResponse> getPatientMedicalRecords(Integer patientID) {
+        List<Map<String, Object>> rawRecords = sessionRepository.findMedicalRecordsByPatientId(patientID);
+        return rawRecords.stream()
+                .map(this::mapToMedicalRecordResponse)
+                .collect(Collectors.toList());
+    }
+
     // ===== CHI TIẾT BỆNH ÁN (CÓ DATA MASKING) =====
     @Override
     public MedicalRecordDetailResponse getMedicalRecordDetail(Integer sessionID, boolean isPatient) {
@@ -155,7 +173,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         });
 
         // Lấy xét nghiệm
-        List<LabResult> labResults = labResultRepository.findByDiagnosisSession_SessionId(sessionID);
+        List<LabResult> labResults = labResultRepository.findByDiagnosisSessionSessionId(sessionID);
         List<MedicalRecordDetailResponse.LabTestDTO> labTestDTOs = new ArrayList<>();
         if (labResults != null && !labResults.isEmpty()) {
             for (LabResult lr : labResults) {
@@ -243,5 +261,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         });
 
         return detail;
+    }
+
+    @Override
+    public void updateMedicalRecordVisibility(Integer sessionID, Boolean isShared) {
+        DiagnosisSession session = sessionRepository.findById(sessionID)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy mã phiên khám: " + sessionID));
+        
+        session.setIsShared(isShared);
+        sessionRepository.save(session);
     }
 }

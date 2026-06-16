@@ -9,7 +9,7 @@ import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.exception.UserNotFoundException;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
-import com.mycompany.jpademo.backend.service.FirebaseService;
+import com.mycompany.jpademo.backend.service.interfaces.FirebaseService;
 import com.mycompany.jpademo.backend.service.factory.AuthFactory;
 import com.mycompany.jpademo.backend.service.interfaces.AuthService;
 import com.mycompany.jpademo.backend.service.interfaces.LoginStrategy;
