@@ -4,6 +4,7 @@ import com.mycompany.jpademo.backend.enums.LabResultStatus;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;

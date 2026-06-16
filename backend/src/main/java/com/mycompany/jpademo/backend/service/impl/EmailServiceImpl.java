@@ -44,6 +44,14 @@ public class EmailServiceImpl implements EmailService {
         buildAndSendEmail(to, subject, body);
     }
 
+    @Async
+    @Override
+    public void sendPasswordEmail(String toEmail, String fullName, String rawPassword) {
+        String subject = "[MedicalDiagnosis] Thông tin tài khoản của bạn";
+        String body = EmailUtil.buildPasswordEmailTemplate(fullName, rawPassword);
+        buildAndSendEmail(toEmail, subject, body);
+    }
+
     private void buildAndSendEmail(String to, String subject, String body) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

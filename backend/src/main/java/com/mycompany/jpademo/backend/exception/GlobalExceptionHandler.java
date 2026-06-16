@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -150,6 +151,18 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiResponse> handleDisabledException(DisabledException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(
+                        ApiResponse.builder()
+                                .success(false)
+                                .message("Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra email để xác thực OTP.")
+                                .build()
+                );
+    }
+
     @ExceptionHandler(EmailSendingException.class)
     public ResponseEntity<ApiResponse> handleEmailSending(EmailSendingException ex) {
 
@@ -237,7 +250,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.builder()
                         .success(false)
-                        .message("Tài khoản bị khoá")
+                        .message("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.")
                         .build());
     }
 }
