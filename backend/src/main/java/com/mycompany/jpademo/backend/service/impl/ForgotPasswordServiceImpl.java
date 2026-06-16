@@ -68,7 +68,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     }
 
     @Override
-    @LogActivity(action = "UPDATE", targetType = "Users", description = "Người dùng đặt lại mật khẩu")
+    @LogActivity(action = "UPDATE_PASSWORD", targetType = "Users", description = "Người dùng đặt lại mật khẩu")
     public ResponseEntity<ApiResponse> resetPassword(ResetPasswordRequest request) {
         if (!resetPasswordJwtService.isValid(request.getResetToken())){
             throw new InvalidResetTokenException();

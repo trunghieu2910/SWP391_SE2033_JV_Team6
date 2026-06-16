@@ -177,4 +177,77 @@ public class EmailUtil {
                 </html>
                 """.formatted(name, username, password);
     }
+
+    public static String buildCreateDoctorOtpForAdmin(String adminName, String otp) {
+        return """
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #1565c0;">Xác nhận tạo tài khoản bác sĩ</h2>
+                <p>Xin chào <b>%s</b>,</p>
+                <p>
+                    Bạn vừa yêu cầu tạo tài khoản Bác sĩ.
+                </p>
+                <p>
+                    Vui lòng sử dụng mã OTP bên dưới để xác nhận thao tác này.
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
+                    <h1 style="color: #1565c0; letter-spacing: 6px; margin: 0;">%s</h1>
+                </div>
+                <p style="margin-top: 12px;">
+                    Mã OTP có hiệu lực trong <strong>10 phút</strong>. Không chia sẻ mã này với người khác.
+                </p>
+                <br>
+                <p>
+                    Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ bộ phận quản trị.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(adminName, otp);
+    }
+
+    public static String buildPasswordEmailTemplate(String fullName, String rawPassword) {
+        return """
+                <html>
+                    <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+                    <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+                
+                        <h2 style="color: #1565c0; border-bottom: 2px solid #e3f2fd; padding-bottom: 10px;">
+                            Thông tin tài khoản của bạn
+                        </h2>
+                
+                        <p>Xin chào <b>%s</b>,</p>
+                
+                        <p>Tài khoản của bạn đã được tạo thành công thông qua Google. Đây là thông tin đăng nhập của bạn:</p>
+                
+                        <div style="margin: 20px 0; padding: 20px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
+                            <p style="margin: 0; font-size: 14px; color: #1565c0;">Mật khẩu tạm thời của bạn là:</p>
+                            <p style="font-size: 24px; font-weight: bold; font-family: monospace; color: #000; margin: 10px 0 0 0;">
+                                %s
+                            </p>
+                        </div>
+                
+                        <p style="color: #d32f2f;">
+                            <b>⚠️ Lưu ý:</b> Vui lòng đăng nhập và đổi mật khẩu ngay sau khi đăng nhập lần đầu để đảm bảo an toàn.
+                        </p>
+                
+                        <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+                
+                        <br>
+                        <p>
+                            Trân trọng,<br>
+                            <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                        </p>
+              
+                    </div>
+                    </body>
+                    </html>
+                """.formatted(fullName, rawPassword);
+    }
 }

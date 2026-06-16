@@ -1,12 +1,6 @@
 package com.mycompany.jpademo.backend.controller;
 
-import com.mycompany.jpademo.backend.dto.request.ForgotPasswordRequest;
-import com.mycompany.jpademo.backend.dto.request.LoginRequest;
-import com.mycompany.jpademo.backend.dto.request.OtpVerificationRequest;
-import com.mycompany.jpademo.backend.dto.request.RegisterRequest;
-import com.mycompany.jpademo.backend.dto.request.ResendOtpRequest;
-import com.mycompany.jpademo.backend.dto.request.ResetPasswordRequest;
-import com.mycompany.jpademo.backend.dto.request.VerifyOtpRequest;
+import com.mycompany.jpademo.backend.dto.request.*;
 import com.mycompany.jpademo.backend.dto.response.ApiResponse;
 import com.mycompany.jpademo.backend.dto.response.LoginResponse;
 import com.mycompany.jpademo.backend.dto.response.VerifyOtpResponse;
@@ -14,6 +8,7 @@ import com.mycompany.jpademo.backend.service.interfaces.AuthService;
 import com.mycompany.jpademo.backend.service.interfaces.ForgotPasswordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -122,5 +117,33 @@ public class AuthController {
 
         return forgotPasswordService
                 .resetPassword(request);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(
+            @Valid
+            @RequestBody
+            GoogleLoginRequest request) {
+
+        Object result = authService.handleGoogleLogin(request.getIdToken());
+
+        if (result instanceof LoginResponse) {
+            // User đã tồn tại -> Trả về JWT (HTTP 200 OK)
+            return ResponseEntity.ok(result);
+        } else {
+            // User chưa tồn tại -> Trả về yêu cầu nhập thêm thông tin (HTTP 202 Accepted)
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
+        }
+    }
+
+    @PostMapping("/google/complete")
+    public ResponseEntity<LoginResponse> googleComplete(
+            @Valid
+            @RequestBody
+            GoogleCompleteRequest request) {
+
+        // Đăng ký hoàn tất và trả thẳng về JWT token (HTTP 200 OK)
+        LoginResponse response = authService.completeGoogleRegistration(request);
+        return ResponseEntity.ok(response);
     }
 }

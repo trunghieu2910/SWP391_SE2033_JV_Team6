@@ -1,11 +1,11 @@
 package com.mycompany.jpademo.backend.service.impl;
 
+import com.mycompany.jpademo.backend.aop.annotation.LogActivity;
 import com.mycompany.jpademo.backend.dto.request.CreateLabResultRequest;
 import com.mycompany.jpademo.backend.dto.response.LabResultResponse;
 import com.mycompany.jpademo.backend.entity.DiagnosisSession;
 import com.mycompany.jpademo.backend.entity.LabResult;
 import com.mycompany.jpademo.backend.entity.LabResultParameter;
-import com.mycompany.jpademo.backend.entity.Parameter;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
@@ -13,7 +13,6 @@ import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.repository.DiagnosisSessionRepository;
 import com.mycompany.jpademo.backend.repository.LabResultParameterRepository;
 import com.mycompany.jpademo.backend.repository.LabResultRepository;
-import com.mycompany.jpademo.backend.repository.ParameterRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.LabResultService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +34,6 @@ public class LabResultServiceImpl implements LabResultService {
     private final LabResultRepository labResultRepository;
 
     private final LabResultParameterRepository labResultParameterRepository;
-
-    private final ParameterRepository parameterRepository;
 
     @Override
     public LabResultResponse createLabResult(CreateLabResultRequest request) {
@@ -67,36 +63,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         labResult = labResultRepository.save(labResult);
 
-        List<LabResultParameter> savedParameters = new ArrayList<>();
-
-        if (request.getParameters() != null && !request.getParameters().isEmpty()) {
-
-            List<Integer> paramIds = request.getParameters().stream()
-                    .map(CreateLabResultRequest.ParameterValueRequest::getParameterId)
-                    .collect(Collectors.toList());
-            long distinctCount = paramIds.stream().distinct().count();
-            if (distinctCount < paramIds.size()) {
-                throw new BadRequestException(
-                        "Danh sách thông số xét nghiệm chứa ID bị trùng lặp");
-            }
-
-            for (CreateLabResultRequest.ParameterValueRequest pvr : request.getParameters()) {
-
-                Parameter parameter = parameterRepository.findById(pvr.getParameterId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Không tìm thấy thông số xét nghiệm với ID: " + pvr.getParameterId()));
-
-                LabResultParameter lrp = LabResultParameter.builder()
-                        .labResult(labResult)
-                        .parameter(parameter)
-                        .value(pvr.getValue())
-                        .build();
-
-                savedParameters.add(labResultParameterRepository.save(lrp));
-            }
-        }
-
-        return mapToLabResultResponse(labResult, savedParameters);
+        return mapToLabResultResponse(labResult, Collections.emptyList());
     }
 
     @Override
@@ -175,7 +142,7 @@ public class LabResultServiceImpl implements LabResultService {
                         ? labResult.getStatus()
                         : null)
                 .createdAt(labResult.getCreatedAt() != null
-                        ? Timestamp.valueOf(labResult.getCreatedAt())
+                        ? labResult.getCreatedAt()
                         : null)
                 .parameters(paramResponses)
                 .build();

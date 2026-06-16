@@ -36,6 +36,6 @@ public class SystemLog {
     private LocalDateTime performedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userID", nullable = false)
+    @JoinColumn(name = "userID", nullable = true)
     private User user;
 }

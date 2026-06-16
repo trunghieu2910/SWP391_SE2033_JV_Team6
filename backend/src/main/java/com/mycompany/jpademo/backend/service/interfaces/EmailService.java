@@ -6,4 +6,6 @@ public interface EmailService {
     void sendCreateDoctorAccountEmail(String to, String subject, String fullName, String username, String password);
 
     void sendOtpEmail(String to, String fullName, String otp);
+
+    void sendPasswordEmail(String toEmail, String fullName, String rawPassword);
 }
