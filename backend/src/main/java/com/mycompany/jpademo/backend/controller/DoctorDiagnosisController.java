@@ -2,9 +2,11 @@ package com.mycompany.jpademo.backend.controller;
 
 import com.mycompany.jpademo.backend.dto.request.UpdateSessionShareRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateSessionStatusRequest;
-import com.mycompany.jpademo.backend.dto.request.UpdateSymptomsRequest;
+import com.mycompany.jpademo.backend.dto.request.UpdateClinicalSymptomsRequest;
+import com.mycompany.jpademo.backend.dto.response.DoctorSessionDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.DoctorSessionResponse;
 import com.mycompany.jpademo.backend.dto.response.SymptomResponse;
+import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.DoctorDiagnosisService;
 import jakarta.validation.Valid;
@@ -34,6 +36,7 @@ public class DoctorDiagnosisController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) DiagnosisSessionStatus status,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         Integer doctorId = userDetails.getUser().getUserId();
@@ -41,7 +44,7 @@ public class DoctorDiagnosisController {
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<DoctorSessionResponse> sessions = doctorDiagnosisService.getSessionsByDoctor(doctorId, pageable, keyword);
+        Page<DoctorSessionResponse> sessions = doctorDiagnosisService.getSessionsByDoctor(doctorId, pageable, keyword, status);  // ✏️ Thêm status
         return ResponseEntity.ok(sessions);
     }
 
@@ -70,12 +73,21 @@ public class DoctorDiagnosisController {
         return ResponseEntity.ok(symptoms);
     }
 
-    @PutMapping("/symptoms")
+    @PutMapping("/{sessionId}/symptoms")
     public ResponseEntity<String> updateSessionSymptoms(
-            @Valid @RequestBody UpdateSymptomsRequest request,
+            @PathVariable Integer sessionId,
+            @Valid @RequestBody UpdateClinicalSymptomsRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         Integer doctorId = userDetails.getUser().getUserId();
-        doctorDiagnosisService.updateSessionSymptoms(doctorId, request);
+        doctorDiagnosisService.updateClinicalSymptoms(doctorId, sessionId, request);
         return ResponseEntity.ok("Clinical symptoms updated successfully.");
+    }
+
+    @GetMapping("/{sessionId}")
+    public ResponseEntity<DoctorSessionDetailResponse> getSessionDetail(
+            @PathVariable Integer sessionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Integer doctorId = userDetails.getUser().getUserId();
+        return ResponseEntity.ok(doctorDiagnosisService.getSessionDetail(sessionId, doctorId));
     }
 }

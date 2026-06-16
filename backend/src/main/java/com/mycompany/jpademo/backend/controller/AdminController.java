@@ -1,9 +1,7 @@
 package com.mycompany.jpademo.backend.controller;
 
 import com.mycompany.jpademo.backend.dto.request.*;
-import com.mycompany.jpademo.backend.dto.response.DashboardStatsResponse;
-import com.mycompany.jpademo.backend.dto.response.UserDetailResponse;
-import com.mycompany.jpademo.backend.dto.response.UserResponse;
+import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import jakarta.validation.Valid;
@@ -14,14 +12,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import jakarta.validation.constraints.Min;
 import org.springframework.web.bind.annotation.*;
+
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
-@Validated
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
@@ -29,6 +27,11 @@ public class AdminController {
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
         return ResponseEntity.ok(adminService.getDashboardStats());
+    }
+
+    @GetMapping("/dashboard/charts")
+    public ResponseEntity<ChartStatsResponse> getChartStats() {
+        return ResponseEntity.ok(adminService.getChartStats());
     }
 
     @GetMapping("/users")
@@ -45,7 +48,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserDetailResponse> getUserDetail(@PathVariable @Min(value = 1, message = "Validation Error") Integer id) {
+    public ResponseEntity<UserDetailResponse> getUserDetail(@PathVariable Integer id) {
         return ResponseEntity.ok(adminService.getUserDetail(id));
     }
 
@@ -56,10 +59,20 @@ public class AdminController {
         return adminService.updateUserStatus(request);
     }
 
-    @PostMapping("/doctors")
-    public ResponseEntity<String> createDoctor(
+    @PostMapping("/doctors/initiate")
+    public ResponseEntity<InitiateCreateDoctorResponse> initiateCreateDoctor(
             @Valid
-            @RequestBody CreateDoctorRequest request) {
-        return adminService.createDoctor(request);
+            @RequestBody InitiateCreateDoctorRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(adminService.initiateCreateDoctor(request, userDetails.getUser()));
+    }
+
+    @PostMapping("/doctors/confirm")
+    public ResponseEntity<String> confirmCreateDoctor(
+            @Valid
+            @RequestBody VerifyPendingDoctorRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return adminService.verifyAndCreateDoctor(request, userDetails.getUser());
     }
 }
+

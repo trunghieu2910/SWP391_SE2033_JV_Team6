@@ -19,14 +19,8 @@ public class Review {
     @Column(name = "reviewID")
     private Integer reviewId;
 
-    @Column(name = "verdict", nullable = false, length = 50)
-    private String verdict;
-
     @Column(name = "finalDiagnosis", nullable = false)
     private String finalDiagnosis;
-
-    @Column(name = "icd10Code", nullable = false)
-    private String icd10Code;
 
     @Column(name = "treatmentPlan", nullable = false)
     private String treatmentPlan;

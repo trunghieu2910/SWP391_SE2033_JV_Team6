@@ -9,6 +9,5 @@ import java.util.List;
 
 @Repository
 public interface SymptomDetailsRepository extends JpaRepository<SymptomDetails, Integer> {
-    // Query theo cấu trúc DB mới: SymptomDetails -> SymptomResult -> DiagnosisSession
     List<SymptomDetails> findBySymptomResult_DiagnosisSession_SessionId(Integer sessionId);
 }

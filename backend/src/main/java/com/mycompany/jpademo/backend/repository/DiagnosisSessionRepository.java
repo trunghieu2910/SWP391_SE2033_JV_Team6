@@ -1,6 +1,7 @@
 package com.mycompany.jpademo.backend.repository;
 
 import com.mycompany.jpademo.backend.entity.DiagnosisSession;
+import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSession, Integer> {
@@ -81,18 +83,57 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             @Param("status") String status,
             @Param("isShared") Boolean isShared);
 
-    // ===== QUERY TÌM KIẾM PHIÊN KHÁM CHO BÁC SĨ (từ folder 'codeSWP' + 'backend') =====
-    @Query("""
-    SELECT ds FROM DiagnosisSession ds
-    LEFT JOIN ds.patient p
-    LEFT JOIN p.user u
-    WHERE ds.user.userId = :doctorId
-      AND (:keyword IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.nationalID) LIKE LOWER(CONCAT('%', :keyword, '%')))
-    """)
+    @Query(value = """
+    SELECT ds.* FROM DiagnosisSession ds
+    LEFT JOIN Patient p ON ds.patientID = p.patientID
+    LEFT JOIN [Users] u ON p.userID = u.userID
+    WHERE ds.userID = :doctorId
+      AND (:keyword IS NULL OR 
+           u.fullName COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR 
+           u.nationalID LIKE CONCAT('%', :keyword, '%'))
+    """,
+            countQuery = """
+    SELECT COUNT(*) FROM DiagnosisSession ds
+    LEFT JOIN Patient p ON ds.patientID = p.patientID
+    LEFT JOIN [Users] u ON p.userID = u.userID
+    WHERE ds.userID = :doctorId
+      AND (:keyword IS NULL OR 
+           u.fullName COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR 
+           u.nationalID LIKE CONCAT('%', :keyword, '%'))
+    """,
+            nativeQuery = true)
     Page<DiagnosisSession> searchByDoctorWithKeyword(
             @Param("doctorId") Integer doctorId,
             @Param("keyword") String keyword,
             Pageable pageable);
 
     List<DiagnosisSession> findByPatientPatientId(Integer patientId);
+
+    @Query(value = """
+    SELECT 
+        FORMAT(createdAt, 'yyyy-MM') as month,
+        COUNT(*) as count
+    FROM DiagnosisSession 
+    WHERE createdAt >= DATEADD(month, -6, GETDATE())
+    GROUP BY FORMAT(createdAt, 'yyyy-MM')
+    ORDER BY month ASC
+    """, nativeQuery = true)
+    List<Object[]> getDiagnosisSessionsByMonth();
+
+    @Query("SELECT ds FROM DiagnosisSession ds " +
+            "LEFT JOIN FETCH ds.patient p " +
+            "LEFT JOIN FETCH p.user pu " +
+            "LEFT JOIN FETCH ds.user u " +
+            "WHERE ds.sessionId = :sessionId")
+    Optional<DiagnosisSession> findSessionWithDetails(@Param("sessionId") Integer sessionId);
+
+    @Query("SELECT ds FROM DiagnosisSession ds " +
+            "WHERE ds.user.userId = :doctorId " +
+            "AND (:keyword IS NULL OR LOWER(ds.patient.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:status IS NULL OR ds.status = :status)")
+    Page<DiagnosisSession> searchByDoctorWithKeywordAndStatus(
+            @Param("doctorId") Integer doctorId,
+            @Param("keyword") String keyword,
+            @Param("status") DiagnosisSessionStatus status,
+            Pageable pageable);
 }

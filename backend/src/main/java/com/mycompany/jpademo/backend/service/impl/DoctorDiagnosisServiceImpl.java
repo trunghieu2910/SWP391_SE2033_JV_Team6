@@ -1,5 +1,7 @@
 package com.mycompany.jpademo.backend.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.jpademo.backend.dto.request.*;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.*;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,15 +30,21 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     private final DiagnosisSessionRepository sessionRepository;
     private final SymptomRepository symptomRepository;
     private final SymptomResultRepository symptomResultRepository;
+    private final LabResultRepository labResultRepository;
+    private final MedicalImageRepository medicalImageRepository;
+
+    private static final String MESSAGE = "Diagnosis session not found with ID: ";
 
     @Override
     @Transactional(readOnly = true)
     public Page<DoctorSessionResponse> getSessionsByDoctor(Integer doctorId,
                                                            Pageable pageable,
-                                                           String keyword) {
+                                                           String keyword,
+                                                           DiagnosisSessionStatus status) {
         String normalizedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
 
-        Page<DiagnosisSession> sessionPage = sessionRepository.searchByDoctorWithKeyword(doctorId, normalizedKeyword, pageable);
+        Page<DiagnosisSession> sessionPage = sessionRepository.searchByDoctorWithKeywordAndStatus(
+                doctorId, normalizedKeyword, status, pageable);
 
         return sessionPage.map(session -> DoctorSessionResponse.builder()
                 .sessionId(session.getSessionId())
@@ -52,13 +61,22 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     public void updateSessionStatus(Integer doctorId, UpdateSessionStatusRequest request) {
         Integer sessionId = request.getSessionId();
         DiagnosisSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Diagnosis session not found with ID: " + sessionId));
+                .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
 
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("You are not authorized to update this session.");
         }
-
-        session.setStatus(request.getStatus());
+        String status = String.valueOf(request.getStatus());
+        if (status == null || status.isBlank()) {
+            throw new BadRequestException("Status must not be null or blank.");
+        }
+        DiagnosisSessionStatus newStatus;
+        try {
+            newStatus = DiagnosisSessionStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid status value: " + request.getStatus() + ". Must be PENDING, PROCESSING, COMPLETED, or FAILED.");
+        }
+        session.setStatus(newStatus);
         sessionRepository.save(session);
     }
 
@@ -67,12 +85,14 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     public void updateSessionShare(Integer doctorId, UpdateSessionShareRequest request) {
         Integer sessionId = request.getSessionId();
         DiagnosisSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Diagnosis session not found with ID: " + sessionId));
+                .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
 
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("You are not authorized to update this session.");
         }
-
+        if (!DiagnosisSessionStatus.COMPLETED.equals(session.getStatus())) {
+            throw new BadRequestException("Cannot publish session that is not completed");
+        }
         session.setIsShared(request.getIsShared());
         sessionRepository.save(session);
     }
@@ -88,7 +108,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                                 "No clinical symptoms recorded for session ID: "
                                         + sessionId));
         String menopauseStatus = symptomResult.getMenopauseStatus() != null
-                ? symptomResult.getMenopauseStatus().toString()
+                ? symptomResult.getMenopauseStatus()
                 : null;
         String symptomDuration = symptomResult.getSymptomDuration();
         Boolean symptomProgressing = symptomResult.getSymptomProgressing();
@@ -107,58 +127,185 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     @Override
     @Transactional
-    public void updateSessionSymptoms(Integer doctorId, UpdateSymptomsRequest request) {
-        Integer sessionId = request.getSessionId();
+    public void updateClinicalSymptoms(Integer doctorId, Integer sessionId, UpdateClinicalSymptomsRequest request) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Diagnosis session not found with ID: "
-                                        + sessionId));
+                .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
         if (!session.getUser().getUserId().equals(doctorId)) {
-            throw new UnauthorizedActionException(
-                    "You are not authorized to update this session.");
+            throw new UnauthorizedActionException("You are not authorized to update this session.");
         }
-        if (request.getSymptomIds() == null
-                || request.getSymptomIds().isEmpty()) {
-            throw new BadRequestException(
-                    "At least one symptom is required.");
-        }
+
+        if (request.getHeight() != null) session.setHeight(request.getHeight());
+        if (request.getWeight() != null) session.setWeight(request.getWeight());
+        sessionRepository.save(session);
+
         SymptomResult symptomResult = symptomResultRepository
                 .findByDiagnosisSessionSessionId(sessionId)
                 .orElseGet(() -> {
                     SymptomResult result = new SymptomResult();
                     result.setDiagnosisSession(session);
                     result.setStatus(SymptomResultStatus.COMPLETED);
+                    result.setCreatedAt(LocalDateTime.now());
                     result.setSymptomDetails(new ArrayList<>());
                     return result;
                 });
-        if (request.getMenopauseStatus() != null) {
-            symptomResult.setMenopauseStatus(request.getMenopauseStatus());
-        } else if (symptomResult.getMenopauseStatus() == null) {
-            symptomResult.setMenopauseStatus("");
+        symptomResult.setMenopauseStatus(request.getMenopauseStatus());
+        symptomResult.setSymptomDuration(request.getSymptomDuration());
+        symptomResult.setSymptomProgressing(request.getSymptomProgressing());
+        List<Integer> allSymptomIds = new ArrayList<>();
+
+        if (request.getAbnormalBleedingIds() != null) allSymptomIds.addAll(request.getAbnormalBleedingIds());
+        if (request.getAbnormalDischargeIds() != null) allSymptomIds.addAll(request.getAbnormalDischargeIds());
+        if (request.getPainIds() != null) allSymptomIds.addAll(request.getPainIds());
+        if (request.getUrinarySymptomsIds() != null) allSymptomIds.addAll(request.getUrinarySymptomsIds());
+        if (request.getDigestiveSymptomsIds() != null) allSymptomIds.addAll(request.getDigestiveSymptomsIds());
+        if (request.getSystemicSymptoms() != null) {
+            if (Boolean.TRUE.equals(request.getSystemicSymptoms().get("weightLoss"))) allSymptomIds.add(14);
+            if (Boolean.TRUE.equals(request.getSystemicSymptoms().get("fatigue"))) allSymptomIds.add(15);
+            if (Boolean.TRUE.equals(request.getSystemicSymptoms().get("anorexia"))) allSymptomIds.add(16);
         }
-        if (request.getSymptomDuration() != null) {
-            symptomResult.setSymptomDuration(request.getSymptomDuration());
-        } else if (symptomResult.getSymptomDuration() == null) {
-            symptomResult.setSymptomDuration("");
+
+        if (request.getRiskFactors() != null) {
+            if (Boolean.TRUE.equals(request.getRiskFactors().get("familyHistory"))) allSymptomIds.add(25);
+            if (Boolean.TRUE.equals(request.getRiskFactors().get("obesity"))) allSymptomIds.add(26);
+            if (Boolean.TRUE.equals(request.getRiskFactors().get("diabetes"))) allSymptomIds.add(27);
+            if (Boolean.TRUE.equals(request.getRiskFactors().get("hypertension"))) allSymptomIds.add(28);
+            if (Boolean.TRUE.equals(request.getRiskFactors().get("pcos"))) allSymptomIds.add(29);
+            if (Boolean.TRUE.equals(request.getRiskFactors().get("estrogenTherapy"))) allSymptomIds.add(30);
         }
-        if (request.getSymptomProgressing() != null) {
-            symptomResult.setSymptomProgressing(request.getSymptomProgressing());
-        } else if (symptomResult.getSymptomProgressing() == null) {
-            symptomResult.setSymptomProgressing(false);
+
+        if (symptomResult.getSymptomDetails() != null) {
+            symptomResult.getSymptomDetails().clear();
+        } else {
+            symptomResult.setSymptomDetails(new ArrayList<>());
         }
-        List<Symptom> symptoms = symptomRepository.findAllById(request.getSymptomIds());
-        if (symptoms.size() != request.getSymptomIds().size()) {
-            throw new ResourceNotFoundException(
-                    "One or more symptoms not found.");
-        }
-        symptomResult.getSymptomDetails().clear();
-        for (Symptom symptom : symptoms) {
+
+        for (Integer symptomId : allSymptomIds) {
+            Symptom symptom = symptomRepository.findById(symptomId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Symptom not found: " + symptomId));
+
             SymptomDetails detail = new SymptomDetails();
             detail.setSymptomResult(symptomResult);
             detail.setSymptom(symptom);
             symptomResult.getSymptomDetails().add(detail);
         }
         symptomResultRepository.save(symptomResult);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DoctorSessionDetailResponse getSessionDetail(Integer sessionId, Integer doctorId) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found with id: " + sessionId));
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("You don't have permission to view this session");
+        }
+        Patient patient = session.getPatient();
+        User patientUser = patient.getUser();
+
+        SymptomResult symptomResult = symptomResultRepository
+                .findBySessionIdWithDetails(sessionId)
+                .orElse(null);
+        List<LabResult> labResults = labResultRepository.findByDiagnosisSessionSessionId(sessionId);
+        List<MedicalImage> medicalImages = medicalImageRepository.findByDiagnosisSession_SessionId(sessionId);
+        return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages);
+    }
+
+    private DoctorSessionDetailResponse mapToDoctorSessionDetailResponse(
+            DiagnosisSession session,
+            Patient patient,
+            User user,
+            SymptomResult symptomResult,
+            List<LabResult> labResults,
+            List<MedicalImage> medicalImages
+    ) {
+        SymptomResultResponse symptomResultResponse = null;
+        if (symptomResult != null) {
+            List<SymptomDetailResponse> symptomDetails = symptomResult.getSymptomDetails() != null ?
+                    symptomResult.getSymptomDetails().stream()
+                    .map(sd -> SymptomDetailResponse.builder()
+                               .symptomDetailId(sd.getSymptomDetailsId())
+                               .symptomId(sd.getSymptom().getSymptomId())
+                               .symptomName(sd.getSymptom().getSymptomName())
+                               .build())
+                    .collect(Collectors.toList()) : null;
+
+            symptomResultResponse = SymptomResultResponse.builder()
+                    .symptomResultId(symptomResult.getSymptomResultId())
+                    .sessionId(session.getSessionId())
+                    .status(symptomResult.getStatus())
+                    .createdAt(symptomResult.getCreatedAt())
+                    .menopauseStatus(symptomResult.getMenopauseStatus())
+                    .symptomDuration(symptomResult.getSymptomDuration())
+                    .symptomProgressing(symptomResult.getSymptomProgressing())
+                    .symptomDetails(symptomDetails)
+                    .build();
+        }
+
+        List<LabResultResponse> labResultResponses = labResults.stream()
+                .map(this::mapToLabResultResponse)
+                .collect(Collectors.toList());
+
+        List<MedicalImageResponse> medicalImageResponses = medicalImages.stream()
+                .map(this::mapToMedicalImageResponse)
+                .collect(Collectors.toList());
+
+        return DoctorSessionDetailResponse.builder()
+                .sessionId(session.getSessionId())
+                .status(session.getStatus().name())
+                .isShared(session.getIsShared())
+                .createdAt(session.getCreatedAt())
+                .weight(session.getWeight())
+                .height(session.getHeight())
+                .doctorId(session.getUser().getUserId())
+                .doctorName(session.getUser().getFullName())
+                .patientId(patient.getPatientId())
+                .patientName(user.getFullName())
+                .patientGender(patient.getGender())
+                .patientDob(patient.getDob() != null ? patient.getDob().atStartOfDay() : null)
+                .patientAddress(patient.getAddress())
+                .symptomResult(symptomResultResponse)
+                .labResults(labResultResponses)
+                .medicalImages(medicalImageResponses)
+                .build();
+    }
+
+    private MedicalImageResponse mapToMedicalImageResponse(MedicalImage medicalImage) {
+        List<MedicalImageDetailResponse> details = medicalImage.getMedicalImageDetailsList().stream()
+                .map(detail -> MedicalImageDetailResponse.builder()
+                        .imageId(detail.getImageId())
+                        .imageUrl(detail.getImageUrl())
+                        .uploadedAt(detail.getUploadedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        return MedicalImageResponse.builder()
+                .medicalImageId(medicalImage.getMedicalImageId())
+                .sessionId(medicalImage.getDiagnosisSession().getSessionId())
+                .imageType(medicalImage.getImageType())
+                .status(medicalImage.getStatus())
+                .createdAt(medicalImage.getCreatedAt())
+                .images(details)
+                .build();
+    }
+
+    private LabResultResponse mapToLabResultResponse(LabResult labResult) {
+        List<LabResultResponse.ParameterValueResponse> parameters = labResult.getLabResultParameters().stream()
+                .map(lrp -> LabResultResponse.ParameterValueResponse.builder()
+                        .labResultParameterId(lrp.getLabResultParameterId())
+                        .parameterId(lrp.getParameter().getParameterId())
+                        .parameterName(lrp.getParameter().getParameterName())
+                        .unit(lrp.getParameter().getUnit())
+                        .value(lrp.getValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        return LabResultResponse.builder()
+                .labResultId(labResult.getLabResultId())
+                .sessionId(labResult.getDiagnosisSession().getSessionId())
+                .testType(labResult.getTestType())
+                .status(labResult.getStatus())
+                .createdAt(labResult.getCreatedAt())
+                .parameters(parameters)
+                .build();
     }
 }

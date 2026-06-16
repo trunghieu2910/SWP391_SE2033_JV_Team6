@@ -1,18 +1,17 @@
 package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
-import com.mycompany.jpademo.backend.dto.request.CreateDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
-import com.mycompany.jpademo.backend.dto.response.DashboardStatsResponse;
-import com.mycompany.jpademo.backend.dto.response.SystemLogResponse;
-import com.mycompany.jpademo.backend.dto.response.UserDetailResponse;
-import com.mycompany.jpademo.backend.dto.response.UserResponse;
+import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
+import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.Role;
 import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.exception.DuplicateResourceException;
+import com.mycompany.jpademo.backend.exception.InvalidOtpException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.exception.UserNotFoundException;
 import com.mycompany.jpademo.backend.repository.DiagnosisSessionRepository;
@@ -22,6 +21,9 @@ import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
 import com.mycompany.jpademo.backend.util.EmailUtil;
+import com.mycompany.jpademo.backend.util.OtpUtil;
+import com.mycompany.jpademo.backend.cache.PendingDoctorData;
+import com.mycompany.jpademo.backend.cache.PendingDoctorStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -83,7 +86,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @AdminActionLog(action = "UPDATE_USER_STATUS",
-                    targetType = "User")
+            targetType = "User")
     public ResponseEntity<String> updateUserStatus(UpdateUserStatusRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException(
@@ -98,18 +101,63 @@ public class AdminServiceImpl implements AdminService {
         user.setStatus(request.getStatus());
         if (request.getStatus() == UserStatus.BANNED) {
             user.setStatus(UserStatus.BANNED);
-        } else {
+        } else if (request.getStatus() == UserStatus.ACTIVE){
             user.setStatus(UserStatus.ACTIVE);
+        } else {
+            user.setStatus(UserStatus.INACTIVE);
         }
         userRepository.save(user);
-        sendStatusEmail(user, request.getStatus());
+        sendStatusEmail(user, request.getStatus(), request.getReason());
         return ResponseEntity.ok("User status updated successfully");
     }
 
     @Override
     @AdminActionLog(action = "CREATE_DOCTOR",
-                    targetType = "User")
-    public ResponseEntity<String> createDoctor(CreateDoctorRequest request) {
+            targetType = "User")
+    public ResponseEntity<String> verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin) {
+        String otp = request.getOtp();
+        PendingDoctorData pending = PendingDoctorStore.getPendingByAdminEmail(admin.getEmail());
+        if (pending == null) {
+            return ResponseEntity.badRequest().body("No pending doctor creation found or it has expired.");
+        }
+        boolean isOtpValid = OtpUtil.verifyOtp(admin.getEmail(), otp);
+        if (!isOtpValid) {
+            throw new InvalidOtpException();
+        }
+        OtpUtil.removeOtp(admin.getEmail());
+        PendingDoctorStore.removePending(pending.getRequestId());
+        if (userRepository.existsByEmail(pending.getEmail())) {
+            throw new DuplicateResourceException("Email is already in use: " + pending.getEmail());
+        }
+        if (userRepository.findByUserName(pending.getUserName()).isPresent()) {
+            throw new DuplicateResourceException("Username is already exists: " + pending.getUserName());
+        }
+        if (userRepository.existsByPhoneNumber(pending.getPhoneNumber())) {
+            throw new DuplicateResourceException("Phone number is already in use: " + pending.getPhoneNumber());
+        }
+        User user = new User();
+        user.setUserName(pending.getUserName());
+        user.setFullName(pending.getFullName());
+        user.setEmail(pending.getEmail());
+        user.setPhoneNumber(pending.getPhoneNumber());
+        user.setStatus(UserStatus.ACTIVE);
+        Role doctorRole = roleRepository.findByRoleName(RoleName.DOCTOR)
+                .orElseThrow(() -> new UserNotFoundException("Doctor role not found"));
+        user.setRole(doctorRole);
+
+        String rawPassword = UUID.randomUUID().toString().substring(0, 8);
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        userRepository.save(user);
+        emailService.sendEmail(
+                user.getEmail(),
+                "Tài khoản bác sĩ đã được tạo",
+                EmailUtil.buildCreateDoctorAccountTemplate(user.getFullName(), user.getUserName(), rawPassword)
+        );
+        return ResponseEntity.ok("Doctor created successfully");
+    }
+
+    @Override
+    public InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email is already in use: " + request.getEmail());
         }
@@ -119,26 +167,27 @@ public class AdminServiceImpl implements AdminService {
         if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new DuplicateResourceException("Phone number is already in use: " + request.getPhoneNumber());
         }
-        User user = new User();
-        user.setUserName(request.getUserName());
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setStatus(UserStatus.ACTIVE);
-        Role doctorRole = roleRepository.findByRoleName(RoleName.DOCTOR)
-                .orElseThrow(() -> new UserNotFoundException("Doctor role not found"));
-        user.setRole(doctorRole);
-        String rawPassword = UUID.randomUUID().toString().substring(0, 8);
-        user.setPasswordHash(passwordEncoder.encode(rawPassword));
-        userRepository.save(user);
+        String requestId = UUID.randomUUID().toString();
+
+        PendingDoctorData pending = PendingDoctorData.builder()
+                .requestId(requestId)
+                .userName(request.getUserName())
+                .fullName(request.getFullName())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .build();
+        PendingDoctorStore.savePending(admin.getEmail(), pending);
+        String otp = OtpUtil.generateOtp();
+        OtpUtil.saveOtp(admin.getEmail(), otp);
         emailService.sendEmail(
-                user.getEmail(),
-                "Tài khoản bác sĩ đã được tạo",
-                EmailUtil.buildCreateDoctorAccountTemplate(user.getFullName(),
-                        user.getUserName(),
-                        rawPassword)
+                admin.getEmail(),
+                "Mã xác thực OTP tạo tài khoản Bác sĩ",
+                EmailUtil.buildCreateDoctorOtpForAdmin(admin.getFullName(), otp)
         );
-        return ResponseEntity.ok("Doctor created successfully");
+        return InitiateCreateDoctorResponse.builder()
+                .requestId(requestId)
+                .message("OTP đã được gửi đến email " + admin.getEmail())
+                .build();
     }
 
     @Override
@@ -163,16 +212,42 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    @Override
+    public ChartStatsResponse getChartStats() {
+        List<Object[]> userStats = userRepository.getUserRegistrationsByMonth();
+        List<Object[]> sessionStats = diagnosisSessionRepository.getDiagnosisSessionsByMonth();
+
+        return ChartStatsResponse.builder()
+                .userRegistrations(mapToMonthlyStats(userStats))
+                .diagnosisSessions(mapToMonthlyStats(sessionStats))
+                .build();
+    }
+
+    private List<MonthlyStats> mapToMonthlyStats(List<Object[]> stats) {
+        if (stats == null || stats.isEmpty()) {
+            return List.of();
+        }
+        return stats.stream()
+                .map(row -> MonthlyStats.builder()
+                        .month(row[0].toString())
+                        .count(((Number) row[1]).longValue())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     private UserResponse mapToUserResponse(User user) {
         return UserResponse.builder()
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .nationalId(user.getNationalID())
                 .email(user.getEmail())
                 .roleName(user.getRole() != null ? user.getRole().getRoleName() : null)
                 .status(user.getStatus())
                 .lastChangePassTime(user.getLastChangePassTime())
                 .createdAt(user.getCreatedAt())
+                .lastLogoutTime(user.getLastLogoutTime())
                 .build();
     }
 
@@ -188,18 +263,23 @@ public class AdminServiceImpl implements AdminService {
     }
 
 
-    private void sendStatusEmail(User user, UserStatus userStatus) {
+    private void sendStatusEmail(User user, UserStatus userStatus, String reason) {
         switch (userStatus) {
             case BANNED:
                 emailService.sendEmail(
                         user.getEmail(),
                         "Tài khoản của bạn đã bị khoá",
-                        EmailUtil.buildBanAccountTemplate(user.getFullName()));
+                        EmailUtil.buildBanAccountTemplate(user.getFullName(), reason));
                 break;
             case ACTIVE: emailService.sendEmail(
                     user.getEmail(),
                     "Tài khoản của bạn đã được mở khoá",
-                    EmailUtil.buildUnbanAccountTemplate(user.getFullName()));
+                    EmailUtil.buildUnbanAccountTemplate(user.getFullName(), reason));
+                break;
+            case INACTIVE: emailService.sendEmail(
+                    user.getEmail(),
+                    "Tài khoản của bạn đã được mở khoá",
+                    EmailUtil.buildInactiveAccountTemplate(user.getFullName(), reason));
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported user status: " + userStatus);

@@ -31,12 +31,18 @@ public class AdminActionLogAspect {
             targetID = target.getTargetId();
         }
         String action = adminActionLog.action();
-        for (Object arg: args) {
+        String description = "";
+        for (Object arg : args) {
             if (arg instanceof UpdateUserStatusRequest req) {
                 if (req.getStatus() == UserStatus.BANNED) {
                     action = "BAN_USER";
+                    description = "ADMIN: Khóa người dùng. Lý do: " + req.getReason();
                 } else if (req.getStatus() == UserStatus.ACTIVE) {
                     action = "UNBAN_USER";
+                    description = "ADMIN: Mở khóa/Kích hoạt người dùng. Lý do: " + req.getReason();
+                } else if (req.getStatus() == UserStatus.INACTIVE) {
+                    action = "SET_INACTIVE";
+                    description = "ADMIN: Chuyển sang không hoạt động. Lý do: " + req.getReason();
                 }
             }
         }
@@ -51,7 +57,7 @@ public class AdminActionLogAspect {
                 .action(action)
                 .targetType(adminActionLog.targetType())
                 .targetId(targetID)
-                .description("Admin action: " + action + " on " + adminActionLog.targetType())
+                .description(description)
                 .build();
         systemLogRepository.save(systemLog);
     }

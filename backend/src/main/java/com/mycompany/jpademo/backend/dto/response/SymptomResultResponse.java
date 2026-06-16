@@ -18,4 +18,5 @@ public class SymptomResultResponse {
     private String menopauseStatus;
     private String symptomDuration;
     private Boolean symptomProgressing;
+    private List<SymptomDetailResponse> symptomDetails;
 }

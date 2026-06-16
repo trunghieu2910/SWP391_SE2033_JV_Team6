@@ -16,6 +16,10 @@ public class UserResponse {
 
     private String fullName;
 
+    private String phoneNumber;
+
+    private String nationalId;
+
     private String email;
 
     private UserStatus status;
@@ -25,4 +29,6 @@ public class UserResponse {
     private LocalDateTime lastChangePassTime;
 
     private LocalDateTime createdAt;
+
+    private LocalDateTime lastLogoutTime;
 }

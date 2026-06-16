@@ -30,6 +30,4 @@ public class SymptomDetails {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "symptomResultID", nullable = false)
     private SymptomResult symptomResult;
-
-    // THÊM 1 THUỘC TÍNH LÀ STATUS
 }
