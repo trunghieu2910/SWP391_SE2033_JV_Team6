@@ -37,6 +37,8 @@ public class AdminActionLogAspect {
                     action = "BAN_USER";
                 } else if (req.getStatus() == UserStatus.ACTIVE) {
                     action = "UNBAN_USER";
+                } else if (req.getStatus() == UserStatus.INACTIVE) {
+                    action = "SET_INACTIVE";
                 }
             }
         }
