@@ -204,7 +204,7 @@ public class EmailUtil {
                     <h1 style="color: #1565c0; letter-spacing: 6px; margin: 0;">%s</h1>
                 </div>
                 <p style="margin-top: 12px;">
-                    Mã OTP có hiệu lực trong <strong>10 phút</strong>. Không chia sẻ mã này với người khác.
+                    Mã OTP có hiệu lực trong <strong>2 phút</strong>. Không chia sẻ mã này với người khác.
                 </p>
                 <br>
                 <p>

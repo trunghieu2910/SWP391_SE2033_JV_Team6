@@ -70,6 +70,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (status == null || status.isBlank()) {
             throw new BadRequestException("Status must not be null or blank.");
         }
+        if (session.getIsShared() != null && session.getIsShared()) {
+            throw new BadRequestException("Session is shared. Cannot update session.");
+        }
         DiagnosisSessionStatus newStatus;
         try {
             newStatus = DiagnosisSessionStatus.valueOf(status.trim().toUpperCase());
@@ -132,6 +135,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("You are not authorized to update this session.");
+        }
+        if (session.getIsShared() != null && session.getIsShared()) {
+            throw new BadRequestException("Session is shared. Cannot update session.");
         }
 
         if (request.getHeight() != null) session.setHeight(request.getHeight());
