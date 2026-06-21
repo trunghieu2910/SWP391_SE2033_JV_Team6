@@ -4,39 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="Update: TS-60 Cập nhật logic khi cập nhật trạng thái của ca chẩn đoán">
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/doctor/DoctorProfile.jsx" afterDir="false" />
+    <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="Update: TS-60 Thêm thông tin khi đăng kí tài khoản bác sĩ">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/cache/PendingDoctorData.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/cache/PendingDoctorData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/config/CorsConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/InitiateCreateDoctorRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/request/InitiateCreateDoctorRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/UserResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/UserResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/entity/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/cache/PendingDoctorData$PendingDoctorDataBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/cache/PendingDoctorData$PendingDoctorDataBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/cache/PendingDoctorData.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/cache/PendingDoctorData.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/config/CorsConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/config/CorsConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/controller/AdminController.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/controller/AdminController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/request/InitiateCreateDoctorRequest$InitiateCreateDoctorRequestBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/request/InitiateCreateDoctorRequest$InitiateCreateDoctorRequestBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/request/InitiateCreateDoctorRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/request/InitiateCreateDoctorRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserResponse$UserResponseBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserResponse$UserResponseBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/dto/response/UserResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/User$UserBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/User$UserBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/entity/User.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/common/Pagination.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/common/Pagination.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/doctor/session-detail/ClinicalSymptomsForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/doctor/session-detail/ClinicalSymptomsForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/CreateDoctor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/CreateDoctor.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/UserDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/UserDetail.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/UserManagement.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/UserManagement.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/routes/AppRoutes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routes/AppRoutes.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/services/adminService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/adminService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/services/doctorService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/doctorService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -408,6 +377,7 @@
       <workItem from="1781943752450" duration="760000" />
       <workItem from="1781967551650" duration="16000" />
       <workItem from="1782027317726" duration="4123000" />
+      <workItem from="1782048341198" duration="343000" />
     </task>
     <task id="LOCAL-00001" summary="Branches Giang">
       <option name="closed" value="true" />
@@ -441,7 +411,15 @@
       <option name="project" value="LOCAL" />
       <updated>1781667278805</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Update: TS-60 Thêm thông tin khi đăng kí tài khoản bác sĩ">
+      <option name="closed" value="true" />
+      <created>1782048441626</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1782048441626</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -463,7 +441,8 @@
     <MESSAGE value="Xây dựng chức năng login (Entity, DTO, Repository, Exception)" />
     <MESSAGE value="Hoàn thiện backend chức năng login. Đăng nhập bằng Username or Email or phoneNumber và mật khẩu. Mật khẩu mã hóa theo BCrypt. Đã tạo token sau khi đăng nhập. Đã thực hiện Unit Testing." />
     <MESSAGE value="Update: TS-60 Cập nhật logic khi cập nhật trạng thái của ca chẩn đoán" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update: TS-60 Cập nhật logic khi cập nhật trạng thái của ca chẩn đoán" />
+    <MESSAGE value="Update: TS-60 Thêm thông tin khi đăng kí tài khoản bác sĩ" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update: TS-60 Thêm thông tin khi đăng kí tài khoản bác sĩ" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
