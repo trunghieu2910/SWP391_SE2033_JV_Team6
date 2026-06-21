@@ -31,6 +31,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -135,12 +137,17 @@ public class AdminServiceImpl implements AdminService {
         if (userRepository.existsByPhoneNumber(pending.getPhoneNumber())) {
             throw new DuplicateResourceException("Phone number is already in use: " + pending.getPhoneNumber());
         }
+        if (pending.getNationalId() != null && userRepository.existsByNationalID(pending.getNationalId())) {
+            throw new DuplicateResourceException("National ID is already in use: " + pending.getNationalId());
+        }
         User user = new User();
         user.setUserName(pending.getUserName());
         user.setFullName(pending.getFullName());
         user.setEmail(pending.getEmail());
         user.setPhoneNumber(pending.getPhoneNumber());
         user.setStatus(UserStatus.ACTIVE);
+        user.setNationalID(pending.getNationalId());
+        user.setCertificateUrl(pending.getCertificateUrl());
         Role doctorRole = roleRepository.findByRoleName(RoleName.DOCTOR)
                 .orElseThrow(() -> new UserNotFoundException("Doctor role not found"));
         user.setRole(doctorRole);
@@ -167,14 +174,37 @@ public class AdminServiceImpl implements AdminService {
         if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new DuplicateResourceException("Phone number is already in use: " + request.getPhoneNumber());
         }
+        if (request.getNationalId() != null && userRepository.existsByNationalID(request.getNationalId())) {
+            throw new DuplicateResourceException("National ID is already in use: " + request.getNationalId());
+        }
         String requestId = UUID.randomUUID().toString();
+        String certificateUrl = null;
+        if (request.getCertificateFile() != null && !request.getCertificateFile().isEmpty()) {
+            try {
+                String userDir = System.getProperty("user.dir");
+                String uploadDir = userDir + File.separator + "uploads" + File.separator + "certificates" + File.separator;
 
+                File directory = new File(uploadDir);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                String fileName = System.currentTimeMillis() + "_" + request.getCertificateFile().getOriginalFilename();
+                String filePath = uploadDir + fileName;
+                request.getCertificateFile().transferTo(new File(filePath));
+                certificateUrl = "/uploads/certificates/" + fileName;
+            } catch (IOException e) {
+                throw new RuntimeException("Không thể lưu file bằng cấp: " + e.getMessage());
+            }
+        }
         PendingDoctorData pending = PendingDoctorData.builder()
                 .requestId(requestId)
                 .userName(request.getUserName())
                 .fullName(request.getFullName())
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
+                .nationalId(request.getNationalId())
+                .certificateUrl(certificateUrl)
                 .build();
         PendingDoctorStore.savePending(admin.getEmail(), pending);
         String otp = OtpUtil.generateOtp();
@@ -247,6 +277,7 @@ public class AdminServiceImpl implements AdminService {
                 .status(user.getStatus())
                 .lastChangePassTime(user.getLastChangePassTime())
                 .createdAt(user.getCreatedAt())
+                .certificateUrl(user.getCertificateUrl())
                 .lastLogoutTime(user.getLastLogoutTime())
                 .build();
     }

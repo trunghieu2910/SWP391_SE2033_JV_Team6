@@ -27,6 +27,12 @@ const doctorService = {
 
     // Lấy danh sách xét nghiệm theo session
     getLabResultsBySession: (sessionId) => api.get(`/lab-results/session/${sessionId}`),
+
+    // Lấy thông tin hồ sơ bác sĩ
+    getProfile: () => api.get('/profile'),
+
+    // Cập nhật thông tin hồ sơ bác sĩ
+    updateProfile: (data) => api.put('/profile', data),
 };
 
 export default doctorService;

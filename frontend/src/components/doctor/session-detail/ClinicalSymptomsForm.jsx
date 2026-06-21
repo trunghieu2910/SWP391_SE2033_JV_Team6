@@ -265,6 +265,18 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
     const handleSubmit = async () => {
         setLoading(true);
         try {
+            if (formData.height && parseFloat(formData.height) <= 0) {
+                toast.error('Chiều cao phải lớn hơn 0');
+                setLoading(false);
+                return;
+            }
+
+            if (formData.weight && parseFloat(formData.weight) <= 0) {
+                toast.error('Cân nặng phải lớn hơn 0');
+                setLoading(false);
+                return;
+            }
+
             const payload = {
                 height: formData.height && formData.height !== '' ? parseFloat(formData.height) : null,
                 weight: formData.weight && formData.weight !== '' ? parseFloat(formData.weight) : null,

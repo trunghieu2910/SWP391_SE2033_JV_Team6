@@ -3,7 +3,9 @@ package com.mycompany.jpademo.backend.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -24,4 +26,9 @@ public class InitiateCreateDoctorRequest {
     @NotBlank(message = "Phone number is required!")
     @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$", message = "Invalid phone number")
     private String phoneNumber;
+
+    @Size(min = 9, max = 12, message = "National ID is required")
+    private String nationalId;
+
+    private MultipartFile certificateFile;
 }

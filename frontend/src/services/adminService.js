@@ -10,8 +10,18 @@ const adminService = {
     getUserDetail: (userId) => api.get(`/admin/users/${userId}`),
     updateUserStatus: (data) => api.patch('/admin/users/status', data),
 
-    // Create Doctor
-    initiateCreateDoctor: (data) => api.post('/admin/doctors/initiate', data),
+    //Create Doctor
+    initiateCreateDoctor: (data) => {
+        if (data instanceof FormData) {
+            return api.post('/admin/doctors/initiate', data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+        }
+        return api.post('/admin/doctors/initiate', data);
+    },
+
     confirmCreateDoctor: (data) => api.post('/admin/doctors/confirm', data),
 
     // System Logs

@@ -94,7 +94,7 @@ const UserManagement = () => {
                                 <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Tên, email, số điện thoại..."
+                                    placeholder="Tên, email người dùng"
                                     value={tempKeyword}
                                     onChange={(e) => setTempKeyword(e.target.value)}
                                     onKeyDown={handleKeyDown}

@@ -68,7 +68,6 @@ const Dashboard = () => {
         }
     };
 
-    // Chuyển đổi định dạng tháng từ "2024-01" thành "Thg 1"
     const formatMonth = (monthStr) => {
         if (!monthStr) return '';
         const [year, month] = monthStr.split('-');
