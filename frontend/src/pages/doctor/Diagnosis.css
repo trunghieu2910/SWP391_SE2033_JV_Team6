@@ -1,0 +1,139 @@
+/* ── Session banner ─────────────────────────────────────────────── */
+.session-banner {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 16px 24px;
+  margin-bottom: 24px;
+}
+.session-banner.completed {
+  background: var(--warning-light);
+  border-left-color: var(--warning);
+}
+.session-banner-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.banner-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--neutral-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.banner-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+
+/* ── Khu vực "New Lab Test Request" ─────────────────────────────── */
+
+/* Thanh tiêu đề chứa tên section và nút + */
+.new-lab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Không có margin-bottom khi form đang đóng */
+}
+.new-lab-header h3 {
+  margin: 0;
+}
+
+/* Nút tròn + / × để toggle form */
+.btn-toggle-form {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, transform 0.2s;
+  flex-shrink: 0;
+}
+.btn-toggle-form:hover {
+  background: var(--primary);
+  color: #fff;
+}
+/* Khi form đang mở, xoay nhẹ để × trông tự nhiên hơn */
+.btn-toggle-form.open {
+  border-color: var(--neutral-400);
+  color: var(--neutral-600);
+}
+.btn-toggle-form.open:hover {
+  background: var(--neutral-100);
+  color: var(--neutral-900);
+}
+
+/* Phần nội dung form — xuất hiện khi formOpen === true */
+.new-lab-form {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--neutral-200);
+}
+
+/* ── Parameters ─────────────────────────────────────────────────── */
+.params-section { }
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ── Lab result cards ───────────────────────────────────────────── */
+.lab-results-list { display: flex; flex-direction: column; gap: 10px; }
+
+.lab-card {
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--white);
+  transition: box-shadow 0.15s;
+}
+.lab-card:hover { box-shadow: var(--shadow-md); }
+
+/* Header tĩnh (không phải button, không có cursor pointer) */
+.lab-card-header--static {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  /* cursor: default — không bấm được, không có hand cursor */
+  cursor: default;
+}
+
+.lab-card-icon    { font-size: 1.2rem; }
+.lab-card-type    { font-weight: 600; font-size: 0.95rem; color: var(--neutral-900); flex: 1; }
+.lab-card-date    { font-size: 0.85rem; }
+/* lab-card-chevron đã bị xoá khỏi JSX — không cần style */
+
+.lab-card-body {
+  border-top: 1px solid var(--neutral-100);
+}
+
+/* ── Error screens ──────────────────────────────────────────────── */
+.error-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 64px 24px;
+  gap: 8px;
+  max-width: 440px;
+  margin: 40px auto;
+}
+.error-screen-icon { font-size: 4rem; margin-bottom: 8px; }

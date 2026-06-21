@@ -1,0 +1,29 @@
+.patient-list-toolbar {
+  display: flex; align-items: center;
+  gap: 16px; flex-wrap: wrap;
+}
+
+.filter-tabs {
+  display: flex; gap: 4px;
+}
+
+.filter-tab {
+  height: 36px; padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--neutral-300);
+  background: var(--white);
+  font-size: 0.8125rem; font-weight: 600;
+  color: var(--neutral-500); cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-sans);
+}
+.filter-tab:hover  { border-color: var(--primary); color: var(--primary); }
+.filter-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+.share-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.8rem; font-weight: 500; padding: 3px 8px;
+  border-radius: 20px;
+}
+.share-pill.shared  { background: var(--teal-light);    color: var(--teal);    }
+.share-pill.private { background: var(--neutral-100);   color: var(--neutral-500); }

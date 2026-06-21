@@ -1,0 +1,81 @@
+.sessions-list {
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.session-card {
+  transition: box-shadow 0.15s;
+}
+.session-card:hover { box-shadow: var(--shadow-lg); }
+
+.session-card-top {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.session-card-id {
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--primary); font-family: var(--font-mono);
+}
+
+.session-card-info {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin-bottom: 4px;
+}
+
+.session-info-item {
+  display: flex; flex-direction: column; gap: 3px;
+}
+
+.session-info-label {
+  font-size: 0.75rem; font-weight: 600;
+  color: var(--neutral-500); text-transform: uppercase; letter-spacing: 0.4px;
+}
+
+.session-info-value {
+  font-size: 0.9rem; font-weight: 500; color: var(--neutral-900);
+}
+
+.session-card-footer {
+  display: flex; align-items: center;
+}
+
+.not-shared-msg {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.875rem; color: var(--neutral-500);
+}
+
+/* ── Lab result detail ── */
+.lab-results-detail {
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.lab-detail-card {}
+
+.lab-detail-header {
+  display: flex; align-items: flex-start; gap: 14px;
+}
+
+.lab-detail-icon { font-size: 1.75rem; flex-shrink: 0; margin-top: 2px; }
+
+.lab-detail-type {
+  font-size: 1rem; font-weight: 700; color: var(--neutral-900); margin-bottom: 3px;
+}
+
+.lab-detail-date { font-size: 0.8125rem; }
+
+.lab-detail-header .badge { margin-left: auto; flex-shrink: 0; }
+
+/* ── Access Denied ── */
+.access-denied {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 8px; padding: 56px 24px;
+}
+
+.access-denied-icon { font-size: 4rem; margin-bottom: 8px; }
+.access-denied h4   { font-size: 1.25rem; color: var(--neutral-900); }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .session-card-info { grid-template-columns: 1fr 1fr; }
+}

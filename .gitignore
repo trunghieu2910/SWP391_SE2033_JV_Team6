@@ -1,0 +1,27 @@
+# Firebase service account
+firebase-service-account.json
+
+# Environment variables
+.env.local
+.env
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+target/
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+
+# Firebase
+firebase-service-account.json
