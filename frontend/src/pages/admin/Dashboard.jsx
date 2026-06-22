@@ -24,6 +24,7 @@ import adminService from '../../services/adminService';
 import Topbar from '../../components/admin/layout/Topbar';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StatsCard from '../../components/admin/dashboard/StatsCard';
+import GlobalSearch from '../../components/admin/common/GlobalSearch';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -101,6 +102,10 @@ const Dashboard = () => {
         <div>
             <Topbar title="Tổng quan" />
             <div className="p-6">
+                {/*Global Search*/}
+                <div className="mb-6 flex justify-end">
+                    <GlobalSearch />
+                </div>
                 {/* Thống kê */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                     <StatsCard

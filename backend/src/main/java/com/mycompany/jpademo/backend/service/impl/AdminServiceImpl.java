@@ -26,6 +26,7 @@ import com.mycompany.jpademo.backend.cache.PendingDoctorData;
 import com.mycompany.jpademo.backend.cache.PendingDoctorStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -250,6 +251,48 @@ public class AdminServiceImpl implements AdminService {
         return ChartStatsResponse.builder()
                 .userRegistrations(mapToMonthlyStats(userStats))
                 .diagnosisSessions(mapToMonthlyStats(sessionStats))
+                .build();
+    }
+
+    @Override
+    public SearchResponse searchGlobal(String keyword) {
+        Pageable limit = PageRequest.of(0, 5);
+
+        List<User> users = userRepository.searchUsers(keyword, limit);
+        List<SystemLog> logs = systemLogRepository.searchLogs(keyword, limit);
+
+        List<UserSearchDTO> userDTOs = users.stream()
+                .map(this::mapToUserSearchDTO)
+                .collect(Collectors.toList());
+
+        List<LogSearchDTO> logDTOs = logs.stream()
+                .map(this::mapToLogSearchDTO)
+                .collect(Collectors.toList());
+
+        return SearchResponse.builder()
+                .users(userDTOs)
+                .logs(logDTOs)
+                .build();
+    }
+
+    private UserSearchDTO mapToUserSearchDTO(User user) {
+        return UserSearchDTO.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .roleName(user.getRole().getRoleName().name())
+                .status(user.getStatus().name())
+                .build();
+    }
+
+    private LogSearchDTO mapToLogSearchDTO(SystemLog log) {
+        return LogSearchDTO.builder()
+                .logId(log.getLogId())
+                .action(log.getAction())
+                .description(log.getDescription())
+                .username(log.getUser().getUserName())
+                .performedAt(log.getPerformedAt())
                 .build();
     }
 

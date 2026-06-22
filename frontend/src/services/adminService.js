@@ -4,6 +4,8 @@ const adminService = {
     // Dashboard
     getDashboardStats: () => api.get('/admin/dashboard'),
     getChartStats: () => api.get('/admin/dashboard/charts'),
+    // Search
+    searchGlobal: (keyword) => api.get('/admin/search', { params: { keyword } }),
 
     // User Management
     getUsers: (params) => api.get('/admin/users', { params }),

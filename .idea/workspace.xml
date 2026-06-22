@@ -5,7 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="Update: TS-60 Thêm thông tin khi đăng kí tài khoản bác sĩ">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/LogSearchDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/SearchResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/UserSearchDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/admin/common/GlobalSearch.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/hooks/useDebounce.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/controller/AdminController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/SystemLogRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/SystemLogRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/AdminService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/AdminService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/controller/AdminController.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/controller/AdminController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/SystemLogRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/SystemLogRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/UserRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/UserRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/AdminService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/AdminService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/layout/Topbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/layout/Topbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/adminService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/adminService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,8 +126,9 @@
       <list>
         <option value="Exception" />
         <option value="Interface" />
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
+        <option value="JavaScript File" />
         <option value="JSX File" />
       </list>
     </option>
@@ -240,7 +260,7 @@
     &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/TS-60-update-and-view-clinical-and-update-diagnose-session&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/TS-71-admin-searchdashboard-createdoctor&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;D:/SU26/SWP391/Project/frontend&quot;,
@@ -378,6 +398,7 @@
       <workItem from="1781967551650" duration="16000" />
       <workItem from="1782027317726" duration="4123000" />
       <workItem from="1782048341198" duration="343000" />
+      <workItem from="1782091665331" duration="1583000" />
     </task>
     <task id="LOCAL-00001" summary="Branches Giang">
       <option name="closed" value="true" />

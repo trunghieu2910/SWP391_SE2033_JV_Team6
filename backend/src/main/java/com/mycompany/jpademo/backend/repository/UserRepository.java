@@ -71,4 +71,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     ORDER BY month ASC
     """, nativeQuery = true)
     List<Object[]> getUserRegistrationsByMonth();
+
+    @Query("SELECT u FROM User u " +
+            "WHERE LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(u.phoneNumber) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<User> searchUsers(@Param("keyword") String keyword, Pageable pageable);
 }

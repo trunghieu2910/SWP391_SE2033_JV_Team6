@@ -75,5 +75,11 @@ public class AdminController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return adminService.verifyAndCreateDoctor(request, userDetails.getUser());
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<SearchResponse> searchGlobal(
+            @RequestParam String keyword) {
+        return ResponseEntity.ok(adminService.searchGlobal(keyword));
+    }
 }
 
