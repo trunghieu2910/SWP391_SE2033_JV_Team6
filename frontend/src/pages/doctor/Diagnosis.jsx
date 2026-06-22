@@ -21,29 +21,57 @@ const TEST_TYPES = [
 // Kho dữ liệu mô phỏng kết quả trả về từ máy LIS
 const LIS_MOCK_DATA = {
     'Xét nghiệm tế bào học cổ tử cung': [
-        { testName: 'Kết quả tế bào học', resultValue: 'HSIL', unit: null },
-        { testName: 'Mức độ viêm', resultValue: 'Trung bình', unit: null }
+        { testName: 'Chất lượng mẫu bệnh phẩm', resultValue: 'Đạt yêu cầu (Có tế bào vùng chuyển tiếp)', unit: null },
+        { testName: 'Tác nhân vi sinh', resultValue: 'Không phát hiện', unit: null },
+        { testName: 'Đánh giá tế bào tuyến', resultValue: 'Bình thường', unit: null },
+        { testName: 'Đánh giá tế bào vảy', resultValue: 'HSIL (Tổn thương mức độ cao)', unit: null },
+        { testName: 'Kết luận (The Bethesda System)', resultValue: 'Bất thường tế bào biểu mô vảy (HSIL)', unit: null }
     ],
     'Xét nghiệm DNA của virus HPV': [
-        { testName: 'HPV DNA Test', resultValue: 'Positive', unit: null }
+        { testName: 'Kiểm chứng nội bộ (IC)', resultValue: 'Hợp lệ', unit: null },
+        { testName: 'Phát hiện HPV nguy cơ cao', resultValue: 'Positive (Dương tính)', unit: null },
+        { testName: 'HPV Tuýp 16', resultValue: 'Positive', unit: null },
+        { testName: 'HPV Tuýp 18', resultValue: 'Negative', unit: null },
+        { testName: '12 tuýp nguy cơ cao khác', resultValue: 'Negative', unit: null },
+        { testName: 'Ngưỡng chu kỳ (Ct Value) - Tuýp 16', resultValue: '22.4', unit: 'Chu kỳ' }
     ],
     'Định tuýp HPV nguy cơ cao': [
+        { testName: 'Kiểm soát chất lượng (Internal Control)', resultValue: 'Đạt', unit: null },
         { testName: 'Tuýp 16', resultValue: 'Positive', unit: null },
         { testName: 'Tuýp 18', resultValue: 'Negative', unit: null },
-        { testName: '12 Tuýp nguy cơ cao khác', resultValue: 'Negative', unit: null }
+        { testName: 'Tuýp 31', resultValue: 'Positive', unit: null },
+        { testName: 'Tuýp 33', resultValue: 'Negative', unit: null },
+        { testName: 'Tuýp 45', resultValue: 'Negative', unit: null },
+        { testName: 'Tuýp 52', resultValue: 'Positive', unit: null },
+        { testName: 'Tuýp 58', resultValue: 'Negative', unit: null },
+        { testName: 'Các tuýp nguy cơ cao khác (35, 39, 51, 56, 59, 66, 68)', resultValue: 'Negative', unit: null },
+        { testName: 'Tuýp 6', resultValue: 'Negative', unit: null },
+        { testName: 'Tuýp 11', resultValue: 'Negative', unit: null },
+        { testName: 'Kết luận Định tuýp', resultValue: 'Nhiễm đa tuýp nguy cơ cao (16, 31, 52)', unit: null }
     ],
     'Sinh thiết': [
-        { testName: 'Kết quả giải phẫu bệnh', resultValue: 'CIN 2', unit: null },
-        { testName: 'Mô tả', resultValue: 'Tổn thương tiền ung thư mức độ trung bình', unit: null }
+        { testName: 'Mô tả đại thể', resultValue: 'Nhận 02 mảnh mô màu xám nhạt, kích thước lớn nhất 0.3x0.2cm, bấm từ vị trí 12h và 6h trên cổ tử cung.', unit: null },
+        { testName: 'Mô tả vi thể', resultValue: 'Biểu mô vảy quá sản, tế bào mất phân cực, nhân quái, nhân chia xuất hiện ở 2/3 bề dày lớp biểu mô. Màng đáy vẫn còn nguyên vẹn chưa bị phá vỡ.', unit: null },
+        { testName: 'Kết luận Giải phẫu bệnh', resultValue: 'Tân sản nội biểu mô cổ tử cung độ 2 (CIN 2)', unit: null }
     ],
     'Dấu ấn ung thư SCC': [
-        { testName: 'Chỉ số SCC Antigen', resultValue: '2.8', unit: 'ng/mL' }
+        { testName: 'Phương pháp phân tích', resultValue: 'Miễn dịch hóa phát quang (CMIA)', unit: null },
+        { testName: 'Mẫu bệnh phẩm', resultValue: 'Huyết thanh (Serum)', unit: null },
+        { testName: 'Nồng độ SCC Antigen', resultValue: '12.40', unit: 'ng/mL' },
+        { testName: 'Khoảng tham chiếu (Trị số BT)', resultValue: '< 1.50', unit: 'ng/mL' },
+        { testName: 'Đánh giá kết quả', resultValue: 'Tăng cao', unit: null }
     ],
     'Xét nghiệm máu cơ bản': [
-        { testName: 'Hồng cầu (RBC)', resultValue: '4.2', unit: 'T/L' },
-        { testName: 'Bạch cầu (WBC)', resultValue: '6.5', unit: 'G/L' },
-        { testName: 'Tiểu cầu (PLT)', resultValue: '250', unit: 'G/L' }
-    ]
+        { testName: 'Hồng cầu (RBC)', resultValue: '2.8 ↓', unit: 'T/L' },
+        { testName: 'Huyết sắc tố (HGB)', resultValue: '85 ↓', unit: 'g/L' },
+        { testName: 'Bạch cầu (WBC)', resultValue: '1.5 ↓', unit: 'G/L' },
+        { testName: 'Tiểu cầu (PLT)', resultValue: '90 ↓', unit: 'G/L' },
+        { testName: 'Ure máu', resultValue: '5.0', unit: 'mmol/L' },
+        { testName: 'Creatinin máu', resultValue: '80', unit: 'µmol/L' },
+        { testName: 'AST (Men gan)', resultValue: '85 ↑', unit: 'U/L' },
+        { testName: 'ALT (Men gan)', resultValue: '90 ↑', unit: 'U/L' },
+        { testName: 'Kết luận', resultValue: 'Thiếu máu, Giảm bạch cầu hạt, Tăng men gan', unit: null }
+    ],
 };
 
 function LabResultCard({ result, onSimulate, isSimulating }) {
@@ -205,6 +233,8 @@ export default function Diagnosis() {
             labResultId: labResultId,
             testResults: mockResults
         };
+
+        console.log("Dữ liệu chuẩn bị gửi lên Server:", payload);
 
         try {
             const res = await lisIntegrationService.sendResults(payload);
