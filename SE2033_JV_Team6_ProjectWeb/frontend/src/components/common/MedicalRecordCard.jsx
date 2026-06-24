@@ -24,6 +24,7 @@ export default function MedicalRecordCard({ record }) {
     isShared,
     nationalID,
     gender,
+    doctorFullName,
 
   } = record
 
@@ -60,10 +61,15 @@ export default function MedicalRecordCard({ record }) {
           <span className="info-lbl">Mã phiên khám</span>
           <span className="info-val accent">#S{String(id).padStart(4, '0')}</span>
         </div>
+        <div className="info-item" >
+          <span className="info-lbl">Bác sĩ phụ trách:</span>
+          <span className="info-val">{doctorFullName ?? '—'}</span>
+        </div>
         <div className="info-item">
           <span className="info-lbl">Chẩn đoán</span>
           <span className="info-val">{diagnosis || 'Chưa có chẩn đoán'}</span>
         </div>
+
         <div className="info-item">
           <span className="info-lbl">Chia sẻ hồ sơ</span>
           <span className={`shared-pill ${isShared ? 'yes' : 'no'}`} style={{ display: 'inline-flex' }}>
