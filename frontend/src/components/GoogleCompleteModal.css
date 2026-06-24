@@ -1,0 +1,20 @@
+.gcm-modal { max-width: 460px; width: 95vw; }
+
+.gcm-header {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 6px;
+}
+.gcm-google-icon { width: 36px; height: 36px; flex-shrink: 0; margin-top: 2px; }
+.gcm-title { font-size: 1.125rem; font-weight: 700; color: var(--neutral-900); margin-bottom: 3px; }
+.gcm-subtitle { font-size: 0.875rem; color: var(--neutral-500); margin: 0; }
+
+.gcm-readonly-field {
+  background: var(--neutral-100);
+  border: 1.5px solid var(--neutral-300);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.9rem; color: var(--neutral-500);
+  cursor: not-allowed;
+}
+
+.gcm-form { display: flex; flex-direction: column; gap: 14px; }
+.gcm-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }

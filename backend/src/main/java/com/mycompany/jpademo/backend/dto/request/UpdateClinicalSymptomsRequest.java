@@ -1,5 +1,7 @@
 package com.mycompany.jpademo.backend.dto.request;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +14,12 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateClinicalSymptomsRequest {
+    @NotNull(message = "Chưa nhập đủ thông tin")
+    @Positive(message = "Chiều cao phải là số dương")
     private Double height;
+
+    @NotNull(message = "Chưa nhập đủ thông tin")
+    @Positive(message = "Cân nặng phải là số dương")
     private Double weight;
     private String menopauseStatus;
     private List<Integer> abnormalBleedingIds;

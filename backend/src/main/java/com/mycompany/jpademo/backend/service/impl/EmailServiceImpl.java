@@ -36,7 +36,6 @@ public class EmailServiceImpl implements EmailService {
         buildAndSendEmail(to, subject, body);
     }
 
-    @Async
     @Override
     public void sendOtpEmail(String to, String fullName, String otp) {
         String subject = "Mã OTP đặt lại mật khẩu";
@@ -44,7 +43,6 @@ public class EmailServiceImpl implements EmailService {
         buildAndSendEmail(to, subject, body);
     }
 
-    @Async
     @Override
     public void sendPasswordEmail(String toEmail, String fullName, String rawPassword) {
         String subject = "[MedicalDiagnosis] Thông tin tài khoản của bạn";
