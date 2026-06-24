@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import ClinicalSymptomsForm from '../../components/doctor/session-detail/ClinicalSymptomsForm';
 import { 

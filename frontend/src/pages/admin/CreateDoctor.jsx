@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaPhone, FaKey, FaCheck, FaArrowLeft, FaClock } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaKey, FaCheck, FaArrowLeft, FaClock, FaIdCard, FaUpload, FaFileImage } from 'react-icons/fa';
 import adminService from '../../services/adminService';
 import Topbar from '../../components/admin/layout/Topbar';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -15,12 +15,15 @@ const CreateDoctor = () => {
     const [canResend, setCanResend] = useState(false);
     const timerRef = useRef(null);
     const otpInputsRef = useRef([]);
+    const [certificateFile, setCertificateFile] = useState(null);
+    const [certificatePreview, setCertificatePreview] = useState(null);
 
     const [formData, setFormData] = useState({
         userName: '',
         fullName: '',
         email: '',
         phoneNumber: '',
+        nationalId: '',
     });
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
 
@@ -31,8 +34,8 @@ const CreateDoctor = () => {
         };
     }, []);
 
-    // Bộ đếm thời gian OTP (10 phút = 600 giây)
-    const startTimer = (seconds = 600) => {
+    // Bộ đếm thời gian OTP (2 phút = 120 giây)
+    const startTimer = (seconds = 120) => {
         if (timerRef.current) clearInterval(timerRef.current);
 
         setTimeLeft(seconds);
@@ -56,9 +59,46 @@ const CreateDoctor = () => {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    const getProgressPercentage = () => {
+        return ((120 - timeLeft) / 120) * 100;
+    };
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setError('');
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Kiểm tra định dạng file
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/pdf'];
+            if (!allowedTypes.includes(file.type)) {
+                toast.error('Chỉ chấp nhận file ảnh (JPG, PNG) hoặc PDF');
+                e.target.value = '';
+                return;
+            }
+            // Kiểm tra kích thước (tối đa 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Kích thước file tối đa 5MB');
+                e.target.value = '';
+                return;
+            }
+
+            setCertificateFile(file);
+            // Tạo preview cho ảnh
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCertificatePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveFile = () => {
+        setCertificateFile(null);
+        setCertificatePreview(null);
+        document.getElementById('certificateInput').value = '';
     };
 
     const handleOtpChange = (index, value) => {
@@ -68,14 +108,12 @@ const CreateDoctor = () => {
         setOtp(newOtp);
         setError('');
 
-        // Tự động focus sang ô tiếp theo
         if (value && index < 5) {
             otpInputsRef.current[index + 1]?.focus();
         }
     };
 
     const handleOtpKeyDown = (index, e) => {
-        // Nếu nhấn Backspace và ô hiện tại đang trống, focus về ô trước đó
         if (e.key === 'Backspace' && !otp[index] && index > 0) {
             const newOtp = [...otp];
             newOtp[index - 1] = '';
@@ -85,7 +123,6 @@ const CreateDoctor = () => {
         }
     };
 
-    // Reset các ô OTP
     const resetOtpFields = () => {
         setOtp(['', '', '', '', '', '']);
         otpInputsRef.current[0]?.focus();
@@ -94,20 +131,35 @@ const CreateDoctor = () => {
     const handleInitiate = async (e) => {
         e.preventDefault();
 
-        // Kiểm tra số điện thoại
         const phoneRegex = /^(0|\+84)[0-9]{9,10}$/;
         if (!phoneRegex.test(formData.phoneNumber)) {
             setError('Số điện thoại không hợp lệ. Phải là số điện thoại Việt Nam (0xxxxxxxxx hoặc +84xxxxxxxxx)');
             return;
         }
 
+        if (formData.nationalId && (formData.nationalId.length < 9 || formData.nationalId.length > 12)) {
+            setError('CCCD/CMND phải có từ 9 đến 12 ký tự');
+            return;
+        }
+
         setLoading(true);
         setError('');
         try {
-            await adminService.initiateCreateDoctor(formData);
+            const formDataToSend = new FormData();
+            formDataToSend.append('userName', formData.userName);
+            formDataToSend.append('fullName', formData.fullName);
+            formDataToSend.append('email', formData.email);
+            formDataToSend.append('phoneNumber', formData.phoneNumber);
+            formDataToSend.append('nationalId', formData.nationalId || '');
+            if (certificateFile) {
+                formDataToSend.append('certificateFile', certificateFile);
+            }
+
+            await adminService.initiateCreateDoctor(formDataToSend);
+
             toast.success('OTP đã được gửi đến email quản trị viên');
             setStep(2);
-            startTimer(600);
+            startTimer(120);
             resetOtpFields();
         } catch (error) {
             const errorMsg = error.response?.data?.message || error.response?.data || 'Không thể khởi tạo tạo bác sĩ';
@@ -124,9 +176,19 @@ const CreateDoctor = () => {
         setLoading(true);
         setError('');
         try {
-            await adminService.initiateCreateDoctor(formData);
+            const formDataToSend = new FormData();
+            formDataToSend.append('userName', formData.userName);
+            formDataToSend.append('fullName', formData.fullName);
+            formDataToSend.append('email', formData.email);
+            formDataToSend.append('phoneNumber', formData.phoneNumber);
+            formDataToSend.append('nationalId', formData.nationalId || '');
+            if (certificateFile) {
+                formDataToSend.append('certificateFile', certificateFile);
+            }
+
+            await adminService.initiateCreateDoctor(formDataToSend);
             toast.success('OTP đã được gửi lại đến email quản trị viên');
-            startTimer(600);
+            startTimer(120);
             resetOtpFields();
         } catch (error) {
             toast.error('Không thể gửi lại OTP');
@@ -172,7 +234,6 @@ const CreateDoctor = () => {
         }
     };
 
-    // Quay lại bước 1
     const handleBack = () => {
         if (timerRef.current) clearInterval(timerRef.current);
         setStep(1);
@@ -188,7 +249,6 @@ const CreateDoctor = () => {
             <Topbar title="Tạo tài khoản bác sĩ" />
             <div className="p-6">
                 <div className="max-w-2xl mx-auto">
-                    {/* Chỉ bước */}
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center flex-1">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-[#100357] text-white' : 'bg-gray-200 text-gray-500'}`}>
@@ -201,14 +261,12 @@ const CreateDoctor = () => {
                         </div>
                     </div>
 
-                    {/* Hiển thị lỗi */}
                     {error && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                             {error}
                         </div>
                     )}
 
-                    {/* Bước 1: Thông tin bác sĩ */}
                     {step === 1 && (
                         <div className="bg-white rounded-lg shadow-sm p-6">
                             <h2 className="text-xl font-semibold text-gray-800 mb-4">Thông tin bác sĩ</h2>
@@ -272,6 +330,59 @@ const CreateDoctor = () => {
                                         </div>
                                         <p className="text-xs text-gray-400 mt-1">Số điện thoại Việt Nam: 0xxxxxxxxx hoặc +84xxxxxxxxx</p>
                                     </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">CCCD/CMND</label>
+                                        <div className="relative">
+                                            <FaIdCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                name="nationalId"
+                                                value={formData.nationalId}
+                                                onChange={handleChange}
+                                                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#100357]"
+                                                placeholder="Nhập CCCD/CMND (9-12 số)"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">Bằng cấp / Chứng chỉ</label>
+                                        <div className="flex items-center gap-3">
+                                            <label className="flex-1 cursor-pointer">
+                                                <div className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#100357] transition">
+                                                    <FaUpload className="text-gray-400" />
+                                                    <span className="text-sm text-gray-500">
+                                                        {certificateFile ? certificateFile.name : 'Chọn file (JPG, PNG, PDF)'}
+                                                    </span>
+                                                </div>
+                                                <input
+                                                    id="certificateInput"
+                                                    type="file"
+                                                    accept=".jpg,.jpeg,.png,.pdf"
+                                                    onChange={handleFileChange}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                            {certificateFile && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemoveFile}
+                                                    className="text-red-500 hover:text-red-700 text-sm"
+                                                >
+                                                    Xóa
+                                                </button>
+                                            )}
+                                        </div>
+                                        {certificatePreview && (
+                                            <div className="mt-2">
+                                                <img
+                                                    src={certificatePreview}
+                                                    alt="Certificate preview"
+                                                    className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                                                />
+                                            </div>
+                                        )}
+                                        <p className="text-xs text-gray-400 mt-1">Chấp nhận JPG, PNG, PDF (tối đa 5MB)</p>
+                                    </div>
                                 </div>
                                 <div className="mt-6 flex gap-3">
                                     <button
@@ -293,7 +404,6 @@ const CreateDoctor = () => {
                         </div>
                     )}
 
-                    {/* Bước 2: Xác thực OTP */}
                     {step === 2 && (
                         <div className="bg-white rounded-lg shadow-sm p-6">
                             <button
@@ -326,23 +436,39 @@ const CreateDoctor = () => {
                                         ))}
                                     </div>
 
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                                            <FaClock className="w-4 h-4" />
-                                            {timeLeft > 0 ? (
-                                                <span>OTP hết hạn sau: <span className="font-mono font-semibold">{formatTime(timeLeft)}</span></span>
-                                            ) : (
-                                                <span className="text-red-500">OTP đã hết hạn</span>
-                                            )}
+                                    <div className="mb-4">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <FaClock className={`${timeLeft > 30 ? 'text-gray-500' : 'text-red-500 animate-pulse'}`} />
+                                                {timeLeft > 0 ? (
+                                                    <span className={timeLeft > 30 ? 'text-gray-600' : 'text-red-600 font-semibold'}>
+                                                        Còn <span className="font-mono font-bold">{formatTime(timeLeft)}</span>
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-red-500 font-semibold">OTP đã hết hạn</span>
+                                                )}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleResendOtp}
+                                                disabled={!canResend}
+                                                className={`text-sm font-medium transition ${
+                                                    canResend
+                                                        ? 'text-[#100357] hover:underline'
+                                                        : 'text-gray-400 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                Gửi lại OTP
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={handleResendOtp}
-                                            disabled={!canResend}
-                                            className={`text-sm ${canResend ? 'text-[#100357] hover:underline' : 'text-gray-400 cursor-not-allowed'}`}
-                                        >
-                                            Gửi lại OTP
-                                        </button>
+                                        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full transition-all duration-1000 rounded-full ${
+                                                    timeLeft > 30 ? 'bg-[#100357]' : 'bg-red-500'
+                                                }`}
+                                                style={{ width: `${getProgressPercentage()}%` }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 

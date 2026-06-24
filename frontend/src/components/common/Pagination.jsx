@@ -17,7 +17,7 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
     if (totalPages <= 1) return null;
 
     return (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
             <button
                 onClick={() => onPageChange(page - 1)}
                 disabled={page === 0}
@@ -25,7 +25,8 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
             >
                 <FaChevronLeft className="w-4 h-4" />
             </button>
-            <div className="flex gap-1">
+
+            <div className="flex items-center gap-1">
                 {getPageNumbers().map((p, idx) => (
                     <button
                         key={idx}
@@ -43,6 +44,7 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
                     </button>
                 ))}
             </div>
+
             <button
                 onClick={() => onPageChange(page + 1)}
                 disabled={page === totalPages - 1}

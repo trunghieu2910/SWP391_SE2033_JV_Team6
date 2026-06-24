@@ -1,14 +1,11 @@
-import { BrowserRouter } from 'react-router-dom';               // Kích hoạt chức năng điều hướng (routing) trong React
-import { AuthProvider }  from './context/AuthContext';          // Cung cấp dữ liệu đăng nhập cho toàn bộ ứng dụng.
-import AppRoutes         from './routes/AppRoutes';             // Quản lý tất cả URL của ứng dụng.
-import './index.css';                                           // Load CSS toàn cục.
+import { AuthProvider } from './contexts/AuthContext';
+import AppRoutes from './routes/AppRoutes';
+import './index.css';
 
-export default function App() {                                 // Tạo component gốc tên: App
-  return (
-      <BrowserRouter>
+export default function App() {
+    return (
         <AuthProvider>
-          <AppRoutes />
+            <AppRoutes />
         </AuthProvider>
-      </BrowserRouter>
-  );
+    );
 }

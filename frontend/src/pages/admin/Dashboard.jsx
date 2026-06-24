@@ -24,6 +24,7 @@ import adminService from '../../services/adminService';
 import Topbar from '../../components/admin/layout/Topbar';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StatsCard from '../../components/admin/dashboard/StatsCard';
+import GlobalSearch from '../../components/admin/common/GlobalSearch';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -41,18 +42,16 @@ const Dashboard = () => {
         try {
             const [statsRes, chartsRes, logsRes] = await Promise.all([
                 adminService.getDashboardStats(),
-                adminService.getChartStats(),      // API mới cho biểu đồ
+                adminService.getChartStats(),
                 adminService.getSystemLogs({ page: 0, size: 5 })
             ]);
 
             setStats(statsRes.data);
             setRecentLogs(logsRes.data.content || []);
 
-            // Ghép dữ liệu từ 2 API thành 1 mảng cho biểu đồ
             const userData = chartsRes.data.userRegistrations || [];
             const sessionData = chartsRes.data.diagnosisSessions || [];
 
-            // Tạo mảng dữ liệu ghép theo tháng
             const mergedData = userData.map((item, index) => ({
                 month: formatMonth(item.month),
                 users: item.count,
@@ -68,7 +67,6 @@ const Dashboard = () => {
         }
     };
 
-    // Chuyển đổi định dạng tháng từ "2024-01" thành "Thg 1"
     const formatMonth = (monthStr) => {
         if (!monthStr) return '';
         const [year, month] = monthStr.split('-');
@@ -100,7 +98,12 @@ const Dashboard = () => {
 
     return (
         <div>
-            <Topbar title="Tổng quan" />
+            {/* ✅ Đưa Global Search vào Topbar bằng cách sửa Topbar hoặc tạo header riêng */}
+            <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-800">Tổng quan</h1>
+                <GlobalSearch />
+            </div>
+
             <div className="p-6">
                 {/* Thống kê */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">

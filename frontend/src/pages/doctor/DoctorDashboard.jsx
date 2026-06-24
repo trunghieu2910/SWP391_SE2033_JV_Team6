@@ -82,7 +82,7 @@ const DoctorDashboard = () => {
             toast.success(`Đã chuyển trạng thái sang ${getStatusLabel(selectedNewStatus)}`);
             fetchSessions();
         } catch (error) {
-            toast.error('Không thể cập nhật trạng thái');
+            toast.error('Không thể cập nhật trạng thái khi đã công bố');
         } finally {
             setUpdatingId(null);
             setShowStatusModal(false);
@@ -92,7 +92,9 @@ const DoctorDashboard = () => {
     };
 
     const openShareModal = (session) => {
-        if (session.status !== 'COMPLETED') {
+        const status = session.status?.toString().trim().toUpperCase() || '';
+
+        if (status !== 'COMPLETED') {
             toast.error('Chỉ có thể công bố khi ca chẩn đoán có trạng thái "Hoàn thành"');
             return;
         }

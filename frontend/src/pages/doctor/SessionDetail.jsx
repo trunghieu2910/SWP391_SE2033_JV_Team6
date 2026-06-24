@@ -289,11 +289,9 @@ const SessionDetail = () => {
                             {openSymptom && (
                                 <ClinicalSymptomsForm
                                     sessionId={session.sessionId}
-                                    initialData={{
-                                        height: session.height,
-                                        weight: session.weight,
-                                        ...session.symptomResult
-                                    }}
+                                    initialData={session.symptomResult}
+                                    height={session.height}
+                                    weight={session.weight}
                                     onSave={async (data) => {
                                         try {
                                             await doctorService.updateSessionSymptoms(session.sessionId, data);

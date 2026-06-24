@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 import api from '../services/api';
 import { User, Phone, Mail, Calendar, MapPin, Clipboard, Check, AlertCircle } from 'lucide-react';
 

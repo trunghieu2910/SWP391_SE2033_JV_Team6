@@ -16,8 +16,7 @@ const doctorService = {
     // Lấy triệu chứng của ca chẩn đoán
     getSessionSymptoms: (sessionId) => api.get(`/api/doctor/sessions/${sessionId}/symptoms`),
 
-    // Cập nhật triệu chứng
-    updateSessionSymptoms: (sessionId, data) => api.put(`/api/diagnosis-sessions/${sessionId}/symptom-result`, data),
+    updateSessionSymptoms: (sessionId, data) => api.put(`/api/doctor/sessions/${sessionId}/symptoms`, data),
 
     // Lấy danh sách thông số xét nghiệm
     getParameters: () => api.get('/api/parameters'),
@@ -27,6 +26,12 @@ const doctorService = {
 
     // Lấy danh sách xét nghiệm theo session
     getLabResultsBySession: (sessionId) => api.get(`/api/lab-results/session/${sessionId}`),
+
+    // Lấy thông tin hồ sơ bác sĩ
+    getProfile: () => api.get('/api/profile'),
+
+    // Cập nhật thông tin hồ sơ bác sĩ
+    updateProfile: (data) => api.put('/api/profile', data),
 };
 
 export default doctorService;
