@@ -4,27 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="Update: TS-60 Thêm thông tin khi đăng kí tài khoản bác sĩ">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/LogSearchDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/SearchResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/dto/response/UserSearchDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/admin/common/GlobalSearch.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/hooks/useDebounce.js" afterDir="false" />
+    <list default="true" id="91a5185b-d70a-4b39-8c81-ef82551d298e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/SystemLogRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/SystemLogRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/AdminService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/interfaces/AdminService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/controller/AdminController.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/controller/AdminController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/SystemLogRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/SystemLogRepository.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/UserRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/repository/UserRepository.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/impl/AdminServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/AdminService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/mycompany/jpademo/backend/service/interfaces/AdminService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/layout/Topbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/layout/Topbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/services/adminService.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/adminService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/DoctorDiagnosisServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/mycompany/jpademo/backend/service/impl/DoctorDiagnosisServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,7 +118,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="LuuTienGiang_HE194888" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -159,61 +141,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.0000000000447011" />
-      <entry key="M2" value="1.0000207885170869" />
-      <entry key="M5" value="1.1357483491446991" />
-      <entry key="M10" value="4.285118208584446" />
-      <entry key="M15" value="10.837207692686826" />
-      <entry key="M30" value="31.131934607713" />
-      <entry key="H1" value="54.283431461017464" />
-      <entry key="H2" value="72.06908413895705" />
-      <entry key="H4" value="83.14453106024202" />
-      <entry key="D1" value="93.72181453269808" />
-      <entry key="W1" value="95.67105490683616" />
+      <entry key="MS100" value="1.6945451064996535" />
+      <entry key="MS500" value="4.32700069318396" />
+      <entry key="S2" value="7.5153981716813805" />
+      <entry key="S5" value="8.850083122795198" />
+      <entry key="S10" value="9.395376986855872" />
+      <entry key="S30" value="9.885060978933879" />
+      <entry key="S60" value="10.201344288617214" />
+      <entry key="M2" value="10.500951211484468" />
+      <entry key="M5" value="10.87547824652626" />
+      <entry key="M10" value="13.796970034563044" />
+      <entry key="M15" value="20.009270939624493" />
+      <entry key="M30" value="39.926157282268875" />
+      <entry key="H1" value="63.223199310371825" />
+      <entry key="H2" value="81.36211018860813" />
+      <entry key="H4" value="92.73578644345861" />
+      <entry key="D1" value="103.6448759530985" />
+      <entry key="W1" value="105.65983136172773" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="1.413722747664853E-93" />
-      <entry key="S2" value="8.666369000742056E-24" />
-      <entry key="S5" value="8.843635230821611E-10" />
-      <entry key="S10" value="4.1903603932440795E-5" />
-      <entry key="S30" value="0.055091404953300116" />
-      <entry key="S60" value="0.33190418159715895" />
-      <entry key="M2" value="0.8149290353558255" />
-      <entry key="M5" value="1.544069201111698" />
-      <entry key="M10" value="3.766280366095368" />
-      <entry key="M15" value="7.198759702316789" />
-      <entry key="M30" value="16.561137556402286" />
-      <entry key="H1" value="26.574049377824405" />
-      <entry key="H2" value="34.0678301028016" />
-      <entry key="H4" value="38.68166786315215" />
-      <entry key="D1" value="43.0600119016846" />
-      <entry key="W1" value="43.86433739636122" />
+      <entry key="MS500" value="3.776477251942653E-155" />
+      <entry key="S2" value="3.503626749303688E-39" />
+      <entry key="S5" value="6.156063399148984E-16" />
+      <entry key="S10" value="3.496129472655963E-8" />
+      <entry key="S30" value="0.005186358797946724" />
+      <entry key="S60" value="0.10183617512915996" />
+      <entry key="M2" value="0.451403029366662" />
+      <entry key="M5" value="1.2191148780342884" />
+      <entry key="M10" value="3.3465828549667243" />
+      <entry key="M15" value="6.653502134662722" />
+      <entry key="M30" value="15.921591471565021" />
+      <entry key="H1" value="26.05588888764459" />
+      <entry key="H2" value="33.73405515785112" />
+      <entry key="H4" value="38.49171225453606" />
+      <entry key="D1" value="43.024696819982964" />
+      <entry key="W1" value="43.85919634073735" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.47302882336279795" />
-      <entry key="MS500" value="0.860949188338904" />
-      <entry key="S2" value="0.963261894020148" />
-      <entry key="S5" value="0.9851395444798791" />
-      <entry key="S10" value="0.9925808668828607" />
-      <entry key="S30" value="1.0512159958087877" />
-      <entry key="S60" value="1.3264358994505643" />
-      <entry key="M2" value="1.8091093494944104" />
-      <entry key="M5" value="2.6753206269559495" />
-      <entry key="M10" value="8.044086778886511" />
-      <entry key="M15" value="18.025398008404736" />
-      <entry key="M30" value="47.679625584951545" />
-      <entry key="H1" value="80.84623154646061" />
-      <entry key="H2" value="106.12956124392157" />
-      <entry key="H4" value="121.82198461485915" />
-      <entry key="D1" value="136.7810384076243" />
-      <entry key="W1" value="139.53527747224624" />
+      <entry key="MS100" value="1.5980117218035863" />
+      <entry key="MS500" value="4.264308034671237" />
+      <entry key="S2" value="7.485053174341618" />
+      <entry key="S5" value="8.835582568147338" />
+      <entry key="S10" value="9.387645860622628" />
+      <entry key="S30" value="9.887193116677889" />
+      <entry key="S60" value="10.300143070459583" />
+      <entry key="M2" value="10.948435534931633" />
+      <entry key="M5" value="12.09076825482222" />
+      <entry key="M10" value="17.136918566130703" />
+      <entry key="M15" value="26.652912665935364" />
+      <entry key="M30" value="55.8347756372191" />
+      <entry key="H1" value="89.26803534454436" />
+      <entry key="H2" value="115.08887293349933" />
+      <entry key="H4" value="131.22329935700645" />
+      <entry key="D1" value="146.66878443793794" />
+      <entry key="W1" value="149.51891274858957" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -337,6 +319,8 @@
       <list>
         <item itemvalue="Application.BackendApplication" />
         <item itemvalue="Application.Main" />
+        <item itemvalue="Application.BackendApplication" />
+        <item itemvalue="Application.Main" />
       </list>
     </recent_temporary>
   </component>
@@ -399,6 +383,9 @@
       <workItem from="1782027317726" duration="4123000" />
       <workItem from="1782048341198" duration="343000" />
       <workItem from="1782091665331" duration="1583000" />
+      <workItem from="1782292384063" duration="667000" />
+      <workItem from="1782355320856" duration="19000" />
+      <workItem from="1782363801629" duration="1067000" />
     </task>
     <task id="LOCAL-00001" summary="Branches Giang">
       <option name="closed" value="true" />

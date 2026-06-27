@@ -71,7 +71,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             throw new BadRequestException("Status must not be null or blank.");
         }
         if (session.getIsShared() != null && session.getIsShared()) {
-            throw new BadRequestException("Session is shared. Cannot update session.");
+            throw new BadRequestException(".Session is shared. Cannot update session");
         }
         DiagnosisSessionStatus newStatus;
         try {
