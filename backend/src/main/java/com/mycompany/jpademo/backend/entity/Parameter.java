@@ -21,7 +21,7 @@ public class Parameter {
     @Column(name = "parameterName", unique = true, length = 100, nullable = false)
     private String parameterName;
 
-    @Column(name = "unit", nullable = false, length = 50)
+    @Column(name = "unit", nullable = true, length = 50)
     private String unit;
 
     @OneToMany(mappedBy = "parameter")

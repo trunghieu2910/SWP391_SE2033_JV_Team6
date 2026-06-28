@@ -320,18 +320,24 @@ export default function MedicalRecordDetailPage() {
                 </div>
                 <div>
                   <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Loại xét nghiệm</span>
-                  <span className="text-sm font-semibold text-gray-700">{lr.testType}</span>
+                  <span className="text-sm font-semibold text-gray-700">{lr.testName}</span>
                 </div>
                 <div>
                   <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Trạng thái</span>
-                  <span className="bg-[#e6f4ea] text-[#137333] border border-[#ceead6] px-3 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#137333]"></span>
-                    HOÀN THÀNH
+                  <span className={`px-3 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5 border ${
+                      lr.status === 'COMPLETED'
+                          ? 'bg-[#e6f4ea] text-[#137333] border-[#ceead6]'
+                          : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                        lr.status === 'COMPLETED' ? 'bg-[#137333]' : 'bg-yellow-500'
+                    }`}></span>
+                        {lr.status === 'COMPLETED' ? 'Hoàn thành' : 'Chờ xử lý'}
                   </span>
                 </div>
                 <div>
                   <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Ngày chỉ định</span>
-                  <span className="text-sm font-semibold text-gray-700">{fmtDateTime(lr.createdAt)}</span>
+                  <span className="text-sm font-semibold text-gray-700">{fmtDateTime(lr.testedAt)}</span>
                 </div>
               </div>
 

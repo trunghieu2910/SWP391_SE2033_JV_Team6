@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Activity, FileText, LogOut, User } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -6,8 +6,12 @@ import { useAuth } from '../../hooks/useAuth';
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => setShowConfirm(true);
+
+  const handleLogoutConfirm = () => {
+    setShowConfirm(false);
     logout();
     navigate('/login');
   };
@@ -94,13 +98,36 @@ export default function Navbar() {
 
         {/* Logout button */}
         <button
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
           className="w-10 h-10 border border-gray-100 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 hover:border-red-100 transition-all duration-200 animate-none"
           title="Đăng xuất"
         >
           <LogOut className="w-5 h-5" />
         </button>
       </div>
+
+      {showConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+            <div className="bg-white rounded-xl p-6 w-80 shadow-xl">
+              <h3 className="text-gray-800 font-semibold text-lg mb-2">Xác nhận đăng xuất</h3>
+              <p className="text-gray-500 text-sm mb-6">Bạn có chắc chắn muốn đăng xuất không?</p>
+              <div className="flex gap-3">
+                <button
+                    onClick={() => setShowConfirm(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-600"
+                >
+                  Hủy
+                </button>
+                <button
+                    onClick={handleLogoutConfirm}
+                    className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                >
+                  Đăng xuất
+                </button>
+              </div>
+            </div>
+          </div>
+      )}
     </nav>
   );
 }

@@ -50,7 +50,7 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
                     .orElseGet(() -> {
                         Parameter newParam = Parameter.builder()
                                 .parameterName(item.getTestName())
-                                .unit(item.getUnit() != null ? item.getUnit() : "—")
+                                .unit(item.getUnit() != null ? item.getUnit() : null)
                                 .build();
                         return parameterRepository.save(newParam);
                     });

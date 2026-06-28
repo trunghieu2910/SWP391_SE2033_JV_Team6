@@ -72,8 +72,16 @@ export default function GoogleCompleteModal({ googleProfile, idToken, onSuccess,
   };
 
   const handleChange = (e) => {
-    setForm(p => ({ ...p, [e.target.name]: e.target.value }));
-    setErrors(p => ({ ...p, [e.target.name]: '' }));
+    const { name, value } = e.target;
+
+    // Chỉ cho phép nhập số với phoneNumber và nationalID
+    const numericFields = ['phoneNumber', 'nationalID'];
+    const finalValue = numericFields.includes(name)
+        ? value.replace(/\D/g, '')
+        : value;
+
+    setForm(p => ({ ...p, [name]: finalValue }));
+    setErrors(p => ({ ...p, [name]: '' }));
     setApiError('');
   };
 
@@ -130,7 +138,9 @@ export default function GoogleCompleteModal({ googleProfile, idToken, onSuccess,
             <input
               id="gcm-phone"
               name="phoneNumber"
-              type="tel"
+              type="text"
+              maxLength={10}
+              pattern="\d*"
               className={`form-input ${errors.phoneNumber ? 'error' : ''}`}
               placeholder="0901234567"
               value={form.phoneNumber}
@@ -148,6 +158,7 @@ export default function GoogleCompleteModal({ googleProfile, idToken, onSuccess,
               name="nationalID"
               type="text"
               maxLength={12}
+              pattern="\d*"
               className={`form-input ${errors.nationalID ? 'error' : ''}`}
               placeholder="012345678901"
               value={form.nationalID}

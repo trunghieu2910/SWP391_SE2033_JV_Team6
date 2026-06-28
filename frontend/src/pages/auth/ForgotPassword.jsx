@@ -48,6 +48,7 @@ export default function ForgotPassword() {
   const [canResend, setCanResend] = useState(false);
   const [step2Load, setStep2Load] = useState(false);
   const otpRefs = useRef([]);
+  const [resendCount, setResendCount] = useState(0);
 
   // Step 3
   const [newPwd, setNewPwd]       = useState('');
@@ -72,7 +73,7 @@ export default function ForgotPassword() {
       });
     }, 1000);
     return () => clearInterval(iv);
-  }, [step]);
+  }, [step, resendCount]);
 
   const formatTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 
@@ -134,7 +135,8 @@ export default function ForgotPassword() {
     if (!canResend) return;
     await authService.forgotPassword({ email });
     setOtp(['','','','','','']);
-    setCanResend(false); setTimer(OTP_TTL); setOtpErr('');
+    setOtpErr('');
+    setResendCount(c => c + 1);
   }, [canResend, email]);
 
   /* ── Step 3: Reset Password ── */
@@ -257,9 +259,9 @@ export default function ForgotPassword() {
                   {step2Load ? <span className="spinner" /> : null}
                   {step2Load ? 'Đang xác minh…' : 'Xác minh mã'}
                 </button>
-                <div className="login-forgot-row" style={{ justifyContent: 'center', marginTop: '18px' }}>
-                  <Link to="/login" className="login-forgot-link">← Quay lại trang đăng nhập</Link>
-                </div>
+                  <div className="login-forgot-row" style={{ justifyContent: 'center', marginTop: '18px' }}>
+                    <Link to="/login" className="login-forgot-link">← Quay lại trang đăng nhập</Link>
+                  </div>
               </form>
             </>
           )}
@@ -324,6 +326,9 @@ export default function ForgotPassword() {
                   {step3Load ? <span className="spinner" /> : null}
                   {step3Load ? 'Đang đặt lại…' : 'Đặt lại mật khẩu'}
                 </button>
+                <div className="login-forgot-row" style={{ justifyContent: 'center', marginTop: '18px' }}>
+                  <Link to="/login" className="login-forgot-link">← Quay lại trang đăng nhập</Link>
+                </div>
               </form>
             </>
           )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
     FaStethoscope,
@@ -21,8 +21,14 @@ const menuItems = [
 const DoctorSidebar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [showConfirm, setShowConfirm] = useState(false);
 
-    const handleLogout = async () => {
+    // Chỉ mở modal xác nhận, chưa logout
+    const handleLogoutClick = () => setShowConfirm(true);
+
+    // Thực sự logout khi user bấm Xác nhận
+    const handleLogoutConfirm = async () => {
+        setShowConfirm(false);
         await logout();
         navigate('/login');
     };
@@ -78,13 +84,36 @@ const DoctorSidebar = () => {
                     </div>
                 </div>
                 <button
-                    onClick={handleLogout}
+                    onClick={handleLogoutClick}
                     className="flex items-center gap-2 text-gray-500 hover:text-[#100357] transition w-full px-4 py-2.5 rounded-xl hover:bg-gray-100"
                 >
                     <FaSignOutAlt className="w-5 h-5" />
                     <span>Đăng xuất</span>
                 </button>
             </div>
+
+            {showConfirm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+                    <div className="bg-white rounded-xl p-6 w-80 shadow-xl">
+                        <h3 className="text-gray-800 font-semibold text-lg mb-2">Xác nhận đăng xuất</h3>
+                        <p className="text-gray-500 text-sm mb-6">Bạn có chắc chắn muốn đăng xuất không?</p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-600"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                onClick={handleLogoutConfirm}
+                                className="flex-1 px-4 py-2 bg-[#100357] text-white rounded-lg hover:bg-[#100357]/90 transition"
+                            >
+                                Đăng xuất
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

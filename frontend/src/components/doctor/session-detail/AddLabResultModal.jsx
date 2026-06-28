@@ -64,11 +64,12 @@ const AddLabResultModal = ({ isOpen, onClose, sessionId, onSuccess }) => {
                             autoFocus
                         >
                             <option value="" disabled>Chọn loại xét nghiệm</option>
-                            <option value="Xét nghiệm tế bào (PAP)">Xét nghiệm tế bào (PAP)</option>
-                            <option value="Xét nghiệm HPV DNA">Xét nghiệm HPV DNA</option>
-                            <option value="Xét nghiệm sinh thiết (Biopsy)">Xét nghiệm sinh thiết (Biopsy)</option>
-                            <option value="Xét nghiệm máu">Xét nghiệm máu</option>
-                            <option value="Xét nghiệm tổng quát">Xét nghiệm tổng quát</option>
+                            <option value="Xét nghiệm tế bào học cổ tử cung">Xét nghiệm tế bào học cổ tử cung</option>
+                            <option value="Xét nghiệm DNA của virus HPV">Xét nghiệm DNA của virus HPV</option>
+                            <option value="Định tuýp HPV nguy cơ cao">Định tuýp HPV nguy cơ cao</option>
+                            <option value="Sinh thiết">Sinh thiết</option>
+                            <option value="Dấu ấn ung thư SCC">Dấu ấn ung thư SCC</option>
+                            <option value="Xét nghiệm máu cơ bản">Xét nghiệm máu cơ bản</option>
                         </select>
                     </div>
 

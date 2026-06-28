@@ -60,8 +60,10 @@ export default function Login() {
             const status  = err.response?.status;
             const message = err.response?.data?.message ?? '';
 
-            if (status === 401 && message.toLowerCase().includes('tài khoản bị khoá')) {
+            if (status === 401 && message.toLowerCase().includes('tài khoản của bạn đã bị khóa')) {
                 setApiError({ type: 'banned', msg: 'Tài khoản của bạn đã bị tạm ngưng. Vui lòng liên hệ với quản trị viên.' });
+            } else if (status === 401 && message.toLowerCase().includes('tài khoản của bạn chưa được kích hoạt')){
+                setApiError({ type: 'pending', msg: 'Tài khoản của bạn chưa được kích hoạt. Vui lòng liên hệ với quản trị viên.' });
             } else {
                 setApiError({ type: 'invalid', msg: 'Thông tin đăng nhập không chính xác. Vui lòng thử lại.' });
             }

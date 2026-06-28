@@ -141,14 +141,36 @@ public class GlobalExceptionHandler {
             InternalAuthenticationServiceException.class
     })
     public ResponseEntity<ApiResponse> handleAuthenticationExceptions(Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED) // Ép 401
-                .body(
-                        ApiResponse.builder()
-                                .success(false)
-                                .message("Tên đăng nhập hoặc mật khẩu không chính xác")
-                                .build()
-                );
+
+        System.out.println(">>> Exception class: " + ex.getClass().getName());
+        System.out.println(">>> Exception message: " + ex.getMessage());
+        System.out.println(">>> Cause: " + (ex.getCause() != null ? ex.getCause().getClass().getName() + " - " + ex.getCause().getMessage() : "null"));
+
+        // Unwrap: InternalAuthenticationServiceException bọc DisabledException/LockedException bên trong
+        Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+
+        if (cause instanceof DisabledException) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.builder()
+                            .success(false)
+                            .message("Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra email để xác thực OTP.")
+                            .build());
+        }
+
+        if (cause instanceof LockedException) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.builder()
+                            .success(false)
+                            .message("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.")
+                            .build());
+        }
+
+        // Mặc định: sai username/password
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.builder()
+                        .success(false)
+                        .message("Tên đăng nhập hoặc mật khẩu không chính xác")
+                        .build());
     }
 
     @ExceptionHandler(DisabledException.class)
