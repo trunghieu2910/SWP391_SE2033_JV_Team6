@@ -182,20 +182,20 @@ export default function ForgotPassword() {
 
       <div className="login-right">
         <div className="login-card card">
-          <div className="login-card-header">
-            <h2>Quên mật khẩu</h2>
-            <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: 4 }}>
-              Nhập email đã đăng ký để nhận mã OTP đặt lại mật khẩu.
-            </p>
-          </div>
 
           {step1Err && <div className="alert alert-error mb-16"><span>❌</span>{step1Err}</div>}
           {otpErr && <div className="alert alert-error mb-16"><span>❌</span>{otpErr}</div>}
           {step3Err && <div className="alert alert-error mb-16"><span>❌</span>{step3Err}</div>}
-          {success && <div className="alert alert-success mb-16"><span>✓</span> Mật khẩu đã được đặt lại thành công.</div>}
 
           {step === 0 && (
             <>
+              <div className="login-card-header">
+                <h2>Quên mật khẩu</h2>
+                <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: 4 }}>
+                  Nhập email đã đăng ký để nhận mã OTP đặt lại mật khẩu.
+                </p>
+              </div>
+
               <form onSubmit={handleSendOtp} noValidate>
                 <div className="form-group">
                   <label className="form-label" htmlFor="fp-email">Email <span className="required">*</span></label>

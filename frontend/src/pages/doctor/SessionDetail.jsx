@@ -5,6 +5,7 @@ import {
     FaMapMarkerAlt, FaWeight, FaRulerVertical, FaStethoscope,
     FaImage, FaRobot, FaChevronDown, FaChevronUp,
     FaHistory, FaChartLine,
+    FaFlask,
 } from 'react-icons/fa';
 import toast, { Toaster } from 'react-hot-toast';
 import doctorService from '../../services/doctorService';
@@ -330,64 +331,6 @@ const SessionDetail = () => {
                             onAddClick={() => setShowAddLabModal(true)}
                             onRefresh={fetchSessionDetail}
                         />
-
-                        {/* Hình ảnh y tế */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <button
-                                onClick={() => setOpenLab(!openLab)}
-                                className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <FaFlask className="text-[#100357]" />
-                                    <span className="font-semibold text-gray-800">Xét nghiệm y tế</span>
-                                    <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full">
-                                        {session.labResults?.length || 0}
-                                    </span>
-                                </div>
-                                {openLab ? <FaChevronUp /> : <FaChevronDown />}
-                            </button>
-
-                            {openLab && (
-                                <div className="p-4 border-t border-gray-200">
-                                    {session.labResults && session.labResults.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {session.labResults.map((lab, idx) => (
-                                                <div key={idx} className="border border-gray-100 rounded-lg p-3">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <div>
-                                                            <p className="font-medium text-gray-800">{lab.testType}</p>
-                                                            <p className="text-xs text-gray-400">{formatDateTime(lab.createdAt)}</p>
-                                                        </div>
-                                                        <StatusBadge type="status" value={lab.status} />
-                                                    </div>
-                                                    {lab.parameters && lab.parameters.length > 0 ? (
-                                                        <div className="mt-2 space-y-1">
-                                                            {lab.parameters.map((param, pIdx) => (
-                                                                <div key={pIdx} className="flex justify-between text-sm">
-                                                                    <span className="text-gray-600">{param.parameterName}</span>
-                                                                    <span className="font-medium">{param.value} {param.unit}</span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    ) : lab.status === 'PENDING' ? (
-                                                        <p className="text-gray-400 text-sm mt-2">Chưa có kết quả chi tiết</p>
-                                                    ) : null}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-gray-400 text-center py-4">Chưa có xét nghiệm nào</p>
-                                    )}
-                                    <button
-                                        onClick={() => setShowAddLabModal(true)}
-                                        className="mt-4 w-full py-2 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-[#100357] hover:border-[#100357] transition flex items-center justify-center gap-2"
-                                    >
-                                        <FaFlask className="w-3 h-3" />
-                                        Thêm xét nghiệm
-                                    </button>
-                                </div>
-                            )}
-                        </div>
 
                         {/* Hình ảnh y tế - Card */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
