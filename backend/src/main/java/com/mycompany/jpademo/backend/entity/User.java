@@ -53,6 +53,9 @@ public class User {
     @Column(name = "nationalID", length = 12)
     private String nationalID;
 
+    @Column(name = "certificateUrl")
+    private String certificateUrl;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "roleID", nullable = false)
     private Role role;

@@ -24,5 +24,7 @@ public interface AdminService {
     ResponseEntity<String> verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin);
 
     ChartStatsResponse getChartStats();
+
+    SearchResponse searchGlobal(String keyword);
 }
 

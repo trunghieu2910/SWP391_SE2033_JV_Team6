@@ -22,6 +22,8 @@ public class UserResponse {
 
     private String email;
 
+    private String certificateUrl;
+
     private UserStatus status;
 
     private RoleName roleName;

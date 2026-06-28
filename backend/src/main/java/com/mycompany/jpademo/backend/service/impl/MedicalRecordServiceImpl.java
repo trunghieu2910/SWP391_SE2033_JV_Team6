@@ -250,8 +250,6 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 detail.setNote(r.getNote());
             } else {
                 detail.setFinalDiagnosis("Đang chờ bác sĩ công bố...");
-                detail.setIcd10Code("BẢO MẬT");
-                detail.setVerdict("BẢO MẬT");
                 detail.setTreatmentPlan("Chờ công bố");
                 detail.setDoctorAdvice("Chờ công bố");
                 detail.setNote("Bảo mật");

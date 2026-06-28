@@ -26,11 +26,14 @@ import com.mycompany.jpademo.backend.cache.PendingDoctorData;
 import com.mycompany.jpademo.backend.cache.PendingDoctorStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -135,12 +138,17 @@ public class AdminServiceImpl implements AdminService {
         if (userRepository.existsByPhoneNumber(pending.getPhoneNumber())) {
             throw new DuplicateResourceException("Phone number is already in use: " + pending.getPhoneNumber());
         }
+        if (pending.getNationalId() != null && userRepository.existsByNationalID(pending.getNationalId())) {
+            throw new DuplicateResourceException("National ID is already in use: " + pending.getNationalId());
+        }
         User user = new User();
         user.setUserName(pending.getUserName());
         user.setFullName(pending.getFullName());
         user.setEmail(pending.getEmail());
         user.setPhoneNumber(pending.getPhoneNumber());
         user.setStatus(UserStatus.ACTIVE);
+        user.setNationalID(pending.getNationalId());
+        user.setCertificateUrl(pending.getCertificateUrl());
         Role doctorRole = roleRepository.findByRoleName(RoleName.DOCTOR)
                 .orElseThrow(() -> new UserNotFoundException("Doctor role not found"));
         user.setRole(doctorRole);
@@ -167,14 +175,37 @@ public class AdminServiceImpl implements AdminService {
         if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new DuplicateResourceException("Phone number is already in use: " + request.getPhoneNumber());
         }
+        if (request.getNationalId() != null && userRepository.existsByNationalID(request.getNationalId())) {
+            throw new DuplicateResourceException("National ID is already in use: " + request.getNationalId());
+        }
         String requestId = UUID.randomUUID().toString();
+        String certificateUrl = null;
+        if (request.getCertificateFile() != null && !request.getCertificateFile().isEmpty()) {
+            try {
+                String userDir = System.getProperty("user.dir");
+                String uploadDir = userDir + File.separator + "uploads" + File.separator + "certificates" + File.separator;
 
+                File directory = new File(uploadDir);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                String fileName = System.currentTimeMillis() + "_" + request.getCertificateFile().getOriginalFilename();
+                String filePath = uploadDir + fileName;
+                request.getCertificateFile().transferTo(new File(filePath));
+                certificateUrl = "/uploads/certificates/" + fileName;
+            } catch (IOException e) {
+                throw new RuntimeException("Không thể lưu file bằng cấp: " + e.getMessage());
+            }
+        }
         PendingDoctorData pending = PendingDoctorData.builder()
                 .requestId(requestId)
                 .userName(request.getUserName())
                 .fullName(request.getFullName())
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
+                .nationalId(request.getNationalId())
+                .certificateUrl(certificateUrl)
                 .build();
         PendingDoctorStore.savePending(admin.getEmail(), pending);
         String otp = OtpUtil.generateOtp();
@@ -223,6 +254,48 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    @Override
+    public SearchResponse searchGlobal(String keyword) {
+        Pageable limit = PageRequest.of(0, 5);
+
+        List<User> users = userRepository.searchUsers(keyword, limit);
+        List<SystemLog> logs = systemLogRepository.searchLogs(keyword, limit);
+
+        List<UserSearchDTO> userDTOs = users.stream()
+                .map(this::mapToUserSearchDTO)
+                .collect(Collectors.toList());
+
+        List<LogSearchDTO> logDTOs = logs.stream()
+                .map(this::mapToLogSearchDTO)
+                .collect(Collectors.toList());
+
+        return SearchResponse.builder()
+                .users(userDTOs)
+                .logs(logDTOs)
+                .build();
+    }
+
+    private UserSearchDTO mapToUserSearchDTO(User user) {
+        return UserSearchDTO.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .roleName(user.getRole().getRoleName().name())
+                .status(user.getStatus().name())
+                .build();
+    }
+
+    private LogSearchDTO mapToLogSearchDTO(SystemLog log) {
+        return LogSearchDTO.builder()
+                .logId(log.getLogId())
+                .action(log.getAction())
+                .description(log.getDescription())
+                .username(log.getUser().getUserName())
+                .performedAt(log.getPerformedAt())
+                .build();
+    }
+
     private List<MonthlyStats> mapToMonthlyStats(List<Object[]> stats) {
         if (stats == null || stats.isEmpty()) {
             return List.of();
@@ -247,6 +320,7 @@ public class AdminServiceImpl implements AdminService {
                 .status(user.getStatus())
                 .lastChangePassTime(user.getLastChangePassTime())
                 .createdAt(user.getCreatedAt())
+                .certificateUrl(user.getCertificateUrl())
                 .lastLogoutTime(user.getLastLogoutTime())
                 .build();
     }

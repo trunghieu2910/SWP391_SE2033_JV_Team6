@@ -32,7 +32,7 @@ const idToSymptomMap = Object.fromEntries(
     Object.entries(symptomIdMap).map(([key, value]) => [value, key])
 );
 
-const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true, disabled = false }) => {
+const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -99,10 +99,10 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
     ];
 
     const durationOptions = [
-        {value: 'LESS_THAN_1_MONTH', label: 'Dưới 1 tháng'},
-        {value: 'MONTHS_1_3', label: '1–3 tháng'},
-        {value: 'MONTHS_3_6', label: '3–6 tháng'},
-        {value: 'MORE_THAN_6_MONTHS', label: 'Trên 6 tháng'}
+        {value: 'DƯỚI_1_THÁNG', label: 'Dưới 1 tháng'},
+        {value: '1-3_THÁNG', label: '1–3 tháng'},
+        {value: '3-6_THÁNG', label: '3–6 tháng'},
+        {value: 'TRÊN_6_THÁNG', label: 'Trên 6 tháng'}
     ];
 
     useEffect(() => {
@@ -112,11 +112,11 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
     }, [initialData]);
 
     const mapInitialDataToForm = (data) => {
-        const symptomDetails = data?.symptomDetails || (data?.symptomIds ? data.symptomIds.map(id => ({ symptomId: id })) : []);
-        const allSymptomIds = Array.from(new Set(symptomDetails.map(sd => sd.symptomId)));
+        const symptomDetails = data?.symptomDetails || [];
+        const allSymptomIds = symptomDetails.map(sd => sd.symptomId);
 
         const getTextFromIds = (ids) => {
-            return Array.from(new Set(ids.map(id => idToSymptomMap[id]).filter(v => v)));
+            return ids.map(id => idToSymptomMap[id]).filter(v => v);
         };
 
         const abnormalBleedingIds = allSymptomIds.filter(id => id >= 1 && id <= 5);
@@ -180,6 +180,39 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
         })));
     };
 
+    // Component input số tùy chỉnh
+    const NumberInput = ({ value, onChange, disabled, placeholder, className }) => {
+        const [localValue, setLocalValue] = useState(value || '');
+
+        useEffect(() => {
+            setLocalValue(value || '');
+        }, [value]);
+
+        const handleChange = (e) => {
+            const rawValue = e.target.value;
+            if (rawValue === '') {
+                setLocalValue('');
+                onChange('');
+                return;
+            }
+            if (/^\d*\.?\d*$/.test(rawValue)) {
+                setLocalValue(rawValue);
+                onChange(rawValue);
+            }
+        };
+
+        return (
+            <input
+                type="text"
+                value={localValue}
+                onChange={handleChange}
+                disabled={disabled}
+                className={className}
+                placeholder={placeholder}
+            />
+        );
+    };
+
     const handleEdit = () => {
         if (originalData) {
             setFormData(JSON.parse(JSON.stringify(originalData)));
@@ -198,9 +231,7 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
         setFormData(prev => {
             const current = [...prev[field]];
             if (checked) {
-                if (!current.includes(value)) {
-                    current.push(value);
-                }
+                current.push(value);
             } else {
                 const index = current.indexOf(value);
                 if (index > -1) current.splice(index, 1);
@@ -231,31 +262,20 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
         return values.map(v => symptomIdMap[v]).filter(id => id !== undefined);
     };
 
-    const getAdditionalSymptomIds = () => {
-        const ids = [];
-        if (formData.systemicSymptoms.weightLoss) ids.push(14);
-        if (formData.systemicSymptoms.fatigue) ids.push(15);
-        if (formData.systemicSymptoms.anorexia) ids.push(16);
-        if (formData.riskFactors.familyHistory) ids.push(25);
-        if (formData.riskFactors.obesity) ids.push(26);
-        if (formData.riskFactors.diabetes) ids.push(27);
-        if (formData.riskFactors.hypertension) ids.push(28);
-        if (formData.riskFactors.pcos) ids.push(29);
-        if (formData.riskFactors.estrogenTherapy) ids.push(30);
-        return ids;
-    };
-
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const symptomIds = [
-                ...getIdsFromValues(formData.abnormalBleeding),
-                ...getIdsFromValues(formData.abnormalDischarge),
-                ...getIdsFromValues(formData.pain),
-                ...getIdsFromValues(formData.urinarySymptoms),
-                ...getIdsFromValues(formData.digestiveSymptoms),
-                ...getAdditionalSymptomIds()
-            ];
+            if (formData.height && parseFloat(formData.height) <= 0) {
+                toast.error('Chiều cao phải lớn hơn 0');
+                setLoading(false);
+                return;
+            }
+
+            if (formData.weight && parseFloat(formData.weight) <= 0) {
+                toast.error('Cân nặng phải lớn hơn 0');
+                setLoading(false);
+                return;
+            }
 
             const payload = {
                 height: formData.height && formData.height !== '' ? parseFloat(formData.height) : null,
@@ -263,27 +283,18 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
                 menopauseStatus: formData.menopauseStatus || null,
                 symptomDuration: formData.symptomDuration || null,
                 symptomProgressing: formData.symptomProgressing,
-                symptoms: Array.from(new Set(symptomIds.filter(id => typeof id === 'number')))
+                abnormalBleedingIds: getIdsFromValues(formData.abnormalBleeding),
+                abnormalDischargeIds: getIdsFromValues(formData.abnormalDischarge),
+                painIds: getIdsFromValues(formData.pain),
+                urinarySymptomsIds: getIdsFromValues(formData.urinarySymptoms),
+                digestiveSymptomsIds: getIdsFromValues(formData.digestiveSymptoms),
+                systemicSymptoms: {
+                    weightLoss: formData.systemicSymptoms.weightLoss,
+                    fatigue: formData.systemicSymptoms.fatigue,
+                    anorexia: formData.systemicSymptoms.anorexia
+                },
+                riskFactors: formData.riskFactors
             };
-
-            // Client-side validation before submitting to backend
-            if (!payload.height || !payload.weight) {
-                toast.error('Bạn phải điền đầy đủ chiều cao cân nặng');
-                setLoading(false);
-                return;
-            }
-
-            if (payload.height <= 0 || payload.weight <= 0) {
-                toast.error('Chiều cao cân nặng phải là số dương');
-                setLoading(false);
-                return;
-            }
-
-            if (!payload.menopauseStatus || !payload.symptomDuration || payload.symptomProgressing === null || payload.symptoms.length === 0) {
-                toast.error('Vui lòng điền đầy đủ các trường bắt buộc: tình trạng mãn kinh, thời gian triệu chứng, diễn biến và ít nhất một triệu chứng.');
-                setLoading(false);
-                return;
-            }
 
             console.log('Saving payload:', payload);
 
@@ -310,9 +321,9 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Chiều cao (cm)</label>
                     <input
-                        type="text"
-                        value={formData.height}
-                        onChange={(e) => setFormData(prev => ({ ...prev, height: e.target.value }))}
+                        type="number"
+                        defaultValue={formData.height}
+                        onBlur={(e) => setFormData(prev => ({ ...prev, height: e.target.value }))}
                         disabled={disabled}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#100357] disabled:bg-gray-100 disabled:text-gray-500"
                         placeholder="Nhập chiều cao"
@@ -321,9 +332,9 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Cân nặng (kg)</label>
                     <input
-                        type="text"
-                        value={formData.weight}
-                        onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
+                        type="number"
+                        defaultValue={formData.weight}
+                        onBlur={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
                         disabled={disabled}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#100357] disabled:bg-gray-100 disabled:text-gray-500"
                         placeholder="Nhập cân nặng"
@@ -339,8 +350,8 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
                         <input
                             type="radio"
                             name="menopauseStatus"
-                            value="NOT_YET"
-                            checked={formData.menopauseStatus === 'NOT_YET'}
+                            value="PRE"
+                            checked={formData.menopauseStatus === 'PRE'}
                             onChange={(e) => handleRadioGroupChange('menopauseStatus', e.target.value)}
                             disabled={disabled}
                             className="w-4 h-4 disabled:opacity-60"
@@ -351,8 +362,8 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
                         <input
                             type="radio"
                             name="menopauseStatus"
-                            value="ALREADY"
-                            checked={formData.menopauseStatus === 'ALREADY'}
+                            value="POST"
+                            checked={formData.menopauseStatus === 'POST'}
                             onChange={(e) => handleRadioGroupChange('menopauseStatus', e.target.value)}
                             disabled={disabled}
                             className="w-4 h-4 disabled:opacity-60"
@@ -601,16 +612,14 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
 
         return (
             <div className="p-4">
-                {allowEdit && (
-                    <div className="flex justify-end mb-4">
-                        <button
-                            onClick={handleEdit}
-                            className="px-3 py-1 text-[#100357] hover:bg-gray-100 rounded-lg transition flex items-center gap-1"
-                        >
-                            <FaEdit className="w-4 h-4"/> Chỉnh sửa
-                        </button>
-                    </div>
-                )}
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={handleEdit}
+                        className="px-3 py-1 text-[#100357] hover:bg-gray-100 rounded-lg transition flex items-center gap-1"
+                    >
+                        <FaEdit className="w-4 h-4"/> Chỉnh sửa
+                    </button>
+                </div>
 
                 <div className="space-y-4">
                     {/* Chiều cao, cân nặng - CHỈ HIỂN THỊ TEXT */}
@@ -637,7 +646,7 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
                             <span className="text-gray-500 text-sm">Tình trạng mãn kinh</span>
                             <div className="mt-1">
                                 <span className="inline-block px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700">
-                                    {originalData.menopauseStatus === 'NOT_YET' ? 'Chưa mãn kinh' : 'Đã mãn kinh'}
+                                    {originalData.menopauseStatus === 'PRE' ? 'Chưa mãn kinh' : 'Đã mãn kinh'}
                                 </span>
                             </div>
                         </div>
@@ -804,14 +813,12 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
         return (
             <div className="p-4 text-center">
                 <p className="text-gray-400 mb-3">Chưa có dữ liệu triệu chứng lâm sàng</p>
-                {allowEdit && (
-                    <button
-                        onClick={handleEdit}
-                        className="px-4 py-2 bg-[#100357] text-white rounded-lg hover:bg-[#100357]/90"
-                    >
-                        <FaEdit className="inline mr-2"/> Nhập triệu chứng
-                    </button>
-                )}
+                <button
+                    onClick={handleEdit}
+                    className="px-4 py-2 bg-[#100357] text-white rounded-lg hover:bg-[#100357]/90"
+                >
+                    <FaEdit className="inline mr-2"/> Nhập triệu chứng
+                </button>
             </div>
         );
     }
@@ -819,7 +826,7 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, allowEdit = true
     // Chế độ chỉnh sửa (Edit mode)
     return (
         <div className="p-4 border-t border-gray-200">
-            <FormContent disabled={disabled}/>
+            <FormContent disabled={false}/>
 
             {/* Nút Lưu và Hủy - ở dưới cùng, chia đều */}
             <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">

@@ -3,6 +3,7 @@ package com.mycompany.jpademo.backend.aop.aspect;
 import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
 import com.mycompany.jpademo.backend.aop.interfaces.LoggableTarget;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
+import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
 import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
@@ -44,6 +45,9 @@ public class AdminActionLogAspect {
                     action = "SET_INACTIVE";
                     description = "ADMIN: Chuyển sang không hoạt động. Lý do: " + req.getReason();
                 }
+            }
+            if (arg instanceof VerifyPendingDoctorRequest request) {
+                description = "ADMIN: Tạo tài khoản bác sĩ";
             }
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

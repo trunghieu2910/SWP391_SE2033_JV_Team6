@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import PatientProfile from '../../components/patient/PatientProfile';
 import ActiveSession from '../../components/patient/ActiveSession';

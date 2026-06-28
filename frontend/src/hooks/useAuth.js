@@ -1,3 +1,3 @@
-export { useAuth } from '../context/AuthContext';
-import { useAuth as _useAuth } from '../context/AuthContext';
+export { useAuth } from '../contexts/AuthContext';
+import { useAuth as _useAuth } from '../contexts/AuthContext';
 export default _useAuth;
