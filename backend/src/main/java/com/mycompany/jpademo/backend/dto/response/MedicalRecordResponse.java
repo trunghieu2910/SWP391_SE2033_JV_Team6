@@ -24,7 +24,7 @@ public class MedicalRecordResponse {
     private String gender;
     private Integer age;
 
-
+    private String doctorFullName;
     // Chi tiết (detail view)
     private Integer sessionID;
     private Date createdAt;

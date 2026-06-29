@@ -5,7 +5,6 @@ import com.mycompany.jpademo.backend.dto.response.MedicalRecordResponse;
 import com.mycompany.jpademo.backend.entity.*;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
-import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.repository.*;
 import com.mycompany.jpademo.backend.service.interfaces.MedicalRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,30 +12,39 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class MedicalRecordServiceImpl implements MedicalRecordService {
 
-    @Autowired private DiagnosisSessionRepository sessionRepository;
-    @Autowired private ReviewRepository reviewRepository;
-    @Autowired private SymptomDetailsRepository symptomDetailsRepository;
-    @Autowired private LabResultRepository labResultRepository;
-    @Autowired private LabResultParameterRepository labResultParameterRepository;
-    @Autowired private MedicalImageRepository medicalImageRepository;
-    @Autowired private MedicalImageDetailsRepository medicalImageDetailsRepository;
-    @Autowired private SymptomResultRepository symptomResultRepository;
+     private DiagnosisSessionRepository sessionRepository;
+     private ReviewRepository reviewRepository;
+     private SymptomDetailsRepository symptomDetailsRepository;
+     private LabResultRepository labResultRepository;
+     private LabResultParameterRepository labResultParameterRepository;
+     private MedicalImageRepository medicalImageRepository;
+     private MedicalImageDetailsRepository medicalImageDetailsRepository;
+     private SymptomResultRepository symptomResultRepository;
+    @Autowired
+    public MedicalRecordServiceImpl(DiagnosisSessionRepository sessionRepository, ReviewRepository reviewRepository, SymptomDetailsRepository symptomDetailsRepository, LabResultRepository labResultRepository, LabResultParameterRepository labResultParameterRepository, MedicalImageRepository medicalImageRepository, MedicalImageDetailsRepository medicalImageDetailsRepository, SymptomResultRepository symptomResultRepository) {
+        this.sessionRepository = sessionRepository;
+        this.reviewRepository = reviewRepository;
+        this.symptomDetailsRepository = symptomDetailsRepository;
+        this.labResultRepository = labResultRepository;
+        this.labResultParameterRepository = labResultParameterRepository;
+        this.medicalImageRepository = medicalImageRepository;
+        this.medicalImageDetailsRepository = medicalImageDetailsRepository;
+        this.symptomResultRepository = symptomResultRepository;
+    }
 
     // ===== MAP TỪ RAW SQL SANG DTO =====
     private MedicalRecordResponse mapToMedicalRecordResponse(Map<String, Object> row) {
         Boolean isShared = false;
         Object rawShared = row.get("isShared");
-        if (rawShared instanceof Boolean) {
-            isShared = (Boolean) rawShared;
-        } else if (rawShared instanceof Number) {
-            isShared = ((Number) rawShared).intValue() == 1;
+        if (rawShared instanceof Boolean booleanValue) {
+            isShared = booleanValue;
+        } else if (rawShared instanceof Number numberValue) {
+            isShared = numberValue.intValue() == 1;
         }
 
         // Convert status từ String sang DiagnosisSessionStatus enum
@@ -50,6 +58,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         return MedicalRecordResponse.builder()
                 .id(((Number) row.get("id")).intValue())
                 .patientName((String) row.get("patientName"))
+                .doctorFullName((String) row.get("doctorFullName"))
                 .diagnosis((String) row.get("diagnosis"))
                 .visitDate((Date) row.get("visitDate"))
                 .symptoms((String) row.get("symptoms"))
@@ -69,7 +78,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
         List<MedicalRecordResponse> records = rawRecords.stream()
                 .map(this::mapToMedicalRecordResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         //  CHỐNG SẬP PHÂN TRANG
         int start = (int) pageable.getOffset();
@@ -81,24 +90,6 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         List<MedicalRecordResponse> pageContent = records.subList(start, end);
 
         return new PageImpl<>(pageContent, pageable, records.size());
-    }
-
-    // ===== DANH SÁCH CHO BÁC SĨ =====
-    @Override
-    public List<MedicalRecordResponse> getAllMedicalRecords() {
-        List<Map<String, Object>> rawRecords = sessionRepository.findAllMedicalRecords();
-        return rawRecords.stream()
-                .map(this::mapToMedicalRecordResponse)
-                .collect(Collectors.toList());
-    }
-
-    // ===== DANH SÁCH CHO BỆNH NHÂN =====
-    @Override
-    public List<MedicalRecordResponse> getPatientMedicalRecords(Integer patientID) {
-        List<Map<String, Object>> rawRecords = sessionRepository.findMedicalRecordsByPatientId(patientID);
-        return rawRecords.stream()
-                .map(this::mapToMedicalRecordResponse)
-                .collect(Collectors.toList());
     }
 
     // ===== CHI TIẾT BỆNH ÁN (CÓ DATA MASKING) =====
@@ -122,8 +113,6 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         if (patient != null && patient.getUser() != null) {
             User patientUser = patient.getUser();
             detail.setPatientFullName(patientUser.getFullName());
-            detail.setPatientFirstName(patientUser.getFullName());
-            detail.setPatientLastName("");
             detail.setPatientNationalID(patientUser.getNationalID());
             detail.setPatientPhone(patientUser.getPhoneNumber());
             if (patient.getDob() != null) {
@@ -155,7 +144,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             detail.setMenopauseStatus(sr.getMenopauseStatus());
             detail.setSymptomDuration(sr.getSymptomDuration());
             detail.setSymptomProgressing(sr.getSymptomProgressing());
-            
+
             // Lấy danh sách symptoms từ symptomDetails
             if (sr.getSymptomDetails() != null && !sr.getSymptomDetails().isEmpty()) {
                 List<MedicalRecordDetailResponse.SymptomDTO> symptomDTOs = sr.getSymptomDetails().stream()
@@ -167,7 +156,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                             }
                             return dto;
                         })
-                        .collect(Collectors.toList());
+                        .toList();
                 detail.setSymptoms(symptomDTOs);
             }
         });
@@ -194,7 +183,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     }
                     pDTO.setValue(lrp.getValue());
                     return pDTO;
-                }).collect(Collectors.toList());
+                }).toList();
                 labDTO.setParameters(paramDTOs);
                 labTestDTOs.add(labDTO);
             }
@@ -224,10 +213,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                             }
                             return detailDTO;
                         })
-                        .collect(Collectors.toList());
+                        .toList();
                 imgDTO.setDetails(detailDTOs);
                 return imgDTO;
-            }).collect(Collectors.toList());
+            }).toList();
         }
         detail.setMedicalImages(imageDTOs);
 
@@ -257,14 +246,5 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         });
 
         return detail;
-    }
-
-    @Override
-    public void updateMedicalRecordVisibility(Integer sessionID, Boolean isShared) {
-        DiagnosisSession session = sessionRepository.findById(sessionID)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy mã phiên khám: " + sessionID));
-        
-        session.setIsShared(isShared);
-        sessionRepository.save(session);
     }
 }
