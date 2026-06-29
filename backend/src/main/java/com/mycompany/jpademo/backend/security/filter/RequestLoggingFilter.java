@@ -1,20 +1,15 @@
 package com.mycompany.jpademo.backend.security.filter;
 
-import com.mycompany.jpademo.backend.entity.RequestLog;
-import com.mycompany.jpademo.backend.repository.RequestLogRepository;
 import com.mycompany.jpademo.backend.service.interfaces.LogAsyncService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
