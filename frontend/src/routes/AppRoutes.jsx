@@ -29,6 +29,7 @@ import UserDetail     from '../pages/admin/UserDetail';
 import SystemLogs     from '../pages/admin/SystemLogs';
 import CreateDoctor   from '../pages/admin/CreateDoctor';
 import AdminLayout    from '../components/admin/layout/AdminLayout';
+import { SecurityDashboard } from '../pages/admin/SecurityDashboard';
 
 // Medical Records pages
 import MedicalRecordsPage from '../pages/medical-records/MedicalRecordsPage';
@@ -117,6 +118,7 @@ export default function AppRoutes() {
                 <Route path="logs" element={<SystemLogs />} />
                 <Route path="create-doctor" element={<CreateDoctor />} />
                 <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="security" element={<SecurityDashboard />} />
             </Route>
 
             {/* Medical Records */}

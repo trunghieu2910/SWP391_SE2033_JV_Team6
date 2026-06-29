@@ -6,7 +6,8 @@ import {
     FaHistory,
     FaUserMd,
     FaSignOutAlt,
-    FaUserCircle
+    FaUserCircle,
+    FaShieldAlt
 } from 'react-icons/fa';
 import { useAuth } from '../../../hooks/useAuth';
 
@@ -15,6 +16,7 @@ const menuItems = [
     { path: '/admin/users', label: 'Quản lý người dùng', icon: FaUsers },
     { path: '/admin/logs', label: 'Nhật ký hệ thống', icon: FaHistory },
     { path: '/admin/create-doctor', label: 'Tạo bác sĩ', icon: FaUserMd },
+    { path: '/admin/security', label: 'Giám sát bảo mật', icon: FaShieldAlt }
 ];
 
 const Sidebar = () => {

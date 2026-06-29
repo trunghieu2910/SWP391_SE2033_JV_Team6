@@ -1,6 +1,9 @@
 package com.mycompany.jpademo.backend.security.config;
 
+import com.mycompany.jpademo.backend.security.filter.BlockedIpFilter;
 import com.mycompany.jpademo.backend.security.filter.JwtAuthenticationFilter;
+import com.mycompany.jpademo.backend.security.filter.RateLimitingFilter;
+import com.mycompany.jpademo.backend.security.filter.RequestLoggingFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,6 +28,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final BlockedIpFilter blockedIpFilter;
+    private final RateLimitingFilter rateLimitingFilterl;
+    private final RequestLoggingFilter requestLoggingFilter;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -81,7 +88,10 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated())
 
-                .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(requestLoggingFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(blockedIpFilter, RequestLoggingFilter.class)
+                .addFilterAfter(rateLimitingFilterl, BlockedIpFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, RateLimitingFilter.class);
 
         return http.build();
     }
