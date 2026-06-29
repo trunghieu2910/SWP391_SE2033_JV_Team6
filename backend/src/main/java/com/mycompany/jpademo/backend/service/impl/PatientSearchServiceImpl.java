@@ -41,6 +41,7 @@ public class PatientSearchServiceImpl implements PatientSearchService {
                 .dob(patient.getDob())
                 .address(patient.getAddress())
                 .nationalId(patient.getUser().getNationalID())
+                .phoneNumber(patient.getUser().getPhoneNumber())
                 .build();
     }
 }

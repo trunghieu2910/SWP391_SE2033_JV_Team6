@@ -217,55 +217,55 @@ export default function MedicalRecordDetail() {
             <FileText className="w-5 h-5 text-primary" /> Kết quả chẩn đoán & điều trị
           </h3>
 
-          {!isShared ? (
-            /* UNPUBLISHED STATE */
-            <div style={{ padding: '30px', textAlign: 'center', backgroundColor: '#fafafa', borderRadius: 'var(--radius-sm)', border: '1px dashed #ddd', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              <Lock className="w-10 h-10 text-red-500 mb-2" />
-              <h4 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--neutral-900)', margin: 0 }}>Chưa có kết quả chẩn đoán</h4>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>Bác sĩ chưa công bố hồ sơ bệnh án</p>
-            </div>
-          ) : (
-            /* PUBLISHED STATE */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                <div style={{ backgroundColor: '#fcfcfc', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '16px' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>🔬 Chẩn đoán của bác sĩ</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+              {/* Diagnosis box - content changes based on isShared */}
+              <div style={{ backgroundColor: '#fcfcfc', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '16px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>🔬 Chẩn đoán của bác sĩ</span>
+                {!isShared ? (
+                  <div className="text-red-500 font-medium flex items-center gap-1.5 mt-2.5">
+                    <Lock size={14} /> Bác sĩ chưa công bố chẩn đoán
+                  </div>
+                ) : (
                   <div style={{ fontSize: '1.15rem', fontWeight: '700', color: 'hsl(var(--primary))', marginTop: '6px' }}>
                     {finalDiagnosis || 'Chưa ghi nhận chẩn đoán cuối cùng'}
                   </div>
-                </div>
-                
-                <div style={{ backgroundColor: '#fcfcfc', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '16px' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>💊 Đơn thuốc & Phác đồ</span>
-                  <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--neutral-700)', marginTop: '6px', whiteSpace: 'pre-wrap' }}>
-                    {treatmentPlan || 'Chưa ghi nhận đơn thuốc'}
-                  </div>
+                )}
+              </div>
+              
+              {/* Treatment plan - always shown */}
+              <div style={{ backgroundColor: '#fcfcfc', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '16px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>💊 Đơn thuốc & Phác đồ</span>
+                <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--neutral-700)', marginTop: '6px', whiteSpace: 'pre-wrap' }}>
+                  {treatmentPlan || 'Chưa ghi nhận đơn thuốc'}
                 </div>
               </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                <div style={{ backgroundColor: '#fcfcfc', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '16px' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>💡 Hướng dẫn & Lời khuyên</span>
-                  <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--neutral-700)', marginTop: '6px', whiteSpace: 'pre-wrap' }}>
-                    {doctorAdvice || 'Chưa ghi nhận lời khuyên'}
-                  </div>
-                </div>
-
-                <div style={{ backgroundColor: '#fcfcfc', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '16px' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>📎 Ghi chú thêm</span>
-                  <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--neutral-700)', marginTop: '6px', whiteSpace: 'pre-wrap' }}>
-                    {note || 'Không có ghi chú'}
-                  </div>
-                </div>
-              </div>
-
-              {reviewedByDoctorName && (
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '12px', textAlign: 'right' }}>
-                  Được kết luận bởi <strong>{reviewedByDoctorName}</strong> lúc <strong>{fmtDateTime(reviewedAt)}</strong>
-                </div>
-              )}
             </div>
-          )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+              {/* Doctor advice - always shown */}
+              <div style={{ backgroundColor: '#fcfcfc', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '16px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>💡 Hướng dẫn & Lời khuyên</span>
+                <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--neutral-700)', marginTop: '6px', whiteSpace: 'pre-wrap' }}>
+                  {doctorAdvice || 'Chưa ghi nhận lời khuyên'}
+                </div>
+              </div>
+
+              {/* Additional notes - always shown */}
+              <div style={{ backgroundColor: '#fcfcfc', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '16px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>📎 Ghi chú thêm</span>
+                <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--neutral-700)', marginTop: '6px', whiteSpace: 'pre-wrap' }}>
+                  {note || 'Không có ghi chú'}
+                </div>
+              </div>
+            </div>
+
+            {reviewedByDoctorName && (
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '12px', textAlign: 'right' }}>
+                Được kết luận bởi <strong>{reviewedByDoctorName}</strong> lúc <strong>{fmtDateTime(reviewedAt)}</strong>
+              </div>
+            )}
+          </div>
         </div>
 
       </div>

@@ -32,7 +32,7 @@ const idToSymptomMap = Object.fromEntries(
     Object.entries(symptomIdMap).map(([key, value]) => [value, key])
 );
 
-const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
+const ClinicalSymptomsForm = ({ sessionId, initialData, onSave, showToast = true, readOnly = false }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -214,6 +214,7 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
     };
 
     const handleEdit = () => {
+        if (readOnly) return;
         if (originalData) {
             setFormData(JSON.parse(JSON.stringify(originalData)));
         }
@@ -266,13 +267,13 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
         setLoading(true);
         try {
             if (formData.height && parseFloat(formData.height) <= 0) {
-                toast.error('Chiều cao phải lớn hơn 0');
+                if (showToast) toast.error('Chiều cao phải lớn hơn 0');
                 setLoading(false);
                 return;
             }
 
             if (formData.weight && parseFloat(formData.weight) <= 0) {
-                toast.error('Cân nặng phải lớn hơn 0');
+                if (showToast) toast.error('Cân nặng phải lớn hơn 0');
                 setLoading(false);
                 return;
             }
@@ -303,7 +304,7 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
             }
 
             setOriginalData(JSON.parse(JSON.stringify(formData)));
-            toast.success('Đã lưu triệu chứng lâm sàng');
+            if (showToast) toast.success('Đã lưu triệu chứng lâm sàng');
             setIsEditing(false);
         } catch (error) {
             console.error('Save error:', error);
@@ -612,14 +613,16 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
 
         return (
             <div className="p-4">
-                <div className="flex justify-end mb-4">
-                    <button
-                        onClick={handleEdit}
-                        className="px-3 py-1 text-[#100357] hover:bg-gray-100 rounded-lg transition flex items-center gap-1"
-                    >
-                        <FaEdit className="w-4 h-4"/> Chỉnh sửa
-                    </button>
-                </div>
+                {!readOnly && (
+                    <div className="flex justify-end mb-4">
+                        <button
+                            onClick={handleEdit}
+                            className="px-3 py-1 text-[#100357] hover:bg-gray-100 rounded-lg transition flex items-center gap-1"
+                        >
+                            <FaEdit className="w-4 h-4"/> Chỉnh sửa
+                        </button>
+                    </div>
+                )}
 
                 <div className="space-y-4">
                     {/* Chiều cao, cân nặng - CHỈ HIỂN THỊ TEXT */}
@@ -813,12 +816,14 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
         return (
             <div className="p-4 text-center">
                 <p className="text-gray-400 mb-3">Chưa có dữ liệu triệu chứng lâm sàng</p>
-                <button
-                    onClick={handleEdit}
-                    className="px-4 py-2 bg-[#100357] text-white rounded-lg hover:bg-[#100357]/90"
-                >
-                    <FaEdit className="inline mr-2"/> Nhập triệu chứng
-                </button>
+                {!readOnly && (
+                    <button
+                        onClick={handleEdit}
+                        className="px-4 py-2 bg-[#100357] text-white rounded-lg hover:bg-[#100357]/90"
+                    >
+                        <FaEdit className="inline mr-2"/> Nhập triệu chứng
+                    </button>
+                )}
             </div>
         );
     }
@@ -826,24 +831,25 @@ const ClinicalSymptomsForm = ({ sessionId, initialData, onSave }) => {
     // Chế độ chỉnh sửa (Edit mode)
     return (
         <div className="p-4 border-t border-gray-200">
-            <FormContent disabled={false}/>
+            <FormContent disabled={readOnly || loading}/>
 
-            {/* Nút Lưu và Hủy - ở dưới cùng, chia đều */}
-            <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
-                <button
-                    onClick={handleCancel}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2"
-                >
-                    <FaTimes className="w-4 h-4"/> Hủy
-                </button>
-                <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="flex-1 bg-[#100357] text-white py-2 rounded-lg hover:bg-[#100357]/90 disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                    <FaSave className="w-4 h-4"/> {loading ? 'Đang lưu...' : 'Lưu'}
-                </button>
-            </div>
+            {!readOnly && (
+                <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
+                    <button
+                        onClick={handleCancel}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2"
+                    >
+                        <FaTimes className="w-4 h-4"/> Hủy
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="flex-1 bg-[#100357] text-white py-2 rounded-lg hover:bg-[#100357]/90 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        <FaSave className="w-4 h-4"/> {loading ? 'Đang lưu...' : 'Lưu'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

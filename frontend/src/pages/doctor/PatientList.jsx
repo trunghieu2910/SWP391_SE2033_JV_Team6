@@ -4,7 +4,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import { 
   Users, Search, Filter, Shield, ShieldOff, Play, Eye, 
-  ChevronLeft, ChevronRight, PlusCircle, CheckCircle 
+  ChevronLeft, ChevronRight, PlusCircle, CheckCircle, Plus, Phone, IdCard, ArrowLeft
 } from 'lucide-react';
 
 export default function PatientList() {
@@ -175,22 +175,52 @@ export default function PatientList() {
 
   const getStatusBadge = (status) => {
     const cleanStatus = status?.toUpperCase() || '';
-    if (cleanStatus === 'PENDING') return <span className="badge badge-pending">Đang chờ</span>;
-    if (cleanStatus === 'PROCESSING') return <span className="badge badge-processing">Đang khám</span>;
-    if (cleanStatus === 'COMPLETED') return <span className="badge badge-completed"><CheckCircle size={10} style={{ marginRight: '4px' }} />Hoàn thành</span>;
-    return <span className="badge">{status}</span>;
+    if (cleanStatus === 'PENDING') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">
+          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5 animate-pulse" />
+          Đang chờ
+        </span>
+      );
+    }
+    if (cleanStatus === 'PROCESSING') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse" />
+          Đang khám
+        </span>
+      );
+    }
+    if (cleanStatus === 'COMPLETED') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+          <CheckCircle size={12} className="mr-1" />
+          Hoàn thành
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-50 text-slate-600 border border-slate-100">
+        {status}
+      </span>
+    );
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', textAlign: 'left' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', textAlign: 'left', padding: '32px' }}>
       
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#100357' }}>
-          {currentTab === 'create' && 'Tạo phiên khám mới'}
-          {currentTab === 'active' && 'Quản lý phiên khám'}
-          {currentTab === 'completed' && 'Hồ sơ bệnh án đã hoàn thành'}
+      <div style={{ marginBottom: '32px' }} className="border-b border-slate-100 pb-6">
+        <h1 style={{ fontSize: '2rem', fontWeight: '850', color: '#100357', letterSpacing: '-0.03em' }} className="flex items-center gap-3">
+          {currentTab === 'create' && <span className="bg-blue-50 text-blue-600 p-2 rounded-2xl"><PlusCircle size={28} /></span>}
+          {currentTab === 'active' && <span className="bg-indigo-50 text-indigo-600 p-2 rounded-2xl"><Users size={28} /></span>}
+          {currentTab === 'completed' && <span className="bg-emerald-50 text-emerald-600 p-2 rounded-2xl"><CheckCircle size={28} /></span>}
+          <div>
+            {currentTab === 'create' && 'Tạo phiên khám mới'}
+            {currentTab === 'active' && 'Quản lý phiên khám'}
+            {currentTab === 'completed' && 'Hồ sơ bệnh án đã hoàn thành'}
+          </div>
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '4px' }}>
+        <p style={{ color: 'var(--neutral-500)', fontSize: '0.95rem', marginTop: '6px' }}>
           {currentTab === 'create' && 'Tìm kiếm bệnh nhân để khởi tạo hồ sơ bệnh án mới.'}
           {currentTab === 'active' && 'Xem danh sách và tiến hành chẩn đoán cho các phiên khám đang chờ.'}
           {currentTab === 'completed' && 'Xem lại danh sách bệnh án đã chẩn đoán hoàn thành.'}
@@ -199,84 +229,138 @@ export default function PatientList() {
 
       {/* CREATE TAB */}
       {currentTab === 'create' && (
-        <div className="glass-panel" style={{ padding: '28px', border: '1px solid var(--border-color)', borderRadius: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {!selectedPatient ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <form onSubmit={handleSearchPatients} style={{ display: 'flex', gap: '12px' }}>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  placeholder="Tìm theo Tên hoặc Số CCCD/CMND..."
-                  value={searchPatientKeyword}
-                  onChange={(e) => setSearchPatientKeyword(e.target.value)}
-                  required
-                />
-                <button type="submit" className="btn btn-primary" style={{ minWidth: '140px' }}>
-                  <Search size={16} /> Tìm kiếm
-                </button>
-              </form>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              {/* Search bar container */}
+              <div className="bg-slate-50/80 border border-slate-100 p-6 rounded-2xl">
+                <form onSubmit={handleSearchPatients} style={{ display: 'flex', gap: '16px' }}>
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input 
+                      type="text" 
+                      className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-[#100357] transition-all text-[0.95rem] shadow-sm font-medium"
+                      placeholder="Tìm theo Tên hoặc Số CCCD/CMND..."
+                      value={searchPatientKeyword}
+                      onChange={(e) => setSearchPatientKeyword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    className="bg-[#100357] hover:bg-[#1b0880] text-white px-6 py-3 rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.98]"
+                    style={{ minWidth: '150px' }}
+                  >
+                    <Search size={18} />
+                    <span>Tìm kiếm</span>
+                  </button>
+                </form>
+              </div>
 
               {searchingPatients ? (
-                <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  Đang quét danh sách bệnh nhân...
+                <div className="flex flex-col items-center justify-center py-16 text-slate-400 gap-3">
+                  <div className="spinner spinner-dark" />
+                  <span className="text-sm font-semibold animate-pulse text-slate-500">Đang quét danh sách bệnh nhân...</span>
                 </div>
               ) : foundPatients.length > 0 ? (
-                <div style={{ display: 'grid', gap: '12px', maxHeight: '350px', overflowY: 'auto' }}>
-                  {foundPatients.map((p) => (
-                    <div 
-                      key={p.patientId}
-                      onClick={() => setSelectedPatient(p)}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '16px 20px',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        backgroundColor: '#ffffff',
-                        transition: 'all 0.2s ease',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.borderColor = '#100357'}
-                      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
-                    >
-                      <div>
-                        <strong style={{ display: 'block', fontSize: '1rem', color: '#100357' }}>{p.fullName}</strong>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                          Mã bệnh nhân: #{p.patientId} • CMND/CCCD: {p.nationalId}
-                        </span>
-                      </div>
-                      <PlusCircle size={20} style={{ color: '#100357' }} />
-                    </div>
-                  ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Kết quả tìm kiếm ({foundPatients.length})</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px', maxHeight: '500px', overflowY: 'auto', padding: '4px' }}>
+                    {foundPatients.map((p) => {
+                      // Get name initials
+                      const initials = p.fullName
+                        ? p.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                        : 'BN';
+                      return (
+                        <div 
+                          key={p.patientId}
+                          onClick={() => setSelectedPatient(p)}
+                          className="group border border-slate-100 bg-white hover:border-[#100357]/20 rounded-xl p-5 cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 flex items-start justify-between gap-4"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-[#100357]/5 text-slate-600 group-hover:text-[#100357] font-bold flex items-center justify-center text-sm transition-all duration-200">
+                              {initials}
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <span className="font-bold text-slate-800 group-hover:text-[#100357] text-[1.05rem] transition-colors duration-200">
+                                {p.fullName}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs bg-slate-100 group-hover:bg-slate-200/50 text-slate-500 px-2 py-0.5 rounded font-medium">
+                                  ID: #{p.patientId}
+                                </span>
+                                <span className="text-xs bg-slate-100 group-hover:bg-slate-200/50 text-slate-500 px-2 py-0.5 rounded font-medium">
+                                  CCCD: {p.nationalId}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-[#100357] text-[#100357] group-hover:text-white flex items-center justify-center transition-all duration-200">
+                            <Plus size={16} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               ) : searchPatientKeyword && (
-                <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                  Không tìm thấy bệnh nhân nào hợp lệ. Vui lòng kiểm tra lại thông tin.
+                <div className="border border-dashed border-slate-200 rounded-2xl p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+                  <Users size={32} className="text-slate-300" />
+                  <span className="text-sm font-semibold">Không tìm thấy bệnh nhân nào hợp lệ. Vui lòng kiểm tra lại thông tin.</span>
                 </div>
               )}
             </div>
           ) : (
-            <form onSubmit={handleCreateSession} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ padding: '20px', backgroundColor: 'rgba(16, 3, 87, 0.05)', border: '1px solid rgba(16, 3, 87, 0.15)', borderRadius: '12px' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Bệnh nhân đã chọn</span>
-                <strong style={{ display: 'block', fontSize: '1.2rem', color: '#100357' }}>{selectedPatient.fullName}</strong>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
-                  Mã bệnh nhân: #{selectedPatient.patientId} • CMND/CCCD: {selectedPatient.nationalId}
-                </span>
-                <span style={{ fontSize: '0.95rem', color: '#100357', fontWeight: '600', display: 'block', marginTop: '8px' }}>
-                  Số ĐT: {selectedPatient.phoneNumber || 'Chưa cập nhật'}
-                </span>
-              </div>
+            <form onSubmit={handleCreateSession} className="max-w-2xl mx-auto w-full">
+              <div className="bg-white border border-slate-150 rounded-2xl shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-r from-[#100357] to-[#1e0a8c] p-6 text-white">
+                  <span className="text-xs font-bold tracking-widest uppercase opacity-75">Bệnh nhân được chọn chẩn đoán</span>
+                  <h3 className="text-xl font-bold mt-1" style={{ color: '#ffffff' }}>{selectedPatient.fullName}</h3>
+                </div>
+                
+                <div className="p-6 flex flex-col gap-5">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-4 rounded-xl flex items-center gap-3">
+                      <IdCard className="text-slate-400" size={20} />
+                      <div className="flex flex-col">
+                        <span className="text-xs text-slate-400 font-medium">CMND / CCCD</span>
+                        <span className="text-[0.95rem] font-semibold text-slate-700">{selectedPatient.nationalId}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-slate-50 p-4 rounded-xl flex items-center gap-3">
+                      <Phone className="text-slate-400" size={20} />
+                      <div className="flex flex-col">
+                        <span className="text-xs text-slate-400 font-medium">Số điện thoại</span>
+                        <span className="text-[0.95rem] font-semibold text-slate-700">{selectedPatient.phoneNumber || 'Chưa cập nhật'}</span>
+                      </div>
+                    </div>
+                  </div>
 
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <button type="button" onClick={() => setSelectedPatient(null)} className="btn btn-secondary" style={{ flex: 1, padding: '12px' }}>
-                  Quay lại chọn bệnh nhân
-                </button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '12px', backgroundColor: '#10b981', borderColor: '#10b981' }} disabled={createLoading}>
-                  {createLoading ? 'Đang khởi tạo...' : 'Xác nhận khởi tạo'}
-                </button>
+                  <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 text-[0.875rem] text-blue-800 leading-relaxed">
+                    <strong>Lưu ý:</strong> Phiên khám mới sẽ được khởi tạo với trạng thái <strong>Đang chờ</strong>. 
+                    Bạn có thể cập nhật thông tin chiều cao, cân nặng và tiến hành chẩn đoán hình ảnh ở bước tiếp theo.
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-4 px-6 border-t border-slate-100 flex gap-4">
+                  <button 
+                    type="button" 
+                    onClick={() => setSelectedPatient(null)} 
+                    className="flex-1 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 py-3 rounded-xl font-semibold transition-all duration-150 flex items-center justify-center gap-2"
+                  >
+                    <ArrowLeft size={16} />
+                    <span>Quay lại</span>
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition-all duration-150 flex items-center justify-center gap-2 shadow-sm"
+                    disabled={createLoading}
+                  >
+                    {createLoading ? 'Đang khởi tạo...' : 'Xác nhận khởi tạo'}
+                  </button>
+                </div>
               </div>
             </form>
           )}
@@ -285,33 +369,39 @@ export default function PatientList() {
 
       {/* ACTIVE & COMPLETED LIST TAB */}
       {(currentTab === 'active' || currentTab === 'completed') && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           {/* Filters */}
-          <div className="glass-panel" style={{ padding: '20px', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
-            <form onSubmit={handleSearchSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', alignItems: 'end' }}>
+          <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl">
+            <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Tìm kiếm bệnh nhân</label>
-                <div style={{ position: 'relative' }}>
+              <div className="form-group">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tìm kiếm bệnh nhân</label>
+                <div className="relative">
                   <input 
                     type="text" 
-                    className="form-control" 
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#100357]/20 focus:border-[#100357] transition-all text-sm shadow-sm" 
                     placeholder="Tên hoặc Số CMND/CCCD..."
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
-                    style={{ paddingLeft: '38px' }}
                   />
-                  <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Chế độ công khai kết quả</label>
+              <div className="form-group">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Chế độ công khai kết quả</label>
                 <select 
-                  className="form-control"
+                  className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#100357]/20 focus:border-[#100357] transition-all text-sm shadow-sm cursor-pointer appearance-none"
                   value={sharedFilter}
                   onChange={(e) => setSharedFilter(e.target.value)}
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`,
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundSize: '1.25rem',
+                    backgroundRepeat: 'no-repeat',
+                    paddingRight: '2.5rem'
+                  }}
                 >
                   <option value="">Tất cả</option>
                   <option value="true">Công khai</option>
@@ -319,7 +409,10 @@ export default function PatientList() {
                 </select>
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px' }}>
+              <button 
+                type="submit" 
+                className="bg-[#100357] hover:bg-[#1b0880] text-white py-2.5 rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-[0.98] text-sm h-[44px]"
+              >
                 <Filter size={16} /> Lọc kết quả
               </button>
             </form>
@@ -327,76 +420,57 @@ export default function PatientList() {
 
           {/* List Table */}
           {loading ? (
-            <div style={{ padding: '80px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <div className="pulse-indicator" style={{ marginRight: '8px' }}></div>
-              Đang tải danh sách phiên khám...
+            <div className="flex flex-col items-center justify-center py-24 text-slate-400 gap-3">
+              <div className="spinner spinner-dark" />
+              <span className="text-sm font-semibold animate-pulse text-slate-500">Đang tải danh sách phiên khám...</span>
             </div>
           ) : sessions.length > 0 ? (
-            <div className="custom-table-container glass-panel" style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
-              <table className="custom-table">
+            <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm bg-white">
+              <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr>
-                    <th>Mã phiên</th>
-                    <th>Bệnh nhân</th>
-                    <th>Ngày khám</th>
-                    <th>Trạng thái</th>
-                    <th>Trạng thái chia sẻ</th>
-                    <th style={{ textAlign: 'right' }}>Thao tác</th>
+                  <tr className="bg-slate-50/50 border-b border-slate-100">
+                    <th className="p-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Mã phiên</th>
+                    <th className="p-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Bệnh nhân</th>
+                    <th className="p-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Ngày khám</th>
+                    <th className="p-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                    <th className="p-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái chia sẻ</th>
+                    <th className="p-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-50">
                   {sessions.map((session) => (
-                    <tr key={session.id}>
-                      <td style={{ fontWeight: '700' }}>#{session.id}</td>
-                      <td style={{ fontWeight: '600' }}>{session.patientName}</td>
-                      <td>{session.visitDate}</td>
-                      <td>{getStatusBadge(session.status)}</td>
-                      <td>
+                    <tr key={session.id} className="hover:bg-slate-50/30 transition-colors duration-150">
+                      <td className="p-4 px-6 text-sm font-bold text-[#100357]">#{session.id}</td>
+                      <td className="p-4 px-6 text-sm font-semibold text-slate-800">{session.patientName}</td>
+                      <td className="p-4 px-6 text-sm text-slate-600">{session.visitDate}</td>
+                      <td className="p-4 px-6 text-sm">{getStatusBadge(session.status)}</td>
+                      <td className="p-4 px-6 text-sm">
                         <button 
                           type="button"
                           onClick={() => handleToggleShare(session.id, session.isShared)}
                           disabled={session.status !== 'COMPLETED'}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: session.status === 'COMPLETED' ? 'pointer' : 'not-allowed',
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '0.85rem',
-                            fontWeight: '600',
-                            color: session.isShared ? '#10b981' : '#f59e0b',
-                            backgroundColor: session.isShared ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                            transition: 'all 0.2s ease',
-                            outline: 'none',
-                            opacity: session.status === 'COMPLETED' ? 1 : 0.6
-                          }}
-                          onMouseEnter={(e) => {
-                            if (session.status === 'COMPLETED') {
-                              e.currentTarget.style.backgroundColor = session.isShared ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (session.status === 'COMPLETED') {
-                              e.currentTarget.style.backgroundColor = session.isShared ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)';
-                            }
-                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 ${
+                            session.status === 'COMPLETED' 
+                              ? 'cursor-pointer hover:scale-[1.02]' 
+                              : 'cursor-not-allowed opacity-60'
+                          } ${
+                            session.isShared 
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
+                              : 'bg-amber-50 text-amber-700 border border-amber-100'
+                          }`}
                           title={session.status === 'COMPLETED' ? 'Nhấp để thay đổi trạng thái' : 'Chỉ có thể công bố khi ca đã hoàn thành'}
                         >
                           {session.isShared ? (
-                            <><Shield size={14} /> Công khai</>
+                            <><Shield size={13} /> Công khai</>
                           ) : (
-                            <><ShieldOff size={14} /> Riêng tư</>
+                            <><ShieldOff size={13} /> Riêng tư</>
                           )}
                         </button>
                       </td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td className="p-4 px-6 text-sm text-right">
                         <button 
                           onClick={() => navigate(`/doctor/sessions/${session.id}`)}
-                          className="btn btn-secondary"
-                          style={{ padding: '6px 14px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          className="border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 text-[#100357] hover:text-blue-700 px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-all duration-150"
                         >
                           {currentTab === 'active' ? (
                             <><Play size={12} fill="currentColor" /> Khám bệnh</>
@@ -411,34 +485,37 @@ export default function PatientList() {
               </table>
             </div>
           ) : (
-            <div className="glass-panel" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <Users size={48} style={{ strokeWidth: '1.5px', marginBottom: '16px', color: 'hsl(var(--primary))' }} />
-              <p>Không tìm thấy phiên khám nào phù hợp.</p>
+            <div className="border border-dashed border-slate-200 rounded-2xl p-16 text-center text-slate-400 flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center">
+                <Users size={32} />
+              </div>
+              <div>
+                <h4 className="text-slate-700 font-bold text-base mb-1">Không tìm thấy phiên khám</h4>
+                <p className="text-sm text-slate-400">Không tìm thấy phiên khám nào phù hợp với bộ lọc hiện tại.</p>
+              </div>
             </div>
           )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <div className="flex justify-between items-center mt-2 px-1">
+              <span className="text-xs font-semibold text-slate-400">
                 Hiển thị {sessions.length} phiên khám
               </span>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="flex gap-2 items-center">
                 <button 
                   onClick={() => setPage(p => Math.max(0, p - 1))}
-                  className="btn btn-secondary"
-                  style={{ padding: '6px 12px' }}
+                  className="w-8 h-8 rounded-full border border-slate-200 hover:border-slate-300 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={page === 0}
                 >
                   <ChevronLeft size={16} />
                 </button>
-                <span style={{ display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: '0.9rem', fontWeight: '500' }}>
+                <span className="text-xs font-bold text-slate-600 px-2">
                   Trang {page + 1} / {totalPages}
                 </span>
                 <button 
                   onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-                  className="btn btn-secondary"
-                  style={{ padding: '6px 12px' }}
+                  className="w-8 h-8 rounded-full border border-slate-200 hover:border-slate-300 bg-white text-slate-600 hover:bg-slate-50 flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={page === totalPages - 1}
                 >
                   <ChevronRight size={16} />

@@ -14,4 +14,5 @@ public class PatientSearchResponse {
     private LocalDate dob;
     private String address;
     private String nationalId;
+    private String phoneNumber;
 }
