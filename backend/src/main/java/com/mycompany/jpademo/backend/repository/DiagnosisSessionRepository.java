@@ -64,6 +64,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "u.fullName as patientName, " +
             "  u.nationalID as nationalID, " +
             "  p.gender as gender, " +
+            " du.fullName AS doctorFullName, " +
             "ISNULL(r.finalDiagnosis, N'Chưa có chẩn đoán') as diagnosis, " +
             "s.createdAt as visitDate, " +
             "ISNULL((SELECT TOP 1 sym.symptomName FROM SymptomResult sr " +
@@ -75,6 +76,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "FROM DiagnosisSession s " +
             "JOIN Patient p ON s.patientID = p.patientID " +
             "JOIN [Users] u ON p.userID = u.userID " +
+            "JOIN [Users] du ON s.userID = du.userID " +
             "LEFT JOIN Review r ON s.sessionID = r.sessionID " +
             "WHERE (:keyword IS NULL OR u.fullName COLLATE Latin1_General_CI_AI\n" +
             "LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%')) " +

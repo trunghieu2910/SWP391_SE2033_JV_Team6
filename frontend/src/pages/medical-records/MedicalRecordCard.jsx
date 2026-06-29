@@ -25,6 +25,7 @@ export default function MedicalRecordCard({ record }) {
     isShared,
     nationalID,
     gender,
+    doctorFullName,
   } = record
 
   const name = patientName || 'Không rõ'
@@ -61,24 +62,23 @@ export default function MedicalRecordCard({ record }) {
       </div>
 
       {/* Body */}
-      <div className="space-y-3 text-xs text-left">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-400 font-medium">Mã phiên khám</span>
-          <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-            #S{String(id).padStart(4, '0')}
-          </span>
+      <div className="card-body">
+        <div className="info-item">
+          <span className="info-lbl">Mã phiên khám</span>
+          <span className="info-val accent">#S{String(id).padStart(4, '0')}</span>
         </div>
-        
-        <div className="flex flex-col gap-1">
-          <span className="text-gray-400 font-medium">Chẩn đoán</span>
-          <span className="font-semibold text-gray-700 line-clamp-1">{diagnosis || 'Chưa có chẩn đoán'}</span>
+        <div className="info-item" >
+          <span className="info-lbl">Bác sĩ phụ trách:</span>
+          <span className="info-val">{doctorFullName ?? '—'}</span>
+        </div>
+        <div className="info-item">
+          <span className="info-lbl">Chẩn đoán</span>
+          <span className="info-val">{diagnosis || 'Chưa có chẩn đoán'}</span>
         </div>
 
-        <div className="flex justify-between items-center">
-          <span className="text-gray-400 font-medium">Chia sẻ hồ sơ</span>
-          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold text-[10px] ${
-            isShared ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-          }`}>
+        <div className="info-item">
+          <span className="info-lbl">Chia sẻ hồ sơ</span>
+          <span className={`shared-pill ${isShared ? 'yes' : 'no'}`} style={{ display: 'inline-flex' }}>
             {isShared ? '🔗 Đã chia sẻ' : '🔒 Riêng tư'}
           </span>
         </div>
