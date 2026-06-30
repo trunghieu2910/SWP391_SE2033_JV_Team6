@@ -75,7 +75,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/auth/login",
+                        .requestMatchers(
+                                "/api/auth/login",
                                 "/api/auth/register",
                                 "/api/auth/register/verify-otp",
                                 "/api/auth/register/resend-otp",
@@ -84,7 +85,12 @@ public class SecurityConfig {
                                 "/api/auth/forgot-password/reset-password",
                                 "/api/auth/google",
                                 "/api/auth/google/complete",
-                                "/api/integration/lis/results").permitAll()
+                                "/api/integration/lis/results",
+                                "/auth/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**"
+                        ).permitAll()
 
                         .anyRequest().authenticated())
 
