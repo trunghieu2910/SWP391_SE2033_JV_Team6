@@ -21,7 +21,6 @@ import {
     Legend
 } from 'recharts';
 import adminService from '../../services/adminService';
-import Topbar from '../../components/admin/layout/Topbar';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StatsCard from '../../components/admin/dashboard/StatsCard';
 import GlobalSearch from '../../components/admin/common/GlobalSearch';

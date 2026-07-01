@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: main-layout(~{::main}, 'Tạo tài khoản bác sĩ', 'create-doctor')}">
+<body>
+<main>
+    <!-- Create Doctor Page CSS -->
+    <link rel="stylesheet" th:href="@{/css/admin/create-doctor.css}">
+
+    <div class="wizard-card">
+        <!-- Header hiển thị bước hiện tại -->
+        <div class="wizard-header">
+            <div class="wizard-header-content">
+                <div class="wizard-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div>
+                    <h2 class="wizard-title">Đăng ký tài khoản bác sĩ mới</h2>
+                    <p class="wizard-subtitle">Nhập thông tin và xác thực OTP để tạo tài khoản</p>
+                </div>
+            </div>
+            <div class="wizard-steps">
+                <div class="step-indicator" th:classappend="${step == 1 ? 'active' : ''}">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <span class="step-label">Bước 1</span>
+                        <span class="step-title">Nhập thông tin</span>
+                    </div>
+                </div>
+                <div class="step-connector">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+                <div class="step-indicator" th:classappend="${step == 2 ? 'active' : ''}">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <span class="step-label">Bước 2</span>
+                        <span class="step-title">Xác nhận OTP</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-body">
+            <!-- BƯỚC 1: ĐIỀN THÔNG TIN BÁC SĨ -->
+            <div th:if="${step == 1}">
+                <form th:action="@{/admin/create-doctor/initiate}" th:object="${doctorRequest}" method="post" enctype="multipart/form-data" class="form-grid">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userName">
+                                <i class="fa-regular fa-user"></i> Tên đăng nhập
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="userName" th:field="*{userName}" placeholder="VD: doctor.nam" required>
+                            <span class="error-span" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fullName">
+                                <i class="fa-regular fa-address-card"></i> Họ và tên
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="fullName" th:field="*{fullName}" placeholder="VD: Nguyễn Văn Nam" required>
+                            <span class="error-span" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fa-regular fa-envelope"></i> Địa chỉ Email
+                                <span class="required">*</span>
+                            </label>
+                            <input type="email" id="email" th:field="*{email}" placeholder="doctor.nam@hospital.com" required>
+                            <span class="error-span" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phoneNumber">
+                                <i class="fa-solid fa-phone"></i> Số điện thoại
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" id="phoneNumber" th:field="*{phoneNumber}" placeholder="VD: 0912345678" required>
+                            <span class="error-span" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nationalId">
+                            <i class="fa-regular fa-id-card"></i> Căn cước công dân (CCCD)
+                        </label>
+                        <input type="text" id="nationalId" th:field="*{nationalId}" placeholder="Số CCCD 12 chữ số">
+                        <span class="error-span" th:if="${#fields.hasErrors('nationalId')}" th:errors="*{nationalId}"></span>
+                    </div>
+
+                    <div class="form-group file-group">
+                        <label for="certificateFile">
+                            <i class="fa-regular fa-file-pdf"></i> Chứng chỉ y khoa / Bằng cấp
+                            <span class="required">*</span>
+                        </label>
+                        <div class="file-upload-wrapper">
+                            <div class="file-upload-area">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span class="file-upload-text">Kéo thả file vào đây hoặc bấm để chọn</span>
+                                <span class="file-upload-hint">Hỗ trợ: PDF, JPG, PNG (tối đa 10MB)</span>
+                                <input type="file" id="certificateFile" name="certificateFile" required accept="image/*,.pdf">
+                            </div>
+                        </div>
+                        <div id="fileInfo" class="file-info" style="display: none;">
+                            <i class="fa-regular fa-circle-check"></i>
+                            <span id="fileName">Đã chọn: </span>
+                            <button type="button" class="file-remove" onclick="removeFile()">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-action btn-primary btn-lg">
+                            <i class="fa-solid fa-paper-plane"></i> Gửi yêu cầu & Nhận mã OTP
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- BƯỚC 2: XÁC MINH OTP -->
+            <div th:if="${step == 2}">
+                <form th:action="@{/admin/create-doctor/confirm}" method="post" class="otp-box">
+                    <div class="otp-icon-wrapper">
+                        <div class="otp-icon">
+                            <i class="fa-solid fa-shield-check"></i>
+                        </div>
+                    </div>
+                    <h3 class="otp-title">Nhập mã xác thực OTP</h3>
+                    <p class="otp-description">
+                        Mã xác nhận OTP đã được gửi đến email quản trị viên của bạn.
+                        Vui lòng kiểm tra email và nhập mã để xác thực hành động tạo tài khoản bác sĩ này.
+                    </p>
+
+                    <div class="otp-input-wrapper">
+                        <div class="otp-input-group">
+                            <input type="text" name="otp" class="otp-input" placeholder="000000" maxlength="6" pattern="\d{6}" required autocomplete="off" autofocus>
+                        </div>
+                        <div class="otp-timer">
+                            <i class="fa-regular fa-clock"></i>
+                            <span>OTP có hiệu lực trong 5 phút</span>
+                        </div>
+                    </div>
+
+                    <div class="otp-actions">
+                        <a th:href="@{/admin/create-doctor}" class="btn-action btn-outline btn-md">
+                            <i class="fa-solid fa-arrow-left"></i> Nhập lại thông tin
+                        </a>
+                        <button type="submit" class="btn-action btn-success btn-md">
+                            <i class="fa-solid fa-check"></i> Xác nhận tạo tài khoản
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript cho file upload -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('certificateFile');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileUploadArea = document.querySelector('.file-upload-area');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    if (this.files && this.files.length > 0) {
+                        fileInfo.style.display = 'flex';
+                        fileName.textContent = 'Đã chọn: ' + this.files[0].name;
+                    } else {
+                        fileInfo.style.display = 'none';
+                    }
+                });
+
+                // Drag and drop
+                if (fileUploadArea) {
+                    fileUploadArea.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        this.classList.add('dragover');
+                    });
+
+                    fileUploadArea.addEventListener('dragleave', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('dragover');
+                    });
+
+                    fileUploadArea.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('dragover');
+                        const files = e.dataTransfer.files;
+                        if (files.length > 0) {
+                            fileInput.files = files;
+                            fileInfo.style.display = 'flex';
+                            fileName.textContent = 'Đã chọn: ' + files[0].name;
+                        }
+                    });
+                }
+            }
+        });
+
+        function removeFile() {
+            const fileInput = document.getElementById('certificateFile');
+            const fileInfo = document.getElementById('fileInfo');
+            if (fileInput) {
+                fileInput.value = '';
+                fileInfo.style.display = 'none';
+            }
+        }
+    </script>
+</main>
+</body>
+</html>

@@ -25,32 +25,44 @@ public class SecurityServiceImpl implements SecurityService {
     private final RequestLogRepository requestLogRepository;
 
     @Override
-    public SecurityStatsResponse getStats() {
-        LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        long totalDay = requestLogRepository.countByTimestampAfter(startOfDay);
+    public SecurityStatsResponse getStats(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+
+        long totalPeriod = requestLogRepository.countWithDateFilter(start, end);
         long blockedCount = blockedIPRepository.count();
 
-        long minutesElapsed = java.time.Duration.between(startOfDay, LocalDateTime.now()).toMinutes();
+        long minutesElapsed = java.time.Duration.between(start, end).toMinutes();
         if (minutesElapsed < 1) {
             minutesElapsed = 1;
         }
 
-        double avgPerMinute = (double) totalDay / minutesElapsed;
+        double avgPerMinute = (double) totalPeriod / minutesElapsed;
 
         return SecurityStatsResponse.builder()
-                .totalRequestsToday(totalDay)
+                .totalRequestsToday(totalPeriod)
                 .totalBlockedIps(blockedCount)
                 .avgRequestPerMinute(Math.round(avgPerMinute * 100.0) / 100.0)
                 .build();
     }
 
     @Override
-    public List<IpRequestStats> getTopIps(int limit) {
+    public List<IpRequestStats> getTopIps(int limit, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+        if (start != null || end != null) {
+            return requestLogRepository.findTopIpsWithDateFilter(start, end, PageRequest.of(0, limit));
+        }
         return requestLogRepository.findTopIps(PageRequest.of(0, limit));
     }
 
     @Override
-    public List<EndpointRequestStats> getTopEndpoints(int limit) {
+    public List<EndpointRequestStats> getTopEndpoints(int limit, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+        if (start != null || end != null) {
+            return requestLogRepository.findTopEndpointsWithDateFilter(start, end, PageRequest.of(0, limit));
+        }
         return requestLogRepository.findTopEndpoints(PageRequest.of(0, limit));
     }
 

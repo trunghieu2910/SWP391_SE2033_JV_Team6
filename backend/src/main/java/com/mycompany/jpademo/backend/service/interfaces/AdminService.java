@@ -15,7 +15,7 @@ public interface AdminService {
 
     ResponseEntity<String> updateUserStatus(UpdateUserStatusRequest request);
 
-    DashboardStatsResponse getDashboardStats();
+    DashboardStatsResponse getDashboardStats(java.time.LocalDate startDate, java.time.LocalDate endDate);
 
     UserDetailResponse getUserDetail(Integer userId);
 
@@ -23,8 +23,8 @@ public interface AdminService {
 
     ResponseEntity<String> verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin);
 
-    ChartStatsResponse getChartStats();
+    ChartStatsResponse getChartStats(java.time.LocalDate startDate, java.time.LocalDate endDate);
 
-    SearchResponse searchGlobal(String keyword);
+    GlobalSearchResponse searchGlobal(String keyword);
 }
 

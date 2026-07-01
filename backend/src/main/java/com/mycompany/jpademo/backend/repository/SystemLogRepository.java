@@ -30,10 +30,23 @@ public interface SystemLogRepository extends JpaRepository<SystemLog, Integer> {
 
     List<SystemLog> findTop10ByUser_UserIdOrderByPerformedAtDesc(Integer userId);
 
-    @Query("SELECT l FROM SystemLog l " +
-            "JOIN l.user u " +
-            "WHERE LOWER(l.action) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(l.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    List<SystemLog> searchLogs(@Param("keyword") String keyword, Pageable pageable);
+    @Query("SELECT l FROM SystemLog l WHERE " +
+            "(:userId IS NULL OR l.user.userId = :userId) AND " +
+            "(:action IS NULL OR l.action = :action) AND " +
+            "(:keyword IS NULL OR LOWER(l.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+            "(CAST(:startDate AS timestamp) IS NULL OR l.performedAt >= :startDate) AND " +
+            "(CAST(:endDate AS timestamp) IS NULL OR l.performedAt <= :endDate)")
+    Page<SystemLog> filterLogs(
+            @Param("userId") Integer userId,
+            @Param("action") String action,
+            @Param("keyword") String keyword,
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
+            Pageable pageable);
+
+    @Query("SELECT l FROM SystemLog l WHERE " +
+            "LOWER(l.action) LIKE LOWER(:keyword) OR " +
+            "LOWER(l.description) LIKE LOWER(:keyword) OR " +
+            "LOWER(l.user.userName) LIKE LOWER(:keyword)")
+    List<SystemLog> searchLogsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

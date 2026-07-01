@@ -5,6 +5,7 @@ import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
+import com.mycompany.jpademo.backend.entity.BlockedIP;
 import com.mycompany.jpademo.backend.entity.Role;
 import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
@@ -14,10 +15,7 @@ import com.mycompany.jpademo.backend.exception.DuplicateResourceException;
 import com.mycompany.jpademo.backend.exception.InvalidOtpException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.exception.UserNotFoundException;
-import com.mycompany.jpademo.backend.repository.DiagnosisSessionRepository;
-import com.mycompany.jpademo.backend.repository.RoleRepository;
-import com.mycompany.jpademo.backend.repository.SystemLogRepository;
-import com.mycompany.jpademo.backend.repository.UserRepository;
+import com.mycompany.jpademo.backend.repository.*;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
 import com.mycompany.jpademo.backend.util.EmailUtil;
@@ -25,6 +23,7 @@ import com.mycompany.jpademo.backend.util.OtpUtil;
 import com.mycompany.jpademo.backend.cache.PendingDoctorData;
 import com.mycompany.jpademo.backend.cache.PendingDoctorStore;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,10 +33,15 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
@@ -52,6 +56,8 @@ public class AdminServiceImpl implements AdminService {
     private final DiagnosisSessionRepository diagnosisSessionRepository;
 
     private final EmailService emailService;
+
+    private final BlockedIPRepository blockedIPRepository;
 
 
     @Override
@@ -222,13 +228,16 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public DashboardStatsResponse getDashboardStats() {
+    public DashboardStatsResponse getDashboardStats(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+
         return DashboardStatsResponse.builder()
-                .totalUsers(userRepository.count())
-                .totalDoctors(userRepository.countByRoleRoleName(RoleName.DOCTOR))
-                .totalPatients(userRepository.countByRoleRoleName(RoleName.PATIENT))
-                .blockedUsers(userRepository.countByStatus(UserStatus.BANNED))
-                .totalDiagnosisSessions(diagnosisSessionRepository.count())
+                .totalUsers(userRepository.countUsersWithDateFilter(start, end))
+                .totalDoctors(userRepository.countUsersByRoleWithDateFilter(RoleName.DOCTOR, start, end))
+                .totalPatients(userRepository.countUsersByRoleWithDateFilter(RoleName.PATIENT, start, end))
+                .blockedUsers(userRepository.countUsersByStatusWithDateFilter(UserStatus.BANNED, start, end))
+                .totalDiagnosisSessions(diagnosisSessionRepository.countSessionsWithDateFilter(start, end))
                 .build();
     }
 
@@ -244,22 +253,74 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ChartStatsResponse getChartStats() {
-        List<Object[]> userStats = userRepository.getUserRegistrationsByMonth();
-        List<Object[]> sessionStats = diagnosisSessionRepository.getDiagnosisSessionsByMonth();
+    public ChartStatsResponse getChartStats(LocalDate startDate, LocalDate endDate) {
+        try {
+            // Nếu không có filter, mặc định chỉ lấy 6 tháng gần nhất
+            if (startDate == null && endDate == null) {
+                endDate = LocalDate.now();
+                startDate = endDate.minusMonths(6); // Chỉ lấy 6 tháng
+            }
 
-        return ChartStatsResponse.builder()
-                .userRegistrations(mapToMonthlyStats(userStats))
-                .diagnosisSessions(mapToMonthlyStats(sessionStats))
-                .build();
+            LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+            LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+
+            // Lấy dữ liệu với giới hạn
+            List<Object[]> userResults = userRepository.getMonthlyUserRegistrations(start, end);
+            List<MonthlyStats> userRegistrations = new ArrayList<>();
+            if (userResults != null && !userResults.isEmpty()) {
+                // Giới hạn tối đa 6 tháng
+                int maxSize = Math.min(userResults.size(), 6);
+                userRegistrations = userResults.stream()
+                        .limit(maxSize)
+                        .map(row -> MonthlyStats.builder()
+                                .month(row[0].toString())
+                                .count(((Number) row[1]).longValue())
+                                .build())
+                        .collect(Collectors.toList());
+            }
+
+            List<Object[]> sessionResults = diagnosisSessionRepository.getMonthlyDiagnosisSessions(start, end);
+            List<MonthlyStats> diagnosisSessions = new ArrayList<>();
+            if (sessionResults != null && !sessionResults.isEmpty()) {
+                int maxSize = Math.min(sessionResults.size(), 6);
+                diagnosisSessions = sessionResults.stream()
+                        .limit(maxSize)
+                        .map(row -> MonthlyStats.builder()
+                                .month(row[0].toString())
+                                .count(((Number) row[1]).longValue())
+                                .build())
+                        .collect(Collectors.toList());
+            }
+
+            return ChartStatsResponse.builder()
+                    .userRegistrations(userRegistrations)
+                    .diagnosisSessions(diagnosisSessions)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Lỗi khi lấy chart stats: ", e);
+            return ChartStatsResponse.builder()
+                    .userRegistrations(new ArrayList<>())
+                    .diagnosisSessions(new ArrayList<>())
+                    .build();
+        }
     }
 
     @Override
-    public SearchResponse searchGlobal(String keyword) {
+    public GlobalSearchResponse searchGlobal(String keyword) {
         Pageable limit = PageRequest.of(0, 5);
 
-        List<User> users = userRepository.searchUsers(keyword, limit);
-        List<SystemLog> logs = systemLogRepository.searchLogs(keyword, limit);
+        if (keyword == null || keyword.isEmpty()) {
+            return GlobalSearchResponse.builder()
+                    .users(new ArrayList<>())
+                    .logs(new ArrayList<>())
+                    .blockedIPs(new ArrayList<>())
+                    .build();
+        }
+
+        List<User> users = userRepository.searchUsersByKeyword(keyword, limit);
+        List<SystemLog> logs = systemLogRepository.searchLogsByKeyword(keyword, limit);
+        List<BlockedIP> blockedIPs = blockedIPRepository.searchByKeyword(keyword, limit);
 
         List<UserSearchDTO> userDTOs = users.stream()
                 .map(this::mapToUserSearchDTO)
@@ -269,10 +330,41 @@ public class AdminServiceImpl implements AdminService {
                 .map(this::mapToLogSearchDTO)
                 .collect(Collectors.toList());
 
-        return SearchResponse.builder()
+        List<SecuritySearchDTO> searchDTOs = blockedIPs.stream()
+                .map(this::mapToSecuritySearchDTO)
+                .collect(Collectors.toList());
+
+        return GlobalSearchResponse.builder()
                 .users(userDTOs)
                 .logs(logDTOs)
+                .blockedIPs(searchDTOs)
                 .build();
+    }
+
+    private List<MonthlyStats> getMonthlyUserRegistrations(LocalDate startDate, LocalDate endDate) {
+        try {
+            LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+            LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+
+            List<Object[]> results = userRepository.getMonthlyUserRegistrations(start, end);
+            return mapToMonthlyStats(results);
+        } catch (Exception e) {
+            log.error("Lỗi khi lấy monthly user registrations: ", e);
+            return new ArrayList<>();
+        }
+    }
+
+    private List<MonthlyStats> getMonthlyDiagnosisSessions(LocalDate startDate, LocalDate endDate) {
+        try {
+            LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+            LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+
+            List<Object[]> results = diagnosisSessionRepository.getMonthlyDiagnosisSessions(start, end);
+            return mapToMonthlyStats(results);
+        } catch (Exception e) {
+            log.error("Lỗi khi lấy monthly diagnosis sessions: ", e);
+            return new ArrayList<>();
+        }
     }
 
     private UserSearchDTO mapToUserSearchDTO(User user) {
@@ -290,6 +382,7 @@ public class AdminServiceImpl implements AdminService {
         return LogSearchDTO.builder()
                 .logId(log.getLogId())
                 .action(log.getAction())
+                .actionDisplay(mapActionToVietnamese(log.getAction()))
                 .description(log.getDescription())
                 .username(log.getUser().getUserName())
                 .performedAt(log.getPerformedAt())
@@ -325,6 +418,20 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    private String mapActionToVietnamese(String action) {
+        switch (action) {
+            case "LOGIN": return "Đăng nhập";
+            case "LOGOUT": return "Đăng xuất";
+            case "BAN_USER": return "Khóa User";
+            case "UNBAN_USER": return "Mở khóa";
+            case "CREATE_DOCTOR": return "Tạo bác sĩ";
+            case "UPDATE_USER_STATUS": return "Đổi trạng thái";
+            case "BLOCK_IP": return "Chặn IP";
+            case "UNBLOCK_IP": return "Mở khóa IP";
+            default: return action;
+        }
+    }
+
     private SystemLogResponse mapToLogResponse(SystemLog log) {
         return SystemLogResponse.builder()
                 .logId(log.getLogId())
@@ -334,6 +441,46 @@ public class AdminServiceImpl implements AdminService {
                 .targetId(log.getTargetId())
                 .performedAt(log.getPerformedAt())
                 .build();
+    }
+
+    private SecuritySearchDTO mapToSecuritySearchDTO(BlockedIP blockedIp) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+        return SecuritySearchDTO.builder()
+                .ipAddress(blockedIp.getIpAddress())
+                .reason(blockedIp.getReason())
+                .blockedAt(blockedIp.getCreatedAt() != null ? blockedIp.getCreatedAt().format(formatter) : "")
+                .createdBy(blockedIp.getCreatedBy())
+                .build();
+    }
+
+    // Helper method để lọc 12 tháng gần nhất
+    private List<MonthlyStats> filterLast12Months(List<MonthlyStats> data, LocalDate fromDate) {
+        if (data == null || data.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Giả sử month có format "MM/yyyy"
+        List<MonthlyStats> filtered = new ArrayList<>();
+        for (MonthlyStats item : data) {
+            try {
+                String monthStr = item.getMonth();
+                if (monthStr != null && monthStr.contains("/")) {
+                    String[] parts = monthStr.split("/");
+                    if (parts.length == 2) {
+                        int month = Integer.parseInt(parts[0]);
+                        int year = Integer.parseInt(parts[1]);
+                        LocalDate itemDate = LocalDate.of(year, month, 1);
+                        if (itemDate.isAfter(fromDate) || itemDate.isEqual(fromDate)) {
+                            filtered.add(item);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Bỏ qua item không parse được
+            }
+        }
+        return filtered;
     }
 
 

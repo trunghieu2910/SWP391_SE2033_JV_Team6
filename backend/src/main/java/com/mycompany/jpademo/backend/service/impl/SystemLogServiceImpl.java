@@ -15,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,32 +25,10 @@ public class SystemLogServiceImpl implements SystemLogService {
     private final UserRepository userRepository;
 
     @Override
-    public Page<SystemLogResponse> getLogs(Integer userId, String action, String keyword, Pageable pageable) {
-        Page<SystemLog> systemLogs;
-        boolean hasUserId = userId != null;
-        boolean hasAction = action != null && !action.isBlank();
-        boolean hasKeyword = keyword != null && !keyword.isBlank();
-        if (hasAction && hasUserId && hasKeyword) {
-            systemLogs = systemLogRepository.findByUserUserIdAndActionAndDescriptionContainingIgnoreCase(
-                    userId, action, keyword, pageable);
-        } else if (hasAction && hasUserId) {
-            systemLogs = systemLogRepository.findByUserUserIdAndAction(
-                    userId, action, pageable);
-        } else if (hasAction && hasKeyword) {
-            systemLogs = systemLogRepository.findByActionAndDescriptionContainingIgnoreCase(
-                    action, keyword, pageable);
-        } else if (hasKeyword && hasUserId) {
-            systemLogs = systemLogRepository.findByUserUserIdAndDescriptionContainingIgnoreCase(
-                    userId, keyword, pageable);
-        } else if (hasAction) {
-            systemLogs = systemLogRepository.findByAction(action, pageable);
-        } else if (hasKeyword) {
-            systemLogs = systemLogRepository.findByDescriptionContainingIgnoreCase(keyword, pageable);
-        } else if (hasUserId) {
-            systemLogs = systemLogRepository.findByUserUserId(userId, pageable);
-        } else {
-            systemLogs = systemLogRepository.findAll(pageable);
-        }
+    public Page<SystemLogResponse> getLogs(Integer userId, String action, String keyword, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        String cleanAction = (action == null || action.isBlank()) ? null : action;
+        String cleanKeyword = (keyword == null || keyword.isBlank()) ? null : keyword;
+        Page<SystemLog> systemLogs = systemLogRepository.filterLogs(userId, cleanAction, cleanKeyword, startDate, endDate, pageable);
         return systemLogs.map(this::mapToSystemLogRespone);
     }
 

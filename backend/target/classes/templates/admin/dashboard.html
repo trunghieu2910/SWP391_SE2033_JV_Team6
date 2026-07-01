@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: main-layout(~{::main}, 'Tổng quan hệ thống', 'dashboard')}">
+<body>
+<main>
+    <!-- Date Filter Bar - Cập nhật đẹp hơn -->
+    <div class="filter-bar">
+        <div class="filter-row">
+            <div class="filter-info">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>Lọc theo thời gian</span>
+                <span th:if="${startDate != null and endDate != null}"
+                      class="filter-date-range">
+                (<span th:text="${#temporals.format(startDate, 'dd/MM/yyyy')}"></span>
+                <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem; margin: 0 4px;"></i>
+                <span th:text="${#temporals.format(endDate, 'dd/MM/yyyy')}"></span>)
+            </span>
+            </div>
+
+            <form th:action="@{/admin/dashboard}" method="get" class="filter-form-horizontal">
+                <div class="filter-group-horizontal">
+                    <div class="filter-input-horizontal">
+                        <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
+                        <input type="date" name="startDate"
+                               th:value="${startDate}"
+                               class="filter-date-input">
+                    </div>
+
+                    <div class="filter-input-horizontal">
+                        <label><i class="fa-regular fa-calendar"></i> Đến ngày</label>
+                        <input type="date" name="endDate"
+                               th:value="${endDate}"
+                               class="filter-date-input">
+                    </div>
+
+                    <div class="filter-actions-horizontal">
+                        <button type="submit" class="btn-filter btn-apply">
+                            <i class="fa-solid fa-filter"></i> Áp dụng
+                        </button>
+                        <a th:href="@{/admin/dashboard}" class="btn-filter btn-clear">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Filters -->
+    <div class="quick-filters">
+        <span><i class="fa-regular fa-clock"></i> Nhanh:</span>
+        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+           class="quick-filter-btn">Tháng này</a>
+        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(3), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+           class="quick-filter-btn">3 tháng</a>
+        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(6), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+           class="quick-filter-btn">6 tháng</a>
+        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusYears(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+           class="quick-filter-btn">1 năm</a>
+        <a th:href="@{/admin/dashboard}"
+           class="quick-filter-btn quick-filter-all">Tất cả</a>
+    </div>
+
+    <!-- Dashboard Stats Grid -->
+    <link rel="stylesheet" th:href="@{/css/admin/dashboard.css}">
+
+    <div class="dashboard-stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Tổng người dùng</h3>
+                <p th:text="${stats.totalUsers}">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <i class="fa-solid fa-user-md"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Tổng Bác sĩ</h3>
+                <p th:text="${stats.totalDoctors}">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                <i class="fa-solid fa-hospital-user"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Tổng Bệnh nhân</h3>
+                <p th:text="${stats.totalPatients}">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                <i class="fa-solid fa-user-slash"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Bị Khóa</h3>
+                <p th:text="${stats.blockedUsers}">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                <i class="fa-solid fa-stethoscope"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Phiên chẩn đoán</h3>
+                <p th:text="${stats.totalDiagnosisSessions}">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Đăng ký người dùng theo tháng</h3>
+                <a th:href="@{/admin/users}">Xem chi tiết</a>
+            </div>
+            <div id="userChartContainer" style="min-height: 280px;">
+                <canvas id="userChart" style="max-height: 280px; width: 100%;"></canvas>
+            </div>
+            <div id="userChartError" class="chart-error" style="display: none; text-align: center; padding: 40px; color: var(--neutral-light);">
+                <i class="fa-solid fa-chart-line" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                <span>Chưa có dữ liệu đăng ký người dùng</span>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Xu hướng phiên chẩn đoán</h3>
+                <a th:href="@{/admin/logs}">Xem chi tiết</a>
+            </div>
+            <div id="sessionChartContainer" style="min-height: 280px;">
+                <canvas id="sessionChart" style="max-height: 280px; width: 100%;"></canvas>
+            </div>
+            <div id="sessionChartError" class="chart-error" style="display: none; text-align: center; padding: 40px; color: var(--neutral-light);">
+                <i class="fa-solid fa-chart-bar" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                <span>Chưa có dữ liệu phiên chẩn đoán</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng hoạt động gần đây -->
+    <div class="logs-table-container">
+        <div class="logs-table-header">
+            <h3>Nhật ký hoạt động gần đây</h3>
+            <a th:href="@{/admin/logs}">Xem tất cả nhật ký &rarr;</a>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Hành động</th>
+                    <th>Mô tả hoạt động</th>
+                    <th>Người thực hiện</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="log : ${recentLogs}">
+                    <td th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026 12:00:00</td>
+                    <td>
+                        <span th:if="${log.action == 'LOGIN'}" class="badge badge-login">Đăng nhập</span>
+                        <span th:if="${log.action == 'LOGOUT'}" class="badge badge-logout">Đăng xuất</span>
+                        <span th:if="${log.action == 'BAN_USER'}" class="badge badge-ban">Khóa User</span>
+                        <span th:if="${log.action == 'UNBAN_USER'}" class="badge badge-unban">Mở khóa</span>
+                        <span th:if="${log.action == 'CREATE_DOCTOR'}" class="badge badge-create">Tạo bác sĩ</span>
+                        <span th:if="${log.action != 'LOGIN' && log.action != 'LOGOUT' && log.action != 'BAN_USER' && log.action != 'UNBAN_USER' && log.action != 'CREATE_DOCTOR'}"
+                              class="badge badge-other" th:text="${log.action}">Hoạt động</span>
+                    </td>
+                    <td th:text="${log.description}">Mô tả hoạt động</td>
+                    <td th:text="${log.userName != null ? log.userName : 'Hệ thống'}">admin</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(recentLogs)}">
+                    <td colspan="4" style="text-align: center; color: var(--neutral-light); padding: 30px;">
+                        <i class="fa-solid fa-folder-open" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                        Không có nhật ký hoạt động nào trong khoảng thời gian này
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Load Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Truyền dữ liệu từ Backend vào JavaScript -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        try {
+            var userData = /*[[${charts.userRegistrations}]]*/ [];
+            var sessionData = /*[[${charts.diagnosisSessions}]]*/ [];
+
+            console.log('✅ User Data:', userData);
+            console.log('✅ Session Data:', sessionData);
+
+            window._userData = userData;
+            window._sessionData = sessionData;
+
+        } catch(e) {
+            console.error('❌ Lỗi lấy dữ liệu:', e);
+            window._userData = [];
+            window._sessionData = [];
+        }
+        /*]]>*/
+    </script>
+
+    <!-- Dashboard JavaScript -->
+    <script th:src="@{/js/admin/dashboard.js}"></script>
+</main>
+</body>
+</html>

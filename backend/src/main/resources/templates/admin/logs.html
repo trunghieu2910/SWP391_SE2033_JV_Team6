@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: main-layout(~{::main}, 'Nhật ký hoạt động', 'logs')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/admin/logs.css}">
+
+    <!-- Filter -->
+    <div class="filter-card">
+        <form th:action="@{/admin/logs}" method="get" class="filter-grid">
+            <div class="form-field">
+                <label><i class="fa-regular fa-id-card"></i> User ID</label>
+                <input type="number" name="userId" th:value="${userId}" placeholder="ID">
+            </div>
+            <div class="form-field">
+                <label><i class="fa-regular fa-circle-play"></i> Hành động</label>
+                <select name="action">
+                    <option value="">Tất cả</option>
+                    <option value="LOGIN" th:selected="${action == 'LOGIN'}">Đăng nhập</option>
+                    <option value="LOGOUT" th:selected="${action == 'LOGOUT'}">Đăng xuất</option>
+                    <option value="BAN_USER" th:selected="${action == 'BAN_USER'}">Khóa tài khoản</option>
+                    <option value="UNBAN_USER" th:selected="${action == 'UNBAN_USER'}">Mở khóa</option>
+                    <option value="CREATE_DOCTOR" th:selected="${action == 'CREATE_DOCTOR'}">Tạo bác sĩ</option>
+                    <option value="UPDATE_USER_STATUS" th:selected="${action == 'UPDATE_USER_STATUS'}">Đổi trạng thái</option>
+                    <option value="BLOCK_IP" th:selected="${action == 'BLOCK_IP'}">Chặn IP</option>
+                    <option value="UNBLOCK_IP" th:selected="${action == 'UNBLOCK_IP'}">Mở khóa IP</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label><i class="fa-regular fa-keyboard"></i> Từ khóa</label>
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm...">
+            </div>
+            <div class="form-field date-field">
+                <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
+                <input type="date" name="startDate" th:value="${startDate}">
+            </div>
+            <div class="form-field date-field">
+                <label><i class="fa-regular fa-calendar"></i> Đến ngày</label>
+                <input type="date" name="endDate" th:value="${endDate}">
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn-action btn-primary">
+                    <i class="fa-solid fa-magnifying-glass"></i> Lọc
+                </button>
+                <a th:href="@{/admin/logs}" class="btn-action btn-outline">
+                    <i class="fa-solid fa-rotate"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="table-card">
+        <div class="table-header">
+            <div class="table-title">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Nhật ký hoạt động</span>
+                <span class="total-count" th:text="'(' + ${logs.totalElements} + ')'">(0)</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>#ID</th>
+                    <th>Thời gian</th>
+                    <th>Hành động</th>
+                    <th>Mô tả</th>
+                    <th>Target</th>
+                    <th>Người thực hiện</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="log : ${logs.content}" class="log-row">
+                    <td class="log-id" th:text="${log.logId}">1024</td>
+                    <td class="log-time" th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026 12:00:00</td>
+                    <td>
+                        <!-- MAP HÀNH ĐỘNG THÀNH TIẾNG VIỆT -->
+                        <span class="badge"
+                              th:classappend="${log.action == 'LOGIN' ? 'badge-login' :
+                                               log.action == 'LOGOUT' ? 'badge-logout' :
+                                               log.action == 'BAN_USER' ? 'badge-ban' :
+                                               log.action == 'UNBAN_USER' ? 'badge-unban' :
+                                               log.action == 'CREATE_DOCTOR' ? 'badge-create' :
+                                               log.action == 'UPDATE_USER_STATUS' ? 'badge-update' :
+                                               log.action == 'BLOCK_IP' ? 'badge-block-ip' :
+                                               log.action == 'UNBLOCK_IP' ? 'badge-unblock-ip' : 'badge-other'}">
+
+                            <span th:if="${log.action == 'LOGIN'}">Đăng nhập</span>
+                            <span th:if="${log.action == 'LOGOUT'}">Đăng xuất</span>
+                            <span th:if="${log.action == 'BAN_USER'}">Khóa User</span>
+                            <span th:if="${log.action == 'UNBAN_USER'}">Mở khóa</span>
+                            <span th:if="${log.action == 'CREATE_DOCTOR'}">Tạo bác sĩ</span>
+                            <span th:if="${log.action == 'UPDATE_USER_STATUS'}">Đổi trạng thái</span>
+                            <span th:if="${log.action == 'BLOCK_IP'}">Chặn IP</span>
+                            <span th:if="${log.action == 'UNBLOCK_IP'}">Mở khóa IP</span>
+                            <span th:if="${log.action != 'LOGIN' and log.action != 'LOGOUT' and log.action != 'BAN_USER' and log.action != 'UNBAN_USER' and log.action != 'CREATE_DOCTOR' and log.action != 'UPDATE_USER_STATUS' and log.action != 'BLOCK_IP' and log.action != 'UNBLOCK_IP'}"
+                                  th:text="${log.action}">Khác</span>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="log-desc" th:text="${log.description}">Mô tả hoạt động</div>
+                    </td>
+                    <td>
+                        <span th:if="${log.targetType != null}" class="target-info">
+                            <span class="target-type" th:text="${log.targetType}">User</span>
+                            <span class="target-id" th:text="'#' + ${log.targetId}">#10</span>
+                        </span>
+                        <span th:if="${log.targetType == null}" class="target-info">-</span>
+                    </td>
+                    <td class="log-user" th:text="${log.userName != null ? log.userName : 'Hệ thống'}">admin</td>
+                </tr>
+                <tr th:if="${logs.isEmpty()}">
+                    <td colspan="6" class="empty-state">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <p>Không tìm thấy nhật ký hoạt động</p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar" th:if="${logs.totalPages > 1}">
+            <div class="pagination-info">
+                <span th:text="'Trang ' + (${logs.number} + 1) + ' / ' + ${logs.totalPages}">Trang 1 / 10</span>
+            </div>
+            <div class="page-links">
+                <a th:if="${logs.number > 0}"
+                   th:href="@{/admin/logs(page=${logs.number - 1}, userId=${userId}, action=${action}, keyword=${keyword}, startDate=${startDate}, endDate=${endDate})}"
+                   class="page-btn">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                <a th:each="pageIdx : ${#numbers.sequence(0, logs.totalPages - 1)}"
+                   th:if="${pageIdx >= logs.number - 2 and pageIdx <= logs.number + 2}"
+                   th:href="@{/admin/logs(page=${pageIdx}, userId=${userId}, action=${action}, keyword=${keyword}, startDate=${startDate}, endDate=${endDate})}"
+                   th:text="${pageIdx + 1}"
+                   class="page-btn"
+                   th:classappend="${pageIdx == logs.number ? 'active' : ''}"></a>
+                <a th:if="${logs.number < logs.totalPages - 1}"
+                   th:href="@{/admin/logs(page=${logs.number + 1}, userId=${userId}, action=${action}, keyword=${keyword}, startDate=${startDate}, endDate=${endDate})}"
+                   class="page-btn">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/admin/logs.js}"></script>
+</main>
+</body>
+</html>
