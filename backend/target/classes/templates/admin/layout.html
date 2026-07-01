@@ -25,7 +25,7 @@
         </a>
         <a th:href="@{/admin/users}" class="nav-item" th:classappend="${currentTab == 'users' ? 'active' : ''}">
             <i class="fa-solid fa-user-gear"></i>
-            <span>Quản lý User</span>
+            <span>Quản lý người dùng</span>
         </a>
         <a th:href="@{/admin/create-doctor}" class="nav-item" th:classappend="${currentTab == 'create-doctor' ? 'active' : ''}">
             <i class="fa-solid fa-user-plus"></i>
@@ -68,23 +68,24 @@
             <h1 th:text="${title}">Dashboard</h1>
         </div>
         <div class="topbar-right">
-            <form th:action="@{/admin/search}" method="get" class="search-box">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" name="keyword" placeholder="Tìm kiếm toàn hệ thống...">
-            </form>
-            <!-- Đã xóa user-profile ở đây -->
+            <!-- ===== GLOBAL SEARCH ===== -->
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text"
+                           id="globalSearchInput"
+                           name="keyword"
+                           placeholder="Tìm kiếm toàn hệ thống..."
+                           autocomplete="off">
+                </div>
+                <!-- Dropdown kết quả -->
+                <div id="searchResults" class="search-dropdown" style="display: none;">
+                    <!-- Kết quả sẽ được render bởi JavaScript -->
+                </div>
+            </div>
+            <!-- ===== END GLOBAL SEARCH ===== -->
         </div>
     </header>
-
-    <!-- Flash messages -->
-    <div th:if="${success}" class="alert alert-success">
-        <i class="fa-solid fa-circle-check"></i>
-        <span th:text="${success}"></span>
-    </div>
-    <div th:if="${error}" class="alert alert-danger">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span th:text="${error}"></span>
-    </div>
 
     <!-- Dynamic Content Insertion -->
     <div th:replace="${content}"></div>
@@ -110,33 +111,7 @@
     </div>
 </div>
 
-<!-- ===== LOGOUT SCRIPT ===== -->
-<script>
-    function confirmLogout(event) {
-        event.preventDefault();
-        document.getElementById('logoutModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeLogoutModal() {
-        document.getElementById('logoutModal').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-
-    // Close modal when pressing ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeLogoutModal();
-        }
-    });
-
-    // Close modal when clicking outside
-    document.addEventListener('click', function(e) {
-        var modal = document.getElementById('logoutModal');
-        if (e.target === modal) {
-            closeLogoutModal();
-        }
-    });
-</script>
+<!-- Global Search JavaScript -->
+<script th:src="@{/js/admin/global-search.js}"></script>
 </body>
 </html>

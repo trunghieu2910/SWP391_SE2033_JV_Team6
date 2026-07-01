@@ -484,3 +484,39 @@ th {
     justify-content: flex-end;
     gap: 10px;
 }
+
+/* ===== ALERT CLOSE BUTTON ===== */
+.alert {
+    position: relative;
+    padding-right: 45px;
+}
+
+.alert-close {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 4px 8px;
+    line-height: 1;
+}
+
+.alert-close:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.alert-success .alert-close {
+    color: #16a34a;
+}
+
+.alert-danger .alert-close {
+    color: #dc2626;
+}

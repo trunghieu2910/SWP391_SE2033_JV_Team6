@@ -25,10 +25,10 @@ public class SystemLogServiceImpl implements SystemLogService {
     private final UserRepository userRepository;
 
     @Override
-    public Page<SystemLogResponse> getLogs(Integer userId, String action, String keyword, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+    public Page<SystemLogResponse> getLogs(String action, String keyword, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         String cleanAction = (action == null || action.isBlank()) ? null : action;
         String cleanKeyword = (keyword == null || keyword.isBlank()) ? null : keyword;
-        Page<SystemLog> systemLogs = systemLogRepository.filterLogs(userId, cleanAction, cleanKeyword, startDate, endDate, pageable);
+        Page<SystemLog> systemLogs = systemLogRepository.filterLogs(cleanAction, cleanKeyword, startDate, endDate, pageable);
         return systemLogs.map(this::mapToSystemLogRespone);
     }
 

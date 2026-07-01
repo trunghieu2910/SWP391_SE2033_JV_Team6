@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SystemLogRepository extends JpaRepository<SystemLog, Integer> {
@@ -30,23 +31,35 @@ public interface SystemLogRepository extends JpaRepository<SystemLog, Integer> {
 
     List<SystemLog> findTop10ByUser_UserIdOrderByPerformedAtDesc(Integer userId);
 
-    @Query("SELECT l FROM SystemLog l WHERE " +
-            "(:userId IS NULL OR l.user.userId = :userId) AND " +
+    @Query(value = "SELECT * FROM SystemLog l WHERE " +
             "(:action IS NULL OR l.action = :action) AND " +
-            "(:keyword IS NULL OR LOWER(l.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
-            "(CAST(:startDate AS timestamp) IS NULL OR l.performedAt >= :startDate) AND " +
-            "(CAST(:endDate AS timestamp) IS NULL OR l.performedAt <= :endDate)")
+            "(:keyword IS NULL OR " +
+            "l.action COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR " +
+            "l.description COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR " +
+            "l.targetType COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR " +
+            "CAST(l.targetID AS NVARCHAR) LIKE CONCAT('%', :keyword, '%')) AND " +
+            "(:startDate IS NULL OR l.performedAt >= :startDate) AND " +
+            "(:endDate IS NULL OR l.performedAt <= :endDate)",
+            countQuery = "SELECT COUNT(*) FROM SystemLog l WHERE " +
+                    "(:action IS NULL OR l.action = :action) AND " +
+                    "(:keyword IS NULL OR " +
+                    "l.action COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR " +
+                    "l.description COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR " +
+                    "l.targetType COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR " +
+                    "CAST(l.targetID AS NVARCHAR) LIKE CONCAT('%', :keyword, '%')) AND " +
+                    "(:startDate IS NULL OR l.performedAt >= :startDate) AND " +
+                    "(:endDate IS NULL OR l.performedAt <= :endDate)",
+            nativeQuery = true)
     Page<SystemLog> filterLogs(
-            @Param("userId") Integer userId,
             @Param("action") String action,
             @Param("keyword") String keyword,
-            @Param("startDate") java.time.LocalDateTime startDate,
-            @Param("endDate") java.time.LocalDateTime endDate,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
 
     @Query("SELECT l FROM SystemLog l WHERE " +
-            "LOWER(l.action) LIKE LOWER(:keyword) OR " +
-            "LOWER(l.description) LIKE LOWER(:keyword) OR " +
-            "LOWER(l.user.userName) LIKE LOWER(:keyword)")
+            "LOWER(l.action) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(l.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(l.user.userName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<SystemLog> searchLogsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

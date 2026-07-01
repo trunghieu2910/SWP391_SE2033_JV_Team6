@@ -17,6 +17,10 @@
                     <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem; margin: 0 4px;"></i>
                     <span th:text="${#temporals.format(endDate, 'dd/MM/yyyy')}"></span>)
                 </span>
+                <span th:if="${startDate == null or endDate == null}"
+                      class="filter-date-range" style="color: var(--primary); font-weight: 600;">
+                    (Tất cả thời gian)
+                </span>
             </div>
 
             <form th:action="@{/admin/security}" method="get" class="filter-form-horizontal">
@@ -48,9 +52,11 @@
         </div>
     </div>
 
-    <!-- ===== QUICK FILTERS ===== -->
+    <!-- Quick Filters -->
     <div class="quick-filters">
         <span><i class="fa-regular fa-clock"></i> Nhanh:</span>
+        <a th:href="@{/admin/security}"
+           class="quick-filter-btn quick-filter-all">Tất cả</a>
         <a th:href="@{/admin/security(startDate=${#temporals.format(#temporals.createToday().minusMonths(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
            class="quick-filter-btn">Tháng này</a>
         <a th:href="@{/admin/security(startDate=${#temporals.format(#temporals.createToday().minusMonths(3), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
@@ -59,8 +65,6 @@
            class="quick-filter-btn">6 tháng</a>
         <a th:href="@{/admin/security(startDate=${#temporals.format(#temporals.createToday().minusYears(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
            class="quick-filter-btn">1 năm</a>
-        <a th:href="@{/admin/security}"
-           class="quick-filter-btn quick-filter-all">Tất cả</a>
     </div>
 
     <!-- Stats -->

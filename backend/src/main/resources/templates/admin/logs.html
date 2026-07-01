@@ -8,10 +8,8 @@
     <!-- Filter -->
     <div class="filter-card">
         <form th:action="@{/admin/logs}" method="get" class="filter-grid">
-            <div class="form-field">
-                <label><i class="fa-regular fa-id-card"></i> User ID</label>
-                <input type="number" name="userId" th:value="${userId}" placeholder="ID">
-            </div>
+            <!-- ===== ĐÃ XÓA USER ID ===== -->
+
             <div class="form-field">
                 <label><i class="fa-regular fa-circle-play"></i> Hành động</label>
                 <select name="action">
@@ -28,7 +26,7 @@
             </div>
             <div class="form-field">
                 <label><i class="fa-regular fa-keyboard"></i> Từ khóa</label>
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm...">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm hành động, mô tả, mục tiêu...">
             </div>
             <div class="form-field date-field">
                 <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
@@ -67,7 +65,7 @@
                     <th>Thời gian</th>
                     <th>Hành động</th>
                     <th>Mô tả</th>
-                    <th>Target</th>
+                    <th>Mục tiêu</th>
                     <th>Người thực hiện</th>
                 </tr>
                 </thead>
@@ -76,7 +74,6 @@
                     <td class="log-id" th:text="${log.logId}">1024</td>
                     <td class="log-time" th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026 12:00:00</td>
                     <td>
-                        <!-- MAP HÀNH ĐỘNG THÀNH TIẾNG VIỆT -->
                         <span class="badge"
                               th:classappend="${log.action == 'LOGIN' ? 'badge-login' :
                                                log.action == 'LOGOUT' ? 'badge-logout' :

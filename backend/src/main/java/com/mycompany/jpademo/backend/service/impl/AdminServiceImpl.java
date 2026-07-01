@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,9 +35,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -96,16 +93,15 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @AdminActionLog(action = "UPDATE_USER_STATUS",
             targetType = "User")
-    public ResponseEntity<String> updateUserStatus(UpdateUserStatusRequest request) {
+    public boolean updateUserStatus(UpdateUserStatusRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException(
                         "User not found with id: " + request.getUserId()));
         if (RoleName.ADMIN.equals(user.getRole().getRoleName())) {
-            throw new UnauthorizedActionException("Cannot change status of an admin user");
+            throw new UnauthorizedActionException("Không thể thay đổi trạng thái của Admin");
         }
         if (user.getStatus() == request.getStatus()) {
-            return ResponseEntity.badRequest()
-                    .body("User already has status: " + request.getStatus());
+            return false;
         }
         user.setStatus(request.getStatus());
         if (request.getStatus() == UserStatus.BANNED) {
@@ -117,36 +113,37 @@ public class AdminServiceImpl implements AdminService {
         }
         userRepository.save(user);
         sendStatusEmail(user, request.getStatus(), request.getReason());
-        return ResponseEntity.ok("User status updated successfully");
+        return true;
     }
-
     @Override
-    @AdminActionLog(action = "CREATE_DOCTOR",
-            targetType = "User")
-    public ResponseEntity<String> verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin) {
+    public void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin) {
         String otp = request.getOtp();
+
         PendingDoctorData pending = PendingDoctorStore.getPendingByAdminEmail(admin.getEmail());
         if (pending == null) {
-            return ResponseEntity.badRequest().body("No pending doctor creation found or it has expired.");
+            throw new IllegalArgumentException("Không tìm thấy yêu cầu tạo bác sĩ hoặc đã hết hạn.");
         }
+
         boolean isOtpValid = OtpUtil.verifyOtp(admin.getEmail(), otp);
         if (!isOtpValid) {
-            throw new InvalidOtpException();
+            throw new InvalidOtpException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
+
         OtpUtil.removeOtp(admin.getEmail());
         PendingDoctorStore.removePending(pending.getRequestId());
         if (userRepository.existsByEmail(pending.getEmail())) {
-            throw new DuplicateResourceException("Email is already in use: " + pending.getEmail());
+            throw new DuplicateResourceException("Tài khoản email đã tồn tại: " + pending.getEmail());
         }
         if (userRepository.findByUserName(pending.getUserName()).isPresent()) {
-            throw new DuplicateResourceException("Username is already exists: " + pending.getUserName());
+            throw new DuplicateResourceException("Tên người dùng đã tồn tại: " + pending.getUserName());
         }
         if (userRepository.existsByPhoneNumber(pending.getPhoneNumber())) {
-            throw new DuplicateResourceException("Phone number is already in use: " + pending.getPhoneNumber());
+            throw new DuplicateResourceException("Số điện thoại đã được sử dụng: " + pending.getPhoneNumber());
         }
         if (pending.getNationalId() != null && userRepository.existsByNationalID(pending.getNationalId())) {
-            throw new DuplicateResourceException("National ID is already in use: " + pending.getNationalId());
+            throw new DuplicateResourceException("CCCD đã được sử dụng: " + pending.getNationalId());
         }
+
         User user = new User();
         user.setUserName(pending.getUserName());
         user.setFullName(pending.getFullName());
@@ -156,33 +153,43 @@ public class AdminServiceImpl implements AdminService {
         user.setNationalID(pending.getNationalId());
         user.setCertificateUrl(pending.getCertificateUrl());
         Role doctorRole = roleRepository.findByRoleName(RoleName.DOCTOR)
-                .orElseThrow(() -> new UserNotFoundException("Doctor role not found"));
+                .orElseThrow(() -> new UserNotFoundException("Không tìm thấy role bác sĩ"));
         user.setRole(doctorRole);
-
         String rawPassword = UUID.randomUUID().toString().substring(0, 8);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        SystemLog log = SystemLog.builder()
+                .action("CREATE_DOCTOR")
+                .description("ADMIN: Tạo tài khoản bác sĩ: " + savedUser.getFullName() + " (" + savedUser.getUserName() + ")")
+                .targetType("User")
+                .targetId(savedUser.getUserId())
+                .user(admin)
+                .performedAt(LocalDateTime.now())
+                .build();
+        systemLogRepository.save(log);
+
         emailService.sendEmail(
-                user.getEmail(),
+                savedUser.getEmail(),
                 "Tài khoản bác sĩ đã được tạo",
-                EmailUtil.buildCreateDoctorAccountTemplate(user.getFullName(), user.getUserName(), rawPassword)
+                EmailUtil.buildCreateDoctorAccountTemplate(savedUser.getFullName(), savedUser.getUserName(), rawPassword)
         );
-        return ResponseEntity.ok("Doctor created successfully");
     }
+
 
     @Override
     public InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException("Email is already in use: " + request.getEmail());
+            throw new DuplicateResourceException("Tài khoản email đã tồn tại: " + request.getEmail());
         }
         if (userRepository.findByUserName(request.getUserName()).isPresent()) {
-            throw new DuplicateResourceException("Username is already exists: " + request.getUserName());
+            throw new DuplicateResourceException("Tên người dùng đã tồn tại: " + request.getUserName());
         }
         if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new DuplicateResourceException("Phone number is already in use: " + request.getPhoneNumber());
+            throw new DuplicateResourceException("Số điện thoại đã được sử dụng: " + request.getPhoneNumber());
         }
         if (request.getNationalId() != null && userRepository.existsByNationalID(request.getNationalId())) {
-            throw new DuplicateResourceException("National ID is already in use: " + request.getNationalId());
+            throw new DuplicateResourceException("CCCD đã được sử dụng: " + request.getNationalId());
         }
         String requestId = UUID.randomUUID().toString();
         String certificateUrl = null;
@@ -258,17 +265,15 @@ public class AdminServiceImpl implements AdminService {
             // Nếu không có filter, mặc định chỉ lấy 6 tháng gần nhất
             if (startDate == null && endDate == null) {
                 endDate = LocalDate.now();
-                startDate = endDate.minusMonths(6); // Chỉ lấy 6 tháng
+                startDate = endDate.minusMonths(6);
             }
 
             LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
             LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
 
-            // Lấy dữ liệu với giới hạn
             List<Object[]> userResults = userRepository.getMonthlyUserRegistrations(start, end);
             List<MonthlyStats> userRegistrations = new ArrayList<>();
             if (userResults != null && !userResults.isEmpty()) {
-                // Giới hạn tối đa 6 tháng
                 int maxSize = Math.min(userResults.size(), 6);
                 userRegistrations = userResults.stream()
                         .limit(maxSize)
@@ -339,6 +344,38 @@ public class AdminServiceImpl implements AdminService {
                 .logs(logDTOs)
                 .blockedIPs(searchDTOs)
                 .build();
+    }
+
+    @Override
+    public Map<String, Object> resendOtp(String adminEmail) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            PendingDoctorData pending = PendingDoctorStore.getPendingByAdminEmail(adminEmail);
+            if (pending == null) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy yêu cầu tạo bác sĩ đang chờ xử lý.");
+                return response;
+            }
+            String otp = OtpUtil.generateOtp();
+            OtpUtil.saveOtp(adminEmail, otp);
+            emailService.sendEmail(
+                    adminEmail,
+                    "Mã xác thực OTP mới - Tạo tài khoản Bác sĩ",
+                    EmailUtil.buildCreateDoctorOtpForAdmin(adminEmail, otp)
+            );
+            response.put("success", true);
+            response.put("message", "Đã gửi lại mã OTP mới. Vui lòng kiểm tra email.");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Đã xảy ra lỗi khi gửi lại OTP: " + e.getMessage());
+        }
+        return response;
+    }
+
+    @Override
+    public User getAdminUser() {
+        return userRepository.findFirstByRoleRoleName(RoleName.ADMIN)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy admin trong hệ thống"));
     }
 
     private List<MonthlyStats> getMonthlyUserRegistrations(LocalDate startDate, LocalDate endDate) {

@@ -383,6 +383,33 @@
     font-size: 0.9rem;
 }
 
+.btn-resend {
+    background: #f1f5f9;
+    color: var(--neutral-dark);
+    border: 1px solid var(--border-color);
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-resend:hover:not(:disabled) {
+    background: #e2e8f0;
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-resend:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
+
 .form-actions {
     margin-top: 6px;
 }
@@ -469,11 +496,12 @@
     color: #cbd5e1;
 }
 
+/* ===== OTP TIMER ===== */
 .otp-timer {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     color: var(--neutral-light);
 }
 
@@ -481,6 +509,147 @@
     color: var(--primary);
 }
 
+#timerCountdown {
+    font-weight: 700;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+/* ===== ALERT / FLASH MESSAGES ===== */
+.alert {
+    padding: 14px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    animation: slideDown 0.3s ease;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+
+.alert-success i {
+    color: #16a34a;
+    font-size: 1.2rem;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+.alert-danger i {
+    color: #dc2626;
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+.alert-danger ul {
+    color: #991b1b;
+    font-weight: 500;
+}
+
+.alert-danger ul li {
+    list-style: disc;
+}
+
+.alert-warning {
+    background: #fffbeb;
+    color: #d97706;
+    border-color: #fcd34d;
+}
+
+.alert-warning i {
+    color: #d97706;
+    font-size: 1.2rem;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== OTP ERROR - RỘNG TOÀN BỘ ===== */
+.otp-error {
+    display: none;
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: 1px solid #fca5a5;
+    margin-top: 16px;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    animation: shake 0.3s ease;
+    box-sizing: border-box;
+}
+
+.otp-error i {
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+.otp-error.show {
+    display: block !important;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+}
+
+/* ===== OTP ACTIONS ===== */
+.otp-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+/* ===== RESPONSIVE - OTP ERROR ===== */
+@media (max-width: 480px) {
+    .otp-error {
+        font-size: 0.82rem;
+        padding: 10px 14px;
+    }
+
+    .otp-error i {
+        font-size: 0.9rem;
+        margin-right: 6px;
+    }
+}
+
+/* ===== OTP RESEND ===== */
+.otp-resend {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+/* ===== OTP ACTIONS ===== */
 .otp-actions {
     display: flex;
     gap: 12px;
@@ -622,5 +791,10 @@
 
     .file-upload-hint {
         font-size: 0.7rem;
+    }
+
+    .otp-error {
+        font-size: 0.8rem;
+        padding: 10px 12px;
     }
 }

@@ -4,9 +4,13 @@ import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
+import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
+import com.mycompany.jpademo.backend.exception.DuplicateResourceException;
+import com.mycompany.jpademo.backend.exception.InvalidOtpException;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
+import com.mycompany.jpademo.backend.util.OtpUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -27,7 +32,10 @@ import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -41,35 +49,28 @@ import com.mycompany.jpademo.backend.entity.User;
 public class AdminController {
     private final AdminService adminService;
     private final SystemLogService systemLogService;
-    private final UserRepository userRepository;
 
-    @GetMapping("/dashboard")
+    @GetMapping({"/", "/dashboard"})
     public String dashboard(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             Model model) {
 
         try {
-            log.info("========== DASHBOARD REQUEST ==========");
-            log.info("StartDate: {}, EndDate: {}", startDate, endDate);
-
             // Nếu không có filter, mặc định 6 tháng gần nhất
             if (startDate == null && endDate == null) {
                 endDate = LocalDate.now();
                 startDate = endDate.minusMonths(6);
-                log.info("No filter, using default: {} to {}", startDate, endDate);
             }
 
             // Nếu chỉ có startDate, set endDate = startDate + 1 tháng
             if (startDate != null && endDate == null) {
                 endDate = startDate.plusMonths(1);
-                log.info("Only startDate, set endDate: {}", endDate);
             }
 
             // Nếu chỉ có endDate, set startDate = endDate - 6 tháng
             if (endDate != null && startDate == null) {
                 startDate = endDate.minusMonths(6);
-                log.info("Only endDate, set startDate: {}", startDate);
             }
 
             // Đảm bảo startDate <= endDate
@@ -110,8 +111,7 @@ public class AdminController {
             LocalDateTime startLogs = startDate != null ? startDate.atStartOfDay() : null;
             LocalDateTime endLogs = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
 
-            Page<SystemLogResponse> recentLogs = systemLogService.getLogs(
-                    null, null, null, startLogs, endLogs,
+            Page<SystemLogResponse> recentLogs = systemLogService.getLogs( null, null, startLogs, endLogs,
                     PageRequest.of(0, 10, Sort.by("performedAt").descending())
             );
             List<SystemLogResponse> logList = recentLogs != null ? recentLogs.getContent() : new ArrayList<>();
@@ -125,7 +125,6 @@ public class AdminController {
         } catch (Exception e) {
             log.error("ERROR loading dashboard: ", e);
 
-            // Trả về dữ liệu rỗng
             model.addAttribute("stats", DashboardStatsResponse.builder()
                     .totalUsers(0L)
                     .totalDoctors(0L)
@@ -175,16 +174,24 @@ public class AdminController {
     @PostMapping("/users/{id}/status")
     public String updateUserStatus(
             @PathVariable Integer id,
-            @RequestParam UserStatus status,
-            @RequestParam String reason,
+            @Valid @ModelAttribute UpdateUserStatusRequest request,
+            BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
+        request.setUserId(id);
+        if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(error -> error.getDefaultMessage())
+                    .collect(Collectors.joining(", "));
+            redirectAttributes.addFlashAttribute("error", errorMessage);
+            return "redirect:/admin/users/" + id;
+        }
         try {
-            UpdateUserStatusRequest request = new UpdateUserStatusRequest();
-            request.setUserId(id);
-            request.setStatus(status);
-            request.setReason(reason);
-            adminService.updateUserStatus(request);
-            redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
+            boolean isUpdated = adminService.updateUserStatus(request);
+            if (isUpdated) {
+                redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Không thể cập nhật trạng thái. Vui lòng kiểm tra lại.");
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
@@ -192,11 +199,22 @@ public class AdminController {
     }
 
     @GetMapping("/create-doctor")
-    public String createDoctorPage(Model model) {
+    public String createDoctorPage(@RequestParam(defaultValue = "1") int step,
+                                   @RequestParam(required = false) Integer remainingTime,
+                                   Model model) {
         if (!model.containsAttribute("doctorRequest")) {
             model.addAttribute("doctorRequest", new InitiateCreateDoctorRequest());
         }
-        model.addAttribute("step", 1);
+        String adminEmail = "luugiang205@gmail.com";
+
+        int remainingTimeValue;
+        if (remainingTime != null) {
+            remainingTimeValue = remainingTime;
+        } else {
+            remainingTimeValue = OtpUtil.getRemainingTime(adminEmail);
+        }
+        model.addAttribute("step", step);
+        model.addAttribute("remainingTime", remainingTimeValue);
         return "admin/create-doctor";
     }
 
@@ -207,21 +225,18 @@ public class AdminController {
             @RequestParam(required = false) MultipartFile certificateFile,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
-
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("doctorRequest", request);
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.doctorRequest", result);
+            redirectAttributes.addFlashAttribute("hasErrors", true);
+            redirectAttributes.addFlashAttribute("errors", result.getAllErrors());
             return "redirect:/admin/create-doctor";
         }
-
         try {
             if (certificateFile != null && !certificateFile.isEmpty()) {
                 request.setCertificateFile(certificateFile);
             }
-
-            User adminUser = (userDetails != null) ? userDetails.getUser() : userRepository.findAll().stream()
-                    .filter(u -> "ADMIN".equals(u.getRole().getRoleName().name()))
-                    .findFirst().orElse(null);
+            User adminUser = (userDetails != null) ? userDetails.getUser() :
+                    adminService.getAdminUser();
             InitiateCreateDoctorResponse response = adminService.initiateCreateDoctor(request, adminUser);
             redirectAttributes.addFlashAttribute("requestId", response.getRequestId());
             redirectAttributes.addFlashAttribute("step", 2);
@@ -238,29 +253,34 @@ public class AdminController {
         if (!model.containsAttribute("step")) {
             model.addAttribute("step", 2);
         }
+        if (!model.containsAttribute("remainingTime")) {
+            String adminEmail = "luugiang205@gmail.com";
+            int remainingTime = OtpUtil.getRemainingTime(adminEmail);
+            model.addAttribute("remainingTime", remainingTime);
+        }
         return "admin/create-doctor";
     }
 
     @PostMapping("/create-doctor/confirm")
     public String confirmCreateDoctor(
-            @RequestParam String otp,
+            @Valid @ModelAttribute VerifyPendingDoctorRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
-        try {
-            VerifyPendingDoctorRequest request = new VerifyPendingDoctorRequest();
-            request.setOtp(otp);
-            User adminUser = (userDetails != null) ? userDetails.getUser() : userRepository.findAll().stream()
-                    .filter(u -> "ADMIN".equals(u.getRole().getRoleName().name()))
-                    .findFirst().orElse(null);
-            adminService.verifyAndCreateDoctor(request, adminUser);
-            redirectAttributes.addFlashAttribute("success", "Tạo tài khoản bác sĩ thành công!");
-            return "redirect:/admin/users";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            redirectAttributes.addFlashAttribute("step", 2);
-            return "redirect:/admin/create-doctor/verify";
-        }
+
+        User adminUser = (userDetails != null) ? userDetails.getUser() : adminService.getAdminUser();
+        adminService.verifyAndCreateDoctor(request, adminUser);
+
+        redirectAttributes.addFlashAttribute("success", "Tạo tài khoản bác sĩ thành công!");
+        return "redirect:/admin/users";
     }
+
+    @PostMapping("/create-doctor/resend-otp")
+    @ResponseBody
+    public Map<String, Object> resendOtp() {
+        String adminEmail = "luugiang205@gmail.com";
+        return adminService.resendOtp(adminEmail);
+    }
+
 
     @GetMapping("/logs")
     public String systemLogs(
@@ -273,7 +293,7 @@ public class AdminController {
             Model model) {
         LocalDateTime startLogs = startDate != null ? startDate.atStartOfDay() : null;
         LocalDateTime endLogs = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
-        Page<SystemLogResponse> logs = systemLogService.getLogs(userId, action, keyword, startLogs, endLogs, pageable);
+        Page<SystemLogResponse> logs = systemLogService.getLogs(action, keyword, startLogs, endLogs, pageable);
         model.addAttribute("logs", logs);
         model.addAttribute("userId", userId);
         model.addAttribute("action", action);
@@ -281,12 +301,5 @@ public class AdminController {
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         return "admin/logs";
-    }
-
-    @GetMapping("/search")
-    public String searchGlobal(@RequestParam String keyword, RedirectAttributes redirectAttributes) {
-        // Search and redirect to users page with keyword
-        redirectAttributes.addAttribute("keyword", keyword);
-        return "redirect:/admin/users";
     }
 }

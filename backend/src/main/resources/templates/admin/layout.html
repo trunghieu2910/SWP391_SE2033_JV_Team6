@@ -25,7 +25,7 @@
         </a>
         <a th:href="@{/admin/users}" class="nav-item" th:classappend="${currentTab == 'users' ? 'active' : ''}">
             <i class="fa-solid fa-user-gear"></i>
-            <span>Quản lý User</span>
+            <span>Quản lý người dùng</span>
         </a>
         <a th:href="@{/admin/create-doctor}" class="nav-item" th:classappend="${currentTab == 'create-doctor' ? 'active' : ''}">
             <i class="fa-solid fa-user-plus"></i>
@@ -87,16 +87,6 @@
         </div>
     </header>
 
-    <!-- Flash messages -->
-    <div th:if="${success}" class="alert alert-success">
-        <i class="fa-solid fa-circle-check"></i>
-        <span th:text="${success}"></span>
-    </div>
-    <div th:if="${error}" class="alert alert-danger">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span th:text="${error}"></span>
-    </div>
-
     <!-- Dynamic Content Insertion -->
     <div th:replace="${content}"></div>
 </div>
@@ -121,37 +111,7 @@
     </div>
 </div>
 
-<!-- ===== SCRIPTS ===== -->
 <!-- Global Search JavaScript -->
 <script th:src="@{/js/admin/global-search.js}"></script>
-
-<!-- Logout Script -->
-<script>
-    function confirmLogout(event) {
-        event.preventDefault();
-        document.getElementById('logoutModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeLogoutModal() {
-        document.getElementById('logoutModal').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-
-    // Close modal when pressing ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeLogoutModal();
-        }
-    });
-
-    // Close modal when clicking outside
-    document.addEventListener('click', function(e) {
-        var modal = document.getElementById('logoutModal');
-        if (e.target === modal) {
-            closeLogoutModal();
-        }
-    });
-</script>
 </body>
 </html>

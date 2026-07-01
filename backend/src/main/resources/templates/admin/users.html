@@ -3,6 +3,18 @@
       th:replace="~{admin/layout :: main-layout(~{::main}, 'Quản lý người dùng', 'users')}">
 <body>
 <main>
+    <!-- Flash messages -->
+    <div th:if="${success}" id="successAlert" class="alert alert-success" role="alert" style="margin-bottom: 20px;">
+        <i class="fa-regular fa-circle-check"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="alert-close" onclick="closeAlert(this)">&times;</button>
+    </div>
+    <div th:if="${error}" id="errorAlert" class="alert alert-danger" role="alert" style="margin-bottom: 20px;">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="alert-close" onclick="closeAlert(this)">&times;</button>
+    </div>
+
     <link rel="stylesheet" th:href="@{/css/admin/users.css}">
 
     <!-- Filter Section -->
@@ -17,7 +29,10 @@
                 <label><i class="fa-solid fa-user-tag"></i> Vai trò</label>
                 <select name="role">
                     <option th:each="r : ${roles}" th:value="${r}"
-                            th:text="${r == '' ? 'Tất cả vai trò' : r}"
+                            th:text="${r == '' ? 'Tất cả vai trò' :
+                                    r == 'ADMIN' ? 'Quản trị viên' :
+                                    r == 'DOCTOR' ? 'Bác sĩ' :
+                                    r == 'PATIENT' ? 'Bệnh nhân' : r}"
                             th:selected="${r == role}"></option>
                 </select>
             </div>
@@ -72,17 +87,24 @@
                     <td th:text="${user.userName}">userA</td>
                     <td th:text="${user.email}">userA@gmail.com</td>
                     <td>
-                                <span class="role-badge"
-                                      th:classappend="${user.roleName != null ? 'role-' + user.roleName.toString().toLowerCase() : ''}"
-                                      th:text="${user.roleName}">PATIENT</span>
+                        <span class="role-badge"
+                              th:classappend="${user.roleName != null ? 'role-' + user.roleName.toString().toLowerCase() : ''}"
+                              th:text="${user.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
+                                       user.roleName?.name() == 'DOCTOR' ? 'Bác sĩ' :
+                                       user.roleName?.name() == 'PATIENT' ? 'Bệnh nhân' : user.roleName}">
+                        </span>
                     </td>
                     <td>
-                                <span class="status-badge"
-                                      th:classappend="${user.status != null ? 'status-' + user.status.toString().toLowerCase() : ''}">
-                                    <span class="status-dot"></span>
-                                    <span th:text="${user.status}">ACTIVE</span>
-                                </span>
+                        <span class="status-badge"
+                              th:classappend="${user.status != null ? 'status-' + user.status.toString().toLowerCase() : ''}">
+                            <span class="status-dot"></span>
+                            <span th:text="${user.status?.name() == 'ACTIVE' ? 'Hoạt động' :
+                                           user.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
+                                           user.status?.name() == 'BANNED' ? 'Đã khóa' : user.status}">
+                            </span>
+                        </span>
                     </td>
+
                     <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</td>
                     <td class="actions-col">
                         <div class="action-buttons">

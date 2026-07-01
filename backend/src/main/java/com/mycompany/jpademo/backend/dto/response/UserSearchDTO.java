@@ -12,5 +12,4 @@ public class UserSearchDTO {
     private String email;
     private String roleName;
     private String status;
-    private String avatarUrl;
 }

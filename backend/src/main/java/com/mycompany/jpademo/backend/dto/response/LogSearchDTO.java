@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public class LogSearchDTO {
     private Integer logId;
     private String action;
+    private String actionDisplay;
     private String description;
     private String username;
     private LocalDateTime performedAt;

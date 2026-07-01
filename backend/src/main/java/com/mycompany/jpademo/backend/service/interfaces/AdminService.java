@@ -10,10 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+
 public interface AdminService {
     Page<UserResponse> getUser(String keyword, String role, UserStatus status, Pageable pageable);
 
-    ResponseEntity<String> updateUserStatus(UpdateUserStatusRequest request);
+    boolean updateUserStatus(UpdateUserStatusRequest request);
 
     DashboardStatsResponse getDashboardStats(java.time.LocalDate startDate, java.time.LocalDate endDate);
 
@@ -21,10 +23,14 @@ public interface AdminService {
 
     InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin);
 
-    ResponseEntity<String> verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin);
+    void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin);
 
     ChartStatsResponse getChartStats(java.time.LocalDate startDate, java.time.LocalDate endDate);
 
     GlobalSearchResponse searchGlobal(String keyword);
+
+    Map<String, Object> resendOtp(String adminEmail);
+
+    User getAdminUser();
 }
 

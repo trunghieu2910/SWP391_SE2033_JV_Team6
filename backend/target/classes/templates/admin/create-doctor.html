@@ -3,11 +3,10 @@
       th:replace="~{admin/layout :: main-layout(~{::main}, 'Tạo tài khoản bác sĩ', 'create-doctor')}">
 <body>
 <main>
-    <!-- Create Doctor Page CSS -->
     <link rel="stylesheet" th:href="@{/css/admin/create-doctor.css}">
 
     <div class="wizard-card">
-        <!-- Header hiển thị bước hiện tại -->
+        <!-- HEADER -->
         <div class="wizard-header">
             <div class="wizard-header-content">
                 <div class="wizard-icon">
@@ -40,9 +39,26 @@
         </div>
 
         <div class="wizard-body">
-            <!-- BƯỚC 1: ĐIỀN THÔNG TIN BÁC SĨ -->
+            <!-- ============================================ -->
+            <!-- BƯỚC 1: ĐIỀN THÔNG TIN BÁC SĨ                 -->
+            <!-- ============================================ -->
             <div th:if="${step == 1}">
-                <form th:action="@{/admin/create-doctor/initiate}" th:object="${doctorRequest}" method="post" enctype="multipart/form-data" class="form-grid">
+                <!-- Hiển thị lỗi validation -->
+                <div th:if="${hasErrors}" class="alert alert-danger" role="alert">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <strong>Vui lòng kiểm tra lại thông tin:</strong>
+                    <ul>
+                        <li th:each="err : ${errors}" th:text="${err.defaultMessage}"></li>
+                    </ul>
+                </div>
+
+                <form th:action="@{/admin/create-doctor/initiate}"
+                      th:object="${doctorRequest}"
+                      method="post"
+                      enctype="multipart/form-data"
+                      class="form-grid"
+                      id="doctorForm">
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="userName">
@@ -97,7 +113,7 @@
                             <span class="required">*</span>
                         </label>
                         <div class="file-upload-wrapper">
-                            <div class="file-upload-area">
+                            <div class="file-upload-area" id="fileUploadArea">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <span class="file-upload-text">Kéo thả file vào đây hoặc bấm để chọn</span>
                                 <span class="file-upload-hint">Hỗ trợ: PDF, JPG, PNG (tối đa 10MB)</span>
@@ -121,14 +137,21 @@
                 </form>
             </div>
 
-            <!-- BƯỚC 2: XÁC MINH OTP -->
+            <!-- ============================================ -->
+            <!-- BƯỚC 2: XÁC MINH OTP                          -->
+            <!-- ============================================ -->
             <div th:if="${step == 2}">
-                <form th:action="@{/admin/create-doctor/confirm}" method="post" class="otp-box">
+                <input type="hidden" id="remainingTime" th:value="${remainingTime}">
+
+                <!-- ===== KHÔNG CÓ th:if="${error}" Ở ĐÂY ===== -->
+
+                <form th:action="@{/admin/create-doctor/confirm}" method="post" class="otp-box" id="otpForm">
                     <div class="otp-icon-wrapper">
                         <div class="otp-icon">
                             <i class="fa-solid fa-shield-check"></i>
                         </div>
                     </div>
+
                     <h3 class="otp-title">Nhập mã xác thực OTP</h3>
                     <p class="otp-description">
                         Mã xác nhận OTP đã được gửi đến email quản trị viên của bạn.
@@ -137,19 +160,43 @@
 
                     <div class="otp-input-wrapper">
                         <div class="otp-input-group">
-                            <input type="text" name="otp" class="otp-input" placeholder="000000" maxlength="6" pattern="\d{6}" required autocomplete="off" autofocus>
+                            <input type="text" name="otp" class="otp-input" id="otpInput"
+                                   placeholder="000000" maxlength="6" pattern="\d{6}"
+                                   required autocomplete="off">
                         </div>
-                        <div class="otp-timer">
+
+                        <div class="otp-timer" id="otpTimer">
                             <i class="fa-regular fa-clock"></i>
-                            <span>OTP có hiệu lực trong 5 phút</span>
+                            <span>OTP có hiệu lực trong <strong id="timerCountdown">02:00</strong></span>
                         </div>
+
+                        <div class="otp-resend">
+                            <button type="button" id="resendOtpBtn" class="btn-action btn-resend" disabled>
+                                <i class="fa-solid fa-rotate"></i> Gửi lại mã OTP
+                            </button>
+                            <span id="resendMessage" style="display: none; color: #16a34a; font-size: 0.85rem; font-weight: 600;">
+                                <i class="fa-regular fa-circle-check"></i> Đã gửi lại OTP thành công!
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- ===== HIỂN THỊ LỖI Ở ĐÂY (TRONG FORM) ===== -->
+                    <div th:if="${error}" class="alert alert-danger" role="alert" style="width: 100%; max-width: 420px; margin-top: 8px;">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span th:text="${error}"></span>
+                    </div>
+
+                    <!-- OTP Error (JavaScript) -->
+                    <div id="otpError" class="otp-error" style="display: none;">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span id="otpErrorMessage">Mã OTP không hợp lệ. Vui lòng thử lại.</span>
                     </div>
 
                     <div class="otp-actions">
                         <a th:href="@{/admin/create-doctor}" class="btn-action btn-outline btn-md">
                             <i class="fa-solid fa-arrow-left"></i> Nhập lại thông tin
                         </a>
-                        <button type="submit" class="btn-action btn-success btn-md">
+                        <button type="submit" class="btn-action btn-success btn-md" id="confirmBtn">
                             <i class="fa-solid fa-check"></i> Xác nhận tạo tài khoản
                         </button>
                     </div>
@@ -158,59 +205,7 @@
         </div>
     </div>
 
-    <!-- JavaScript cho file upload -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const fileInput = document.getElementById('certificateFile');
-            const fileInfo = document.getElementById('fileInfo');
-            const fileName = document.getElementById('fileName');
-            const fileUploadArea = document.querySelector('.file-upload-area');
-
-            if (fileInput) {
-                fileInput.addEventListener('change', function() {
-                    if (this.files && this.files.length > 0) {
-                        fileInfo.style.display = 'flex';
-                        fileName.textContent = 'Đã chọn: ' + this.files[0].name;
-                    } else {
-                        fileInfo.style.display = 'none';
-                    }
-                });
-
-                // Drag and drop
-                if (fileUploadArea) {
-                    fileUploadArea.addEventListener('dragover', function(e) {
-                        e.preventDefault();
-                        this.classList.add('dragover');
-                    });
-
-                    fileUploadArea.addEventListener('dragleave', function(e) {
-                        e.preventDefault();
-                        this.classList.remove('dragover');
-                    });
-
-                    fileUploadArea.addEventListener('drop', function(e) {
-                        e.preventDefault();
-                        this.classList.remove('dragover');
-                        const files = e.dataTransfer.files;
-                        if (files.length > 0) {
-                            fileInput.files = files;
-                            fileInfo.style.display = 'flex';
-                            fileName.textContent = 'Đã chọn: ' + files[0].name;
-                        }
-                    });
-                }
-            }
-        });
-
-        function removeFile() {
-            const fileInput = document.getElementById('certificateFile');
-            const fileInfo = document.getElementById('fileInfo');
-            if (fileInput) {
-                fileInput.value = '';
-                fileInfo.style.display = 'none';
-            }
-        }
-    </script>
+    <script th:src="@{/js/admin/create-doctor.js}"></script>
 </main>
 </body>
 </html>

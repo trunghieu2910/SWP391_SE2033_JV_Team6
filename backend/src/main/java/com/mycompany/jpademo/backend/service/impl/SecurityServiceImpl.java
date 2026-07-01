@@ -5,14 +5,17 @@ import com.mycompany.jpademo.backend.dto.response.EndpointRequestStats;
 import com.mycompany.jpademo.backend.dto.response.IpRequestStats;
 import com.mycompany.jpademo.backend.dto.response.SecurityStatsResponse;
 import com.mycompany.jpademo.backend.entity.BlockedIP;
+import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.repository.BlockedIPRepository;
 import com.mycompany.jpademo.backend.repository.RequestLogRepository;
 import com.mycompany.jpademo.backend.service.interfaces.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -25,55 +28,60 @@ public class SecurityServiceImpl implements SecurityService {
     private final RequestLogRepository requestLogRepository;
 
     @Override
-    public SecurityStatsResponse getStats(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+    public SecurityStatsResponse getStats(LocalDateTime startDate, LocalDateTime endDate) {
+        long totalRequests = requestLogRepository.countWithDateFilter(startDate, endDate);
+        long totalBlockIps = blockedIPRepository.countByCreatedAtBetween(startDate, endDate);
 
-        long totalPeriod = requestLogRepository.countWithDateFilter(start, end);
-        long blockedCount = blockedIPRepository.count();
-
-        long minutesElapsed = java.time.Duration.between(start, end).toMinutes();
-        if (minutesElapsed < 1) {
-            minutesElapsed = 1;
+        Double avgRequestsPerMinute = null;
+        if (startDate != null && endDate != null) {
+            avgRequestsPerMinute = requestLogRepository.getAvgRequestsPerMinute(startDate, endDate);
         }
 
-        double avgPerMinute = (double) totalPeriod / minutesElapsed;
+        Double roundedAvg = avgRequestsPerMinute != null ?
+                BigDecimal.valueOf(avgRequestsPerMinute)
+                .setScale(2, BigDecimal.ROUND_HALF_UP)
+                .doubleValue()
+                : 0.0;
 
         return SecurityStatsResponse.builder()
-                .totalRequestsToday(totalPeriod)
-                .totalBlockedIps(blockedCount)
-                .avgRequestPerMinute(Math.round(avgPerMinute * 100.0) / 100.0)
+                .totalRequestsToday(totalRequests)
+                .totalBlockedIps(totalBlockIps)
+                .avgRequestPerMinute(roundedAvg)
                 .build();
     }
 
     @Override
-    public List<IpRequestStats> getTopIps(int limit, LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
-        if (start != null || end != null) {
-            return requestLogRepository.findTopIpsWithDateFilter(start, end, PageRequest.of(0, limit));
+    public List<IpRequestStats> getTopIps(int limit, LocalDateTime startDate, LocalDateTime endDate) {
+        Pageable pageable = PageRequest.of(0, limit);
+        if (startDate != null || endDate != null) {
+            return requestLogRepository.findTopIpsWithDateFilter(startDate, endDate, pageable);
         }
-        return requestLogRepository.findTopIps(PageRequest.of(0, limit));
+        return requestLogRepository.findTopIps(pageable);
     }
 
     @Override
-    public List<EndpointRequestStats> getTopEndpoints(int limit, LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
-        if (start != null || end != null) {
-            return requestLogRepository.findTopEndpointsWithDateFilter(start, end, PageRequest.of(0, limit));
+    public List<EndpointRequestStats> getTopEndpoints(int limit, LocalDateTime startDate, LocalDateTime endDate) {
+        Pageable pageable = PageRequest.of(0, limit);
+        if (startDate != null || endDate != null) {
+            return requestLogRepository.findTopEndpointsWithDateFilter(startDate, endDate, pageable);
         }
-        return requestLogRepository.findTopEndpoints(PageRequest.of(0, limit));
+        return requestLogRepository.findTopEndpoints(pageable);
     }
 
     @Override
-    public List<BlockedIP> getBlockedIps() {
-        return blockedIPRepository.findAll();
+    public List<BlockedIP> getBlockedIps(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate == null || endDate == null) {
+            return blockedIPRepository.findAll();
+        }
+        return blockedIPRepository.findByCreatedAtBetween(startDate, endDate);
     }
 
     @Override
     @Transactional
     public void blockIp(BlockIpRequest request, String adminUsername) {
+        if (blockedIPRepository.existsById(request.getIpAddress())) {
+            throw new BadRequestException("IP " + request.getIpAddress() + " đã bị chặn trước đó.");
+        }
         BlockedIP blockedIP = BlockedIP.builder()
                 .ipAddress(request.getIpAddress())
                 .reason(request.getReason())
@@ -85,6 +93,9 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public void unblockIp(String ipAddress) {
+        BlockedIP blockedIP = blockedIPRepository.findById(ipAddress).orElseThrow(
+                () -> new BadRequestException("IP " + ipAddress + " không tồn tại trong danh sách chặn.")
+        );
         blockedIPRepository.deleteById(ipAddress);
     }
 }

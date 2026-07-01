@@ -19,7 +19,7 @@ public class BlockedIpFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String ipAddress = getClientIp(request);
-        if (blockedIPRepository.existsByIpAddress(ipAddress)) {
+        if (blockedIPRepository.existsById(ipAddress)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"success\": false, \"message\": \"IP này đã bị chặn truy cập do vi phạm chính sách!\"}");

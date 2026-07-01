@@ -30,8 +30,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             @Param("nationalId") String nationalId
     );
 
-    boolean existsByUserName(String userName);
-
     boolean existsByEmail(String email);
 
     boolean existsByPhoneNumber(String phoneNumber);
@@ -48,10 +46,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Page<User> findByStatus(UserStatus status, Pageable pageable);
 
     Page<User> findAll(Pageable pageable);
-
-    Long countByRoleRoleName(RoleName roleName);
-
-    Long countByStatus(UserStatus status);
 
     @Query("SELECT COUNT(u) FROM User u WHERE " +
            "(CAST(:startDate AS timestamp) IS NULL OR u.createdAt >= :startDate) AND " +
@@ -103,10 +97,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
         @Param("endDate") java.time.LocalDateTime endDate);
 
     @Query("SELECT u FROM User u WHERE " +
-            "LOWER(u.userName) LIKE LOWER(:keyword) OR " +
-            "LOWER(u.fullName) LIKE LOWER(:keyword) OR " +
-            "LOWER(u.email) LIKE LOWER(:keyword) OR " +
-            "LOWER(u.phoneNumber) LIKE LOWER(:keyword)")
+            "LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(u.phoneNumber) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<User> searchUsersByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT FUNCTION('FORMAT', u.createdAt, 'MM/yyyy') as month, COUNT(u) as count " +
@@ -117,4 +111,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             "ORDER BY month ASC")
     List<Object[]> getMonthlyUserRegistrations(@Param("start") LocalDateTime start,
                                                @Param("end") LocalDateTime end);
+
+    Optional<User> findFirstByRoleRoleName(RoleName roleName);
 }

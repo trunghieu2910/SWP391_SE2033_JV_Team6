@@ -24,13 +24,21 @@
         <div class="profile-main-info">
             <div class="profile-name-row">
                 <h1 class="profile-name-xl" th:text="${user.userResponse.fullName}">Nguyễn Văn A</h1>
+                <!-- VAI TRÒ - ĐÃ MAP -->
                 <span class="role-badge role-lg"
                       th:classappend="${user.userResponse.roleName != null ? 'role-' + user.userResponse.roleName.toString().toLowerCase() : ''}"
-                      th:text="${user.userResponse.roleName}">PATIENT</span>
+                      th:text="${user.userResponse.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
+                               user.userResponse.roleName?.name() == 'DOCTOR' ? 'Bác sĩ' :
+                               user.userResponse.roleName?.name() == 'PATIENT' ? 'Bệnh nhân' : user.userResponse.roleName}">
+                </span>
+                <!-- TRẠNG THÁI - ĐÃ MAP -->
                 <span class="status-badge status-lg"
                       th:classappend="${user.userResponse.status != null ? 'status-' + user.userResponse.status.toString().toLowerCase() : ''}">
                     <span class="status-dot"></span>
-                    <span th:text="${user.userResponse.status}">ACTIVE</span>
+                    <span th:text="${user.userResponse.status?.name() == 'ACTIVE' ? 'Hoạt động' :
+                                   user.userResponse.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
+                                   user.userResponse.status?.name() == 'BANNED' ? 'Đã khóa' : user.userResponse.status}">
+                    </span>
                 </span>
             </div>
             <div class="profile-username">
@@ -98,19 +106,27 @@
                 <div class="detail-item">
                     <span class="detail-label"><i class="fa-regular fa-circle-check"></i> Trạng thái</span>
                     <span class="detail-value">
+                        <!-- TRẠNG THÁI - ĐÃ MAP -->
                         <span class="status-badge"
                               th:classappend="${user.userResponse.status != null ? 'status-' + user.userResponse.status.toString().toLowerCase() : ''}">
                             <span class="status-dot"></span>
-                            <span th:text="${user.userResponse.status}">ACTIVE</span>
+                            <span th:text="${user.userResponse.status?.name() == 'ACTIVE' ? 'Hoạt động' :
+                                           user.userResponse.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
+                                           user.userResponse.status?.name() == 'BANNED' ? 'Đã khóa' : user.userResponse.status}">
+                            </span>
                         </span>
                     </span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label"><i class="fa-solid fa-user-tag"></i> Vai trò</span>
                     <span class="detail-value">
+                        <!-- VAI TRÒ - ĐÃ MAP -->
                         <span class="role-badge"
                               th:classappend="${user.userResponse.roleName != null ? 'role-' + user.userResponse.roleName.toString().toLowerCase() : ''}"
-                              th:text="${user.userResponse.roleName}">PATIENT</span>
+                              th:text="${user.userResponse.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
+                                       user.userResponse.roleName?.name() == 'DOCTOR' ? 'Bác sĩ' :
+                                       user.userResponse.roleName?.name() == 'PATIENT' ? 'Bệnh nhân' : user.userResponse.roleName}">
+                        </span>
                     </span>
                 </div>
             </div>
@@ -118,7 +134,7 @@
     </div>
 
     <!-- ===== CHỨNG CHỈ (Nếu là DOCTOR) ===== -->
-    <div th:if="${user.userResponse.roleName != null && user.userResponse.roleName.toString() == 'DOCTOR'}"
+    <div th:if="${user.userResponse.roleName != null && user.userResponse.roleName.name() == 'DOCTOR'}"
          class="certificate-section">
         <h3 class="section-title">
             <i class="fa-solid fa-certificate"></i> Chứng chỉ hành nghề
@@ -180,12 +196,20 @@
                 </div>
                 <div class="timeline-content">
                     <div class="timeline-header">
-                        <span class="timeline-action" th:text="${log.action}">LOGIN</span>
+                        <!-- MAP HÀNH ĐỘNG LOG -->
+                        <span class="timeline-action" th:text="${log.action == 'LOGIN' ? 'Đăng nhập' :
+                                                               log.action == 'LOGOUT' ? 'Đăng xuất' :
+                                                               log.action == 'BAN_USER' ? 'Khóa User' :
+                                                               log.action == 'UNBAN_USER' ? 'Mở khóa' :
+                                                               log.action == 'CREATE_DOCTOR' ? 'Tạo bác sĩ' :
+                                                               log.action}">LOGIN</span>
                         <span class="timeline-time" th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026 12:00:00</span>
                     </div>
                     <p class="timeline-desc" th:text="${log.description}">Mô tả hoạt động</p>
-                    <span class="timeline-target" th:if="${log.targetType != null}"
-                          th:text="'🎯 ' + ${log.targetType} + ' #' + ${log.targetId}">User #10</span>
+                    <span class="timeline-target" th:if="${log.targetType != null}">
+                        <i class="fa-solid fa-bullseye" style="font-size: 0.75rem;"></i>
+                        <span th:text="${log.targetType} + ' #' + ${log.targetId}">User #10</span>
+                    </span>
                 </div>
             </div>
         </div>
