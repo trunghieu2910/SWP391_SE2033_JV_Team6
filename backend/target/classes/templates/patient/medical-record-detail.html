@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết bệnh án - MedAI</title>
+    <link rel="stylesheet" href="/patient/css/common.css">
+    <link rel="stylesheet" href="/patient/css/medical-record-detail.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- ── NAVBAR ── -->
+        <nav class="navbar">
+            <div class="navbar-left">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <span>~</span>
+                    </div>
+                    <div>
+                        <div class="logo-text">MedAI</div>
+                        <div class="logo-sub">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo</div>
+                    </div>
+                </div>
+                
+                <div class="nav-links">
+                    <a th:href="@{/patient/home}" class="nav-link">
+                        <span>Trang chính</span>
+                    </a>
+                    <a th:href="@{/patient/medical-records}" class="nav-link active">
+                        <span>Hồ sơ bệnh án</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="navbar-right">
+                <div class="user-info">
+                    <div>
+                        <div class="user-username" th:text="${profile.username}">patient_nam</div>
+                        <div class="user-role">Bệnh nhân</div>
+                    </div>
+                    <div class="user-avatar" th:text="${profile.fullName[0].toUpperCase()}">P</div>
+                </div>
+                
+                <button type="button" class="logout-btn" onclick="showLogoutModal();" title="Đăng xuất">
+                    <span>→</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Back Button -->
+        <div style="text-align: left;">
+            <a th:href="@{/patient/medical-records}" class="back-btn">← Quay lại danh sách</a>
+        </div>
+
+        <!-- Patient Banner -->
+        <div class="glass-panel">
+            <div class="patient-banner-header">
+                <div class="patient-info-group">
+                    <div class="banner-avatar" th:text="${record.patientFullName[0].toUpperCase()}">P</div>
+                    <div class="patient-basic-info">
+                        <h2 th:text="${record.patientFullName}">Phạm Thùy Linh</h2>
+                        <div class="info-row">
+                            <span>CCCD: <strong th:text="${record.patientNationalID ?: '—'}">043678901234</strong></span>
+                            <span>•</span>
+                            <span>Giới tính: <strong th:text="${record.patientGender == 'Female' ? 'Nữ' : 'Nam'}">Nữ</strong></span>
+                            <span>•</span>
+                            <span th:if="${record.patientDob}">
+                                Tuổi: <strong th:text="${#dates.format(#dates.createNow(), 'yyyy') - #dates.format(record.patientDob, 'yyyy')} + ' tuổi'">31 tuổi</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <span class="status-badge" th:classappend="${record.isShared ? 'status-published' : 'status-unpublished'}"
+                      th:text="${record.isShared ? '🔗 Đã công bố' : '🔒 Chưa công bố'}">🔗 Đã công bố</span>
+            </div>
+        </div>
+
+        <!-- 1. CLINICAL GENERAL INFO -->
+        <div class="glass-panel">
+            <h3>🏥 Thông tin khám bệnh</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Ngày khám</span>
+                    <span class="info-value" th:text="${#dates.format(record.createdAt, 'dd/MM/yyyy HH:mm')}">29/06/2026 06:42</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Bác sĩ phụ trách</span>
+                    <span class="info-value" th:text="${record.doctorFullName ?: '—'}">Bác sĩ phụ trách</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Chiều cao / Cân nặng</span>
+                    <span class="info-value" th:text="${record.height ? record.height + ' cm' : '—'} + ' / ' + ${record.weight ? record.weight + ' kg' : '—'}">165 cm / 50 kg</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tình trạng triệu chứng</span>
+                    <span class="info-value" th:if="${record.symptoms and record.symptoms.size() > 0}"
+                          th:text="${#strings.listJoin(record.symptoms.![symptomName], ', ')}">Rong kinh, Đau vùng chậu</span>
+                    <span class="info-value" th:unless="${record.symptoms and record.symptoms.size() > 0}">Không ghi nhận triệu chứng</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. DIAGNOSIS RESULTS -->
+        <div class="glass-panel">
+            <h3>📋 Kết quả chẩn đoán & điều trị</h3>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="diagnosis-grid">
+                    <!-- Diagnosis box -->
+                    <div class="diagnosis-box">
+                        <span class="diagnosis-box-label">🔬 Chẩn đoán của bác sĩ</span>
+                        <div th:if="!${record.isShared}" class="diagnosis-box-content diagnosis-unpublished">
+                            🔒 Bác sĩ chưa công bố chẩn đoán
+                        </div>
+                        <div th:if="${record.isShared}" class="diagnosis-box-content diagnosis-published"
+                             th:text="${record.finalDiagnosis ?: 'Chưa ghi nhận chẩn đoán cuối cùng'}">Viêm phế quan cấp tính</div>
+                    </div>
+
+                    <!-- Treatment plan box -->
+                    <div class="diagnosis-box">
+                        <span class="diagnosis-box-label">💊 Đơn thuốc & Phác đồ</span>
+                        <div class="diagnosis-box-content" th:text="${record.treatmentPlan ?: 'Chưa ghi nhận đơn thuốc'}">Không ghi nhận đơn thuốc</div>
+                    </div>
+                </div>
+
+                <div class="diagnosis-grid">
+                    <!-- Doctor advice box -->
+                    <div class="diagnosis-box">
+                        <span class="diagnosis-box-label">💡 Hướng dẫn & Lời khuyên</span>
+                        <div class="diagnosis-box-content" th:text="${record.doctorAdvice ?: 'Chưa ghi nhận lời khuyên'}">Không ghi nhận lời khuyên</div>
+                    </div>
+
+                    <!-- Additional notes box -->
+                    <div class="diagnosis-box">
+                        <span class="diagnosis-box-label">📎 Ghi chú thêm</span>
+                        <div class="diagnosis-box-content" th:text="${record.note ?: 'Không có ghi chú'}">Không có ghi chú</div>
+                    </div>
+                </div>
+
+                <!-- Review footer -->
+                <div class="review-footer" th:if="${record.reviewedByDoctorName}">
+                    Được kết luận bởi <strong th:text="${record.reviewedByDoctorName}">Bác sĩ</strong> lúc <strong th:text="${#dates.format(record.reviewedAt, 'dd/MM/yyyy HH:mm')}">29/06/2026</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. LAB TESTS SECTION -->
+        <div class="glass-panel" th:if="${record.labTests and record.labTests.size() > 0}">
+            <h3>🔬 Kết quả xét nghiệm</h3>
+            <div class="lab-test-container">
+                <div class="lab-test-card" th:each="labTest : ${record.labTests}">
+                    <div class="lab-test-header">
+                        <div class="lab-test-name" th:text="${labTest.testName}">Tên xét nghiệm</div>
+                        <span class="lab-status-badge" 
+                              th:classappend="${labTest.status == 'COMPLETED' ? 'completed' : ''}"
+                              th:text="${labTest.status == 'PENDING' ? '⏳ Chờ' : labTest.status == 'COMPLETED' ? '✓ Hoàn thành' : labTest.status}">⏳ Chờ</span>
+                    </div>
+                    
+                    <div th:if="${labTest.parameters and labTest.parameters.size() > 0}" class="lab-parameters">
+                        <div class="lab-param-row" th:each="param : ${labTest.parameters}">
+                            <span class="lab-param-name" th:text="${param.paramName}">Tên chỉ số</span>
+                            <span class="lab-param-value" th:text="${param.value + ' ' + (param.unit ?: '')}">Giá trị</span>
+                        </div>
+                    </div>
+                    
+                    <div th:unless="${labTest.parameters and labTest.parameters.size() > 0}" class="empty-state">
+                        Không có chi tiết tham số
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. MEDICAL IMAGES SECTION -->
+        <div class="glass-panel" th:if="${record.medicalImages and record.medicalImages.size() > 0}">
+            <h3>📸 Hình ảnh y tế</h3>
+            <div class="lab-test-container">
+                <div class="lab-test-card" th:each="image : ${record.medicalImages}">
+                    <div class="lab-test-header">
+                        <div class="lab-test-name" th:text="${image.imageType}">Loại hình ảnh</div>
+                        <span class="lab-status-badge" 
+                              th:classappend="${image.status == 'COMPLETED' ? 'completed' : ''}"
+                              th:text="${image.status == 'PENDING' ? '⏳ Chờ' : image.status == 'COMPLETED' ? '✓ Hoàn thành' : image.status}">⏳ Chờ</span>
+                    </div>
+                    
+                    <div th:if="${image.details and image.details.size() > 0}">
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                            <strong th:text="${image.details.size()}">0</strong> ảnh được tải lên
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <div th:each="detail : ${image.details}" style="font-size: 12px; color: #64748b;">
+                                <span th:text="${'📁 ' + detail.imageUrl}">imageUrl</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div th:unless="${image.details and image.details.size() > 0}" class="empty-state">
+                        Chưa có hình ảnh được tải lên
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. CONTACT INFO -->
+        <div class="glass-panel">
+            <h3>👤 Thông tin liên hệ bệnh nhân</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Số điện thoại</span>
+                    <span class="info-value" th:text="${record.patientPhone ?: '—'}">0904445466</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Địa chỉ</span>
+                    <span class="info-value" th:text="${record.patientAddress ?: '—'}">Hà Nội</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Ngày sinh</span>
+                    <span class="info-value" th:if="${record.patientDob}" th:text="${#dates.format(record.patientDob, 'dd/MM/yyyy')}">15/08/1995</span>
+                    <span class="info-value" th:unless="${record.patientDob}">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirm Modal -->
+    <div id="logoutModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <h3 class="modal-title">Xác nhận đăng xuất</h3>
+            <p class="modal-desc">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="hideLogoutModal();">Hủy</button>
+                <form th:action="@{/auth/logout}" method="post" style="flex: 1; display: flex;">
+                    <button type="submit" class="btn-modal-confirm" style="width: 100%;">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+        function hideLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

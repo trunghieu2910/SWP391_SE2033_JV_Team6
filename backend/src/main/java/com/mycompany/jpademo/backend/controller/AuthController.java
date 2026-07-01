@@ -6,9 +6,12 @@ import com.mycompany.jpademo.backend.dto.response.LoginResponse;
 import com.mycompany.jpademo.backend.dto.response.VerifyOtpResponse;
 import com.mycompany.jpademo.backend.service.interfaces.AuthService;
 import com.mycompany.jpademo.backend.service.interfaces.ForgotPasswordService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,7 +39,8 @@ public class AuthController {
             @Valid @ModelAttribute("loginRequest") LoginRequest request,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest httpRequest
     ) {
         if (bindingResult.hasErrors()) {
             return "auth/login";
@@ -44,8 +48,12 @@ public class AuthController {
 
         try {
             LoginResponse response = authService.login(request);
-            // Lưu token vào session hoặc cookie
+            HttpSession session = httpRequest.getSession(true);
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
             redirectAttributes.addFlashAttribute("successMessage", "Đăng nhập thành công!");
+            if (response.getRole() != null && response.getRole().equalsIgnoreCase("PATIENT")) {
+                return "redirect:/patient/home";
+            }
             return "redirect:/home";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
@@ -301,7 +309,8 @@ public class AuthController {
             @Valid @ModelAttribute("googleLoginRequest") GoogleLoginRequest request,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest httpRequest
     ) {
         if (bindingResult.hasErrors()) {
             return "auth/google-login";
@@ -309,11 +318,18 @@ public class AuthController {
 
         try {
             Object result = authService.handleGoogleLogin(request.getIdToken());
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                HttpSession session = httpRequest.getSession(true);
+                session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            }
             
-            if (result instanceof LoginResponse) {
+            if (result instanceof LoginResponse response) {
                 // User đã tồn tại -> Đăng nhập thành công
                 redirectAttributes.addFlashAttribute("successMessage", 
                     "Đăng nhập bằng Google thành công!");
+                if (response.getRole() != null && response.getRole().equalsIgnoreCase("PATIENT")) {
+                    return "redirect:/patient/home";
+                }
                 return "redirect:/home";
             } else {
                 // User chưa tồn tại -> Chuyển đến trang hoàn tất đăng ký
@@ -340,7 +356,8 @@ public class AuthController {
             @Valid @ModelAttribute("googleCompleteRequest") GoogleCompleteRequest request,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest httpRequest
     ) {
         if (bindingResult.hasErrors()) {
             return "auth/google-complete";
@@ -348,8 +365,15 @@ public class AuthController {
 
         try {
             LoginResponse response = authService.completeGoogleRegistration(request);
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                HttpSession session = httpRequest.getSession(true);
+                session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            }
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Đăng ký và đăng nhập bằng Google thành công!");
+            if (response.getRole() != null && response.getRole().equalsIgnoreCase("PATIENT")) {
+                return "redirect:/patient/home";
+            }
             return "redirect:/home";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
