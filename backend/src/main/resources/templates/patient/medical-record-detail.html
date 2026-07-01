@@ -65,8 +65,8 @@
                             <span>•</span>
                             <span>Giới tính: <strong th:text="${record.patientGender == 'Female' ? 'Nữ' : 'Nam'}">Nữ</strong></span>
                             <span>•</span>
-                            <span th:if="${record.patientDob}">
-                                Tuổi: <strong th:text="${#dates.format(#dates.createNow(), 'yyyy') - #dates.format(record.patientDob, 'yyyy')} + ' tuổi'">31 tuổi</strong>
+                            <span th:if="${record.patientDob != null}">
+                                Tuổi: <strong th:text="${T(java.time.LocalDate).now().getYear() - T(java.lang.Integer).parseInt(#dates.format(record.patientDob, 'yyyy')) + ' tuổi'}">31 tuổi</strong>
                             </span>
                         </div>
                     </div>
@@ -82,7 +82,7 @@
             <div class="info-grid">
                 <div class="info-item">
                     <span class="info-label">Ngày khám</span>
-                    <span class="info-value" th:text="${#dates.format(record.createdAt, 'dd/MM/yyyy HH:mm')}">29/06/2026 06:42</span>
+                    <span class="info-value" th:text="${record.createdAt != null ? #dates.format(record.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">29/06/2026 06:42</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Bác sĩ phụ trách</span>
@@ -90,13 +90,13 @@
                 </div>
                 <div class="info-item">
                     <span class="info-label">Chiều cao / Cân nặng</span>
-                    <span class="info-value" th:text="${record.height ? record.height + ' cm' : '—'} + ' / ' + ${record.weight ? record.weight + ' kg' : '—'}">165 cm / 50 kg</span>
+                    <span class="info-value" th:text="${(record.height != null ? record.height + ' cm' : '—') + ' / ' + (record.weight != null ? record.weight + ' kg' : '—')}">165 cm / 50 kg</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Tình trạng triệu chứng</span>
-                    <span class="info-value" th:if="${record.symptoms and record.symptoms.size() > 0}"
+                    <span class="info-value" th:if="${record.symptoms != null and record.symptoms.size() > 0}"
                           th:text="${#strings.listJoin(record.symptoms.![symptomName], ', ')}">Rong kinh, Đau vùng chậu</span>
-                    <span class="info-value" th:unless="${record.symptoms and record.symptoms.size() > 0}">Không ghi nhận triệu chứng</span>
+                    <span class="info-value" th:unless="${record.symptoms != null and record.symptoms.size() > 0}">Không ghi nhận triệu chứng</span>
                 </div>
             </div>
         </div>
@@ -138,14 +138,14 @@
                 </div>
 
                 <!-- Review footer -->
-                <div class="review-footer" th:if="${record.reviewedByDoctorName}">
-                    Được kết luận bởi <strong th:text="${record.reviewedByDoctorName}">Bác sĩ</strong> lúc <strong th:text="${#dates.format(record.reviewedAt, 'dd/MM/yyyy HH:mm')}">29/06/2026</strong>
+                <div class="review-footer" th:if="${record.reviewedByDoctorName != null}">
+                    Được kết luận bởi <strong th:text="${record.reviewedByDoctorName}">Bác sĩ</strong> lúc <strong th:text="${record.reviewedAt != null ? #dates.format(record.reviewedAt, 'dd/MM/yyyy HH:mm') : '—'}">29/06/2026</strong>
                 </div>
             </div>
         </div>
 
         <!-- 3. LAB TESTS SECTION -->
-        <div class="glass-panel" th:if="${record.labTests and record.labTests.size() > 0}">
+        <div class="glass-panel" th:if="${record.labTests != null and record.labTests.size() > 0}">
             <h3>🔬 Kết quả xét nghiệm</h3>
             <div class="lab-test-container">
                 <div class="lab-test-card" th:each="labTest : ${record.labTests}">
@@ -156,14 +156,14 @@
                               th:text="${labTest.status == 'PENDING' ? '⏳ Chờ' : labTest.status == 'COMPLETED' ? '✓ Hoàn thành' : labTest.status}">⏳ Chờ</span>
                     </div>
                     
-                    <div th:if="${labTest.parameters and labTest.parameters.size() > 0}" class="lab-parameters">
+                    <div th:if="${labTest.parameters != null and labTest.parameters.size() > 0}" class="lab-parameters">
                         <div class="lab-param-row" th:each="param : ${labTest.parameters}">
                             <span class="lab-param-name" th:text="${param.paramName}">Tên chỉ số</span>
                             <span class="lab-param-value" th:text="${param.value + ' ' + (param.unit ?: '')}">Giá trị</span>
                         </div>
                     </div>
                     
-                    <div th:unless="${labTest.parameters and labTest.parameters.size() > 0}" class="empty-state">
+                    <div th:unless="${labTest.parameters != null and labTest.parameters.size() > 0}" class="empty-state">
                         Không có chi tiết tham số
                     </div>
                 </div>
@@ -171,7 +171,7 @@
         </div>
 
         <!-- 4. MEDICAL IMAGES SECTION -->
-        <div class="glass-panel" th:if="${record.medicalImages and record.medicalImages.size() > 0}">
+        <div class="glass-panel" th:if="${record.medicalImages != null and record.medicalImages.size() > 0}">
             <h3>📸 Hình ảnh y tế</h3>
             <div class="lab-test-container">
                 <div class="lab-test-card" th:each="image : ${record.medicalImages}">
@@ -182,7 +182,7 @@
                               th:text="${image.status == 'PENDING' ? '⏳ Chờ' : image.status == 'COMPLETED' ? '✓ Hoàn thành' : image.status}">⏳ Chờ</span>
                     </div>
                     
-                    <div th:if="${image.details and image.details.size() > 0}">
+                    <div th:if="${image.details != null and image.details.size() > 0}">
                         <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
                             <strong th:text="${image.details.size()}">0</strong> ảnh được tải lên
                         </p>
@@ -193,7 +193,7 @@
                         </div>
                     </div>
                     
-                    <div th:unless="${image.details and image.details.size() > 0}" class="empty-state">
+                    <div th:unless="${image.details != null and image.details.size() > 0}" class="empty-state">
                         Chưa có hình ảnh được tải lên
                     </div>
                 </div>
@@ -214,8 +214,8 @@
                 </div>
                 <div class="info-item">
                     <span class="info-label">Ngày sinh</span>
-                    <span class="info-value" th:if="${record.patientDob}" th:text="${#dates.format(record.patientDob, 'dd/MM/yyyy')}">15/08/1995</span>
-                    <span class="info-value" th:unless="${record.patientDob}">—</span>
+                    <span class="info-value" th:if="${record.patientDob != null}" th:text="${#dates.format(record.patientDob, 'dd/MM/yyyy')}">15/08/1995</span>
+                    <span class="info-value" th:unless="${record.patientDob != null}">—</span>
                 </div>
             </div>
         </div>

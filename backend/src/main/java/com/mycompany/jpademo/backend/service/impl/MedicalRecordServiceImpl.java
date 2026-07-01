@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -55,12 +56,18 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     row.get("status").toString()
             );
         }
+        Date visitDate = null;
+        Object rawVisitDate = row.get("visitDate");
+        if (rawVisitDate instanceof Date dateValue) {
+            visitDate = new Date(dateValue.getTime());
+        }
+
         return MedicalRecordResponse.builder()
                 .id(((Number) row.get("id")).intValue())
                 .patientName((String) row.get("patientName"))
                 .doctorFullName((String) row.get("doctorFullName"))
                 .diagnosis((String) row.get("diagnosis"))
-                .visitDate((Date) row.get("visitDate"))
+                .visitDate(visitDate)
                 .symptoms((String) row.get("symptoms"))
                 .prescription((String) row.get("prescription"))
                 .doctorNotes((String) row.get("doctorNotes"))
@@ -101,7 +108,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         MedicalRecordDetailResponse detail = new MedicalRecordDetailResponse();
         detail.setSessionID(session.getSessionId());
         if (session.getCreatedAt() != null) {
-            detail.setCreatedAt(java.sql.Timestamp.valueOf(session.getCreatedAt()));
+            detail.setCreatedAt(Date.from(session.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant()));
         }
         detail.setStatus(session.getStatus());
         detail.setWeight(session.getWeight());
@@ -116,7 +123,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             detail.setPatientNationalID(patientUser.getNationalID());
             detail.setPatientPhone(patientUser.getPhoneNumber());
             if (patient.getDob() != null) {
-                detail.setPatientDob(java.sql.Date.valueOf(patient.getDob()));
+                detail.setPatientDob(Date.from(patient.getDob().atStartOfDay(ZoneId.systemDefault()).toInstant()));
             }
             detail.setPatientGender(patient.getGender());
             detail.setPatientAddress(patient.getAddress());
@@ -226,7 +233,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         reviewRepository.findByDiagnosisSessionSessionId(sessionID).ifPresent(r -> {
             detail.setReviewID(r.getReviewId());
             if (r.getReviewedAt() != null) {
-                detail.setReviewedAt(java.sql.Timestamp.valueOf(r.getReviewedAt()));
+                detail.setReviewedAt(Date.from(r.getReviewedAt().atZone(ZoneId.systemDefault()).toInstant()));
             }
             if (r.getUser() != null) {
                 detail.setReviewedByDoctorName(r.getUser().getFullName());
