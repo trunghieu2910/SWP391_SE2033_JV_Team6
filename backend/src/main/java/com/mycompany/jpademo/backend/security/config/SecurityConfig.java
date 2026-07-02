@@ -60,14 +60,18 @@ public class SecurityConfig {
 
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
-                            // Ép hệ thống trả về lỗi 401 thay vì 403
-                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json;charset=UTF-8");
-                            String jsonResponse = String.format(
-                                    "{\"success\": false, \"message\": \"%s\"}",
-                                    "Vui lòng đăng nhập để thực hiện chức năng này!"
-                            );
-                            response.getWriter().write(jsonResponse);
+                            String uri = request.getRequestURI();
+                            if (uri.startsWith("/api/")) {
+                                response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json;charset=UTF-8");
+                                String jsonResponse = String.format(
+                                        "{\"success\": false, \"message\": \"%s\"}",
+                                        "Vui lòng đăng nhập để thực hiện chức năng này!"
+                                );
+                                response.getWriter().write(jsonResponse);
+                            } else {
+                                response.sendRedirect("/login");
+                            }
                         })
                 )
 
@@ -85,6 +89,15 @@ public class SecurityConfig {
                                 "/api/auth/google",
                                 "/api/auth/google/complete",
                                 "/api/integration/lis/results").permitAll()
+
+                        // Static resources — CSS/JS/images không cần auth
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+
+                        // Cho phép truy cập trang login và logout Thymeleaf
+                        .requestMatchers("/login", "/logout").permitAll()
+
+                        // Thymeleaf pages cho bác sĩ — bảo vệ bằng @PreAuthorize trên controller
+                        .requestMatchers("/doctor/medical-records", "/doctor/medical-records/**").authenticated()
 
                         .anyRequest().authenticated())
 

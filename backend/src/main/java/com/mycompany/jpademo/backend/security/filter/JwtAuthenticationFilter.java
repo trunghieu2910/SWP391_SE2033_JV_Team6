@@ -24,16 +24,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     jakarta.servlet.FilterChain filterChain) 
             throws jakarta.servlet.ServletException, java.io.IOException {
 
-        // Read the header
-        String authHeader = request.getHeader("Authorization");
+        String token = null;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // 1. Try to read from Authorization header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.replace("Bearer ", "");
+        }
+
+        // 2. Try to read from Cookie 'token' if not found in header
+        if (token == null && request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // Extract token
-        String token = authHeader.replace("Bearer ", "");
         // Extract username
         String username = jwtService.extractUsername(token);
 
