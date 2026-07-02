@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- ========================================== -->
+<!-- FRAGMENT: FORM TRIỆU CHỨNG LÂM SÀNG        -->
+<!-- ========================================== -->
+<div th:fragment="form(sessionDetail)">
+    <div class="symptom-container" id="symptomContainer">
+        <!-- Chế độ xem (không chỉnh sửa) -->
+        <div id="symptomView" class="symptom-view">
+            <div class="symptom-actions">
+                <button class="btn-action btn-edit" onclick="editSymptoms()">
+                    <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                </button>
+            </div>
+
+            <div th:if="${sessionDetail.symptomResult == null}" class="empty-state">
+                <i class="fa-regular fa-notes-medical"></i>
+                <p>Chưa có dữ liệu triệu chứng lâm sàng</p>
+                <button class="btn-action btn-primary" onclick="editSymptoms()">
+                    <i class="fa-solid fa-plus"></i> Nhập triệu chứng
+                </button>
+            </div>
+
+            <div th:if="${sessionDetail.symptomResult != null}" class="symptom-display">
+                <!-- Chiều cao, cân nặng -->
+                <div class="symptom-row">
+                    <span class="symptom-label">Chiều cao</span>
+                    <span class="symptom-value" th:text="${sessionDetail.height != null ? sessionDetail.height + ' cm' : '—'}">—</span>
+                </div>
+                <div class="symptom-row">
+                    <span class="symptom-label">Cân nặng</span>
+                    <span class="symptom-value" th:text="${sessionDetail.weight != null ? sessionDetail.weight + ' kg' : '—'}">—</span>
+                </div>
+
+                <!-- Tình trạng mãn kinh -->
+                <div class="symptom-row">
+                    <span class="symptom-label">Tình trạng mãn kinh</span>
+                    <span class="symptom-value" th:text="${sessionDetail.symptomResult.menopauseStatus == 'PRE' ? 'Chưa mãn kinh' : sessionDetail.symptomResult.menopauseStatus == 'POST' ? 'Đã mãn kinh' : '—'}">—</span>
+                </div>
+
+                <!-- Triệu chứng -->
+                <div th:if="${not #lists.isEmpty(sessionDetail.symptomResult.symptomDetails)}" class="symptom-tags">
+                    <span class="symptom-tag" th:each="detail : ${sessionDetail.symptomResult.symptomDetails}"
+                          th:text="${detail.symptomName}">Đau bụng</span>
+                </div>
+                <div th:if="${#lists.isEmpty(sessionDetail.symptomResult.symptomDetails)}" class="empty-text">
+                    Chưa có triệu chứng nào được ghi nhận
+                </div>
+
+                <!-- Thời gian và tiến triển -->
+                <div th:if="${sessionDetail.symptomResult.symptomDuration != null}" class="symptom-row">
+                    <span class="symptom-label">Thời gian triệu chứng</span>
+                    <span class="symptom-value" th:text="${sessionDetail.symptomResult.symptomDuration}">—</span>
+                </div>
+                <div class="symptom-row">
+                    <span class="symptom-label">Tiến triển</span>
+                    <span class="symptom-value" th:text="${sessionDetail.symptomResult.symptomProgressing != null ? (sessionDetail.symptomResult.symptomProgressing ? 'Đang tiến triển' : 'Không tiến triển') : '—'}">—</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chế độ chỉnh sửa -->
+        <div id="symptomEdit" class="symptom-edit" style="display: none;">
+            <!-- ===== THÊM ID CHO FORM ===== -->
+            <form id="symptomForm" class="symptom-form" method="post" th:action="@{/doctor/sessions/{id}/symptoms(id=${sessionDetail.sessionId})}">
+                <input type="hidden" name="sessionId" th:value="${sessionDetail.sessionId}">
+
+                <!-- Chiều cao, Cân nặng -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Chiều cao (cm)</label>
+                        <input type="number" step="0.1" name="height" class="form-control"
+                               th:value="${sessionDetail.height}" placeholder="Nhập chiều cao">
+                    </div>
+                    <div class="form-group">
+                        <label>Cân nặng (kg)</label>
+                        <input type="number" step="0.1" name="weight" class="form-control"
+                               th:value="${sessionDetail.weight}" placeholder="Nhập cân nặng">
+                    </div>
+                </div>
+
+                <!-- Tình trạng mãn kinh -->
+                <div class="form-group">
+                    <label>Tình trạng mãn kinh</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="menopauseStatus" value="PRE"
+                                      th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.menopauseStatus == 'PRE'}"> Chưa mãn kinh</label>
+                        <label><input type="radio" name="menopauseStatus" value="POST"
+                                      th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.menopauseStatus == 'POST'}"> Đã mãn kinh</label>
+                    </div>
+                </div>
+
+                <!-- ===== SỬA: THÊM [] VÀO TÊN FIELD CHO CHECKBOX ===== -->
+                <!-- Ra máu bất thường -->
+                <div class="form-group">
+                    <label class="section-label">Ra máu âm đạo bất thường</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="abnormalBleedingIds" value="1"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 1)}"> Ra máu giữa kỳ kinh</label>
+                        <label><input type="checkbox" name="abnormalBleedingIds" value="2"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 2)}"> Kinh nguyệt kéo dài bất thường</label>
+                        <label><input type="checkbox" name="abnormalBleedingIds" value="3"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 3)}"> Rong kinh (lượng máu nhiều)</label>
+                        <label><input type="checkbox" name="abnormalBleedingIds" value="4"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 4)}"> Ra máu sau mãn kinh</label>
+                        <label><input type="checkbox" name="abnormalBleedingIds" value="5"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 5)}"> Ra máu sau quan hệ</label>
+                    </div>
+                </div>
+
+                <!-- Khí hư bất thường -->
+                <div class="form-group">
+                    <label class="section-label">Khí hư bất thường</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="abnormalDischargeIds" value="6"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 6)}"> Khí hư nhiều</label>
+                        <label><input type="checkbox" name="abnormalDischargeIds" value="7"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 7)}"> Khí hư có mùi hôi</label>
+                        <label><input type="checkbox" name="abnormalDischargeIds" value="8"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 8)}"> Khí hư lẫn máu</label>
+                        <label><input type="checkbox" name="abnormalDischargeIds" value="9"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 9)}"> Dịch tiết màu nâu</label>
+                    </div>
+                </div>
+
+                <!-- Đau -->
+                <div class="form-group">
+                    <label class="section-label">Đau</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="painIds" value="10"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 10)}"> Đau vùng chậu</label>
+                        <label><input type="checkbox" name="painIds" value="11"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 11)}"> Đau bụng dưới</label>
+                        <label><input type="checkbox" name="painIds" value="12"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 12)}"> Đau lưng dưới</label>
+                        <label><input type="checkbox" name="painIds" value="13"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 13)}"> Đau khi quan hệ</label>
+                    </div>
+                </div>
+
+                <!-- Triệu chứng toàn thân -->
+                <div class="form-group">
+                    <label class="section-label">Triệu chứng toàn thân</label>
+                    <div class="radio-group">
+                        <label>Sụt cân không rõ nguyên nhân:
+                            <input type="radio" name="systemicSymptoms.weightLoss" value="true"
+                                   th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDetails != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 14)}"> Có
+                            <input type="radio" name="systemicSymptoms.weightLoss" value="false"
+                                   th:checked="${sessionDetail.symptomResult == null or !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 14)}"> Không
+                        </label>
+                        <label>Mệt mỏi kéo dài:
+                            <input type="radio" name="systemicSymptoms.fatigue" value="true"
+                                   th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDetails != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 15)}"> Có
+                            <input type="radio" name="systemicSymptoms.fatigue" value="false"
+                                   th:checked="${sessionDetail.symptomResult == null or !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 15)}"> Không
+                        </label>
+                        <label>Chán ăn:
+                            <input type="radio" name="systemicSymptoms.anorexia" value="true"
+                                   th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDetails != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 16)}"> Có
+                            <input type="radio" name="systemicSymptoms.anorexia" value="false"
+                                   th:checked="${sessionDetail.symptomResult == null or !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 16)}"> Không
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Triệu chứng tiết niệu -->
+                <div class="form-group">
+                    <label class="section-label">Triệu chứng tiết niệu</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="urinarySymptomsIds" value="17"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 17)}"> Tiểu nhiều lần</label>
+                        <label><input type="checkbox" name="urinarySymptomsIds" value="18"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 18)}"> Tiểu buốt</label>
+                        <label><input type="checkbox" name="urinarySymptomsIds" value="19"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 19)}"> Tiểu khó</label>
+                        <label><input type="checkbox" name="urinarySymptomsIds" value="20"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 20)}"> Tiểu ra máu</label>
+                    </div>
+                </div>
+
+                <!-- Triệu chứng tiêu hóa -->
+                <div class="form-group">
+                    <label class="section-label">Triệu chứng tiêu hóa</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="digestiveSymptomsIds" value="21"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 21)}"> Táo bón kéo dài</label>
+                        <label><input type="checkbox" name="digestiveSymptomsIds" value="22"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 22)}"> Đầy bụng</label>
+                        <label><input type="checkbox" name="digestiveSymptomsIds" value="23"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 23)}"> Chướng bụng</label>
+                        <label><input type="checkbox" name="digestiveSymptomsIds" value="24"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 24)}"> Buồn nôn</label>
+                    </div>
+                </div>
+
+                <!-- Yếu tố nguy cơ -->
+                <div class="form-group">
+                    <label class="section-label">Yếu tố nguy cơ</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="riskFactors.familyHistory" value="true"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 25)}"> Tiền sử gia đình ung thư phụ khoa</label>
+                        <label><input type="checkbox" name="riskFactors.obesity" value="true"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 26)}"> Béo phì</label>
+                        <label><input type="checkbox" name="riskFactors.diabetes" value="true"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 27)}"> Đái tháo đường</label>
+                        <label><input type="checkbox" name="riskFactors.hypertension" value="true"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 28)}"> Tăng huyết áp</label>
+                        <label><input type="checkbox" name="riskFactors.pcos" value="true"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 29)}"> Hội chứng buồng trứng đa nang (PCOS)</label>
+                        <label><input type="checkbox" name="riskFactors.estrogenTherapy" value="true"
+                                      th:checked="${sessionDetail.symptomResult != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 30)}"> Điều trị hormone estrogen kéo dài</label>
+                    </div>
+                </div>
+
+                <!-- Đánh giá mức độ triệu chứng -->
+                <div class="form-group">
+                    <label class="section-label">Đánh giá mức độ triệu chứng</label>
+                    <div class="radio-group">
+                        <label>Thời gian xuất hiện triệu chứng:
+                            <select name="symptomDuration" class="form-control options-times">
+                                <option value="">Chọn</option>
+                                <option value="DƯỚI_1_THÁNG" th:selected="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDuration == 'DƯỚI_1_THÁNG'}">Dưới 1 tháng</option>
+                                <option value="1-3_THÁNG" th:selected="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDuration == '1-3_THÁNG'}">1–3 tháng</option>
+                                <option value="3-6_THÁNG" th:selected="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDuration == '3-6_THÁNG'}">3–6 tháng</option>
+                                <option value="TRÊN_6_THÁNG" th:selected="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDuration == 'TRÊN_6_THÁNG'}">Trên 6 tháng</option>
+                            </select>
+                        </label>
+                        <label>Triệu chứng có nặng dần không?
+                            <input type="radio" name="symptomProgressing" value="true"
+                                   th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomProgressing}"> Có
+                            <input type="radio" name="symptomProgressing" value="false"
+                                   th:checked="${sessionDetail.symptomResult == null or !sessionDetail.symptomResult.symptomProgressing}"> Không
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-action btn-outline" onclick="cancelEditSymptoms()">
+                        <i class="fa-solid fa-times"></i> Hủy
+                    </button>
+                    <button type="submit" class="btn-action btn-primary" id="saveSymptomBtn">
+                        <i class="fa-solid fa-save"></i> Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

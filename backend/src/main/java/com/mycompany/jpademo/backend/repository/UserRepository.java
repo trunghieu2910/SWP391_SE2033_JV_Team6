@@ -113,4 +113,28 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                                                @Param("end") LocalDateTime end);
 
     Optional<User> findFirstByRoleRoleName(RoleName roleName);
+
+    Page<User> findByCreatedAtBetween(
+            LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndCreatedAtBetween(
+            String userName, String email, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Page<User> findByRoleRoleNameAndCreatedAtBetween(
+            RoleName roleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Page<User> findByStatusAndCreatedAtBetween(
+            UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndCreatedAtBetween(
+            String userName, String email, RoleName roleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndStatusAndCreatedAtBetween(
+            String userName, String email, UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Page<User> findByRoleRoleNameAndStatusAndCreatedAtBetween(
+            RoleName roleName, UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatusAndCreatedAtBetween(
+            String userName, String email, RoleName roleName, UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }

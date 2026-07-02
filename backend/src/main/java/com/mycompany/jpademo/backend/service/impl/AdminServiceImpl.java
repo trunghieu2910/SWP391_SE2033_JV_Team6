@@ -56,37 +56,67 @@ public class AdminServiceImpl implements AdminService {
 
     private final BlockedIPRepository blockedIPRepository;
 
-
     @Override
-    public Page<UserResponse> getUser(String keyword, String role, UserStatus status, Pageable pageable) {
+    public Page<UserResponse> getUser(String keyword, String role, UserStatus status,
+                                      LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+
         Page<User> users;
         boolean hasKeyword = keyword != null && !keyword.isBlank();
         boolean hasRole = role != null && !role.isBlank();
         boolean hasStatus = status != null;
-        if (hasKeyword && hasRole && hasStatus) {
-            users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatus(
-                    keyword, keyword, RoleName.valueOf(role), status, pageable);
-        } else if (hasKeyword && hasRole) {
-            users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleName(
-                    keyword, keyword, RoleName.valueOf(role), pageable);
-        } else if (hasKeyword && hasStatus) {
-            users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndStatus(
-                    keyword, keyword, status, pageable);
-        } else if (hasRole && hasStatus) {
-            users = userRepository.findByRoleRoleNameAndStatus(
-                    RoleName.valueOf(role), status, pageable);
-        } else if (hasKeyword) {
-            users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                    keyword, keyword, pageable);
-        } else if (hasRole) {
-            users = userRepository.findByRoleRoleName(
-                    RoleName.valueOf(role), pageable);
-        } else if (hasStatus) {
-            users = userRepository.findByStatus(
-                    status, pageable);
+        boolean hasDateFilter = startDate != null && endDate != null;
+        if (hasDateFilter) {
+            if (hasKeyword && hasRole && hasStatus) {
+                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatusAndCreatedAtBetween(
+                        keyword, keyword, RoleName.valueOf(role), status, startDate, endDate, pageable);
+            } else if (hasKeyword && hasRole) {
+                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndCreatedAtBetween(
+                        keyword, keyword, RoleName.valueOf(role), startDate, endDate, pageable);
+            } else if (hasKeyword && hasStatus) {
+                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndStatusAndCreatedAtBetween(
+                        keyword, keyword, status, startDate, endDate, pageable);
+            } else if (hasRole && hasStatus) {
+                users = userRepository.findByRoleRoleNameAndStatusAndCreatedAtBetween(
+                        RoleName.valueOf(role), status, startDate, endDate, pageable);
+            } else if (hasKeyword) {
+                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndCreatedAtBetween(
+                        keyword, keyword, startDate, endDate, pageable);
+            } else if (hasRole) {
+                users = userRepository.findByRoleRoleNameAndCreatedAtBetween(
+                        RoleName.valueOf(role), startDate, endDate, pageable);
+            } else if (hasStatus) {
+                users = userRepository.findByStatusAndCreatedAtBetween(
+                        status, startDate, endDate, pageable);
+            } else {
+                users = userRepository.findByCreatedAtBetween(startDate, endDate, pageable);
+            }
         } else {
-            users = userRepository.findAll(pageable);
+            if (hasKeyword && hasRole && hasStatus) {
+                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatus(
+                        keyword, keyword, RoleName.valueOf(role), status, pageable);
+            } else if (hasKeyword && hasRole) {
+                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleName(
+                        keyword, keyword, RoleName.valueOf(role), pageable);
+            } else if (hasKeyword && hasStatus) {
+                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndStatus(
+                        keyword, keyword, status, pageable);
+            } else if (hasRole && hasStatus) {
+                users = userRepository.findByRoleRoleNameAndStatus(
+                        RoleName.valueOf(role), status, pageable);
+            } else if (hasKeyword) {
+                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                        keyword, keyword, pageable);
+            } else if (hasRole) {
+                users = userRepository.findByRoleRoleName(
+                        RoleName.valueOf(role), pageable);
+            } else if (hasStatus) {
+                users = userRepository.findByStatus(
+                        status, pageable);
+            } else {
+                users = userRepository.findAll(pageable);
+            }
         }
+
         return users.map(this::mapToUserResponse);
     }
 
@@ -264,8 +294,10 @@ public class AdminServiceImpl implements AdminService {
         try {
             // Nếu không có filter, mặc định chỉ lấy 6 tháng gần nhất
             if (startDate == null && endDate == null) {
-                endDate = LocalDate.now();
-                startDate = endDate.minusMonths(6);
+                LocalDate now = LocalDate.now();
+                LocalDate currentMonthStart = now.withDayOfMonth(1);
+                startDate = currentMonthStart.minusMonths(5);
+                endDate = currentMonthStart;
             }
 
             LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;

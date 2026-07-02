@@ -19,39 +19,49 @@
 
     <!-- Filter Section -->
     <div class="filter-card">
-        <form th:action="@{/admin/users}" method="get" class="filter-grid">
-            <div class="form-field">
-                <label><i class="fa-solid fa-search"></i> Tìm kiếm</label>
-                <input type="text" name="keyword" th:value="${keyword}"
-                       placeholder="Tên đăng nhập, email, số điện thoại...">
-            </div>
-            <div class="form-field">
-                <label><i class="fa-solid fa-user-tag"></i> Vai trò</label>
-                <select name="role">
-                    <option th:each="r : ${roles}" th:value="${r}"
-                            th:text="${r == '' ? 'Tất cả vai trò' :
+        <form th:action="@{/admin/users}" method="get">
+            <!-- HÀNG 1 -->
+            <div class="filter-row">
+                <div class="form-field search-field">
+                    <label><i class="fa-solid fa-search"></i> Tìm kiếm</label>
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Tên đăng nhập, email... ">
+                </div>
+                <div class="form-field">
+                    <label><i class="fa-solid fa-user-tag"></i> Vai trò</label>
+                    <select name="role">
+                        <option th:each="r : ${roles}" th:value="${r}"
+                                th:text="${r == '' ? 'Tất cả vai trò' :
                                     r == 'ADMIN' ? 'Quản trị viên' :
                                     r == 'DOCTOR' ? 'Bác sĩ' :
                                     r == 'PATIENT' ? 'Bệnh nhân' : r}"
-                            th:selected="${r == role}"></option>
-                </select>
+                                th:selected="${r == role}"></option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label><i class="fa-solid fa-circle"></i> Trạng thái</label>
+                    <select name="status">
+                        <option value="" th:selected="${status == null}">Tất cả trạng thái</option>
+                        <option value="ACTIVE" th:selected="${status != null && status.name() == 'ACTIVE'}">Hoạt động</option>
+                        <option value="INACTIVE" th:selected="${status != null && status.name() == 'INACTIVE'}">Không hoạt động</option>
+                        <option value="BANNED" th:selected="${status != null && status.name() == 'BANNED'}">Đang bị khóa</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-action btn-primary">Lọc</button>
+                    <a th:href="@{/admin/users}" class="btn-action btn-outline">Xóa</a>
+                </div>
             </div>
-            <div class="form-field">
-                <label><i class="fa-solid fa-circle"></i> Trạng thái</label>
-                <select name="status">
-                    <option value="" th:selected="${status == null}">Tất cả trạng thái</option>
-                    <option value="ACTIVE" th:selected="${status != null && status.name() == 'ACTIVE'}">Hoạt động</option>
-                    <option value="INACTIVE" th:selected="${status != null && status.name() == 'INACTIVE'}">Không hoạt động</option>
-                    <option value="BANNED" th:selected="${status != null && status.name() == 'BANNED'}">Đang bị khóa</option>
-                </select>
-            </div>
-            <div class="btn-group">
-                <button type="submit" class="btn-action btn-primary">
-                    <i class="fa-solid fa-magnifying-glass"></i> Lọc
-                </button>
-                <a th:href="@{/admin/users}" class="btn-action btn-outline">
-                    <i class="fa-solid fa-rotate"></i> Xóa lọc
-                </a>
+
+            <!-- HÀNG 2: Date -->
+            <div class="filter-row date-row">
+                <div class="form-field date-field">
+                    <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
+                    <input type="date" name="startDate" th:value="${startDate}">
+                </div>
+                <div class="form-field date-field">
+                    <label><i class="fa-regular fa-calendar"></i> Đến ngày</label>
+                    <input type="date" name="endDate" th:value="${endDate}">
+                </div>
             </div>
         </form>
     </div>

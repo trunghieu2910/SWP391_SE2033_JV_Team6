@@ -49,13 +49,13 @@
     <!-- Quick Filters -->
     <div class="quick-filters">
         <span><i class="fa-regular fa-clock"></i> Nhanh:</span>
-        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().withDayOfMonth(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
            class="quick-filter-btn">Tháng này</a>
-        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(3), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(2), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
            class="quick-filter-btn">3 tháng</a>
-        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(6), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(5), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
            class="quick-filter-btn">6 tháng</a>
-        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusYears(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
+        <a th:href="@{/admin/dashboard(startDate=${#temporals.format(#temporals.createToday().minusMonths(11).withDayOfMonth(1), 'yyyy-MM-dd')}, endDate=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')})}"
            class="quick-filter-btn">1 năm</a>
         <a th:href="@{/admin/dashboard}"
            class="quick-filter-btn quick-filter-all">Tất cả</a>

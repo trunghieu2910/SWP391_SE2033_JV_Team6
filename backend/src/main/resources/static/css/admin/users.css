@@ -1,5 +1,6 @@
-/* users.css - Cập nhật */
+/* users.css - Full */
 
+/* ===== FILTER CARD ===== */
 .filter-card {
     background: #ffffff;
     border-radius: 16px;
@@ -9,25 +10,48 @@
     margin-bottom: 28px;
 }
 
-.filter-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr auto;
-    gap: 16px;
+/* ===== FILTER ROW ===== */
+.filter-row {
+    display: flex;
+    gap: 12px;
     align-items: flex-end;
+    flex-wrap: wrap;
 }
 
-@media (max-width: 992px) {
-    .filter-grid {
-        grid-template-columns: 1fr 1fr;
-    }
+.filter-row .form-field {
+    flex: 1;
+    min-width: 150px;
 }
 
-@media (max-width: 576px) {
-    .filter-grid {
-        grid-template-columns: 1fr;
-    }
+.filter-row .search-field {
+    flex: 2;
+    min-width: 200px;
 }
 
+/* ===== DATE ROW ===== */
+.date-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.date-row .form-field {
+    flex: 1;
+    min-width: 150px;
+    max-width: 280px;
+}
+
+/* ===== BUTTON GROUP ===== */
+.btn-group {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+/* ===== FORM FIELD ===== */
 .form-field {
     display: flex;
     flex-direction: column;
@@ -54,6 +78,7 @@
     transition: var(--transition);
     background-color: #ffffff;
     color: var(--neutral-dark);
+    width: 100%;
 }
 
 .form-field input:focus, .form-field select:focus {
@@ -61,12 +86,25 @@
     box-shadow: 0 0 0 3px rgba(16, 3, 87, 0.05);
 }
 
-.btn-group {
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
+/* ===== DATE FIELD ===== */
+.date-field input {
+    padding: 11px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    outline: none;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    background-color: #ffffff;
+    color: var(--neutral-dark);
+    width: 100%;
 }
 
+.date-field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(16, 3, 87, 0.05);
+}
+
+/* ===== BUTTON ACTION ===== */
 .btn-action {
     padding: 11px 20px;
     border-radius: 10px;
@@ -80,6 +118,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    white-space: nowrap;
 }
 
 .btn-primary {
@@ -104,60 +143,7 @@
     color: var(--primary);
 }
 
-.btn-detail {
-    background: #f1f5f9;
-    color: var(--primary);
-    padding: 8px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-}
-
-.btn-detail:hover {
-    background: var(--primary);
-    color: #ffffff;
-}
-
-.btn-status {
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.8rem;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-lock {
-    background: var(--danger-bg);
-    color: var(--danger);
-}
-
-.btn-lock:hover {
-    background: var(--danger);
-    color: #ffffff;
-}
-
-.btn-unlock {
-    background: var(--success-bg);
-    color: var(--success);
-}
-
-.btn-unlock:hover {
-    background: var(--success);
-    color: #ffffff;
-}
-
+/* ===== TABLE CARD ===== */
 .table-card {
     background: #ffffff;
     border-radius: 16px;
@@ -195,6 +181,7 @@
     font-size: 0.85rem;
 }
 
+/* ===== TABLE ===== */
 .table-container {
     overflow-x: auto;
 }
@@ -227,6 +214,7 @@ th {
     color: var(--neutral-dark);
 }
 
+/* ===== BADGES ===== */
 .role-badge {
     padding: 4px 12px;
     border-radius: 6px;
@@ -265,6 +253,7 @@ th {
 .status-banned { background: #fee2e2; color: #dc2626; }
 .status-banned .status-dot { background: #dc2626; }
 
+/* ===== ACTION BUTTONS ===== */
 .actions-col {
     text-align: center;
 }
@@ -275,6 +264,61 @@ th {
     justify-content: center;
 }
 
+.btn-detail {
+    background: #f1f5f9;
+    color: var(--primary);
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+}
+
+.btn-detail:hover {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.btn-status {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.8rem;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-lock {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-lock:hover {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.btn-unlock {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.btn-unlock:hover {
+    background: #16a34a;
+    color: #ffffff;
+}
+
+/* ===== EMPTY STATE ===== */
 .empty-state {
     text-align: center;
     padding: 48px 20px;
@@ -298,6 +342,7 @@ th {
     font-size: 0.9rem;
 }
 
+/* ===== PAGINATION ===== */
 .pagination-bar {
     padding: 16px 24px;
     display: flex;
@@ -346,7 +391,7 @@ th {
     border-color: var(--primary);
 }
 
-/* Modal */
+/* ===== MODAL ===== */
 .modal {
     position: fixed;
     top: 0;
@@ -405,7 +450,7 @@ th {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: var(--primary-bg);
+    background: #f0f4ff;
     color: var(--primary);
     display: flex;
     align-items: center;
@@ -485,10 +530,30 @@ th {
     gap: 10px;
 }
 
-/* ===== ALERT CLOSE BUTTON ===== */
+/* ===== ALERT ===== */
 .alert {
     position: relative;
-    padding-right: 45px;
+    padding: 14px 45px 14px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fca5a5;
 }
 
 .alert-close {
@@ -519,4 +584,25 @@ th {
 
 .alert-danger .alert-close {
     color: #dc2626;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .filter-row .form-field,
+    .filter-row .search-field {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+    .date-row .form-field {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+    .btn-group {
+        flex: 1 1 100%;
+        justify-content: stretch;
+    }
+    .btn-group .btn-action {
+        flex: 1;
+        justify-content: center;
+    }
 }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- ========================================== -->
+<!-- FRAGMENT: DANH SÁCH XÉT NGHIỆM             -->
+<!-- ========================================== -->
+<div th:fragment="list(labResults)">
+    <div class="lab-container">
+        <div th:if="${not #lists.isEmpty(labResults)}">
+            <div th:each="lab : ${labResults}" class="lab-item">
+                <div class="lab-header">
+                    <span class="lab-name" th:text="${lab.testType}">Xét nghiệm máu</span>
+                    <span class="lab-status" th:text="${lab.status.name() == 'PENDING' ? 'Chờ xử lý' :
+                                                         lab.status.name() == 'COMPLETED' ? 'Hoàn thành' :
+                                                         lab.status.name() == 'CANCELED' ? 'Đã hủy' : lab.status}">PENDING</span>
+                </div>
+                <div class="lab-params">
+                    <div th:each="item : ${lab.parameters}" class="param-row">
+                        <span class="param-name" th:text="${item.parameterName}">Hb</span>
+                        <span class="param-value" th:text="${item.value} + ' ' + ${item.unit}">12.5 g/dL</span>
+                    </div>
+                </div>
+                <div class="lab-time" th:text="${#temporals.format(lab.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(labResults)}">
+            <p class="empty-text">Chưa có kết quả xét nghiệm</p>
+        </div>
+        <!-- ===== NÚT MỞ MODAL ===== -->
+        <button class="btn-action btn-outline btn-add" onclick="openAddLabModal()">
+            <i class="fa-solid fa-plus"></i> Thêm xét nghiệm
+        </button>
+    </div>
+</div>
+</body>
+</html>

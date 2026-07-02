@@ -10,10 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public interface AdminService {
-    Page<UserResponse> getUser(String keyword, String role, UserStatus status, Pageable pageable);
+    Page<UserResponse> getUser(String keyword, String role, UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     boolean updateUserStatus(UpdateUserStatusRequest request);
 

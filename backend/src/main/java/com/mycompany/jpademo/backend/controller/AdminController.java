@@ -59,8 +59,12 @@ public class AdminController {
         try {
             // Nếu không có filter, mặc định 6 tháng gần nhất
             if (startDate == null && endDate == null) {
-                endDate = LocalDate.now();
-                startDate = endDate.minusMonths(6);
+                LocalDate now = LocalDate.now();
+                LocalDate currentMonthStart = now.withDayOfMonth(1);
+                LocalDate sixMonthsAgoStart = currentMonthStart.minusMonths(5);
+
+                startDate = sixMonthsAgoStart;
+                endDate = currentMonthStart;
             }
 
             // Nếu chỉ có startDate, set endDate = startDate + 1 tháng
@@ -152,9 +156,14 @@ public class AdminController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String role,
             @RequestParam(required = false) UserStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             Model model) {
-        Page<UserResponse> users = adminService.getUser(keyword, role, status, pageable);
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+
+        Page<UserResponse> users = adminService.getUser(keyword, role, status, startDateTime, endDateTime, pageable);
         model.addAttribute("users", users);
         model.addAttribute("keyword", keyword);
         model.addAttribute("role", role);
