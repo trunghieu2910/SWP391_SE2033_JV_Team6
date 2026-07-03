@@ -36,8 +36,7 @@
             <div class="navbar-right">
                 <div class="user-info">
                     <div>
-                        <div class="user-username" th:text="${profile.username}">patient_nam</div>
-                        <div class="user-role">Bệnh nhân</div>
+                        <div class="user-username" th:text="${profile.fullName != null ? profile.fullName : ''}">Tên người dùng</div>
                     </div>
                     <div class="user-avatar" th:text="${profile.fullName[0].toUpperCase()}">P</div>
                 </div>

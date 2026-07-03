@@ -36,18 +36,11 @@
             <div class="navbar-right">
                 <div class="user-info">
                     <div>
-                        <!-- SỬA: Hiển thị thông tin đăng nhập -->
-                        <div class="user-username">
-                            <span th:text="${profile.username}">patient_nam</span>
-                            <span style="font-size: 11px; color: #94a3b8; font-weight: 400; margin-left: 6px;">
-                                (<span th:text="${profile.email}">email@example.com</span>)
-                            </span>
-                        </div>
-                        <div class="user-role">Bệnh nhân</div>
+                        <div class="user-username" th:text="${profile.fullName != null ? profile.fullName : ''}">Tên người dùng</div>
                     </div>
                     <div class="user-avatar" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'U'}">P</div>
                 </div>
-                
+
                 <button type="button" class="logout-btn" onclick="showLogoutModal();" title="Đăng xuất">
                     <span>→</span>
                 </button>
@@ -63,15 +56,16 @@
                     <div class="profile-avatar-large" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'U'}">P</div>
                     <h2 class="profile-name" th:text="${profile.fullName}">Phạm Thùy Linh</h2>
                     <span class="profile-id-badge" th:text="'Mã bệnh nhân: #' + ${profile.patientID}">MÃ BỆNH NHÂN: #1</span>
+                    <a th:href="@{/patient/profile}" class="edit-profile-btn">Chỉnh sửa hồ sơ</a>
                     
                     <div class="profile-details-list">
                         <!-- Tài khoản -->
                         <div class="profile-detail-row">
                             <div class="profile-detail-label-container">
                                 <div class="profile-detail-icon">👤</div>
-                                <span class="profile-detail-label">Tên đăng nhập</span>
+                                <span class="profile-detail-label">Họ và tên</span>
                             </div>
-                            <span class="profile-detail-value" th:text="${profile.username}">patient_nam</span>
+                            <span class="profile-detail-value" th:text="${profile.fullName != null ? profile.fullName : 'Chưa cập nhật'}">Họ và tên</span>
                         </div>
                         
                         <!-- Email -->

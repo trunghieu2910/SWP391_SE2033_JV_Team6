@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ bệnh nhân - MedAI</title>
+    <link rel="stylesheet" th:href="@{/css/patient/patient.css}"/>
+    <link rel="stylesheet" th:href="@{/css/patient/profile.css}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="logo-container">
+                <div class="logo-icon"><span>~</span></div>
+                <div>
+                    <div class="logo-text">MedAI</div>
+                    <div class="logo-sub">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo</div>
+                </div>
+            </div>
+
+            <div class="nav-links">
+                <a th:href="@{/patient/home}" class="nav-link">
+                    <span>Trang chính</span>
+                </a>
+                <a th:href="@{/patient/medical-records}" class="nav-link">
+                    <span>Hồ sơ bệnh án</span>
+                </a>
+                <a th:href="@{/patient/profile}" class="nav-link active">
+                    <span>Hồ sơ cá nhân</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="navbar-right">
+            <div class="user-info">
+                <div>
+                    <div class="user-username" th:text="${profile.fullName != null ? profile.fullName : ''}">Tên người dùng</div>
+                </div>
+                <div class="user-avatar" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'U'}">P</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-shell">
+        <div class="page-header">
+            <div>
+                <p class="eyebrow">Thông tin cá nhân</p>
+                <h1>Quản lý hồ sơ của bạn</h1>
+                <p class="subtext">Cập nhật thông tin để bác sĩ và hệ thống có thể phục vụ bạn tốt hơn.</p>
+            </div>
+            <a th:href="@{/patient/home}" class="back-btn">← Quay lại</a>
+        </div>
+
+        <div th:if="${success}" class="success-box">
+            Cập nhật hồ sơ thành công.
+        </div>
+
+        <div class="content-grid">
+            <section class="summary-card">
+                <div class="avatar-large" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'U'}">P</div>
+                <h2 th:text="${profile.fullName != null ? profile.fullName : 'Chưa cập nhật'}">Tên bệnh nhân</h2>
+                <p class="muted" th:text="${profile.email != null ? profile.email : 'Chưa có email'}">email@example.com</p>
+                <div class="summary-list">
+                    <div><span>Ngày sinh</span><strong th:text="${profile.dob != null ? #temporals.format(profile.dob, 'dd/MM/yyyy') : 'Chưa cập nhật'}"></strong></div>
+                    <div><span>Số điện thoại</span><strong th:text="${profile.phoneNumber != null ? profile.phoneNumber : 'Chưa cập nhật'}"></strong></div>
+                    <div><span>CCCD/CMND</span><strong th:text="${profile.nationalID != null ? profile.nationalID : 'Chưa cập nhật'}"></strong></div>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <form th:action="@{/patient/profile}" th:object="${profileForm}" method="post" novalidate>
+                    <div class="field-grid">
+                        <div class="form-group">
+                            <label for="username">Tên đăng nhập</label>
+                            <input id="username" type="text" th:field="*{username}" class="form-input" readonly />
+                            <div style="font-size:12px;color:#64748b;margin-top:6px;">Tên đăng nhập không thể thay đổi.</div>
+                            <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fullName">Họ và tên</label>
+                            <input id="fullName" type="text" th:field="*{fullName}" class="form-input" required />
+                            <div class="error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phoneNumber">Số điện thoại</label>
+                            <input id="phoneNumber" type="text" th:field="*{phoneNumber}" class="form-input" />
+                            <div class="error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nationalID">CCCD/CMND</label>
+                            <input id="nationalID" type="text" th:field="*{nationalID}" class="form-input" />
+                            <div class="error" th:if="${#fields.hasErrors('nationalID')}" th:errors="*{nationalID}"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Giới tính</label>
+                            <select id="gender" th:field="*{gender}" class="form-input">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Male">Nam</option>
+                                <option value="Female">Nữ</option>
+                                <option value="Other">Khác</option>
+                            </select>
+                            <div class="error" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dob">Ngày sinh</label>
+                            <input id="dob" type="date" th:field="*{dob}" class="form-input"
+                                th:attr="max=${#temporals.format(today, 'yyyy-MM-dd')}" />
+                            <div class="error" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="address">Địa chỉ</label>
+                            <textarea id="address" th:field="*{address}" class="form-input form-textarea"></textarea>
+                            <div class="error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a th:href="@{/patient/home}" class="btn-secondary">Hủy</a>
+                        <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn lưu thay đổi hồ sơ này không?');">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+</body>
+</html>
