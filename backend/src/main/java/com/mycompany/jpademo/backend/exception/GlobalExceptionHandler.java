@@ -17,12 +17,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice
+// QUAN TRỌNG: scope "annotations = RestController.class" giới hạn advice này
+// CHỈ áp dụng cho các class @RestController (AuthController, LisIntegrationController...).
+// Nếu không giới hạn, nó sẽ "nuốt" luôn exception ném ra từ các @Controller MVC
+// (như LabResultController sau khi chuyển Thymeleaf) và trả JSON thô cho trình duyệt
+// thay vì để controller MVC tự xử lý bằng redirect/flash message hoặc trang lỗi.
+@RestControllerAdvice(annotations = RestController.class)
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)

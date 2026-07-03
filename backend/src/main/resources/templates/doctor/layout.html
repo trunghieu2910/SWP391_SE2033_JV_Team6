@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title layout:title-pattern="$CONTENT_TITLE - MediAI">Trang bác sĩ</title>
+    <link rel="stylesheet" th:href="@{/css/doctor/common.css}">
+    <th:block layout:fragment="extra-css"></th:block>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" th:replace="~{doctor/fragments/sidebar :: sidebar}"></aside>
+    <div class="main-content">
+        <div class="page-content" layout:fragment="content">
+            <!-- Nội dung từng trang sẽ chèn vào đây -->
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="extra-js"></th:block>
+</body>
+</html>

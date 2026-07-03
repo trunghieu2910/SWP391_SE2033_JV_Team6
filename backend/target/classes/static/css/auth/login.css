@@ -1,0 +1,86 @@
+/* ── Auth Layout (dùng chung cho login, forgot-password, register) ── */
+.login-page {
+    display: flex; min-height: 100vh;
+}
+
+/* ── Left Panel ── */
+.login-left {
+    width: 42%; background: linear-gradient(160deg, #1B4F9B 0%, #0A9396 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+}
+.login-left-content {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 40px;
+}
+.login-logo {
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px; border: 2px solid rgba(255,255,255,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; font-weight: 700; color: white;
+    margin-bottom: 24px;
+}
+.login-app-name {
+    font-size: 2rem; font-weight: 700; color: white;
+    letter-spacing: -0.5px; margin-bottom: 10px;
+}
+.login-tagline {
+    font-size: 1rem; color: rgba(255,255,255,0.75);
+    max-width: 280px; line-height: 1.6;
+}
+
+/* ── Right Panel (dùng chung mọi trang auth) ── */
+.login-right {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 40px 24px; background: var(--neutral-100);
+}
+.login-card { width: 100%; max-width: 420px; }
+.login-card-header { margin-bottom: 24px; }
+.login-card-header h2 { font-size: 1.75rem; }
+
+.login-action-row {
+    display: flex; justify-content: space-between; gap: 16px;
+    margin-top: 8px; align-items: center; flex-wrap: wrap;
+}
+.login-forgot-row {
+    display: flex; justify-content: flex-end; margin-top: 8px;
+}
+.login-forgot-link,
+.login-register-link {
+    font-size: 0.875rem; color: var(--primary); font-weight: 500;
+}
+.login-forgot-link:hover,
+.login-register-link:hover { text-decoration: underline; }
+
+/* Mobile */
+@media (max-width: 768px) {
+    .login-left { display: none; }
+    .login-right { padding: 24px 16px; }
+}
+
+/* ── Divider + Google (chỉ dùng ở trang Login) ── */
+.login-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0; color: var(--neutral-500); font-size: 0.875rem;
+}
+.login-divider::before,
+.login-divider::after {
+    content: ''; flex: 1;
+    border-top: 1px solid var(--neutral-300);
+}
+.btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    height: 44px; border-radius: 6px;
+    border: 1.5px solid var(--neutral-300);
+    background: white; color: var(--neutral-900);
+    font-size: 0.9375rem; font-weight: 600; cursor: pointer;
+    transition: box-shadow 0.18s, border-color 0.18s;
+    font-family: var(--font-sans);
+}
+.btn-google:hover:not(:disabled) {
+    border-color: #4285F4;
+    box-shadow: 0 2px 8px rgba(66,133,244,0.2);
+}
+.btn-google:disabled { opacity: 0.6; cursor: not-allowed; }

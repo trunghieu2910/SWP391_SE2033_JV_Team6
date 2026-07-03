@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập - MedAI</title>
+    <!-- CSRF token cho các request fetch() thuần JS (Spring Security tự bơm giá trị này) -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/auth/common.css}">
+    <link rel="stylesheet" th:href="@{/css/auth/login.css}">
+</head>
+<body>
+<div class="login-page">
+    <div class="login-left">
+        <div class="login-left-content">
+            <div class="login-logo"><span>+</span></div>
+            <h1 class="login-app-name">MedAI</h1>
+            <p class="login-tagline">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo</p>
+        </div>
+    </div>
+
+    <div class="login-right">
+        <div class="login-card card">
+            <div class="login-card-header">
+                <h2>Đăng nhập</h2>
+                <p class="text-muted">Nhập email, tên người dùng, số điện thoại hoặc số CCCD của bạn.</p>
+            </div>
+
+            <!-- form-post tới /login, Spring Security tự xử lý -->
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="login">Tài khoản <span class="required">*</span></label>
+                    <input id="login" name="login" class="form-input"
+                           placeholder="Email, tên người dùng, số điện thoại, số CCCD" autofocus required>
+                </div>
+
+                <div class="form-group mt-16">
+                    <label class="form-label" for="password">Mật khẩu <span class="required">*</span></label>
+                    <div class="password-input-wrap">
+                        <input id="password" name="password" type="password" class="form-input"
+                               placeholder="Nhập mật khẩu của bạn" required>
+                    </div>
+                </div>
+
+                <div class="login-action-row">
+                    <a href="/forgot-password" class="login-forgot-link">Bạn quên mật khẩu?</a>
+                    <a href="/register" class="login-register-link">Đăng ký</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full mt-24">Đăng nhập</button>
+            </form>
+
+            <div class="login-divider"><span>hoặc</span></div>
+
+            <!-- Nút Google — xử lý ở Bước 3 -->
+            <button type="button" id="googleLoginBtn" class="btn btn-google btn-full">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">
+                Đăng nhập với Google
+            </button>
+
+            <!-- Thông báo lỗi — đọc trực tiếp từ query param, không cần Controller -->
+            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'invalid'}">
+                <span>Thông tin đăng nhập không chính xác. Vui lòng thử lại.</span>
+            </div>
+            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'pending'}">
+                <span>Tài khoản của bạn chưa được kích hoạt. Vui lòng liên hệ quản trị viên.</span>
+            </div>
+            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'banned'}">
+                <span>Tài khoản của bạn đã bị tạm ngưng. Vui lòng liên hệ quản trị viên.</span>
+            </div>
+            <div class="alert alert-success" th:if="${param.logout != null}">
+                <span>Bạn đã đăng xuất thành công.</span>
+            </div>
+            <div class="alert alert-success" th:if="${param.resetSuccess != null}">
+                <span>✓ Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" th:src="@{/js/auth/google-login.js}"></script>
+<script th:src="@{/js/auth/password-toggle.js}"></script>
+</body>
+</html>
