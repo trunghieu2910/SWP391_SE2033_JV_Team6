@@ -99,6 +99,7 @@ public class SecurityConfig {
                                 "/api/auth/google/complete",
                                 "/api/integration/lis/results",
                                 "/auth/**",
+                                "/forgot-password/**",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<!-- ========================================== -->
+<!-- FRAGMENT: DANH SÁCH HÌNH ẢNH Y TẾ         -->
+<!-- ========================================== -->
+<div th:fragment="list(medicalImages)">
+  <div class="image-container">
+    <div th:if="${not #lists.isEmpty(medicalImages)}">
+      <div class="image-grid">
+        <div th:each="img : ${medicalImages}" class="image-item">
+          <div class="image-header">
+            <span th:text="${img.imageType}">MRI</span>
+            <span th:text="${img.status.name() == 'PENDING' ? 'Chờ xử lý' :
+                                             img.status.name() == 'COMPLETED' ? 'Hoàn thành' :
+                                             img.status.name() == 'CANCELED' ? 'Đã hủy' : img.status}">COMPLETED</span>
+          </div>
+          <div class="image-thumbs">
+            <!-- SỬA: đổi từ detail thành d -->
+            <div th:each="d : ${img.images}" class="thumb">
+              <img th:src="${d.imageUrl}" alt="Medical Image">
+            </div>
+          </div>
+          <div class="image-time" th:text="${#temporals.format(img.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</div>
+        </div>
+      </div>
+    </div>
+    <div th:if="${#lists.isEmpty(medicalImages)}">
+      <p class="empty-text">Chưa có hình ảnh y tế</p>
+    </div>
+    <button class="btn-action btn-outline btn-add" onclick="alert('Tính năng đang phát triển')">
+      <i class="fa-solid fa-plus"></i> Thêm hình ảnh y tế
+    </button>
+  </div>
+</div>
+</body>
+</html>

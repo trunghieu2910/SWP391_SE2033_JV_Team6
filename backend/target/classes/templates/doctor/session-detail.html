@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{doctor/layout :: main-layout(~{::main}, 'Chi tiết ca chẩn đoán', 'sessions')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/doctor/session-detail.css}">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a th:href="@{/doctor/sessions}">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+        <span class="separator">/</span>
+        <span>Chi tiết ca chẩn đoán #<span th:text="${sessionDetail.sessionId}" id="sessionIdDisplay">1</span></span>
+    </nav>
+
+    <!-- Header -->
+    <div class="session-header">
+        <div class="session-title">
+            <h1>Chi tiết ca chẩn đoán #<span th:text="${sessionDetail.sessionId}" id="sessionIdDisplay">1</span></h1>
+            <div class="session-meta">
+                <span class="status-badge"
+                      th:classappend="${sessionDetail.status != null} ? ${'status-' + sessionDetail.status.toLowerCase()} : 'status-pending'">
+                    <span class="status-dot"></span>
+                    <span th:text="${sessionDetail.status == 'PENDING' ? 'Chờ xử lý' :
+                                     sessionDetail.status == 'PROCESSING' ? 'Đang xử lý' :
+                                     sessionDetail.status == 'COMPLETED' ? 'Hoàn thành' :
+                                     sessionDetail.status == 'FAILED' ? 'Thất bại' : (sessionDetail.status != null ? sessionDetail.status : 'Chưa xác định')}">PENDING</span>
+                </span>
+                <span th:if="${sessionDetail.isShared != null and sessionDetail.isShared}" class="badge badge-shared">Đã công bố</span>
+                <span th:if="${sessionDetail.isShared == null or !sessionDetail.isShared}" class="badge badge-private">Chưa công bố</span>
+            </div>
+        </div>
+        <div class="session-actions">
+            <!-- Nút đổi trạng thái - mở modal -->
+            <button type="button" class="btn-action btn-primary" onclick="openStatusModal()">
+                <i class="fa-solid fa-rotate"></i> Đổi trạng thái
+            </button>
+
+            <!-- Nút công bố - mở modal -->
+            <button type="button" class="btn-action"
+                    th:classappend="${sessionDetail.isShared != null and sessionDetail.isShared} ? 'btn-outline' : 'btn-success'"
+                    onclick="openShareModal()">
+                <i th:class="${sessionDetail.isShared != null and sessionDetail.isShared} ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                <span th:text="${sessionDetail.isShared != null and sessionDetail.isShared} ? 'Gỡ công bố' : 'Công bố'"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content: 3-7 Layout -->
+    <div class="detail-container">
+        <!-- Left: Patient Info (3) -->
+        <div class="patient-card">
+            <h3><i class="fa-solid fa-user-circle"></i> Hồ sơ bệnh nhân</h3>
+            <div class="patient-info">
+                <div class="info-row">
+                    <span class="label">Mã bệnh nhân</span>
+                    <span class="value" th:text="'#' + ${sessionDetail.patientId}">#1</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Tên bệnh nhân</span>
+                    <span class="value" th:text="${sessionDetail.patientName}">Nguyễn Văn A</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Ngày sinh</span>
+                    <span class="value" th:text="${#temporals.format(sessionDetail.patientDob, 'dd/MM/yyyy')}">01/01/1990</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Giới tính</span>
+                    <span class="value" th:text="${sessionDetail.patientGender == 'Male' ? 'Nam' : sessionDetail.patientGender == 'Female' ? 'Nữ' : '—'}">Nữ</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Địa chỉ</span>
+                    <span class="value" th:text="${sessionDetail.patientAddress}">Hà Nội</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Bác sĩ</span>
+                    <span class="value" th:text="${sessionDetail.doctorName}">Bác sĩ A</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Chiều cao</span>
+                    <span class="value" th:text="${sessionDetail.height != null ? sessionDetail.height + ' cm' : '—'}">165 cm</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Cân nặng</span>
+                    <span class="value" th:text="${sessionDetail.weight != null ? sessionDetail.weight + ' kg' : '—'}">55 kg</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Ngày tạo</span>
+                    <span class="value" th:text="${#temporals.format(sessionDetail.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Content (7) -->
+        <div class="content-section">
+
+            <!-- 1. TRIỆU CHỨNG LÂM SÀNG -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('symptomAccordion')">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-stethoscope"></i>
+                        <span>Triệu chứng lâm sàng</span>
+                        <span class="accordion-badge" th:text="${sessionDetail.symptomResult != null ? 'Đã có' : 'Chưa có'}">Đã có</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="symptomIcon"></i>
+                </div>
+                <div class="accordion-body" id="symptomAccordion" style="display: none;">
+                    <div th:replace="~{doctor/fragments/clinical-symptoms :: form(sessionDetail=${sessionDetail})}"></div>
+                </div>
+            </div>
+
+            <!-- 2. XÉT NGHIỆM Y TẾ -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('labAccordion')">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-flask"></i>
+                        <span>Xét nghiệm y tế</span>
+                        <span class="accordion-badge" th:text="${sessionDetail.labResults != null ? sessionDetail.labResults.size() : 0} + ' xét nghiệm'">0 xét nghiệm</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="labIcon"></i>
+                </div>
+                <div class="accordion-body" id="labAccordion" style="display: none;">
+                    <div th:replace="~{doctor/fragments/lab-results :: list(labResults=${sessionDetail.labResults})}"></div>
+                </div>
+            </div>
+
+            <!-- 3. HÌNH ẢNH Y TẾ -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('imageAccordion')">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-image"></i>
+                        <span>Hình ảnh y tế</span>
+                        <span class="accordion-badge" th:text="${sessionDetail.medicalImages != null ? sessionDetail.medicalImages.size() : 0} + ' hình ảnh'">0 hình ảnh</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="imageIcon"></i>
+                </div>
+                <div class="accordion-body" id="imageAccordion" style="display: none;">
+                    <div th:replace="~{doctor/fragments/medical-images :: list(medicalImages=${sessionDetail.medicalImages})}"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="confirmModal" class="confirm-modal" style="display: none;">
+        <div class="confirm-modal-overlay" onclick="closeConfirmModal()"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="confirmModalTitle">Xác nhận</h3>
+            <p id="confirmModalMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            <div class="confirm-modal-actions">
+                <button type="button" class="btn-action btn-outline" onclick="closeConfirmModal()">
+                    <i class="fa-solid fa-times"></i> Hủy
+                </button>
+                <button type="button" class="btn-action btn-primary" id="confirmModalOkBtn">
+                    <i class="fa-solid fa-check"></i> Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeStatusModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-rotate"></i> Đổi trạng thái</h3>
+                <button type="button" class="modal-close" onclick="closeStatusModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-session-info">Ca chẩn đoán #<span id="statusSessionId" th:text="${sessionDetail.sessionId}">1</span></p>
+                <div class="form-group">
+                    <label>Chọn trạng thái mới:</label>
+                    <select id="statusSelect" class="form-control">
+                        <option th:each="s : ${statuses}" th:value="${s}"
+                                th:text="${s.name() == 'PENDING' ? 'Chờ xử lý' :
+                                           s.name() == 'PROCESSING' ? 'Đang xử lý' :
+                                           s.name() == 'COMPLETED' ? 'Hoàn thành' :
+                                           s.name() == 'FAILED' ? 'Thất bại' : s}"
+                                th:selected="${s.name() == sessionDetail.status}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action btn-outline" onclick="closeStatusModal()">
+                    <i class="fa-solid fa-times"></i> Hủy
+                </button>
+                <button type="button" class="btn-action btn-primary" onclick="confirmStatusUpdate()">
+                    <i class="fa-solid fa-check"></i> Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="shareModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeShareModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-share"></i> Xác nhận công bố</h3>
+                <button type="button" class="modal-close" onclick="closeShareModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="shareMessage">
+                    Bạn có chắc chắn muốn <strong id="shareActionText">công bố</strong>
+                    ca chẩn đoán #<span id="shareSessionId" th:text="${sessionDetail.sessionId}">1</span>?
+                </p>
+                <p class="share-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span id="shareWarningText">Sau khi công bố, bệnh nhân và các bác sĩ khác có thể xem ca chẩn đoán này.</span>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action btn-outline" onclick="closeShareModal()">
+                    <i class="fa-solid fa-times"></i> Hủy
+                </button>
+                <button type="button" class="btn-action btn-primary" id="shareConfirmBtn" onclick="confirmShareUpdate()">
+                    <i class="fa-solid fa-check"></i> <span id="shareBtnText">Xác nhận</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addLabModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeAddLabModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-flask"></i> Thêm xét nghiệm y tế</h3>
+                <button type="button" class="modal-close" onclick="closeAddLabModal()">&times;</button>
+            </div>
+            <form id="addLabForm" method="post" th:action="@{/doctor/lab-results/create}">
+                <!-- Hidden field cho sessionId -->
+                <input type="hidden" name="sessionId" th:value="${sessionDetail.sessionId}">
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="testType">Loại xét nghiệm <span class="required">*</span></label>
+                        <select id="testType" name="testType" class="form-control" required>
+                            <option value="">Chọn loại xét nghiệm</option>
+                            <option value="Xét nghiệm tế bào học cổ tử cung">Xét nghiệm tế bào học cổ tử cung</option>
+                            <option value="Xét nghiệm DNA của virus HPV">Xét nghiệm DNA của virus HPV</option>
+                            <option value="Định tuýp HPV nguy cơ cao">Định tuýp HPV nguy cơ cao</option>
+                            <option value="Sinh thiết">Sinh thiết</option>
+                            <option value="Dấu ấn ung thư SCC">Dấu ấn ung thư SCC</option>
+                            <option value="Xét nghiệm máu cơ bản">Xét nghiệm máu cơ bản</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action btn-outline" onclick="closeAddLabModal()">
+                        <i class="fa-solid fa-times"></i> Hủy
+                    </button>
+                    <button type="submit" class="btn-action btn-primary">
+                        <i class="fa-solid fa-plus"></i> Thêm xét nghiệm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/doctor/session-detail.js}"></script>
+</main>
+</body>
+</html>

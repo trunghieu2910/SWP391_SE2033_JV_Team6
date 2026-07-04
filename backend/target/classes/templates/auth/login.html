@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng nhập</title>
-    <link rel="stylesheet" th:href="@{/css/auth/auth.css}" />
-    <link rel="stylesheet" th:href="@{/css/auth/login.css}" />
+    <meta charset="UTF-8">
+    <title>Đăng nhập - MedAI</title>
+    <!-- CSRF token cho các request fetch() thuần JS (Spring Security tự bơm giá trị này) -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+    <link rel="stylesheet" th:href="@{/css/auth/common.css}">
+    <link rel="stylesheet" th:href="@{/css/auth/login.css}">
 </head>
 <body>
 <div class="login-page">
     <div class="login-left">
         <div class="login-left-content">
-            <div class="login-logo">+</div>
+            <div class="login-logo"><span>+</span></div>
             <h1 class="login-app-name">MedAI</h1>
             <p class="login-tagline">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo</p>
-            <div class="decor-circle c1"></div>
-            <div class="decor-circle c2"></div>
-            <div class="decor-circle c3"></div>
         </div>
     </div>
+
     <div class="login-right">
         <div class="login-card card">
             <div class="login-card-header">
@@ -26,35 +27,25 @@
                 <p class="text-muted">Nhập email, tên người dùng, số điện thoại hoặc số CCCD của bạn.</p>
             </div>
 
-            <div th:if="${successMessage}" class="alert alert-success">
-                <span>✓</span>
-                <span th:text="${successMessage}"></span>
-            </div>
-            <div th:if="${error}" class="alert alert-error">
-                <span>!</span>
-                <span th:text="${error}"></span>
-            </div>
-
-            <form id="loginForm" th:action="@{/auth/login}" th:object="${loginRequest}" method="post">
+            <!-- form-post tới /login, Spring Security tự xử lý -->
+            <form th:action="@{/auth/login}" method="post">
                 <div class="form-group">
                     <label class="form-label" for="login">Tài khoản <span class="required">*</span></label>
-                    <input class="form-input" type="text" id="login" th:field="*{login}" placeholder="Email, tên người dùng, số điện thoại, số CCCD" autofocus />
-                    <p th:if="${#fields.hasErrors('login')}" class="form-error" th:errors="*{login}"></p>
+                    <input id="login" name="login" class="form-input"
+                           placeholder="Email, tên người dùng, số điện thoại, số CCCD" autofocus required>
                 </div>
-                <div class="form-group">
+
+                <div class="form-group mt-16">
                     <label class="form-label" for="password">Mật khẩu <span class="required">*</span></label>
-                    <div class="input-wrapper">
-                        <input class="form-input" type="password" id="password" th:field="*{password}" placeholder="Nhập mật khẩu của bạn" />
-                        <button type="button" class="input-action" data-toggle-target="password" aria-label="Hiện mật khẩu">
-                            <img class="eye-icon" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>" alt="Hiện mật khẩu" />
-                        </button>
+                    <div class="password-input-wrap">
+                        <input id="password" name="password" type="password" class="form-input"
+                               placeholder="Nhập mật khẩu của bạn" required>
                     </div>
-                    <p th:if="${#fields.hasErrors('password')}" class="form-error" th:errors="*{password}"></p>
                 </div>
 
                 <div class="login-action-row">
-                    <a class="login-forgot-link" th:href="@{/auth/forgot-password}">Bạn quên mật khẩu?</a>
-                    <a class="login-register-link" th:href="@{/auth/register}">Đăng ký</a>
+                    <a href="/forgot-password" class="login-forgot-link">Bạn quên mật khẩu?</a>
+                    <a href="/auth/register" class="login-register-link">Đăng ký</a>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-full mt-24">Đăng nhập</button>
@@ -62,15 +53,33 @@
 
             <div class="login-divider"><span>hoặc</span></div>
 
-            <form th:action="@{/auth/google}" method="post">
-                <button type="submit" class="btn btn-google btn-full">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" width="20" height="20" />
-                    Đăng nhập với Google
-                </button>
-            </form>
+            <!-- Nút Google — xử lý ở Bước 3 -->
+            <button type="button" id="googleLoginBtn" class="btn btn-google btn-full">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" height="20" alt="Google">
+                Đăng nhập với Google
+            </button>
+
+            <!-- Thông báo lỗi — đọc trực tiếp từ query param, không cần Controller -->
+            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'invalid'}">
+                <span>Thông tin đăng nhập không chính xác. Vui lòng thử lại.</span>
+            </div>
+            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'pending'}">
+                <span>Tài khoản của bạn chưa được kích hoạt. Vui lòng liên hệ quản trị viên.</span>
+            </div>
+            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'banned'}">
+                <span>Tài khoản của bạn đã bị tạm ngưng. Vui lòng liên hệ quản trị viên.</span>
+            </div>
+            <div class="alert alert-success" th:if="${param.logout != null}">
+                <span>Bạn đã đăng xuất thành công.</span>
+            </div>
+            <div class="alert alert-success" th:if="${param.resetSuccess != null}">
+                <span>✓ Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.</span>
+            </div>
         </div>
     </div>
 </div>
-<script th:src="@{/js/auth/auth.js}"></script>
+
+<script type="module" th:src="@{/js/auth/google-login.js}"></script>
+<script th:src="@{/js/auth/password-toggle.js}"></script>
 </body>
 </html>

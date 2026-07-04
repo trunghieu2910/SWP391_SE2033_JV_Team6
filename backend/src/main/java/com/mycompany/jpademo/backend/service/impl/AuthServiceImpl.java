@@ -140,12 +140,12 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
 
         if (user.getStatus() != UserStatus.PENDING) {
-            throw new InvalidOtpException();
+            throw new InvalidOtpException("no");
         }
 
         boolean valid = OtpUtil.verifyOtp(user.getEmail(), request.getOtp());
         if (!valid) {
-            throw new InvalidOtpException();
+            throw new InvalidOtpException("no");
         }
 
         OtpUtil.removeOtp(user.getEmail());
@@ -159,7 +159,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
 
         if (user.getStatus() != UserStatus.PENDING) {
-            throw new InvalidOtpException();
+            throw new InvalidOtpException("no");
         }
 
         String otp = OtpUtil.generateOtp();

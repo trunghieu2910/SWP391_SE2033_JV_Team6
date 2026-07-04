@@ -51,8 +51,14 @@ public class AuthController {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
             redirectAttributes.addFlashAttribute("successMessage", "Đăng nhập thành công!");
-            if (response.getRole() != null && response.getRole().equalsIgnoreCase("PATIENT")) {
-                return "redirect:/patient/home";
+            if (response.getRole() != null) {
+                if (response.getRole().equalsIgnoreCase("PATIENT")) {
+                    return "redirect:/patient/home";
+                } else if (response.getRole().equalsIgnoreCase("DOCTOR")) {
+                    return "redirect:/doctor/sessions";
+                } else if (response.getRole().equalsIgnoreCase("ADMIN")) {
+                    return "redirect:/admin/dashboard";
+                }
             }
             return "redirect:/home";
         } catch (Exception e) {
@@ -327,8 +333,14 @@ public class AuthController {
                 // User đã tồn tại -> Đăng nhập thành công
                 redirectAttributes.addFlashAttribute("successMessage", 
                     "Đăng nhập bằng Google thành công!");
-                if (response.getRole() != null && response.getRole().equalsIgnoreCase("PATIENT")) {
-                    return "redirect:/patient/home";
+                if (response.getRole() != null) {
+                    if (response.getRole().equalsIgnoreCase("PATIENT")) {
+                        return "redirect:/patient/home";
+                    } else if (response.getRole().equalsIgnoreCase("DOCTOR")) {
+                        return "redirect:/doctor/sessions";
+                    } else if (response.getRole().equalsIgnoreCase("ADMIN")) {
+                        return "redirect:/admin/dashboard";
+                    }
                 }
                 return "redirect:/home";
             } else {
@@ -371,8 +383,14 @@ public class AuthController {
             }
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Đăng ký và đăng nhập bằng Google thành công!");
-            if (response.getRole() != null && response.getRole().equalsIgnoreCase("PATIENT")) {
-                return "redirect:/patient/home";
+            if (response.getRole() != null) {
+                if (response.getRole().equalsIgnoreCase("PATIENT")) {
+                    return "redirect:/patient/home";
+                } else if (response.getRole().equalsIgnoreCase("DOCTOR")) {
+                    return "redirect:/doctor/sessions";
+                } else if (response.getRole().equalsIgnoreCase("ADMIN")) {
+                    return "redirect:/admin/dashboard";
+                }
             }
             return "redirect:/home";
         } catch (Exception e) {

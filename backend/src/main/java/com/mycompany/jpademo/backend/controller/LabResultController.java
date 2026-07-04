@@ -1,56 +1,129 @@
 package com.mycompany.jpademo.backend.controller;
 
 import com.mycompany.jpademo.backend.dto.request.CreateLabResultRequest;
-import com.mycompany.jpademo.backend.dto.response.ApiResponse;
 import com.mycompany.jpademo.backend.dto.response.LabResultResponse;
+import com.mycompany.jpademo.backend.entity.DiagnosisSession;
+import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
+import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
+import com.mycompany.jpademo.backend.repository.DiagnosisSessionRepository;
 import com.mycompany.jpademo.backend.service.interfaces.LabResultService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173")
-@RestController
-@RequestMapping("/api/lab-results")
+@Controller
 @RequiredArgsConstructor
 public class LabResultController {
 
     private final LabResultService labResultService;
+    private final DiagnosisSessionRepository sessionRepository;
 
-    @PostMapping
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<ApiResponse<LabResultResponse>> createLabResult(
-            @Valid @RequestBody CreateLabResultRequest request) {
+    // ══════════════════════════════════════════════
+    //  TẠO XÉT NGHIỆM (đã làm ở phần trước — giữ nguyên)
+    // ══════════════════════════════════════════════
 
-        LabResultResponse created = labResultService.createLabResult(request);
+    @GetMapping("/doctor/lab-results/create")
+    public String showCreateForm(@RequestParam("sessionId") Integer sessionId, Model model) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy phiên khám với ID: " + sessionId));
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED) // Trả về 201 thay vì 200 vì đây là hành động tạo mới
-                .body(ApiResponse.<LabResultResponse>builder()
-                        .code(201)
-                        .success(true)
-                        .message("Tạo chỉ định xét nghiệm thành công")
-                        .data(created)
-                        .build());
+        CreateLabResultRequest form = new CreateLabResultRequest();
+        form.setSessionId(sessionId);
+
+        model.addAttribute("labResultForm", form);
+        model.addAttribute("session", session);
+        return "doctor/lab-result-create";
     }
 
-    @GetMapping("/session/{sessionId}")
-    @PreAuthorize("hasRole('DOCTOR') or hasRole('PATIENT')") // Cả 2 role đều xem được
-    public ResponseEntity<ApiResponse<List<LabResultResponse>>> getLabResultsBySession(
-            @PathVariable Integer sessionId) {
+    @PostMapping("/doctor/lab-results/create")
+    public String createLabResult(
+            @Valid @ModelAttribute("labResultForm") CreateLabResultRequest form,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
-        List<LabResultResponse> results = labResultService.getLabResultsBySession(sessionId);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("session",
+                    sessionRepository.findById(form.getSessionId()).orElse(null));
+            return "doctor/lab-result-create";
+        }
 
-        return ResponseEntity.ok(
-                ApiResponse.<List<LabResultResponse>>builder()
-                        .code(200)
-                        .success(true)
-                        .message("Lấy danh sách xét nghiệm thành công")
-                        .data(results)
-                        .build());
+        try {
+            labResultService.createLabResult(form);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Tạo chỉ định xét nghiệm thành công!");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+
+        // SỬA LẠI: trỏ thẳng đến trang Xem xét nghiệm vừa tạo
+        // (thay vì "/doctor/sessions/{id}" — trang đó CHƯA tồn tại)
+        return "redirect:/doctor/lab-results/session/" + form.getSessionId();
+    }
+
+    // ══════════════════════════════════════════════
+    //  XEM XÉT NGHIỆM (chức năng mới của phần này)
+    // ══════════════════════════════════════════════
+
+    // ---- Bác sĩ xem ----
+    @GetMapping("/doctor/lab-results/session/{sessionId}")
+    public String viewByDoctorSession(
+            @PathVariable Integer sessionId,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            List<LabResultResponse> results = labResultService.getLabResultsBySession(sessionId);
+            DiagnosisSession session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Không tìm thấy phiên khám với ID: " + sessionId));
+
+            model.addAttribute("labResults", results);
+            model.addAttribute("session", session);
+            model.addAttribute("sessionId", sessionId);
+            return "doctor/lab-result-list";
+
+        } catch (ResourceNotFoundException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/doctor/patients";
+        } catch (UnauthorizedActionException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/doctor/patients";
+        }
+    }
+
+    // ---- Bệnh nhân xem ----
+    @GetMapping("/patient/lab-results/session/{sessionId}")
+    public String viewByPatientSession(
+            @PathVariable Integer sessionId,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            List<LabResultResponse> results = labResultService.getLabResultsBySession(sessionId);
+            DiagnosisSession session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Không tìm thấy phiên khám với ID: " + sessionId));
+
+            model.addAttribute("labResults", results);
+            model.addAttribute("session", session);
+            model.addAttribute("sessionId", sessionId);
+            return "patient/lab-result-list";
+
+        } catch (ResourceNotFoundException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/patient/dashboard";
+        } catch (UnauthorizedActionException ex) {
+            // Bao gồm cả trường hợp session.isShared = false — service đã tự chặn
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/patient/dashboard";
+        }
     }
 }

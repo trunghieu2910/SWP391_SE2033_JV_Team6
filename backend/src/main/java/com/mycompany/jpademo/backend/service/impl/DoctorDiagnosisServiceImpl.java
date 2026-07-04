@@ -1,8 +1,8 @@
 package com.mycompany.jpademo.backend.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mycompany.jpademo.backend.dto.request.*;
+import com.mycompany.jpademo.backend.dto.request.UpdateClinicalSymptomsRequest;
+import com.mycompany.jpademo.backend.dto.request.UpdateSessionShareRequest;
+import com.mycompany.jpademo.backend.dto.request.UpdateSessionStatusRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.*;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
@@ -13,6 +13,7 @@ import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.repository.*;
 import com.mycompany.jpademo.backend.service.interfaces.DoctorDiagnosisService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
@@ -33,7 +35,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     private final LabResultRepository labResultRepository;
     private final MedicalImageRepository medicalImageRepository;
 
-    private static final String MESSAGE = "Diagnosis session not found with ID: ";
+    private static final String MESSAGE = "Ca chẩn đoán không tìm thấy với ID: ";
 
     @Override
     @Transactional(readOnly = true)
@@ -64,21 +66,17 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
 
         if (!session.getUser().getUserId().equals(doctorId)) {
-            throw new UnauthorizedActionException("You are not authorized to update this session.");
-        }
-        String status = String.valueOf(request.getStatus());
-        if (status == null || status.isBlank()) {
-            throw new BadRequestException("Status must not be null or blank.");
+            throw new UnauthorizedActionException("Bạn không có quyền cập nhật trạng thái ca chẩn đoán này.");
         }
         if (session.getIsShared() != null && session.getIsShared()) {
-            throw new BadRequestException(".Session is shared. Cannot update session");
+            throw new BadRequestException("Ca chẩn đoán đã được chia sẻ. Không thể cập nhật trạng thái.");
         }
-        DiagnosisSessionStatus newStatus;
-        try {
-            newStatus = DiagnosisSessionStatus.valueOf(status.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid status value: " + request.getStatus() + ". Must be PENDING, PROCESSING, COMPLETED, or FAILED.");
+
+        DiagnosisSessionStatus newStatus = request.getStatus();
+        if (newStatus == null) {
+            throw new BadRequestException("Trạng thái không thể bỏ trống.");
         }
+
         session.setStatus(newStatus);
         sessionRepository.save(session);
     }
@@ -89,12 +87,11 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         Integer sessionId = request.getSessionId();
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
-
         if (!session.getUser().getUserId().equals(doctorId)) {
-            throw new UnauthorizedActionException("You are not authorized to update this session.");
+            throw new UnauthorizedActionException("Bạn không có quyền cập nhật trạng thái ca chẩn đoán này.");
         }
         if (!DiagnosisSessionStatus.COMPLETED.equals(session.getStatus())) {
-            throw new BadRequestException("Cannot publish session that is not completed");
+            throw new BadRequestException("Không thể công bố ca chẩn đoán chưa hoàn thành.");
         }
         session.setIsShared(request.getIsShared());
         sessionRepository.save(session);
@@ -103,13 +100,10 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     @Override
     @Transactional(readOnly = true)
     public List<SymptomResponse> getSessionSymptoms(Integer sessionId) {
-
         SymptomResult symptomResult = symptomResultRepository
                 .findByDiagnosisSessionSessionId(sessionId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "No clinical symptoms recorded for session ID: "
-                                        + sessionId));
+                        new ResourceNotFoundException("Không tìm thấy triệu chứng lâm sàng cho ca chẩn đoán ID: " + sessionId));
         String menopauseStatus = symptomResult.getMenopauseStatus() != null
                 ? symptomResult.getMenopauseStatus()
                 : null;
@@ -125,7 +119,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                         .symptomDuration(symptomDuration)
                         .symptomProgressing(symptomProgressing)
                         .build())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -133,8 +127,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     public void updateClinicalSymptoms(Integer doctorId, Integer sessionId, UpdateClinicalSymptomsRequest request) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
+
         if (!session.getUser().getUserId().equals(doctorId)) {
-            throw new UnauthorizedActionException("You are not authorized to update this session.");
+            throw new UnauthorizedActionException("Bạn không có quyền cập nhật triệu chứng của ca chẩn đoán này.");
         }
 
         if (request.getHeight() != null) session.setHeight(request.getHeight());
@@ -151,9 +146,11 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                     result.setSymptomDetails(new ArrayList<>());
                     return result;
                 });
+
         symptomResult.setMenopauseStatus(request.getMenopauseStatus());
         symptomResult.setSymptomDuration(request.getSymptomDuration());
         symptomResult.setSymptomProgressing(request.getSymptomProgressing());
+
         List<Integer> allSymptomIds = new ArrayList<>();
 
         if (request.getAbnormalBleedingIds() != null) allSymptomIds.addAll(request.getAbnormalBleedingIds());
@@ -161,6 +158,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (request.getPainIds() != null) allSymptomIds.addAll(request.getPainIds());
         if (request.getUrinarySymptomsIds() != null) allSymptomIds.addAll(request.getUrinarySymptomsIds());
         if (request.getDigestiveSymptomsIds() != null) allSymptomIds.addAll(request.getDigestiveSymptomsIds());
+
         if (request.getSystemicSymptoms() != null) {
             if (Boolean.TRUE.equals(request.getSystemicSymptoms().get("weightLoss"))) allSymptomIds.add(14);
             if (Boolean.TRUE.equals(request.getSystemicSymptoms().get("fatigue"))) allSymptomIds.add(15);
@@ -191,6 +189,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             detail.setSymptom(symptom);
             symptomResult.getSymptomDetails().add(detail);
         }
+
         symptomResultRepository.save(symptomResult);
     }
 
@@ -198,18 +197,18 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     @Transactional(readOnly = true)
     public DoctorSessionDetailResponse getSessionDetail(Integer sessionId, Integer doctorId) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Session not found with id: " + sessionId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán với: " + sessionId));
         if (!session.getUser().getUserId().equals(doctorId)) {
-            throw new UnauthorizedActionException("You don't have permission to view this session");
+            throw new UnauthorizedActionException("Bạn không có quyền xem ca chẩn đoán này.");
         }
         Patient patient = session.getPatient();
         User patientUser = patient.getUser();
-
         SymptomResult symptomResult = symptomResultRepository
                 .findBySessionIdWithDetails(sessionId)
                 .orElse(null);
         List<LabResult> labResults = labResultRepository.findByDiagnosisSessionSessionId(sessionId);
         List<MedicalImage> medicalImages = medicalImageRepository.findByDiagnosisSession_SessionId(sessionId);
+
         return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages);
     }
 
@@ -219,8 +218,8 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             User user,
             SymptomResult symptomResult,
             List<LabResult> labResults,
-            List<MedicalImage> medicalImages
-    ) {
+            List<MedicalImage> medicalImages) {
+
         SymptomResultResponse symptomResultResponse = null;
         if (symptomResult != null) {
             List<SymptomDetailResponse> symptomDetails = symptomResult.getSymptomDetails() != null ?

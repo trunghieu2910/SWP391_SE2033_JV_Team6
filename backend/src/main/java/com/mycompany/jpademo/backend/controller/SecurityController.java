@@ -1,7 +1,7 @@
 package com.mycompany.jpademo.backend.controller;
 
 import com.mycompany.jpademo.backend.dto.request.BlockIpRequest;
-import com.mycompany.jpademo.backend.dto.response.ApiResponse;
+import com.mycompany.jpademo.backend.dto.request.UnblockIpRequest;
 import com.mycompany.jpademo.backend.dto.response.EndpointRequestStats;
 import com.mycompany.jpademo.backend.dto.response.IpRequestStats;
 import com.mycompany.jpademo.backend.dto.response.SecurityStatsResponse;
@@ -9,57 +9,67 @@ import com.mycompany.jpademo.backend.entity.BlockedIP;
 import com.mycompany.jpademo.backend.service.interfaces.SecurityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/admin/security")
+@Controller
+@RequestMapping("/admin/security")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class SecurityController {
     private final SecurityService securityService;
+    private static final int TOP_LIMIT = 10;
 
-    @GetMapping("/stats")
-    public ResponseEntity<SecurityStatsResponse> getStats() {
-        return ResponseEntity.ok(securityService.getStats());
-    }
+    @GetMapping
+    public String securityPage(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            Model model) {
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
 
-    @GetMapping("/top-ips")
-    public ResponseEntity<List<IpRequestStats>> getTopIps(@RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(securityService.getTopIps(limit));
-    }
+        SecurityStatsResponse stats = securityService.getStats(startDateTime, endDateTime);
+        List<IpRequestStats> topIps = securityService.getTopIps(TOP_LIMIT, startDateTime, endDateTime);
+        List<EndpointRequestStats> topEndpoints = securityService.getTopEndpoints(TOP_LIMIT, startDateTime, endDateTime);
+        List<BlockedIP> blockedIps = securityService.getBlockedIps(startDateTime, endDateTime);
 
-    @GetMapping("/top-endpoints")
-    public ResponseEntity<List<EndpointRequestStats>> getTopEndpoints(@RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(securityService.getTopEndpoints(limit));
-    }
+        model.addAttribute("stats", stats);
+        model.addAttribute("topIps", topIps);
+        model.addAttribute("topEndpoints", topEndpoints);
+        model.addAttribute("blockedIps", blockedIps);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
 
-    @GetMapping("/blocked-ips")
-    public ResponseEntity<List<BlockedIP>> getBlockedIps() {
-        return ResponseEntity.ok(securityService.getBlockedIps());
+        return "admin/security";
     }
 
     @PostMapping("/block-ip")
-    public ResponseEntity<ApiResponse> blockIp(@Valid @RequestBody BlockIpRequest blockIpRequest,
-                                               @AuthenticationPrincipal UserDetails userDetails) {
-        securityService.blockIp(blockIpRequest, userDetails.getUsername());
-        return ResponseEntity.ok(ApiResponse.builder()
-                        .success(true)
-                        .message("Đã chặn địa chỉ IP: " + blockIpRequest.getIpAddress() + " thành công.")
-                        .build());
+    public String blockIp(@Valid @ModelAttribute BlockIpRequest blockIpRequest, RedirectAttributes redirectAttributes) {
+        try {
+            String adminUsername = "admin";
+            securityService.blockIp(blockIpRequest, adminUsername);
+            redirectAttributes.addFlashAttribute("message", "Đã chặn IP " +  blockIpRequest.getIpAddress() + " thành công.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/security";
     }
 
-    @DeleteMapping("/unlock-ip/{ip}")
-    public ResponseEntity<ApiResponse> unlockIp(@PathVariable String ip) {
-        securityService.unblockIp(ip);
-        return ResponseEntity.ok(ApiResponse.builder()
-                        .success(true)
-                        .message("Đã bỏ chặn địa chỉ IP: " + ip + " thành công.")
-                        .build());
+    @PostMapping("/unlock-ip")
+    public String unlockIp(@Valid @ModelAttribute UnblockIpRequest unblockIpRequest, RedirectAttributes redirectAttributes) {
+        try {
+            securityService.unblockIp(unblockIpRequest.getIpAddress());
+            redirectAttributes.addFlashAttribute("success", "Đã bỏ chặn IP: " + unblockIpRequest.getIpAddress());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/security";
     }
 }

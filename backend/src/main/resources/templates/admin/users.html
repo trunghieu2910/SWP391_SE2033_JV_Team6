@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: main-layout(~{::main}, 'Quản lý người dùng', 'users')}">
+<body>
+<main>
+    <!-- Flash messages -->
+    <div th:if="${success}" id="successAlert" class="alert alert-success" role="alert" style="margin-bottom: 20px;">
+        <i class="fa-regular fa-circle-check"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="alert-close" onclick="closeAlert(this)">&times;</button>
+    </div>
+    <div th:if="${error}" id="errorAlert" class="alert alert-danger" role="alert" style="margin-bottom: 20px;">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="alert-close" onclick="closeAlert(this)">&times;</button>
+    </div>
+
+    <link rel="stylesheet" th:href="@{/css/admin/users.css}">
+
+    <!-- Filter Section -->
+    <div class="filter-card">
+        <form th:action="@{/admin/users}" method="get">
+            <!-- HÀNG 1 -->
+            <div class="filter-row">
+                <div class="form-field search-field">
+                    <label><i class="fa-solid fa-search"></i> Tìm kiếm</label>
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Tên đăng nhập, email... ">
+                </div>
+                <div class="form-field">
+                    <label><i class="fa-solid fa-user-tag"></i> Vai trò</label>
+                    <select name="role">
+                        <option th:each="r : ${roles}" th:value="${r}"
+                                th:text="${r == '' ? 'Tất cả vai trò' :
+                                    r == 'ADMIN' ? 'Quản trị viên' :
+                                    r == 'DOCTOR' ? 'Bác sĩ' :
+                                    r == 'PATIENT' ? 'Bệnh nhân' : r}"
+                                th:selected="${r == role}"></option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label><i class="fa-solid fa-circle"></i> Trạng thái</label>
+                    <select name="status">
+                        <option value="" th:selected="${status == null}">Tất cả trạng thái</option>
+                        <option value="ACTIVE" th:selected="${status != null && status.name() == 'ACTIVE'}">Hoạt động</option>
+                        <option value="INACTIVE" th:selected="${status != null && status.name() == 'INACTIVE'}">Không hoạt động</option>
+                        <option value="BANNED" th:selected="${status != null && status.name() == 'BANNED'}">Đang bị khóa</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-action btn-primary">Lọc</button>
+                    <a th:href="@{/admin/users}" class="btn-action btn-outline">Xóa</a>
+                </div>
+            </div>
+
+            <!-- HÀNG 2: Date -->
+            <div class="filter-row date-row">
+                <div class="form-field date-field">
+                    <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
+                    <input type="date" name="startDate" th:value="${startDate}">
+                </div>
+                <div class="form-field date-field">
+                    <label><i class="fa-regular fa-calendar"></i> Đến ngày</label>
+                    <input type="date" name="endDate" th:value="${endDate}">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-card">
+        <div class="table-header">
+            <div class="table-title">
+                <i class="fa-solid fa-users"></i>
+                <span>Danh sách người dùng</span>
+                <span class="total-count" th:text="'(' + ${users.totalElements} + ')'">(0)</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Họ Tên</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tham gia</th>
+                    <th class="actions-col">Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users.content}" class="user-row">
+                    <td th:text="${user.userId}">1</td>
+                    <td class="user-name" th:text="${user.fullName}">Nguyễn Văn A</td>
+                    <td th:text="${user.userName}">userA</td>
+                    <td th:text="${user.email}">userA@gmail.com</td>
+                    <td>
+                        <span class="role-badge"
+                              th:classappend="${user.roleName != null ? 'role-' + user.roleName.toString().toLowerCase() : ''}"
+                              th:text="${user.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
+                                       user.roleName?.name() == 'DOCTOR' ? 'Bác sĩ' :
+                                       user.roleName?.name() == 'PATIENT' ? 'Bệnh nhân' : user.roleName}">
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${user.status != null ? 'status-' + user.status.toString().toLowerCase() : ''}">
+                            <span class="status-dot"></span>
+                            <span th:text="${user.status?.name() == 'ACTIVE' ? 'Hoạt động' :
+                                           user.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
+                                           user.status?.name() == 'BANNED' ? 'Đã khóa' : user.status}">
+                            </span>
+                        </span>
+                    </td>
+
+                    <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</td>
+                    <td class="actions-col">
+                        <div class="action-buttons">
+                            <a th:href="@{/admin/users/{id}(id=${user.userId})}"
+                               class="btn-action btn-detail" title="Xem chi tiết">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            <button th:if="${user.roleName != null && user.roleName.toString() != 'ADMIN'}"
+                                    type="button"
+                                    class="btn-action btn-status"
+                                    th:classappend="${user.status != null && user.status.toString() == 'BANNED' ? 'btn-unlock' : 'btn-lock'}"
+                                    th:attr="data-id=${user.userId},data-name=${user.fullName},data-status=${user.status.toString()}"
+                                    onclick="openStatusModal(this)">
+                                <i th:class="${user.status != null && user.status.toString() == 'BANNED' ? 'fa-solid fa-unlock' : 'fa-solid fa-lock'}"></i>
+                                <span th:text="${user.status != null && user.status.toString() == 'BANNED' ? 'Mở khóa' : 'Khóa'}">Khóa</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${users.isEmpty()}">
+                    <td colspan="8" class="empty-state">
+                        <i class="fa-solid fa-users-slash"></i>
+                        <p>Không tìm thấy người dùng nào</p>
+                        <span>Hãy thay đổi bộ lọc hoặc tạo người dùng mới</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar" th:if="${users.totalPages > 1}">
+            <div class="pagination-info">
+                Hiển thị <strong th:text="${users.number * users.size + 1}">1</strong>
+                - <strong th:text="${users.number * users.size + users.numberOfElements}">10</strong>
+                trên tổng <strong th:text="${users.totalElements}">100</strong> người dùng
+            </div>
+            <div class="page-links">
+                <a th:if="${users.number > 0}"
+                   th:href="@{/admin/users(page=${users.number - 1}, keyword=${keyword}, role=${role}, status=${status})}"
+                   class="page-btn">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                <a th:each="pageIdx : ${#numbers.sequence(0, users.totalPages - 1)}"
+                   th:href="@{/admin/users(page=${pageIdx}, keyword=${keyword}, role=${role}, status=${status})}"
+                   th:text="${pageIdx + 1}"
+                   class="page-btn"
+                   th:classappend="${pageIdx == users.number ? 'active' : ''}"></a>
+                <a th:if="${users.number < users.totalPages - 1}"
+                   th:href="@{/admin/users(page=${users.number + 1}, keyword=${keyword}, role=${role}, status=${status})}"
+                   class="page-btn">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-overlay" onclick="closeStatusModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h3 id="modalTitle">Khóa tài khoản</h3>
+                    <p id="modalDescription">Bạn có chắc chắn muốn thay đổi trạng thái?</p>
+                </div>
+                <button type="button" class="modal-close" onclick="closeStatusModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="statusForm" method="post" class="modal-body">
+                <input type="hidden" name="status" id="formStatusInput">
+
+                <div class="form-field">
+                    <label for="reasonInput">Lý do thay đổi trạng thái <span class="required">*</span></label>
+                    <select name="reason" id="reasonInput" required>
+                        <option value="">Chọn lý do...</option>
+                        <option value="Vi phạm điều khoản dịch vụ hệ thống">Vi phạm điều khoản dịch vụ</option>
+                        <option value="Yêu cầu từ người dùng sở hữu tài khoản">Người dùng tự yêu cầu đóng</option>
+                        <option value="Hoạt động đáng ngờ cần kiểm tra bảo mật">Hoạt động bất thường / Nghi vấn hack</option>
+                        <option value="Tài khoản bác sĩ giả mạo chứng chỉ">Nghi ngờ thông tin chứng chỉ</option>
+                        <option value="Mở khóa tài khoản sau thời gian tạm ngưng">Mở khóa - Đã xác minh lại</option>
+                    </select>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn-action btn-outline" onclick="closeStatusModal()">
+                    <i class="fa-solid fa-times"></i> Hủy
+                </button>
+                <button type="button" class="btn-action btn-primary" id="modalSubmitBtn" onclick="submitStatusForm()">
+                    <i class="fa-solid fa-check"></i> <span id="modalSubmitText">Xác nhận</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/admin/users.js}"></script>
+</main>
+</body>
+</html>

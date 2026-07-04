@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Danh sách hồ sơ bệnh án - Hệ thống chẩn đoán y tế"/>
+    <title>Hồ Sơ Bệnh Án | Bác Sĩ</title>
+    <link rel="stylesheet" th:href="@{/css/doctor/doctor-medical-records.css}"/>
+</head>
+<body>
+
+<main class="mr-page animate-fade">
+
+    <!-- ══ TOP NAV BAR ══ -->
+    <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 20px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 14px; font-weight: 700; color: var(--text-secondary);">
+                👨‍⚕️ Bác sĩ: <span th:text="${doctorName}" style="color: var(--primary);">Bác sĩ</span>
+            </span>
+        </div>
+        <a href="/logout" style="font-size: 13px; font-weight: 700; color: var(--red); display: flex; align-items: center; gap: 6px; text-decoration: none; transition: var(--transition);">
+            Đăng xuất
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+            </svg>
+        </a>
+    </div>
+
+    <!-- ══ PAGE HEADER ══ -->
+    <div class="page-header">
+        <h1 class="page-title">📁 Hồ Sơ Bệnh Án</h1>
+        <p class="page-subtitle">Tìm kiếm và xem chi tiết bệnh án bằng tên bệnh nhân hoặc số CCCD</p>
+    </div>
+
+    <!-- ══ STATS GRID ══ -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">📋</div>
+            <div>
+                <div class="stat-num" th:text="${totalElements}">0</div>
+                <div class="stat-lbl">Tổng phiên khám</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div>
+                <div class="stat-num" th:text="${completedCount}">0</div>
+                <div class="stat-lbl">Đã hoàn thành</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon yellow">⏳</div>
+            <div>
+                <div class="stat-num" th:text="${pendingCount}">0</div>
+                <div class="stat-lbl">Đang chờ xử lý</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple">📝</div>
+            <div>
+                <div class="stat-num" th:text="${withDiagnosisCount}">0</div>
+                <div class="stat-lbl">Đã có kết luận</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ SEARCH & FILTER ══ -->
+    <div class="search-box">
+        <form method="get" th:action="@{/doctor/medical-records}" class="search-row">
+            <!-- giữ lại selectedStatus khi submit tìm kiếm -->
+            <input type="hidden" name="status" th:value="${selectedStatus}"/>
+            <div class="search-field">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input id="searchInput"
+                       class="search-input"
+                       type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Nhập tên bệnh nhân hoặc số CCCD 12 chữ số..."/>
+            </div>
+            <button type="submit" class="btn-search">Tìm kiếm</button>
+        </form>
+
+        <div class="filter-row">
+            <!-- Filter buttons -->
+            <div class="filter-btns">
+                <a th:href="@{/doctor/medical-records(keyword=${keyword}, status='')}"
+                   th:classappend="${selectedStatus == '' or selectedStatus == null} ? 'active' : ''"
+                   class="filter-btn">Tất cả</a>
+                <a th:href="@{/doctor/medical-records(keyword=${keyword}, status='COMPLETED')}"
+                   th:classappend="${selectedStatus == 'COMPLETED'} ? 'active' : ''"
+                   class="filter-btn">Hoàn thành</a>
+                <a th:href="@{/doctor/medical-records(keyword=${keyword}, status='PENDING')}"
+                   th:classappend="${selectedStatus == 'PENDING'} ? 'active' : ''"
+                   class="filter-btn">Đang chờ</a>
+            </div>
+
+            <div class="result-count">
+                Tìm thấy <strong th:text="${totalElements}">0</strong> bệnh án
+                <span th:if="${keyword != null and keyword != ''}">
+                    cho "<strong th:text="${keyword}"></strong>"
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ RECORDS GRID ══ -->
+    <div th:if="${records != null and !records.isEmpty()}" class="records-grid">
+        <a th:each="rec : ${records}"
+           th:href="@{/doctor/medical-records/{id}(id=${rec.id})}"
+           class="rec-card">
+
+            <!-- Card Header -->
+            <div class="rec-card-hdr">
+                <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                    <!-- Avatar initials -->
+                    <div th:with="genderVal=${rec.gender}"
+                         th:classappend="${genderVal == 'Female'} ? 'female' : 'male'"
+                         class="avatar">
+                        <!-- Lấy 2 chữ cái đầu của tên -->
+                        <span th:text="${rec.patientName != null and rec.patientName.length() > 0}
+                                       ? ${rec.patientName.substring(0,1).toUpperCase()}
+                                       : '?'">?</span>
+                    </div>
+                    <div style="min-width:0;">
+                        <div class="rec-name" th:text="${rec.patientName ?: 'Không rõ'}">—</div>
+                        <div class="rec-meta">
+                            <span th:text="${rec.nationalID ?: '—'}">—</span>
+                            &nbsp;•&nbsp;
+                            <span th:text="${rec.gender == 'Female'} ? 'Nữ' : 'Nam'">—</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Status badge -->
+                <div>
+                    <span th:if="${rec.status != null and rec.status.name() == 'COMPLETED'}"
+                          class="badge badge-completed">
+                        <span class="badge-dot"></span>Hoàn thành
+                    </span>
+                    <span th:unless="${rec.status != null and rec.status.name() == 'COMPLETED'}"
+                          class="badge badge-pending">
+                        <span class="badge-dot"></span>Đang chờ
+                    </span>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="rec-body">
+                <div class="rec-row">
+                    <span class="rec-lbl">Mã phiên khám</span>
+                    <span class="rec-val code"
+                          th:text="${rec.id != null ? '#S' + #numbers.formatInteger(rec.id, 4) : '#S0000'}">—</span>
+                </div>
+                <div class="rec-row">
+                    <span class="rec-lbl">Bác sĩ phụ trách</span>
+                    <span class="rec-val" th:text="${rec.doctorFullName ?: '—'}">—</span>
+                </div>
+                <div class="rec-row">
+                    <span class="rec-lbl">Chẩn đoán</span>
+                    <span class="rec-val" th:text="${rec.diagnosis ?: 'Chưa có chẩn đoán'}">—</span>
+                </div>
+                <div class="rec-row">
+                    <span class="rec-lbl">Chia sẻ hồ sơ</span>
+                    <span th:if="${rec.isShared}" class="badge badge-shared">🔗 Đã chia sẻ</span>
+                    <span th:unless="${rec.isShared}" class="badge badge-private">🔒 Riêng tư</span>
+                </div>
+            </div>
+
+            <!-- Symptoms preview -->
+            <div th:if="${rec.symptoms != null and rec.symptoms != ''}" class="symptoms-preview">
+                <div class="symptoms-lbl">Triệu chứng</div>
+                <span th:text="${rec.symptoms}">—</span>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="rec-footer">
+                <span class="rec-date">
+                    📅&nbsp;
+                    <span th:text="${rec.visitDate != null}
+                                   ? ${#dates.format(rec.visitDate, 'dd/MM/yyyy HH:mm')}
+                                   : '—'">—</span>
+                </span>
+                <span class="rec-link">
+                    Chi tiết
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </span>
+            </div>
+        </a>
+    </div>
+
+    <!-- ══ EMPTY STATE ══ -->
+    <div th:if="${records == null or records.isEmpty()}" class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3 class="empty-title">Không tìm thấy bệnh án</h3>
+        <p class="empty-sub">Thử tìm bằng tên đầy đủ hoặc số CCCD 12 chữ số.</p>
+    </div>
+
+    <!-- ══ PAGINATION ══ -->
+    <div th:if="${totalPages > 1}" class="pagination">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/doctor/medical-records(keyword=${keyword}, status=${selectedStatus}, page=${currentPage - 1})}"
+           class="page-btn">← Trang trước</a>
+        <span th:unless="${currentPage > 0}" class="page-btn disabled">← Trang trước</span>
+
+        <span class="page-info">
+            Trang <strong th:text="${currentPage + 1}">1</strong> /
+            <strong th:text="${totalPages}">1</strong>
+        </span>
+
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/doctor/medical-records(keyword=${keyword}, status=${selectedStatus}, page=${currentPage + 1})}"
+           class="page-btn">Trang sau →</a>
+        <span th:unless="${currentPage < totalPages - 1}" class="page-btn disabled">Trang sau →</span>
+    </div>
+
+</main>
+
+<script>
+    /* Ctrl+K / Cmd+K → focus search */
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('searchInput')?.focus();
+        }
+    });
+</script>
+</body>
+</html>

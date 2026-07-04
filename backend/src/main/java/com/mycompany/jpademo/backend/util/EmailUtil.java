@@ -3,32 +3,6 @@ package com.mycompany.jpademo.backend.util;
 public class EmailUtil {
     private EmailUtil() {}
 
-    public static String buildDoctorApprovedTemplate(String name) {
-        return """
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
-                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
-                    <h2 style="color: #2e7d32;">
-                        Đăng ký bác sĩ đã được phê duyệt
-                    </h2>
-                    <p>Xin chào Bác sĩ <b>%s</b>,</p>
-                    <p>
-                        Tài khoản bác sĩ của bạn đã được quản trị viên phê duyệt thành công.
-                    </p>
-                    <p>
-                        Bạn hiện có thể đăng nhập và sử dụng Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung.
-                    </p>
-                    <br>
-                    <p>
-                        Trân trọng,<br>
-                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
-                    </p>
-                </div>
-                </body>
-                </html>
-                """.formatted(name);
-    }
-
     public static String buildBanAccountTemplate(String name, String reason) {
         return """
             <html>
@@ -142,7 +116,7 @@ public class EmailUtil {
                     <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
                         <h1 style="color: #1565c0; letter-spacing: 8px;">%s</h1>
                     </div>
-                    <p>Mã OTP có hiệu lực trong <strong>5 phút</strong>.</p>
+                    <p>Mã OTP có hiệu lực trong <strong>2 phút</strong>.</p>
                     <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
                     <br>
                     <p>
@@ -204,7 +178,7 @@ public class EmailUtil {
                     <h1 style="color: #1565c0; letter-spacing: 6px; margin: 0;">%s</h1>
                 </div>
                 <p style="margin-top: 12px;">
-                    Mã OTP có hiệu lực trong <strong>10 phút</strong>. Không chia sẻ mã này với người khác.
+                    Mã OTP có hiệu lực trong <strong>2 phút</strong>. Không chia sẻ mã này với người khác.
                 </p>
                 <br>
                 <p>

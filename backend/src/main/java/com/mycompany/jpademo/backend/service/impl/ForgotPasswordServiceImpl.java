@@ -53,7 +53,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     public ResponseEntity<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request) {
         boolean valid = OtpUtil.verifyOtp(request.getEmail(), request.getOtp());
         if (!valid) {
-            throw new InvalidOtpException();
+            throw new InvalidOtpException("no");
         }
 
         OtpUtil.removeOtp(request.getEmail());

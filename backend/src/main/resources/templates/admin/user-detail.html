@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: main-layout(~{::main}, 'Chi tiết người dùng', 'users')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/admin/user-detail.css}">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a th:href="@{/admin/users}">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+        </a>
+        <span class="separator">/</span>
+        <span>Chi tiết người dùng</span>
+    </nav>
+
+    <!-- ===== THÔNG TIN CHUNG - HÀNG NGANG ===== -->
+    <div class="user-profile-header">
+        <div class="profile-avatar-large">
+            <div class="avatar-xl"
+                 th:text="${#strings.substring(user.userResponse.fullName, 0, 1)}">A</div>
+        </div>
+
+        <div class="profile-main-info">
+            <div class="profile-name-row">
+                <h1 class="profile-name-xl" th:text="${user.userResponse.fullName}">Nguyễn Văn A</h1>
+                <!-- VAI TRÒ - ĐÃ MAP -->
+                <span class="role-badge role-lg"
+                      th:classappend="${user.userResponse.roleName != null ? 'role-' + user.userResponse.roleName.toString().toLowerCase() : ''}"
+                      th:text="${user.userResponse.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
+                               user.userResponse.roleName?.name() == 'DOCTOR' ? 'Bác sĩ' :
+                               user.userResponse.roleName?.name() == 'PATIENT' ? 'Bệnh nhân' : user.userResponse.roleName}">
+                </span>
+                <!-- TRẠNG THÁI - ĐÃ MAP -->
+                <span class="status-badge status-lg"
+                      th:classappend="${user.userResponse.status != null ? 'status-' + user.userResponse.status.toString().toLowerCase() : ''}">
+                    <span class="status-dot"></span>
+                    <span th:text="${user.userResponse.status?.name() == 'ACTIVE' ? 'Hoạt động' :
+                                   user.userResponse.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
+                                   user.userResponse.status?.name() == 'BANNED' ? 'Đã khóa' : user.userResponse.status}">
+                    </span>
+                </span>
+            </div>
+            <div class="profile-username">
+                <i class="fa-regular fa-user"></i>
+                <span th:text="${user.userResponse.userName}">username</span>
+            </div>
+        </div>
+
+        <div class="profile-actions">
+            <a th:href="@{/admin/users}" class="btn-action btn-outline">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== THÔNG TIN CHI TIẾT - DẠNG GRID ===== -->
+    <div class="user-detail-grid">
+        <!-- Cột trái: Thông tin cá nhân -->
+        <div class="detail-section">
+            <h3 class="section-title">
+                <i class="fa-regular fa-address-card"></i> Thông tin cá nhân
+            </h3>
+            <div class="detail-grid-2col">
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-regular fa-id-card"></i> ID người dùng</span>
+                    <span class="detail-value" th:text="${user.userResponse.userId}">1</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-regular fa-user"></i> Tên đăng nhập</span>
+                    <span class="detail-value" th:text="${user.userResponse.userName}">username</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-regular fa-envelope"></i> Email</span>
+                    <span class="detail-value" th:text="${user.userResponse.email}">example@mail.com</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-solid fa-phone"></i> Số điện thoại</span>
+                    <span class="detail-value" th:text="${user.userResponse.phoneNumber != null ? user.userResponse.phoneNumber : 'Chưa cập nhật'}">N/A</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-regular fa-id-card"></i> CCCD</span>
+                    <span class="detail-value" th:text="${user.userResponse.nationalId != null ? user.userResponse.nationalId : 'Chưa cập nhật'}">N/A</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-regular fa-calendar-plus"></i> Ngày tạo</span>
+                    <span class="detail-value" th:text="${#temporals.format(user.userResponse.createdAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Thông tin bảo mật -->
+        <div class="detail-section">
+            <h3 class="section-title">
+                <i class="fa-solid fa-shield-halved"></i> Thông tin bảo mật
+            </h3>
+            <div class="detail-grid-2col">
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-regular fa-clock"></i> Đăng xuất cuối</span>
+                    <span class="detail-value" th:text="${user.userResponse.lastLogoutTime != null ? #temporals.format(user.userResponse.lastLogoutTime, 'dd/MM/yyyy HH:mm:ss') : 'Chưa từng đăng nhập'}">N/A</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-solid fa-key"></i> Đổi mật khẩu cuối</span>
+                    <span class="detail-value" th:text="${user.userResponse.lastChangePassTime != null ? #temporals.format(user.userResponse.lastChangePassTime, 'dd/MM/yyyy HH:mm:ss') : 'Chưa đổi'}">N/A</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-regular fa-circle-check"></i> Trạng thái</span>
+                    <span class="detail-value">
+                        <!-- TRẠNG THÁI - ĐÃ MAP -->
+                        <span class="status-badge"
+                              th:classappend="${user.userResponse.status != null ? 'status-' + user.userResponse.status.toString().toLowerCase() : ''}">
+                            <span class="status-dot"></span>
+                            <span th:text="${user.userResponse.status?.name() == 'ACTIVE' ? 'Hoạt động' :
+                                           user.userResponse.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
+                                           user.userResponse.status?.name() == 'BANNED' ? 'Đã khóa' : user.userResponse.status}">
+                            </span>
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fa-solid fa-user-tag"></i> Vai trò</span>
+                    <span class="detail-value">
+                        <!-- VAI TRÒ - ĐÃ MAP -->
+                        <span class="role-badge"
+                              th:classappend="${user.userResponse.roleName != null ? 'role-' + user.userResponse.roleName.toString().toLowerCase() : ''}"
+                              th:text="${user.userResponse.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
+                                       user.userResponse.roleName?.name() == 'DOCTOR' ? 'Bác sĩ' :
+                                       user.userResponse.roleName?.name() == 'PATIENT' ? 'Bệnh nhân' : user.userResponse.roleName}">
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CHỨNG CHỈ (Nếu là DOCTOR) ===== -->
+    <div th:if="${user.userResponse.roleName != null && user.userResponse.roleName.name() == 'DOCTOR'}"
+         class="certificate-section">
+        <h3 class="section-title">
+            <i class="fa-solid fa-certificate"></i> Chứng chỉ hành nghề
+        </h3>
+        <div th:if="${user.userResponse.certificateUrl != null}" class="certificate-box">
+            <div class="certificate-icon-lg">
+                <i class="fa-solid fa-file-pdf"></i>
+            </div>
+            <div class="certificate-info-lg">
+                <h4>Bằng cấp / Chứng chỉ y khoa</h4>
+                <p th:text="${user.userResponse.fullName} + ' - ' + ${user.userResponse.userName}"></p>
+                <div class="certificate-actions">
+                    <a th:href="${user.userResponse.certificateUrl}" target="_blank"
+                       class="btn-action btn-view">
+                        <i class="fa-solid fa-eye"></i> Xem
+                    </a>
+                    <a th:href="${user.userResponse.certificateUrl}" download
+                       class="btn-action btn-download">
+                        <i class="fa-solid fa-download"></i> Tải xuống
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div th:if="${user.userResponse.certificateUrl == null}" class="certificate-empty">
+            <i class="fa-regular fa-file"></i>
+            <div>
+                <p>Chưa có tệp bằng cấp đính kèm</p>
+                <span>Bác sĩ này chưa cập nhật chứng chỉ hành nghề</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HOẠT ĐỘNG GẦN ĐÂY ===== -->
+    <div class="activity-section">
+        <div class="activity-header-section">
+            <h3 class="section-title">
+                <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử hoạt động gần đây
+            </h3>
+            <span class="activity-count" th:text="${#lists.size(user.systemLogResponses)} + ' hoạt động'">0 hoạt động</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(user.systemLogResponses)}" class="empty-state-lg">
+            <i class="fa-regular fa-face-smile"></i>
+            <p>Không có nhật ký hoạt động nào</p>
+            <span>Người dùng này chưa có hoạt động nào trong hệ thống</span>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(user.systemLogResponses)}" class="activity-timeline">
+            <div th:each="log : ${user.systemLogResponses}" class="timeline-item">
+                <div class="timeline-icon"
+                     th:classappend="${log.action == 'LOGIN' ? 'timeline-login' :
+                                    log.action == 'LOGOUT' ? 'timeline-logout' :
+                                    log.action == 'BAN_USER' ? 'timeline-ban' :
+                                    log.action == 'UNBAN_USER' ? 'timeline-unban' : 'timeline-other'}">
+                    <i th:class="${log.action == 'LOGIN' ? 'fa-solid fa-right-to-bracket' :
+                                 log.action == 'LOGOUT' ? 'fa-solid fa-right-from-bracket' :
+                                 log.action == 'BAN_USER' ? 'fa-solid fa-ban' :
+                                 log.action == 'UNBAN_USER' ? 'fa-solid fa-unlock' : 'fa-solid fa-pen-to-square'}"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <!-- MAP HÀNH ĐỘNG LOG -->
+                        <span class="timeline-action" th:text="${log.action == 'LOGIN' ? 'Đăng nhập' :
+                                                               log.action == 'LOGOUT' ? 'Đăng xuất' :
+                                                               log.action == 'BAN_USER' ? 'Khóa User' :
+                                                               log.action == 'UNBAN_USER' ? 'Mở khóa' :
+                                                               log.action == 'CREATE_DOCTOR' ? 'Tạo bác sĩ' :
+                                                               log.action}">LOGIN</span>
+                        <span class="timeline-time" th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026 12:00:00</span>
+                    </div>
+                    <p class="timeline-desc" th:text="${log.description}">Mô tả hoạt động</p>
+                    <span class="timeline-target" th:if="${log.targetType != null}">
+                        <i class="fa-solid fa-bullseye" style="font-size: 0.75rem;"></i>
+                        <span th:text="${log.targetType} + ' #' + ${log.targetId}">User #10</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/admin/user-detail.js}"></script>
+</main>
+</body>
+</html>

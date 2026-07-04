@@ -3,6 +3,7 @@ package com.mycompany.jpademo.backend.util;
 import com.mycompany.jpademo.backend.cache.OtpData;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,5 +46,28 @@ public class OtpUtil {
 
     public static void  removeOtp(String email){
         otpStorage.remove(email);
+    }
+
+    /**
+     * Lấy thời gian còn lại của OTP (tính bằng giây)
+     * @param email Email cần kiểm tra
+     * @return Số giây còn lại, 0 nếu OTP không tồn tại hoặc đã hết hạn
+     */
+    public static int getRemainingTime(String email) {
+        OtpData data = otpStorage.get(email);
+        if (data == null) {
+            return 0;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expireTime = data.getExpireTime();
+
+        if (now.isAfter(expireTime)) {
+            otpStorage.remove(email);
+            return 0;
+        }
+
+        long seconds = java.time.Duration.between(now, expireTime).getSeconds();
+        return (int) Math.max(seconds, 0);
     }
 }

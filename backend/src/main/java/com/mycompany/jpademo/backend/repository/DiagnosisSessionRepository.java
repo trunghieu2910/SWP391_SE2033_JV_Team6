@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.time.LocalDateTime;
 
 import java.util.List;
 import java.util.Map;
@@ -142,4 +143,35 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             @Param("keyword") String keyword,
             @Param("status") DiagnosisSessionStatus status,
             Pageable pageable);
+
+    //Giang
+    @Query(value = """
+    SELECT 
+        FORMAT(createdAt, 'yyyy-MM') as month,
+        COUNT(*) as count
+    FROM DiagnosisSession 
+    WHERE (:startDate IS NULL OR createdAt >= :startDate)
+      AND (:endDate IS NULL OR createdAt <= :endDate)
+    GROUP BY FORMAT(createdAt, 'yyyy-MM')
+    ORDER BY month ASC
+    """, nativeQuery = true)
+    List<Object[]> getDiagnosisSessionsByMonthWithFilter(
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate);
+
+
+    @Query("SELECT COUNT(ds) FROM DiagnosisSession ds WHERE " +
+            "(CAST(:startDate AS timestamp) IS NULL OR ds.createdAt >= :startDate) AND " +
+            "(CAST(:endDate AS timestamp) IS NULL OR ds.createdAt <= :endDate)")
+    long countSessionsWithDateFilter(@Param("startDate") java.time.LocalDateTime startDate, @Param("endDate") java.time.LocalDateTime endDate);
+
+    @Query("SELECT FUNCTION('FORMAT', d.createdAt, 'MM/yyyy') as month, COUNT(d) as count " +
+            "FROM DiagnosisSession d " +
+            "WHERE (:start IS NULL OR d.createdAt >= :start) " +
+            "AND (:end IS NULL OR d.createdAt <= :end) " +
+            "GROUP BY FUNCTION('FORMAT', d.createdAt, 'MM/yyyy') " +
+            "ORDER BY month ASC")
+    List<Object[]> getMonthlyDiagnosisSessions(@Param("start") LocalDateTime start,
+                                               @Param("end") LocalDateTime end);
 }
+

@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class SystemLogResponse {
+    private String userName;
+
     private Integer logId;
 
     private String action;
