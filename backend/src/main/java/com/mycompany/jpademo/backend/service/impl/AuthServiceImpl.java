@@ -186,6 +186,15 @@ public class AuthServiceImpl implements AuthService {
                 throw new com.mycompany.jpademo.backend.exception.UnauthorizedActionException("Tài khoản đã bị khóa. Không thể đăng nhập.");
             }
 
+            // 2. Đặt authentication vào security context để duy trì session cho các request Thymeleaf
+            CustomUserDetails userDetails = new CustomUserDetails(user);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
             // 3. Tái sử dụng Strategy để sinh JWT Token
             LoginStrategy strategy = authFactory.getLoginStrategy(user.getRole().getRoleName().name());
             return strategy.login(user);

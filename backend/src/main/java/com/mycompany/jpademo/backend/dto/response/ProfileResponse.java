@@ -28,4 +28,8 @@ public class ProfileResponse {
     private String gender;
     private LocalDate dob;
     private String address;
+
+    public LocalDate getDateOfBirth() {
+        return dob;
+    }
 }

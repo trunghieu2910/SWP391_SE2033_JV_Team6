@@ -1,0 +1,238 @@
+/* ============================================================================
+   MEDICAL RECORD DETAIL STYLES
+   ============================================================================ */
+
+/* Glass Panel */
+.glass-panel {
+    background-color: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);
+    margin-bottom: 24px;
+}
+
+.glass-panel h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Patient Banner */
+.patient-banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.patient-info-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.banner-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.15);
+    flex-shrink: 0;
+}
+
+.patient-basic-info h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.patient-basic-info .info-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.patient-basic-info .info-row strong {
+    color: #1e293b;
+}
+
+/* Status Badge */
+.status-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 9999px;
+}
+
+.status-published {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-unpublished {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.info-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Diagnosis Grid */
+.diagnosis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.diagnosis-box {
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.diagnosis-box-label {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.diagnosis-box-content {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.diagnosis-published {
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.diagnosis-unpublished {
+    color: #ef4444;
+    font-weight: 500;
+}
+
+/* Review Footer */
+.review-footer {
+    font-size: 12px;
+    color: #64748b;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+    text-align: right;
+    margin-top: 20px;
+}
+
+/* Lab Tests */
+.lab-test-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.lab-test-card {
+    background-color: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.lab-test-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f8fafc;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.lab-test-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.lab-status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.lab-status-badge.completed {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.lab-parameters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lab-param-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 6px 10px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+}
+
+.lab-param-name {
+    font-weight: 600;
+    color: #64748b;
+}
+
+.lab-param-value {
+    font-weight: 700;
+    color: #1e293b;
+}

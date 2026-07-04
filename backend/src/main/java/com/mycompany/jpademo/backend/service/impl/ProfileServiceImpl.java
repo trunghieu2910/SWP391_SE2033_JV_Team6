@@ -27,8 +27,8 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ProfileResponse getProfile(String username) {
-        User user = getUserByUsername(username);
+    public ProfileResponse getProfile(String login) {
+        User user = getUserByLogin(login);
 
         String roleName = getRoleName(user);
 
@@ -44,8 +44,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    public ProfileResponse updateProfile(String username, UpdateProfileRequest request) {
-        User user = getUserByUsername(username);
+    public ProfileResponse updateProfile(String login, UpdateProfileRequest request) {
+        User user = getUserByLogin(login);
 
         updateUserFields(user, request);
 
@@ -68,9 +68,13 @@ public class ProfileServiceImpl implements ProfileService {
         return mapUserProfile(user);
     }
 
-    private User getUserByUsername(String username) {
-        return userRepository.findByUserName(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+    private User getUserByLogin(String login) {
+        return userRepository.findByEmailOrUsernameOrPhoneNumberOrNationalId(
+                login,
+                login,
+                login,
+                login
+        ).orElseThrow(() -> new ResourceNotFoundException("User not found with login identifier: " + login));
     }
 
     private String getRoleName(User user) {

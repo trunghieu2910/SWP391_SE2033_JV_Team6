@@ -1,0 +1,437 @@
+/* ============================================================================
+   DASHBOARD STYLES - Profile card, Session card, Records list
+   ============================================================================ */
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 360px 1fr;
+    }
+}
+
+/* ============================================================================
+   PROFILE SIDEBAR CARD
+   ============================================================================ */
+.profile-card {
+    background-color: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01), 0 2px 4px -1px rgba(0,0,0,0.01);
+}
+
+.profile-avatar-large {
+    width: 96px;
+    height: 96px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 36px;
+    font-weight: 700;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.15);
+    margin-bottom: 16px;
+    transition: transform 0.2s;
+}
+
+.profile-avatar-large:hover {
+    transform: scale(1.05);
+}
+
+.profile-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    text-align: center;
+}
+
+.profile-id-badge {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2563eb;
+    background-color: #eff6ff;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.profile-details-list {
+    width: 100%;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.profile-detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.profile-detail-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.profile-detail-label-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-detail-icon {
+    width: 32px;
+    height: 32px;
+    background-color: #eff6ff;
+    color: #2563eb;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.profile-detail-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.profile-detail-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: right;
+    word-break: break-all;
+}
+
+/* ============================================================================
+   MAIN CONTENT COLUMN
+   ============================================================================ */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ============================================================================
+   SESSION CARDS
+   ============================================================================ */
+.session-card {
+    background-color: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01), 0 2px 4px -1px rgba(0,0,0,0.01);
+}
+
+.session-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f8fafc;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+
+.session-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.session-card-title-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.session-card-title-dot.blue {
+    background-color: #3b82f6;
+}
+
+.session-card-title-dot.green {
+    background-color: #10b981;
+}
+
+.session-status-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: #2563eb;
+    background-color: #eff6ff;
+    border-radius: 9999px;
+    padding: 4px 12px;
+}
+
+.session-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    background-color: #f8fafc;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.session-meta-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    display: block;
+}
+
+.session-meta-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 4px;
+    display: block;
+}
+
+.session-meta-item-right {
+    text-align: right;
+}
+
+.session-success-box {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    color: #166534;
+    margin-bottom: 16px;
+}
+
+.session-success-icon {
+    font-size: 20px;
+    color: #15803d;
+    background-color: #dcfce7;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.session-success-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.session-success-desc {
+    font-size: 12px;
+    color: #166534;
+    margin-top: 2px;
+    line-height: 1.5;
+}
+
+.session-waiting-box {
+    background-color: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    color: #92400e;
+}
+
+.session-waiting-icon {
+    font-size: 20px;
+    color: #b45309;
+    background-color: #fef3c7;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.session-waiting-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.session-waiting-desc {
+    font-size: 12px;
+    color: #92400e;
+    margin-top: 2px;
+    line-height: 1.5;
+}
+
+.btn-view-submitted {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-view-submitted:hover {
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+.btn-submit-symptoms {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #2563eb;
+    color: white;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    transition: all 0.2s;
+}
+
+.btn-submit-symptoms:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+/* ============================================================================
+   RECORDS SECTION (Dashboard)
+   ============================================================================ */
+.records-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 16px;
+}
+
+.records-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.record-history-card {
+    background-color: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);
+    transition: all 0.2s;
+}
+
+.record-history-card:hover {
+    border-color: #2563eb;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.08);
+}
+
+@media (min-width: 768px) {
+    .record-history-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.record-history-info {
+    flex: 1;
+}
+
+.record-history-meta {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.record-history-diagnosis {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 4px;
+}
+
+.record-history-card:hover .record-history-diagnosis {
+    color: #2563eb;
+}
+
+.record-history-symptoms {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.record-history-badge-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.record-history-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #f0fdf4;
+    color: #16a34a;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 12px;
+}
+
+.record-history-arrow {
+    width: 32px;
+    height: 32px;
+    background-color: #f8fafc;
+    color: #94a3b8;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.record-history-card:hover .record-history-arrow {
+    background-color: #eff6ff;
+    color: #2563eb;
+}

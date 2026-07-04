@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -60,22 +61,34 @@ public class SecurityConfig {
 
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
-                            // Ép hệ thống trả về lỗi 401 thay vì 403
-                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json;charset=UTF-8");
                             String jsonResponse = String.format(
                                     "{\"success\": false, \"message\": \"%s\"}",
                                     "Vui lòng đăng nhập để thực hiện chức năng này!"
                             );
-                            response.getWriter().write(jsonResponse);
+                            String acceptHeader = request.getHeader("Accept");
+                            String requestUri = request.getRequestURI();
+                            boolean jsonRequest = requestUri.startsWith("/api/")
+                                    || (acceptHeader != null && acceptHeader.contains("application/json"));
+
+                            if (jsonRequest) {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json;charset=UTF-8");
+                                response.getWriter().write(jsonResponse);
+                            } else {
+                                new LoginUrlAuthenticationEntryPoint("/auth/login")
+                                        .commence(request, response, authException);
+                            }
                         })
                 )
 
-                .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED))
+                .formLogin(form -> form.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
 
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/auth/login",
+                        .requestMatchers(
+                                "/api/auth/login",
                                 "/api/auth/register",
                                 "/api/auth/register/verify-otp",
                                 "/api/auth/register/resend-otp",
@@ -84,7 +97,15 @@ public class SecurityConfig {
                                 "/api/auth/forgot-password/reset-password",
                                 "/api/auth/google",
                                 "/api/auth/google/complete",
-                                "/api/integration/lis/results").permitAll()
+                                "/api/integration/lis/results",
+                                "/auth/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/patient/css/**",
+                                "/patient/js/**",
+                                "/patient/images/**"
+                        ).permitAll()
 
                         .anyRequest().authenticated())
 
