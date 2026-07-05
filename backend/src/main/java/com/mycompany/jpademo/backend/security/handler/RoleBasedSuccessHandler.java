@@ -13,7 +13,7 @@ import java.util.Map;
 public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Map<String, String> ROLE_HOME = Map.of(
-            "ROLE_DOCTOR",  "/doctor/dashboard",
+            "ROLE_DOCTOR",  "/doctor/sessions",
             "ROLE_PATIENT", "/patient/home",
             "ROLE_ADMIN",   "/admin/dashboard"
     );

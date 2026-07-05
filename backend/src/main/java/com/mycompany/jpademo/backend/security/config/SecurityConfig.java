@@ -1,15 +1,17 @@
 package com.mycompany.jpademo.backend.security.config;
 
 import com.mycompany.jpademo.backend.security.filter.BlockedIpFilter;
-import com.mycompany.jpademo.backend.security.filter.JwtAuthenticationFilter;
 import com.mycompany.jpademo.backend.security.filter.RateLimitingFilter;
 import com.mycompany.jpademo.backend.security.filter.RequestLoggingFilter;
+import com.mycompany.jpademo.backend.security.handler.CustomLogoutSuccessHandler;
+import com.mycompany.jpademo.backend.security.handler.LoginFailureHandler;
+import com.mycompany.jpademo.backend.security.handler.RoleBasedSuccessHandler;
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,10 +31,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final BlockedIpFilter blockedIpFilter;
     private final RateLimitingFilter rateLimitingFilterl;
     private final RequestLoggingFilter requestLoggingFilter;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final RoleBasedSuccessHandler roleBasedSuccessHandler;
+    private final LoginFailureHandler loginFailureHandler;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -56,8 +62,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                .csrf(csrf -> csrf.disable())
+                
+                .csrf(csrf -> csrf
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .ignoringRequestMatchers("/api/**"))
 
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
@@ -82,7 +90,22 @@ public class SecurityConfig {
                 )
 
                 .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED))
-                .formLogin(form -> form.disable())
+
+                .formLogin(form -> form
+                        .loginPage("/auth/login")
+                        .usernameParameter("login")
+                        .passwordParameter("password")
+                        .successHandler(roleBasedSuccessHandler)
+                        .failureHandler(loginFailureHandler)
+                        .permitAll())
+
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessHandler(customLogoutSuccessHandler)
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll())
+
                 .httpBasic(httpBasic -> httpBasic.disable())
 
                 .authorizeHttpRequests(auth -> auth
@@ -112,8 +135,7 @@ public class SecurityConfig {
 
                 .addFilterBefore(requestLoggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(blockedIpFilter, RequestLoggingFilter.class)
-                .addFilterAfter(rateLimitingFilterl, BlockedIpFilter.class)
-                .addFilterAfter(jwtAuthenticationFilter, RateLimitingFilter.class);
+                .addFilterAfter(rateLimitingFilterl, BlockedIpFilter.class);
 
         return http.build();
     }
@@ -124,7 +146,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 }

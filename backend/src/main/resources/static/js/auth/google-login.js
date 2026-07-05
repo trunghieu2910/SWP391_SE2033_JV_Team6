@@ -43,9 +43,9 @@ document.getElementById("googleLoginBtn").addEventListener("click", async () => 
             sessionStorage.setItem("pendingIdToken", idToken);
             sessionStorage.setItem("pendingEmail", data.email);
             sessionStorage.setItem("pendingFullName", data.fullName);
-            window.location.href = "/google-complete";
+            window.location.href = "/auth/google-complete";
         } else if (data.status === "BANNED") {
-            window.location.href = "/login?error=banned";
+            window.location.href = "/auth/login?error=banned";
         }
     } catch (err) {
         if (err.code === "auth/popup-closed-by-user") return;

@@ -115,7 +115,7 @@
             <p class="modal-desc">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?</p>
             <div class="modal-actions">
                 <button type="button" class="btn-modal-cancel" onclick="hideLogoutModal();">Hủy</button>
-                <form th:action="@{/auth/logout}" method="get" style="flex: 1; display: flex;">
+                <form th:action="@{/auth/logout}" method="post" style="flex: 1; display: flex;">
                     <button type="submit" class="btn-modal-confirm" style="width: 100%;">Đăng xuất</button>
                 </form>
             </div>

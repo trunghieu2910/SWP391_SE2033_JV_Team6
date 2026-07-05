@@ -1,7 +1,6 @@
 package com.mycompany.jpademo.backend.aop.aspect;
 
 import com.mycompany.jpademo.backend.aop.annotation.LogActivity;
-import com.mycompany.jpademo.backend.dto.response.LoginResponse;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import lombok.RequiredArgsConstructor;
@@ -52,9 +51,7 @@ public class LoggingAspect {
             Integer targetId = preExecutionUserId;
 
             // Dành riêng cho Đăng nhập/Đăng ký: Nếu lúc trước chưa có ID, thì giờ lấy từ kết quả hàm trả về
-            if (result instanceof LoginResponse loginResponse) {
-                targetId = loginResponse.getUserId();
-            } else if ("GOOGLE_LOGIN".equals(action)) {
+            if ("GOOGLE_LOGIN".equals(action)) {
                 // Nếu là luồng Google Login nhưng chưa có tài khoản (Không trả về LoginResponse)
                 // Tự động đổi tên action và description cho hợp lý hơn
                 action = "GOOGLE_INIT_AUTH";
