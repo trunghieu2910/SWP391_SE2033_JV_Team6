@@ -11,19 +11,23 @@ import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.service.interfaces.ProfileService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
 
     private final UserRepository userRepository;
     private final PatientRepository patientRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public ProfileServiceImpl(
             UserRepository userRepository,
-            PatientRepository patientRepository
+            PatientRepository patientRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.patientRepository = patientRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -67,6 +71,24 @@ public class ProfileServiceImpl implements ProfileService {
 
         return mapUserProfile(user);
     }
+
+    @Override
+    @Transactional
+    public void changePassword(String login, com.mycompany.jpademo.backend.dto.request.ChangePasswordRequest request) {
+        User user = getUserByLogin(login);
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Mật khẩu cũ không chính xác");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new BadRequestException("Mật khẩu xác nhận không khớp");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
 
     private User getUserByLogin(String login) {
         return userRepository.findByEmailOrUsernameOrPhoneNumberOrNationalId(

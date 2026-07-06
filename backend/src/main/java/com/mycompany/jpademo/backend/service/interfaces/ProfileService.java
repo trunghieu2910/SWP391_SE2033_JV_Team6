@@ -8,4 +8,6 @@ public interface ProfileService {
     ProfileResponse getProfile(String username);
 
     ProfileResponse updateProfile(String username, UpdateProfileRequest request);
+
+    void changePassword(String username, com.mycompany.jpademo.backend.dto.request.ChangePasswordRequest request);
 }
