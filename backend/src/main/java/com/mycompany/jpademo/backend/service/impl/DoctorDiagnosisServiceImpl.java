@@ -6,6 +6,7 @@ import com.mycompany.jpademo.backend.dto.request.UpdateSessionShareRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateSessionStatusRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.*;
+import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.enums.SymptomResultStatus;
 import com.mycompany.jpademo.backend.exception.BadRequestException;
@@ -135,6 +136,11 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             throw new UnauthorizedActionException("Bạn không có quyền cập nhật triệu chứng của ca chẩn đoán này.");
         }
 
+        if (session.getClinicalInputMode() == ClinicalInputMode.PATIENT
+                && (session.getSymptomResult() == null || session.getSymptomResult().getStatus() != SymptomResultStatus.COMPLETED)) {
+            throw new BadRequestException("Phiên khám này yêu cầu bệnh nhân gửi triệu chứng trước khi bác sĩ có thể chỉnh sửa.");
+        }
+
         if (request.getHeight() != null) session.setHeight(request.getHeight());
         if (request.getWeight() != null) session.setWeight(request.getWeight());
         sessionRepository.save(session);
@@ -194,6 +200,21 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         }
 
         symptomResultRepository.save(symptomResult);
+    }
+
+    @Override
+    @Transactional
+    public void setClinicalInputMode(Integer doctorId, Integer sessionId, ClinicalInputMode clinicalInputMode) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("Bạn không có quyền thay đổi chế độ nhập triệu chứng của ca chẩn đoán này.");
+        }
+        if (session.getClinicalInputMode() != null) {
+            throw new BadRequestException("Đã chọn chế độ nhập triệu chứng. Không thể thay đổi.");
+        }
+        session.setClinicalInputMode(clinicalInputMode);
+        sessionRepository.save(session);
     }
 
     @Override
@@ -310,6 +331,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .patientGender(patient.getGender())
                 .patientDob(patient.getDob() != null ? patient.getDob().atStartOfDay() : null)
                 .patientAddress(patient.getAddress())
+                .clinicalInputMode(session.getClinicalInputMode())
                 .symptomResult(symptomResultResponse)
                 .labResults(labResultResponses)
                 .medicalImages(medicalImageResponses)

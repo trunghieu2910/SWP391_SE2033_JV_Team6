@@ -29,6 +29,7 @@
 
             <!-- form-post tới /login, Spring Security tự xử lý -->
             <form th:action="@{/auth/login}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="form-group">
                     <label class="form-label" for="login">Tài khoản <span class="required">*</span></label>
                     <input id="login" name="login" class="form-input"

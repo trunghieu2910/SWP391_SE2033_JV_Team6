@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
@@ -49,6 +50,10 @@ public class DiagnosisSession {
 
     @OneToOne(mappedBy = "diagnosisSession", fetch = FetchType.LAZY)
     private SymptomResult symptomResult;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "clinicalInputMode", length = 20)
+    private ClinicalInputMode clinicalInputMode;
 
     @OneToMany(mappedBy = "diagnosisSession")
     private List<LabResult> labResults;

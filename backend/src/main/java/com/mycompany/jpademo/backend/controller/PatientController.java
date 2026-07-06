@@ -7,6 +7,7 @@ import com.mycompany.jpademo.backend.dto.response.ProfileResponse;
 import com.mycompany.jpademo.backend.dto.response.DiagnosisSessionResponse;
 import com.mycompany.jpademo.backend.entity.DiagnosisSession;
 import com.mycompany.jpademo.backend.entity.Patient;
+import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.repository.DiagnosisSessionRepository;
 import com.mycompany.jpademo.backend.repository.PatientRepository;
 import com.mycompany.jpademo.backend.repository.SymptomResultRepository;
@@ -58,27 +59,7 @@ public class PatientController {
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
         Patient patient = getPatient(userDetails);
 
-        DiagnosisSessionResponse activeSession = null;
-        List<DiagnosisSession> patientSessions = sessionRepository.findByPatientPatientId(patient.getPatientId());
-        Optional<DiagnosisSession> activeSessionOptional = patientSessions.stream()
-                .filter(s -> s.getStatus() != null && s.getStatus().name().compareTo("COMPLETED") != 0)
-                .max(Comparator.comparing(DiagnosisSession::getCreatedAt));
-
-        if (activeSessionOptional.isPresent()) {
-            DiagnosisSession session = activeSessionOptional.get();
-            activeSession = DiagnosisSessionResponse.builder()
-                    .sessionId(session.getSessionId())
-                    .patientId(session.getPatient().getPatientId())
-                    .patientName(session.getPatient().getUser().getFullName())
-                    .status(session.getStatus())
-                    .symptomResultStatus(session.getSymptomResult() != null ?
-                            session.getSymptomResult().getStatus() : null)
-                    .createdAt(session.getCreatedAt())
-                    .weight(session.getWeight())
-                    .height(session.getHeight())
-                    .build();
-        }
-
+        DiagnosisSessionResponse activeSession = getActiveSession(patient);
         List<MedicalRecordResponse> recentRecords = getRecentMedicalRecords(patient.getPatientId(), 5);
 
         model.addAttribute("profile", profile);
@@ -147,11 +128,36 @@ public class PatientController {
                              @AuthenticationPrincipal CustomUserDetails userDetails,
                              @RequestParam(defaultValue = "false") boolean viewForm) {
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
+        Patient patient = getPatient(userDetails);
+        DiagnosisSessionResponse activeSession = getActiveSession(patient);
+
+        if (activeSession == null) {
+            return "redirect:/patient/home";
+        }
 
         model.addAttribute("profile", profile);
+        model.addAttribute("activeSession", activeSession);
         model.addAttribute("viewForm", viewForm);
 
         return "patient/new-session";
+    }
+
+    private DiagnosisSessionResponse getActiveSession(Patient patient) {
+        return sessionRepository.findByPatientPatientId(patient.getPatientId()).stream()
+                .filter(s -> s.getStatus() != null && s.getStatus() != DiagnosisSessionStatus.COMPLETED)
+                .max(Comparator.comparing(DiagnosisSession::getCreatedAt))
+                .map(session -> DiagnosisSessionResponse.builder()
+                        .sessionId(session.getSessionId())
+                        .patientId(session.getPatient().getPatientId())
+                        .patientName(session.getPatient().getUser().getFullName())
+                        .status(session.getStatus())
+                        .symptomResultStatus(session.getSymptomResult() != null ? session.getSymptomResult().getStatus() : null)
+                        .clinicalInputMode(session.getClinicalInputMode())
+                        .createdAt(session.getCreatedAt())
+                        .weight(session.getWeight())
+                        .height(session.getHeight())
+                        .build())
+                .orElse(null);
     }
 
     @GetMapping("/profile")

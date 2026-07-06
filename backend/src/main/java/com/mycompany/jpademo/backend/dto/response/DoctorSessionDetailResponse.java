@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.dto.response;
 
+import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,8 @@ public class DoctorSessionDetailResponse {
     private Integer doctorId;
 
     private String doctorName;
+
+    private ClinicalInputMode clinicalInputMode;
 
     private Integer patientId;
 

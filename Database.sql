@@ -81,6 +81,7 @@ CREATE TABLE DiagnosisSession
     status    NVARCHAR(50),
     createdAt DATETIME DEFAULT GETDATE(),
     isShared  BIT DEFAULT 0,
+    clinicalInputMode NVARCHAR(20) NULL,
     FOREIGN KEY (userID) REFERENCES [Users] (userID),
     FOREIGN KEY (patientID) REFERENCES Patient (patientID)
 );

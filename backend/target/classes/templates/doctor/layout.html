@@ -22,10 +22,10 @@
             <i class="fa-solid fa-clipboard-list"></i>
             <span>Quản lý ca chẩn đoán</span>
         </a>
-<!--        <a th:href="@{/doctor/create-session}" class="nav-item" th:classappend="${currentTab == 'create-session' ? 'active' : ''}">-->
-<!--            <i class="fa-solid fa-stethoscope"></i>-->
-<!--            <span>Tạo ca chẩn đoán</span>-->
-<!--        </a>-->
+        <a th:href="@{/doctor/sessions/create-session}" class="nav-item" th:classappend="${currentTab == 'create-session' ? 'active' : ''}">
+            <i class="fa-solid fa-stethoscope"></i>
+            <span>Tạo ca chẩn đoán</span>
+        </a>
         <a th:href="@{/doctor/medical-records}" class="nav-item" th:classappend="${currentTab == 'medical-records' ? 'active' : ''}">
             <i class="fa-solid fa-file-medical"></i>
             <span>Xem hồ sơ bệnh án</span>

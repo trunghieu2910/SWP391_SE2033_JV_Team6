@@ -93,6 +93,7 @@ public class SecurityConfig {
 
                 .formLogin(form -> form
                         .loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/login")
                         .usernameParameter("login")
                         .passwordParameter("password")
                         .successHandler(roleBasedSuccessHandler)

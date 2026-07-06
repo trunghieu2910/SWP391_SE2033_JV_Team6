@@ -9,15 +9,50 @@
 <!-- ========================================== -->
 <div th:fragment="form(sessionDetail)">
     <div class="symptom-container" id="symptomContainer">
+        <div class="mode-panel">
+            <div class="mode-header">
+                <i class="fa-solid fa-sliders"></i>
+                <div>
+                    <h4>Chế độ nhập triệu chứng</h4>
+                    <p th:if="${sessionDetail.clinicalInputMode == null}">Chưa chọn chế độ. Vui lòng chọn chế độ để xác định ai sẽ nhập triệu chứng đầu tiên.</p>
+                    <p th:if="${sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR}">Bác sĩ sẽ nhập triệu chứng trực tiếp. Bệnh nhân chỉ xem.</p>
+                    <p th:if="${sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).PATIENT}">Bệnh nhân sẽ điền triệu chứng ban đầu. Bác sĩ có thể chỉnh sửa sau khi bệnh nhân gửi.</p>
+                </div>
+            </div>
+            <div class="mode-actions" th:if="${sessionDetail.clinicalInputMode == null}">
+                <form method="post" th:action="@{/doctor/sessions/{id}/input-mode(id=${sessionDetail.sessionId})}" class="mode-form">
+                    <label class="radio-inline">
+                        <input type="radio" name="clinicalInputMode" value="DOCTOR" required> Bác sĩ nhập triệu chứng
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="clinicalInputMode" value="PATIENT"> Bệnh nhân nhập triệu chứng
+                    </label>
+                    <button type="submit" class="btn-action btn-primary">
+                        <i class="fa-solid fa-check"></i> Xác nhận chế độ
+                    </button>
+                </form>
+            </div>
+            <div class="mode-chip" th:if="${sessionDetail.clinicalInputMode != null}">
+                <span>Chế độ hiện tại:</span>
+                <strong th:text="${sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR ? 'Bác sĩ nhập trực tiếp' : 'Bệnh nhân nhập trước'}">—</strong>
+            </div>
+        </div>
+
         <!-- Chế độ xem (không chỉnh sửa) -->
         <div id="symptomView" class="symptom-view">
-            <div class="symptom-actions">
+            <div class="symptom-actions" th:if="${sessionDetail.clinicalInputMode == null or sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR or (sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).PATIENT and sessionDetail.symptomResult != null and sessionDetail.symptomResult.status != null and sessionDetail.symptomResult.status.name() == 'COMPLETED')}">
                 <button class="btn-action btn-edit" onclick="editSymptoms()">
                     <i class="fa-solid fa-pen"></i> Chỉnh sửa
                 </button>
             </div>
 
-            <div th:if="${sessionDetail.symptomResult == null}" class="empty-state">
+            <div th:if="${sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).PATIENT and (sessionDetail.symptomResult == null or sessionDetail.symptomResult.status == null or sessionDetail.symptomResult.status.name() != 'COMPLETED')}" class="empty-state">
+                <i class="fa-regular fa-hourglass-half"></i>
+                <p>Đang chờ bệnh nhân gửi triệu chứng.</p>
+                <p>Sau khi bệnh nhân gửi, bác sĩ có thể xem và chỉnh sửa dữ liệu.</p>
+            </div>
+
+            <div th:if="${sessionDetail.symptomResult == null and (sessionDetail.clinicalInputMode == null or sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR)}" class="empty-state">
                 <i class="fa-regular fa-notes-medical"></i>
                 <p>Chưa có dữ liệu triệu chứng lâm sàng</p>
                 <button class="btn-action btn-primary" onclick="editSymptoms()">
@@ -64,7 +99,7 @@
         </div>
 
         <!-- Chế độ chỉnh sửa -->
-        <div id="symptomEdit" class="symptom-edit" style="display: none;">
+        <div id="symptomEdit" class="symptom-edit" style="display: none;" th:if="${sessionDetail.clinicalInputMode == null or sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR or (sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).PATIENT and sessionDetail.symptomResult != null and sessionDetail.symptomResult.status != null and sessionDetail.symptomResult.status.name() == 'COMPLETED')}" >
             <!-- ===== THÊM ID CHO FORM ===== -->
             <form id="symptomForm" class="symptom-form" method="post" th:action="@{/doctor/sessions/{id}/symptoms(id=${sessionDetail.sessionId})}">
                 <input type="hidden" name="sessionId" th:value="${sessionDetail.sessionId}">

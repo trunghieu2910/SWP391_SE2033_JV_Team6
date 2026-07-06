@@ -18,6 +18,12 @@ public class BlockedIpFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String path = request.getRequestURI();
+        if (path.startsWith("/auth/login") || path.startsWith("/auth/logout")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String ipAddress = getClientIp(request);
         if (blockedIPRepository.existsById(ipAddress)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);

@@ -20,10 +20,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/diagnosis-sessions")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('DOCTOR')")
 public class DiagnosisSessionController {
     private final DiagnosisSessionService diagnosisSessionService;
     private final PatientSearchService patientSearchService;

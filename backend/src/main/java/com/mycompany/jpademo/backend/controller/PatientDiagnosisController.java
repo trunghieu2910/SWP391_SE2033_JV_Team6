@@ -8,6 +8,7 @@ import com.mycompany.jpademo.backend.entity.LabResult;
 import com.mycompany.jpademo.backend.entity.MedicalImage;
 import com.mycompany.jpademo.backend.entity.Patient;
 import com.mycompany.jpademo.backend.entity.SymptomResult;
+import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.enums.LabResultStatus;
 import com.mycompany.jpademo.backend.enums.MedicalImageStatus;
@@ -21,6 +22,7 @@ import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +31,7 @@ import java.util.Comparator;
 @RestController
 @RequestMapping("/api/patient/sessions")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('PATIENT')")
 public class PatientDiagnosisController {
     private final PatientRepository patientRepository;
     private final DiagnosisSessionRepository sessionRepository;
@@ -86,6 +89,7 @@ public class PatientDiagnosisController {
                                 .patientName(patient.getUser().getFullName())
                                 .status(saved.getStatus())
                                 .symptomResultStatus(symptomResult.getStatus())
+                                .clinicalInputMode(saved.getClinicalInputMode())
                                 .createdAt(saved.getCreatedAt())
                                 .build())
                         .build());
@@ -137,6 +141,7 @@ public class PatientDiagnosisController {
                 .patientName(s.getPatient().getUser().getFullName())
                 .status(s.getStatus())
                 .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
+                .clinicalInputMode(s.getClinicalInputMode())
                 .createdAt(s.getCreatedAt())
                 .build()).toList();
 

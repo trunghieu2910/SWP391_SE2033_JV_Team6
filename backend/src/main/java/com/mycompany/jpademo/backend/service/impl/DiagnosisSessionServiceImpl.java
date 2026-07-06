@@ -5,6 +5,7 @@ import com.mycompany.jpademo.backend.dto.request.SubmitSymptomFormRequest;
 import com.mycompany.jpademo.backend.dto.response.DiagnosisSessionResponse;
 import com.mycompany.jpademo.backend.dto.response.SymptomResultResponse;
 import com.mycompany.jpademo.backend.entity.*;
+import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.enums.LabResultStatus;
 import com.mycompany.jpademo.backend.enums.MedicalImageStatus;
@@ -111,6 +112,9 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
             if (!session.getPatient().getUser().getUserId().equals(userId)) {
                 throw new BadRequestException("Bạn không có quyền submit form cho phiên khám này");
             }
+            if (session.getClinicalInputMode() == ClinicalInputMode.DOCTOR) {
+                throw new BadRequestException("Phiên khám này được bác sĩ nhập triệu chứng. Bạn không thể gửi biểu mẫu.");
+            }
         }
 
         // Kiểm tra SymptomResult tồn tại
@@ -118,6 +122,9 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Kết quả triệu chứng không tồn tại"));
 
         // Xóa các SymptomDetails cũ
+        if ("ROLE_PATIENT".equals(userRole) && symptomResult.getStatus() == SymptomResultStatus.COMPLETED) {
+            throw new BadRequestException("Bạn đã gửi triệu chứng rồi, không thể chỉnh sửa lại.");
+        }
         symptomDetailsRepository.deleteAll(symptomResult.getSymptomDetails());
 
         // Thêm SymptomDetails mới
@@ -191,6 +198,7 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .height(session.getHeight())
                 .status(session.getStatus())
                 .symptomResultStatus(symptomStatus)
+                .clinicalInputMode(session.getClinicalInputMode())
                 .createdAt(session.getCreatedAt())
                 .build();
     }

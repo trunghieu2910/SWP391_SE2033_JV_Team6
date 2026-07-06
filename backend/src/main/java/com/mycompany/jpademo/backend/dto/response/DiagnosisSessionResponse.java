@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.dto.response;
 
+import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.enums.SymptomResultStatus;
 import lombok.Builder;
@@ -17,5 +18,6 @@ public class DiagnosisSessionResponse {
     private Double height;
     private DiagnosisSessionStatus status;
     private SymptomResultStatus symptomResultStatus;
+    private ClinicalInputMode clinicalInputMode;
     private LocalDateTime createdAt;
 }
