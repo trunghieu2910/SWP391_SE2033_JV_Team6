@@ -42,4 +42,6 @@ public class DoctorSessionDetailResponse {
     private List<LabResultResponse> labResults;
 
     private List<MedicalImageResponse> medicalImages;
+
+    private ReviewResponse review;
 }

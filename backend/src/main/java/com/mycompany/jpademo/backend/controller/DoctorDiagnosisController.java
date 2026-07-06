@@ -134,4 +134,29 @@ public class DoctorDiagnosisController {
 
         return "redirect:/doctor/sessions/" + sessionId;
     }
+
+    @PostMapping("/{sessionId}/review")
+    public String saveSessionReview(
+            @PathVariable Integer sessionId,
+            @Valid @ModelAttribute com.mycompany.jpademo.backend.dto.request.CreateReviewRequest request,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getAllErrors().stream()
+                    .map(error -> error.getDefaultMessage())
+                    .findFirst()
+                    .orElse("Dữ liệu không hợp lệ");
+            redirectAttributes.addFlashAttribute("error", errorMessage);
+            return "redirect:/doctor/sessions/" + sessionId;
+        }
+        try {
+            Integer doctorId = TEST_DOCTOR_ID;
+            doctorDiagnosisService.saveReview(doctorId, sessionId, request);
+            redirectAttributes.addFlashAttribute("success", "Đã lưu kết luận bệnh thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/doctor/sessions/" + sessionId;
+    }
 }

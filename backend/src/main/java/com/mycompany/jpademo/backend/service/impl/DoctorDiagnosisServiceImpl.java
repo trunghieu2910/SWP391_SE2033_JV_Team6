@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.service.impl;
 
+import com.mycompany.jpademo.backend.dto.request.CreateReviewRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateClinicalSymptomsRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateSessionShareRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateSessionStatusRequest;
@@ -34,6 +35,8 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     private final SymptomResultRepository symptomResultRepository;
     private final LabResultRepository labResultRepository;
     private final MedicalImageRepository medicalImageRepository;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     private static final String MESSAGE = "Ca chẩn đoán không tìm thấy với ID: ";
 
@@ -212,6 +215,35 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages);
     }
 
+    @Override
+    @Transactional
+    public void saveReview(Integer doctorId, Integer sessionId, CreateReviewRequest request) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán với: " + sessionId));
+
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("Bạn không có quyền cập nhật ca chẩn đoán này.");
+        }
+
+        Review review = session.getReview();
+        if (review == null) {
+            User doctor = userRepository.findById(doctorId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ"));
+            
+            review = new Review();
+            review.setDiagnosisSession(session);
+            review.setUser(doctor);
+        }
+
+        review.setFinalDiagnosis(request.getFinalDiagnosis());
+        review.setTreatmentPlan(request.getTreatmentPlan());
+        review.setDoctorAdvice(request.getDoctorAdvice());
+        review.setNote(request.getNote());
+        review.setReviewedAt(LocalDateTime.now());
+
+        reviewRepository.save(review);
+    }
+
     private DoctorSessionDetailResponse mapToDoctorSessionDetailResponse(
             DiagnosisSession session,
             Patient patient,
@@ -251,9 +283,22 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .map(this::mapToMedicalImageResponse)
                 .collect(Collectors.toList());
 
+        ReviewResponse reviewResponse = null;
+        if (session.getReview() != null) {
+            Review rev = session.getReview();
+            reviewResponse = ReviewResponse.builder()
+                    .reviewId(rev.getReviewId())
+                    .finalDiagnosis(rev.getFinalDiagnosis())
+                    .treatmentPlan(rev.getTreatmentPlan())
+                    .doctorAdvice(rev.getDoctorAdvice())
+                    .note(rev.getNote())
+                    .reviewedAt(rev.getReviewedAt())
+                    .build();
+        }
+
         return DoctorSessionDetailResponse.builder()
                 .sessionId(session.getSessionId())
-                .status(session.getStatus().name())
+                .status(session.getStatus() != null ? session.getStatus().name() : null)
                 .isShared(session.getIsShared())
                 .createdAt(session.getCreatedAt())
                 .weight(session.getWeight())
@@ -268,6 +313,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .symptomResult(symptomResultResponse)
                 .labResults(labResultResponses)
                 .medicalImages(medicalImageResponses)
+                .review(reviewResponse)
                 .build();
     }
 

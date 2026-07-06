@@ -26,4 +26,6 @@ public interface DoctorDiagnosisService {
     void updateClinicalSymptoms(Integer doctorId, Integer sessionId, UpdateClinicalSymptomsRequest request);
 
     DoctorSessionDetailResponse getSessionDetail(Integer sessionId, Integer doctorId);
+
+    void saveReview(Integer doctorId, Integer sessionId, com.mycompany.jpademo.backend.dto.request.CreateReviewRequest request);
 }

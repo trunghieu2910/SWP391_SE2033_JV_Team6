@@ -140,6 +140,49 @@
                 </div>
             </div>
 
+            <!-- 4. KẾT LUẬN BỆNH -->
+            <div class="accordion-item" style="border: 2px solid #0284c7; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.1);">
+                <div class="accordion-header" onclick="toggleAccordion('reviewAccordion')" style="background-color: #f0f9ff;">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-stethoscope" style="color: #0284c7;"></i>
+                        <span style="color: #0369a1; font-weight: bold;">Kết luận bệnh</span>
+                        <span class="accordion-badge" th:if="${sessionDetail.review != null}" style="background-color: #10b981; color: white;">Đã kết luận</span>
+                        <span class="accordion-badge" th:if="${sessionDetail.review == null}" style="background-color: #f59e0b; color: white;">Chưa kết luận</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="reviewIcon"></i>
+                </div>
+                <div class="accordion-body" id="reviewAccordion" style="display: block; padding: 20px;">
+                    <form th:action="@{/doctor/sessions/{id}/review(id=${sessionDetail.sessionId})}" method="post">
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div class="form-group">
+                                <label style="font-weight: 600; margin-bottom: 8px; display: block;">Kết luận chẩn đoán cuối cùng <span style="color: red;">*</span></label>
+                                <textarea name="finalDiagnosis" class="form-control" rows="3" required placeholder="Nhập kết luận..." th:text="${sessionDetail.review != null ? sessionDetail.review.finalDiagnosis : ''}"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label style="font-weight: 600; margin-bottom: 8px; display: block;">Kế hoạch điều trị (Phác đồ) <span style="color: red;">*</span></label>
+                                <textarea name="treatmentPlan" class="form-control" rows="3" required placeholder="Nhập phác đồ điều trị..." th:text="${sessionDetail.review != null ? sessionDetail.review.treatmentPlan : ''}"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label style="font-weight: 600; margin-bottom: 8px; display: block;">Lời khuyên của Bác sĩ</label>
+                                <textarea name="doctorAdvice" class="form-control" rows="2" placeholder="Nhập lời khuyên..." th:text="${sessionDetail.review != null ? sessionDetail.review.doctorAdvice : ''}"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label style="font-weight: 600; margin-bottom: 8px; display: block;">Ghi chú thêm</label>
+                                <textarea name="note" class="form-control" rows="2" placeholder="Ghi chú nội bộ (nếu có)..." th:text="${sessionDetail.review != null ? sessionDetail.review.note : ''}"></textarea>
+                            </div>
+                            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-top: 10px;">
+                                <span th:if="${sessionDetail.review != null}" style="color: #64748b; font-size: 13px;">
+                                    Cập nhật lần cuối: <span th:text="${#temporals.format(sessionDetail.review.reviewedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+                                <button type="submit" class="btn-action btn-primary" style="padding: 10px 20px; font-size: 15px;">
+                                    <i class="fa-solid fa-save"></i> Lưu kết luận
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 
