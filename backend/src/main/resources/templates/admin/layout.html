@@ -31,6 +31,10 @@
             <i class="fa-solid fa-user-plus"></i>
             <span>Tạo Bác sĩ</span>
         </a>
+        <a th:href="@{/admin/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
+            <i class="fa-solid fa-user"></i>
+            <span>Hồ sơ cá nhân</span>
+        </a>
         <a th:href="@{/admin/logs}" class="nav-item" th:classappend="${currentTab == 'logs' ? 'active' : ''}">
             <i class="fa-solid fa-list-check"></i>
             <span>Nhật ký hoạt động</span>

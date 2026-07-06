@@ -17,10 +17,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 
 @Controller
-@RequestMapping("/doctor/profile")
-@PreAuthorize("hasRole('DOCTOR')")
+@RequestMapping("/admin/profile")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
-public class DoctorProfileViewController {
+public class AdminProfileViewController {
 
     private final ProfileService profileService;
 
@@ -44,7 +44,7 @@ public class DoctorProfileViewController {
         model.addAttribute("success", success);
         model.addAttribute("today", LocalDate.now());
 
-        return "doctor/profile";
+        return "admin/profile";
     }
 
     @PostMapping
@@ -57,11 +57,11 @@ public class DoctorProfileViewController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("profile", profile);
             model.addAttribute("profileForm", profileForm);
-            return "doctor/profile";
+            return "admin/profile";
         }
 
         profileService.updateProfile(userDetails.getUsername(), profileForm);
         redirectAttributes.addFlashAttribute("success", "Cập nhật hồ sơ thành công.");
-        return "redirect:/doctor/profile?success=true";
+        return "redirect:/admin/profile?success=true";
     }
 }

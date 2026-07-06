@@ -6,14 +6,13 @@ import lombok.Data;
 
 @Data
 public class ChangePasswordRequest {
-
-    @NotBlank(message = "Vui lòng nhập mật khẩu cũ")
+    @NotBlank(message = "Mật khẩu cũ không được để trống")
     private String oldPassword;
 
-    @NotBlank(message = "Vui lòng nhập mật khẩu mới")
-    @Size(min = 8, message = "Mật khẩu mới phải có ít nhất 8 ký tự")
+    @NotBlank(message = "Mật khẩu mới không được để trống")
+    @Size(min = 6, message = "Mật khẩu mới phải có ít nhất 6 ký tự")
     private String newPassword;
 
-    @NotBlank(message = "Vui lòng xác nhận mật khẩu mới")
+    @NotBlank(message = "Xác nhận mật khẩu không được để trống")
     private String confirmPassword;
 }

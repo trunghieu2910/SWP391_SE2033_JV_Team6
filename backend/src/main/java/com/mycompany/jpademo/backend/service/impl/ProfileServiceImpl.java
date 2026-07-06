@@ -89,7 +89,6 @@ public class ProfileServiceImpl implements ProfileService {
         userRepository.save(user);
     }
 
-
     private User getUserByLogin(String login) {
         return userRepository.findByEmailOrUsernameOrPhoneNumberOrNationalId(
                 login,

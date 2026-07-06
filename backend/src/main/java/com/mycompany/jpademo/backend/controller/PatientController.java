@@ -1,7 +1,6 @@
 package com.mycompany.jpademo.backend.controller;
 
 import com.mycompany.jpademo.backend.dto.request.UpdateProfileRequest;
-import com.mycompany.jpademo.backend.dto.request.ChangePasswordRequest;
 import com.mycompany.jpademo.backend.dto.response.MedicalRecordResponse;
 import com.mycompany.jpademo.backend.dto.response.MedicalRecordDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.ProfileResponse;
@@ -195,33 +194,6 @@ public class PatientController {
         profileService.updateProfile(userDetails.getUsername(), profileForm);
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công.");
         return "redirect:/patient/profile?success=true";
-    }
-
-    @GetMapping("/change-password")
-    public String changePasswordPage(Model model, @RequestParam(value = "success", required = false) boolean success) {
-        model.addAttribute("passwordForm", new ChangePasswordRequest());
-        model.addAttribute("success", success);
-        return "patient/change-password";
-    }
-
-    @PostMapping("/change-password")
-    public String submitChangePassword(@Valid @ModelAttribute("passwordForm") ChangePasswordRequest form,
-                                       BindingResult bindingResult,
-                                       @AuthenticationPrincipal CustomUserDetails userDetails,
-                                       RedirectAttributes redirectAttributes,
-                                       Model model) {
-        if (bindingResult.hasErrors()) {
-            return "patient/change-password";
-        }
-
-        try {
-            profileService.changePassword(userDetails.getUsername(), form);
-            redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
-            return "redirect:/patient/change-password?success=true";
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-            return "patient/change-password";
-        }
     }
 
     private Patient getPatient(CustomUserDetails userDetails) {

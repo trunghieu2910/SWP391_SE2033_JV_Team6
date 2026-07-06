@@ -23,9 +23,11 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
                                 Authentication authentication) throws IOException {
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            User user = userDetails.getUser();
-            user.setLastLogoutTime(LocalDateTime.now());
-            userRepository.save(user);
+            Integer userId = userDetails.getUser().getUserId();
+            userRepository.findById(userId).ifPresent(user -> {
+                user.setLastLogoutTime(LocalDateTime.now());
+                userRepository.save(user);
+            });
         }
         response.sendRedirect("/auth/login?logout");
     }

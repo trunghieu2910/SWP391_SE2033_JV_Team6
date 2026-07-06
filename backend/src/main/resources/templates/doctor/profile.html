@@ -11,7 +11,7 @@
             <h2 style="font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 4px;" th:text="${profile.fullName != null ? profile.fullName : 'Chưa cập nhật'}">Tên bác sĩ</h2>
             <p class="muted" style="color: #64748b; font-size: 14px; margin-bottom: 24px;" th:text="${profile.email != null ? profile.email : 'Chưa có email'}">email@example.com</p>
             <div class="summary-list" style="width: 100%; border-top: 1px solid #f1f5f9; padding-top: 16px; text-align: left;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px;"><span style="color: #64748b;">Ngày sinh</span><strong style="color: #0f172a;" th:text="${profile.dob != null ? #temporals.format(profile.dob, 'dd/MM/yyyy') : 'Chưa cập nhật'}"></strong></div>
+
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px;"><span style="color: #64748b;">Số điện thoại</span><strong style="color: #0f172a;" th:text="${profile.phoneNumber != null ? profile.phoneNumber : 'Chưa cập nhật'}"></strong></div>
                 <div style="display: flex; justify-content: space-between; font-size: 14px;"><span style="color: #64748b;">CCCD/CMND</span><strong style="color: #0f172a;" th:text="${profile.nationalID != null ? profile.nationalID : 'Chưa cập nhật'}"></strong></div>
             </div>
@@ -44,33 +44,11 @@
                         <div class="error" style="color: #ef4444; font-size: 12px;" th:if="${#fields.hasErrors('nationalID')}" th:errors="*{nationalID}"></div>
                     </div>
 
-                    <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                        <label style="font-weight: 600; font-size: 14px; color: #334155;" for="gender">Giới tính</label>
-                        <select style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white;" id="gender" th:field="*{gender}" class="form-input">
-                            <option value="">-- Chọn giới tính --</option>
-                            <option value="Male">Nam</option>
-                            <option value="Female">Nữ</option>
-                            <option value="Other">Khác</option>
-                        </select>
-                        <div class="error" style="color: #ef4444; font-size: 12px;" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
-                    </div>
 
-                    <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                        <label style="font-weight: 600; font-size: 14px; color: #334155;" for="dob">Ngày sinh</label>
-                        <input style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" id="dob" type="date" th:field="*{dob}" class="form-input"
-                               th:attr="max=${#temporals.format(today, 'yyyy-MM-dd')}" />
-                        <div class="error" style="color: #ef4444; font-size: 12px;" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></div>
-                    </div>
-
-                    <div class="form-group full-width" style="grid-column: span 2; display: flex; flex-direction: column; gap: 6px;">
-                        <label style="font-weight: 600; font-size: 14px; color: #334155;" for="address">Địa chỉ</label>
-                        <textarea style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; height: 100px;" id="address" th:field="*{address}" class="form-input form-textarea"></textarea>
-                        <div class="error" style="color: #ef4444; font-size: 12px;" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
-                    </div>
                 </div>
 
                 <div class="form-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
-                    <a th:href="@{/doctor/profile/change-password}" class="btn-action" style="padding: 10px 20px; font-weight: 600; border-radius: 6px; border: 1px solid #cbd5e1; background: white; color: #334155; text-decoration: none; display: inline-block; cursor: pointer;">Đổi mật khẩu</a>
+                    <a th:href="@{/change-password}" class="btn-action" style="padding: 10px 20px; font-weight: 600; border-radius: 6px; border: 1px solid #cbd5e1; background: white; color: #334155; text-decoration: none; display: inline-block; cursor: pointer;">Đổi mật khẩu</a>
                     <button type="submit" class="btn-action btn-primary" style="padding: 10px 20px; font-weight: 600; border-radius: 6px; border: none; background: #0284c7; color: white; cursor: pointer;" onclick="return confirm('Bạn có chắc chắn muốn lưu thay đổi hồ sơ này không?');">Lưu thay đổi</button>
                 </div>
             </form>
