@@ -370,7 +370,8 @@
                             <span class="img-date"
                                   th:text="${d.uploadedAt != null}
                                            ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
-                                           : ''">—</span>
+                                           : '—'">—</span>
+                            <a th:href="@{/ai-result.html(imageId=${d.imageId})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: #2563eb; color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block;"><i class="fa-solid fa-robot"></i> Phân tích AI</a>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giả lập Máy Siêu Âm</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #1e293b; color: #f8fafc; padding: 2rem; display: flex; justify-content: center; }
+        .simulator-container { background: #0f172a; border-radius: 12px; padding: 2rem; width: 100%; max-width: 600px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); border: 1px solid #334155; }
+        .header { text-align: center; margin-bottom: 2rem; border-bottom: 1px solid #334155; padding-bottom: 1rem; }
+        .header h1 { color: #38bdf8; font-size: 1.5rem; margin: 0; }
+        .header p { color: #94a3b8; font-size: 0.875rem; margin-top: 0.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #cbd5e1; font-weight: 600; font-size: 0.875rem; }
+        .form-control { width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #1e293b; color: white; font-size: 1rem; outline: none; }
+        .form-control:focus { border-color: #38bdf8; }
+        
+        .upload-area { border: 2px dashed #475569; border-radius: 8px; padding: 2rem; text-align: center; background: #1e293b; cursor: pointer; transition: all 0.2s; position: relative; }
+        .upload-area:hover { border-color: #38bdf8; background: #233147; }
+        .upload-area i { font-size: 3rem; color: #64748b; margin-bottom: 1rem; }
+        .upload-area p { margin: 0; color: #94a3b8; }
+        .upload-area.has-file { border-color: #10b981; border-style: solid; }
+        
+        #file-input { display: none; }
+        
+        .preview-container { margin-top: 1rem; display: none; text-align: center; }
+        .preview-container img { max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #475569; }
+        
+        .btn-submit { width: 100%; background: #38bdf8; color: #0f172a; border: none; padding: 1rem; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1rem;}
+        .btn-submit:hover { background: #0ea5e9; }
+        .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        .result-message { margin-top: 1.5rem; padding: 1rem; border-radius: 6px; display: none; text-align: center; }
+        .result-message.success { background: #064e3b; color: #34d399; border: 1px solid #059669; }
+        .result-message.error { background: #7f1d1d; color: #fca5a5; border: 1px solid #dc2626; }
+    </style>
+</head>
+<body>
+
+    <div class="simulator-container">
+        <div class="header">
+            <h1><i class="fa-solid fa-desktop"></i> Máy Siêu Âm (Giả Lập)</h1>
+            <p>Kết nối trực tiếp tới AI phân tích</p>
+        </div>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="sessionId"><i class="fa-solid fa-hospital-user"></i> Mã Phiên Khám (Session ID)</label>
+                <input type="number" id="sessionId" class="form-control" placeholder="Nhập ID phiên khám (ví dụ: 1)" required>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fa-solid fa-image"></i> Hình Ảnh Siêu Âm</label>
+                <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p id="upload-text">Bấm vào đây hoặc kéo thả ảnh để tải lên</p>
+                    <input type="file" id="file-input" accept="image/*" required>
+                </div>
+                
+                <div class="preview-container" id="preview-container">
+                    <img id="image-preview" src="" alt="Preview">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-submit" id="btn-submit">
+                <i class="fa-solid fa-upload"></i> Truyền Dữ Liệu Lên Hệ Thống
+            </button>
+        </form>
+        
+        <div class="result-message" id="result-message"></div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadText = document.getElementById('upload-text');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const form = document.getElementById('uploadForm');
+        const btnSubmit = document.getElementById('btn-submit');
+        const resultMessage = document.getElementById('result-message');
+        
+        let selectedFile = null;
+
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            uploadText.textContent = file.name;
+            dropZone.classList.add('has-file');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!selectedFile) {
+                showResult('Vui lòng chọn ảnh trước!', 'error');
+                return;
+            }
+            
+            const sessionId = document.getElementById('sessionId').value;
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('sessionId', sessionId);
+            
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải lên và chạy AI...';
+            resultMessage.style.display = 'none';
+            
+            try {
+                // Gọi API backend Java
+                const response = await fetch('/api/ultrasound/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(`Truyền ảnh thành công! Đã gửi về Bác sĩ (ID Ảnh: ${data.imageId})`, 'success');
+                    
+                    // Nút xem thử
+                    const btnLink = document.createElement('a');
+                    btnLink.href = `/ai-result.html?imageId=${data.imageId}`;
+                    btnLink.textContent = "Mở xem ảnh AI ngay";
+                    btnLink.style = "display:block; margin-top:10px; color:#38bdf8; text-decoration:underline; font-weight:bold;";
+                    resultMessage.appendChild(btnLink);
+                    
+                } else {
+                    const errText = await response.text();
+                    showResult(`Lỗi từ máy chủ: ${errText}`, 'error');
+                }
+            } catch (error) {
+                showResult('Lỗi kết nối mạng hoặc máy chủ không phản hồi!', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-upload"></i> Truyền Dữ Liệu Lên Hệ Thống';
+            }
+        });
+        
+        function showResult(msg, type) {
+            resultMessage.textContent = msg;
+            resultMessage.className = 'result-message ' + type;
+            resultMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

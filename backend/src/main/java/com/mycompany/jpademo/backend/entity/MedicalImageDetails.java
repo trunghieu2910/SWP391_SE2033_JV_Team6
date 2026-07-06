@@ -17,8 +17,14 @@ public class MedicalImageDetails {
     @Column(name = "imageID")
     private Integer imageId;
 
-    @Column(name = "imageUrl", unique = true, nullable = false)
+    @Column(name = "imageUrl", nullable = false)
     private String imageUrl;
+
+    @Column(name = "aiImageUrl")
+    private String aiImageUrl;
+
+    @Column(name = "confidenceScore")
+    private Double confidenceScore;
 
     @CreationTimestamp
     @Column(name = "uploadedAt", nullable = false, updatable = false)

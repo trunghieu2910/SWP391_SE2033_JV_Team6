@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả AI - Hình Ảnh Y Khoa</title>
+    <link rel="stylesheet" href="/css/ai-result.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="header-left">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-image"></i>
+                    </div>
+                    <h2>Hình Ảnh Y Khoa - Phân tích AI</h2>
+                </div>
+                <div class="header-right">
+                    <button class="btn-back" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i> Quay lại</button>
+                </div>
+            </div>
+            
+            <div class="card-info">
+                <div class="info-group">
+                    <label>MÃ HÌNH ẢNH</label>
+                    <p id="image-id">#MI...</p>
+                </div>
+                <div class="info-group">
+                    <label>LOẠI HÌNH ẢNH</label>
+                    <p id="image-type">Siêu âm bụng</p>
+                </div>
+                <div class="info-group">
+                    <label>TRẠNG THÁI AI</label>
+                    <div class="status-pill pending">
+                        <i class="fa-solid fa-circle"></i> <span id="ai-status">ĐANG TẢI...</span>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <label>NGÀY CHỈ ĐỊNH</label>
+                    <p id="upload-date">--/--/----</p>
+                </div>
+                <div class="info-group">
+                    <label>ĐỘ TIN CẬY AI</label>
+                    <p id="ai-confidence" class="confidence-text">--%</p>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <h3><i class="fa-solid fa-images"></i> Danh sách ảnh ( 2 )</h3>
+                
+                <div class="image-comparison-container">
+                    <div class="image-box">
+                        <h4>Ảnh Gốc</h4>
+                        <div class="img-wrapper">
+                            <img id="original-img" src="" alt="Ảnh Gốc" class="placeholder">
+                            <div class="loading-overlay" id="loading-orig" style="display: none;">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                        <p class="img-name">Ảnh siêu âm ban đầu</p>
+                    </div>
+                    
+                    <div class="image-box">
+                        <h4>Ảnh Phân Tích AI</h4>
+                        <div class="img-wrapper">
+                            <img id="ai-img" src="" alt="Ảnh AI" class="placeholder">
+                            <div class="loading-overlay" id="loading-ai" style="display: none;">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...
+                            </div>
+                        </div>
+                        <p class="img-name ai-name">Kết quả khoanh vùng U xơ</p>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="btn-process-ai" class="btn-primary" onclick="processAI()"><i class="fa-solid fa-robot"></i> Chạy Phân Tích AI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/ai-result.js"></script>
+</body>
+</html>
