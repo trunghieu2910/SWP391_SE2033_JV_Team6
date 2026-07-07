@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,16 +57,12 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .weight(request.getWeight())
                 .height(request.getHeight())
                 .status(DiagnosisSessionStatus.PENDING)
+                .clinicalInputMode(ClinicalInputMode.PATIENT)
                 .build();
 
         DiagnosisSession savedSession = diagnosisSessionRepository.save(session);
 
-        // Tạo SymptomResult
-        SymptomResult symptomResult = SymptomResult.builder()
-                .diagnosisSession(savedSession)
-                .status(SymptomResultStatus.PENDING)
-                .build();
-        symptomResultRepository.save(symptomResult);
+        // NOTE: do NOT create SymptomResult here. It will be created when patient or doctor submits.
 
         // Tạo LabResult
         LabResult labResult = LabResult.builder()
@@ -117,15 +114,31 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
             }
         }
 
-        // Kiểm tra SymptomResult tồn tại
+        // Lấy hoặc tạo SymptomResult nếu chưa tồn tại
         SymptomResult symptomResult = symptomResultRepository.findByDiagnosisSessionSessionId(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Kết quả triệu chứng không tồn tại"));
+            .orElseGet(() -> {
+                SymptomResult sr = new SymptomResult();
+                sr.setDiagnosisSession(session);
+                sr.setStatus(SymptomResultStatus.PENDING);
+                sr.setSymptomDetails(new java.util.ArrayList<>());
+                return sr;
+            });
 
         // Xóa các SymptomDetails cũ
         if ("ROLE_PATIENT".equals(userRole) && symptomResult.getStatus() == SymptomResultStatus.COMPLETED) {
             throw new BadRequestException("Bạn đã gửi triệu chứng rồi, không thể chỉnh sửa lại.");
         }
-        symptomDetailsRepository.deleteAll(symptomResult.getSymptomDetails());
+        if (symptomResult.getSymptomDetails() != null && !symptomResult.getSymptomDetails().isEmpty()) {
+            symptomDetailsRepository.deleteAll(symptomResult.getSymptomDetails());
+        }
+
+        // Set thêm thông tin form triệu chứng
+        symptomResult.setMenopauseStatus(request.getMenopauseStatus());
+        symptomResult.setSymptomDuration(request.getSymptomDuration());
+        symptomResult.setSymptomProgressing(request.getSymptomProgressing());
+
+        // Save SymptomResult trước khi tạo SymptomDetails (để tránh transient entity error)
+        symptomResultRepository.save(symptomResult);
 
         // Thêm SymptomDetails mới
         List<Symptom> symptoms = symptomRepository.findAllById(request.getSymptoms());
@@ -136,11 +149,6 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                         .build())
                 .collect(Collectors.toList());
         symptomDetailsRepository.saveAll(symptomDetailsList);
-
-        // Set thêm thông tin form triệu chứng
-        symptomResult.setMenopauseStatus(request.getMenopauseStatus());
-        symptomResult.setSymptomDuration(request.getSymptomDuration());
-        symptomResult.setSymptomProgressing(request.getSymptomProgressing());
 
         // Khi bệnh nhân hoặc bác sĩ submit xong một lần thì
         // SymptomResult là COMPLETED và DiagnosisSession chuyển sang PROCESSING.

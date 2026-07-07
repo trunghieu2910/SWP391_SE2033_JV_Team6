@@ -198,8 +198,14 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             detail.setSymptom(symptom);
             symptomResult.getSymptomDetails().add(detail);
         }
-
+        // Mark symptom result as completed when doctor saves and set session to PROCESSING
+        symptomResult.setStatus(SymptomResultStatus.COMPLETED);
         symptomResultRepository.save(symptomResult);
+
+        if (session.getStatus() == DiagnosisSessionStatus.PENDING) {
+            session.setStatus(DiagnosisSessionStatus.PROCESSING);
+            sessionRepository.save(session);
+        }
     }
 
     @Override
@@ -210,8 +216,11 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền thay đổi chế độ nhập triệu chứng của ca chẩn đoán này.");
         }
-        if (session.getClinicalInputMode() != null) {
-            throw new BadRequestException("Đã chọn chế độ nhập triệu chứng. Không thể thay đổi.");
+        // Allow changing mode only if patient hasn't submitted yet
+        if (session.getClinicalInputMode() != null && 
+            session.getSymptomResult() != null && 
+            session.getSymptomResult().getStatus() == SymptomResultStatus.COMPLETED) {
+            throw new BadRequestException("Bệnh nhân đã gửi triệu chứng. Không thể thay đổi chế độ nhập.");
         }
         session.setClinicalInputMode(clinicalInputMode);
         sessionRepository.save(session);

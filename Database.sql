@@ -147,6 +147,8 @@ CREATE TABLE MedicalImageDetails
     imageID        INT IDENTITY (1,1) PRIMARY KEY,
     medicalImageID INT           NOT NULL,
     imageUrl       NVARCHAR(255) NOT NULL,
+    aiImageUrl     NVARCHAR(255) NULL,
+    confidenceScore FLOAT NULL,
     uploadedAt     DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (medicalImageID) REFERENCES MedicalImage (medicalImageID)
 );

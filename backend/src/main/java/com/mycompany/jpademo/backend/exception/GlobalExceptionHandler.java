@@ -29,7 +29,24 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     private boolean isApiRequest(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/") || path.startsWith("/auth/");
+        return path.startsWith("/api/");
+    }
+
+    private String getFallbackRedirect(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        if (path.startsWith("/doctor/")) {
+            return "redirect:/doctor/sessions";
+        }
+        if (path.startsWith("/patient/")) {
+            return "redirect:/patient/home";
+        }
+        if (path.startsWith("/admin/")) {
+            return "redirect:/admin/dashboard";
+        }
+        if (path.startsWith("/auth/") || path.startsWith("/forgot-password/")) {
+            return "redirect:/auth/login";
+        }
+        return "redirect:/auth/login";
     }
 
     @ExceptionHandler(InvalidOtpException.class)
@@ -83,6 +100,25 @@ public class GlobalExceptionHandler {
         return "redirect:/admin/create-doctor/verify";
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public Object handleResourceNotFound(
+            ResourceNotFoundException e,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+
+        if (isApiRequest(request)) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.builder()
+                            .success(false)
+                            .message(e.getMessage())
+                            .build());
+        }
+
+        redirectAttributes.addFlashAttribute("error", e.getMessage());
+        return getFallbackRedirect(request);
+    }
+
     @ExceptionHandler(UnauthorizedActionException.class)
     public Object handleUnauthorizedAction(
             UnauthorizedActionException e,
@@ -99,7 +135,7 @@ public class GlobalExceptionHandler {
         }
 
         redirectAttributes.addFlashAttribute("error", e.getMessage());
-        return "redirect:/admin/users";
+        return getFallbackRedirect(request);
     }
 
     @ExceptionHandler(Exception.class)
@@ -117,7 +153,7 @@ public class GlobalExceptionHandler {
         }
 
         redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
-        return "redirect:/auth/login";
+        return getFallbackRedirect(request);
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -135,7 +171,7 @@ public class GlobalExceptionHandler {
         }
 
         redirectAttributes.addFlashAttribute("error", e.getMessage());
-        return "redirect:/auth/login";
+        return getFallbackRedirect(request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -294,15 +330,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ApiResponse> handleResourceAlreadyExists(ResourceAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.builder()
-                        .success(false)
-                        .message(ex.getMessage())
-                        .build());
-    }
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse> handleResourceNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.builder()
                         .success(false)
                         .message(ex.getMessage())

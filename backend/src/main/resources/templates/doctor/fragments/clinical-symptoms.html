@@ -80,7 +80,7 @@
                 <!-- Triệu chứng -->
                 <div th:if="${not #lists.isEmpty(sessionDetail.symptomResult.symptomDetails)}" class="symptom-tags">
                     <span class="symptom-tag" th:each="detail : ${sessionDetail.symptomResult.symptomDetails}"
-                          th:text="${detail.symptomName}">Đau bụng</span>
+                          th:text="${detail.symptom.symptomName}">Đau bụng</span>
                 </div>
                 <div th:if="${#lists.isEmpty(sessionDetail.symptomResult.symptomDetails)}" class="empty-text">
                     Chưa có triệu chứng nào được ghi nhận

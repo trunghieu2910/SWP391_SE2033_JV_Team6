@@ -26,7 +26,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @RestController
 @RequestMapping("/api/diagnosis-sessions")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('DOCTOR')")
 public class DiagnosisSessionController {
     private final DiagnosisSessionService diagnosisSessionService;
     private final PatientSearchService patientSearchService;
@@ -35,6 +34,7 @@ public class DiagnosisSessionController {
      * Tìm kiếm bệnh nhân theo từ khóa (tên hoặc nationalID)
      */
     @GetMapping("/search-patients")
+        @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<ApiResponse<List<PatientSearchResponse>>> searchPatients(
             @RequestParam(value = "keyword", required = false) String keyword) {
         List<PatientSearchResponse> patients = patientSearchService.searchPatients(keyword);
@@ -51,6 +51,7 @@ public class DiagnosisSessionController {
      * Bác sĩ tạo phiên khám
      */
     @PostMapping
+        @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<ApiResponse<DiagnosisSessionResponse>> createSession(
             @Valid @RequestBody CreateDiagnosisSessionRequest request,
             Authentication authentication) {
@@ -69,6 +70,7 @@ public class DiagnosisSessionController {
      * Thêm bệnh nhân vào phiên khám (click dấu cộng)
      */
     @PostMapping("/add-patient")
+        @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<ApiResponse<DiagnosisSessionResponse>> addPatientToSession(
             @Valid @RequestBody CreateDiagnosisSessionRequest request,
             Authentication authentication) {
@@ -87,6 +89,7 @@ public class DiagnosisSessionController {
      * Bệnh nhân hoặc bác sĩ submit biểu mẫu triệu chứng
      */
     @PostMapping("/{sessionId}/symptom-result")
+        @PreAuthorize("hasAnyRole('DOCTOR','PATIENT')")
     public ResponseEntity<ApiResponse<SymptomResultResponse>> submitSymptomForm(
             @PathVariable Integer sessionId,
             @Valid @RequestBody SubmitSymptomFormRequest request,
@@ -108,6 +111,7 @@ public class DiagnosisSessionController {
      * Bác sĩ chỉnh sửa biểu mẫu triệu chứng
      */
     @PutMapping("/{sessionId}/symptom-result")
+        @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<ApiResponse<SymptomResultResponse>> updateSymptomForm(
             @PathVariable Integer sessionId,
             @Valid @RequestBody SubmitSymptomFormRequest request,
@@ -129,6 +133,7 @@ public class DiagnosisSessionController {
      * Lấy chi tiết phiên khám
      */
     @GetMapping("/{sessionId}")
+        @PreAuthorize("hasAnyRole('DOCTOR','PATIENT')")
     public ResponseEntity<ApiResponse<DiagnosisSessionResponse>> getSessionDetail(
             @PathVariable Integer sessionId) {
         DiagnosisSessionResponse response = diagnosisSessionService.getSessionDetail(sessionId);
@@ -145,6 +150,7 @@ public class DiagnosisSessionController {
      * Lấy chi tiết SymptomResult
      */
     @GetMapping("/{sessionId}/symptom-result")
+        @PreAuthorize("hasAnyRole('DOCTOR','PATIENT')")
     public ResponseEntity<ApiResponse<SymptomResultResponse>> getSymptomResult(
             @PathVariable Integer sessionId) {
         SymptomResultResponse response = diagnosisSessionService.getSymptomResult(sessionId);
