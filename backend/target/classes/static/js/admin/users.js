@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const alerts = document.querySelectorAll('.alert-success, .alert-danger');
 
     alerts.forEach(function(alert) {
-        // Hiệu ứng fade out sau 4.5 giây, sau đó ẩn
         setTimeout(function() {
             alert.style.transition = 'opacity 0.5s ease';
             alert.style.opacity = '0';
@@ -19,6 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close modal on escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
+            closeStatusModal();
+        }
+    });
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('statusModal');
+        if (e.target === modal) {
             closeStatusModal();
         }
     });
@@ -37,58 +44,126 @@ function closeAlert(button) {
 }
 
 // ===== MODAL FUNCTIONS =====
+let selectedUserId = null;
+let selectedUserStatus = null;
+let selectedUserName = '';
+
 function openStatusModal(button) {
-    const userId = button.getAttribute('data-id');
-    const fullName = button.getAttribute('data-name');
-    const currentStatus = button.getAttribute('data-status');
+    try {
+        selectedUserId = button.getAttribute('data-id');
+        selectedUserName = button.getAttribute('data-name');
+        selectedUserStatus = button.getAttribute('data-status');
 
-    const modal = document.getElementById('statusModal');
-    const form = document.getElementById('statusForm');
-    const title = document.getElementById('modalTitle');
-    const desc = document.getElementById('modalDescription');
-    const statusInput = document.getElementById('formStatusInput');
-    const submitBtn = document.getElementById('modalSubmitBtn');
-    const submitText = document.getElementById('modalSubmitText');
+        console.log('🆔 User ID:', selectedUserId);
+        console.log('👤 User Name:', selectedUserName);
+        console.log('📊 User Status:', selectedUserStatus);
 
-    form.action = `/admin/users/${userId}/status`;
+        if (!selectedUserId) {
+            console.error('❌ Không tìm thấy userId');
+            return;
+        }
 
-    if (currentStatus === 'BANNED') {
-        title.innerText = 'Mở khóa tài khoản';
-        desc.innerText = `Bạn có chắc chắn muốn mở khóa cho "${fullName}"?`;
-        statusInput.value = 'ACTIVE';
-        submitText.innerText = 'Mở khóa ngay';
-        submitBtn.className = 'btn-action btn-success';
-    } else {
-        title.innerText = 'Khóa tài khoản';
-        desc.innerText = `Bạn có chắc chắn muốn khóa "${fullName}"?`;
-        statusInput.value = 'BANNED';
-        submitText.innerText = 'Khóa tài khoản';
-        submitBtn.className = 'btn-action btn-danger';
+        const modal = document.getElementById('statusModal');
+        const form = document.getElementById('statusForm');
+        const title = document.getElementById('modalTitle');
+        const desc = document.getElementById('modalDescription');
+        const statusInput = document.getElementById('formStatusInput');
+        const submitBtn = document.getElementById('modalSubmitBtn');
+        const submitText = document.getElementById('modalSubmitText');
+        const reasonInput = document.getElementById('reasonInput');
+        const userIdInput = document.getElementById('formUserIdInput');
+
+        // Set userId vào hidden input
+        if (userIdInput) {
+            userIdInput.value = selectedUserId;
+        }
+
+        // Reset form
+        if (reasonInput) {
+            reasonInput.value = '';
+            reasonInput.style.borderColor = '';
+            reasonInput.style.borderWidth = '';
+        }
+
+        // Set form action
+        if (form) {
+            form.action = '/admin/users/' + selectedUserId + '/status';
+        }
+
+        // Set modal content
+        if (selectedUserStatus === 'BANNED') {
+            if (title) title.innerText = 'Mở khóa tài khoản';
+            if (desc) desc.innerText = 'Bạn có chắc chắn muốn mở khóa tài khoản "' + selectedUserName + '"?';
+            if (statusInput) statusInput.value = 'ACTIVE';
+            if (submitText) submitText.innerText = 'Mở khóa';
+            if (submitBtn) submitBtn.className = 'btn-action btn-success';
+        } else {
+            if (title) title.innerText = 'Khóa tài khoản';
+            if (desc) desc.innerText = 'Bạn có chắc chắn muốn khóa tài khoản "' + selectedUserName + '"?';
+            if (statusInput) statusInput.value = 'BANNED';
+            if (submitText) submitText.innerText = 'Khóa';
+            if (submitBtn) submitBtn.className = 'btn-action btn-danger';
+        }
+
+        // ✅ Hiển thị modal
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.style.pointerEvents = 'auto';
+            document.body.style.overflow = 'hidden';
+        }
+
+    } catch (error) {
+        console.error('❌ Lỗi khi mở modal:', error);
+        alert('Có lỗi xảy ra khi mở modal. Vui lòng thử lại.');
     }
-
-    modal.classList.add('show');
-    document.body.style.overflow = 'hidden';
 }
 
 function closeStatusModal() {
-    const modal = document.getElementById('statusModal');
-    modal.classList.remove('show');
-    document.body.style.overflow = '';
-    document.getElementById('reasonInput').value = '';
+    try {
+        const modal = document.getElementById('statusModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.style.pointerEvents = 'none';
+        }
+        document.body.style.overflow = '';
+
+        const reasonInput = document.getElementById('reasonInput');
+        if (reasonInput) {
+            reasonInput.value = '';
+            reasonInput.style.borderColor = '';
+            reasonInput.style.borderWidth = '';
+        }
+    } catch (error) {
+        console.error('❌ Lỗi khi đóng modal:', error);
+    }
 }
 
 function submitStatusForm() {
-    const form = document.getElementById('statusForm');
-    const reason = document.getElementById('reasonInput');
+    try {
+        const form = document.getElementById('statusForm');
+        const reason = document.getElementById('reasonInput');
 
-    if (!reason.value) {
-        reason.focus();
-        reason.style.borderColor = '#ef4444';
-        setTimeout(() => {
-            reason.style.borderColor = '';
-        }, 2000);
-        return;
+        if (!reason || !reason.value || reason.value.trim() === '') {
+            if (reason) {
+                reason.focus();
+                reason.style.borderColor = '#ef4444';
+                reason.style.borderWidth = '2px';
+                setTimeout(() => {
+                    reason.style.borderColor = '';
+                    reason.style.borderWidth = '';
+                }, 2000);
+            }
+            return;
+        }
+
+        console.log('📤 Submitting form for user:', selectedUserId);
+        if (form) {
+            form.submit();
+        }
+    } catch (error) {
+        console.error('❌ Lỗi khi submit form:', error);
+        alert('Có lỗi xảy ra khi gửi form. Vui lòng thử lại.');
     }
-
-    form.submit();
 }
+
+console.log('👥 Users page loaded');

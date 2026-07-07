@@ -1,56 +1,45 @@
-<div th:fragment="list(labResults)" class="lab-results-card">
-
-    <!-- Flash message thay cho react-hot-toast -->
-    <div th:if="${success}" class="toast toast-success" th:text="${success}"></div>
-    <div th:if="${error}" class="toast toast-error" th:text="${error}"></div>
-
-    <button type="button" class="lab-results-header" onclick="this.parentElement.classList.toggle('open')">
-        <span class="lab-icon">🧪</span>
-        <span class="lab-title">Xét nghiệm y tế</span>
-        <span class="lab-count" th:text="${#lists.size(labResults)}">0</span>
-    </button>
-
-    <div class="lab-results-body">
-        <div th:if="${#lists.isEmpty(labResults)}" class="empty-text">
-            Chưa có xét nghiệm nào
-        </div>
-
-        <div th:each="lab : ${labResults}" class="lab-result-item">
-            <div class="lab-result-row">
-                <div>
-                    <p class="lab-test-type" th:text="${lab.testType}">Loại xét nghiệm</p>
-                    <p class="lab-date" th:text="${#temporals.format(lab.createdAt, 'dd/MM/yyyy HH:mm')}">--</p>
-                </div>
-
-                <div class="lab-actions">
-                    <!-- Chỉ hiện nút khi status = PENDING, tương đương lab.status === 'PENDING' -->
-                    <form th:if="${lab.status.name() == 'PENDING'}"
-                          th:action="@{/api/integration/lis/simulate/{sid}/{lid}(sid=${sessionDetail.sessionId != null ? sessionDetail.sessionId : sessionId}, lid=${lab.labResultId})}"
-                          method="post" class="inline-form">
-                        <input type="hidden" name="testType" th:value="${lab.testType}" />
-                        <button type="submit" class="btn-simulate-lis">Lấy kết quả LIS</button>
-                    </form>
-
-                    <span th:replace="~{layout/fragments/status-badge :: badge(${lab.status})}"></span>
-                </div>
-            </div>
-
-            <div th:if="${!#lists.isEmpty(lab.parameters)}" class="lab-params">
-                <div th:each="param : ${lab.parameters}" class="lab-param-row">
-                    <span class="param-name" th:text="${param.parameter.parameterName}">--</span>
-                    <span class="param-value">
-                        <span th:text="${param.value}">--</span>
-                        <span th:if="${param.parameter.unit}" th:text="${' ' + param.parameter.unit}"></span>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- ========================================== -->
+<!-- FRAGMENT: DANH SÁCH XÉT NGHIỆM             -->
+<!-- ========================================== -->
+<div th:fragment="list(labResults)">
+    <div class="lab-container">
+        <div th:if="${not #lists.isEmpty(labResults)}">
+            <div th:each="lab : ${labResults}" class="lab-item">
+                <div class="lab-header">
+                    <span class="lab-name" th:text="${lab.testType}">Xét nghiệm máu</span>
+                    <span class="lab-status" th:switch="${lab.status.name()}">
+                        <span th:case="'PENDING'" class="status-pending">Chờ xử lý</span>
+                        <span th:case="'COMPLETED'" class="status-completed">Hoàn thành</span>
+                        <span th:case="'CANCELED'" class="status-canceled">Đã hủy</span>
+                        <span th:case="*" class="status-unknown"><span th:text="${lab.status}">UNKNOWN</span></span>
                     </span>
                 </div>
+                <div class="lab-params">
+                    <div th:each="item : ${lab.parameters}" class="param-row">
+                        <span class="param-name" th:text="${item.parameterName}">Hb</span>
+                        <span class="param-value" th:text="${item.value} + ' ' + ${item.unit}">12.5 g/dL</span>
+                    </div>
+                    <div th:if="${#lists.isEmpty(lab.parameters)}" class="no-params">
+                        <span style="color: #94a3b8; font-style: italic;">Chưa có tham số xét nghiệm</span>
+                    </div>
+                </div>
+                <div class="lab-time" th:text="${#temporals.format(lab.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</div>
             </div>
-            <p th:if="${#lists.isEmpty(lab.parameters) and lab.status.name() == 'PENDING'}" class="empty-text-small">
-                Chưa có kết quả chi tiết
-            </p>
+        </div>
+        <div th:if="${#lists.isEmpty(labResults)}">
+            <p class="empty-text">Chưa có kết quả xét nghiệm</p>
         </div>
 
-        <a th:href="@{/doctor/sessions/{sid}/lab-results/add(sid=${sessionDetail.sessionId != null ? sessionDetail.sessionId : sessionId})}" class="btn-add-lab">
-            + Thêm xét nghiệm
-        </a>
+        <button class="btn-action btn-outline btn-add" onclick="openAddLabModal()">
+            <i class="fa-solid fa-plus"></i> Thêm xét nghiệm
+        </button>
     </div>
 </div>
+</body>
+</html>

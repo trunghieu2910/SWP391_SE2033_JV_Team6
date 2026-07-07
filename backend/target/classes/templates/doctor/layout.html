@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} + ' | Doctor Panel'">Doctor Panel</title>
+    <meta th:name="${_csrf.parameterName}" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <!-- Google Fonts & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
@@ -40,12 +42,14 @@
         </a>
     </nav>
 
-    <!-- User Profile & Logout (ĐÃ BỎ user) -->
+    <!-- User Profile & Logout -->
     <div class="sidebar-bottom">
         <div class="sidebar-user-profile">
-            <div class="sidebar-user-avatar">B</div>
+            <div class="sidebar-user-avatar">
+                <span th:text="${#strings.substring(userFullName, 0, 1)}">B</span>
+            </div>
             <div class="sidebar-user-info">
-                <h4>Bác sĩ</h4>
+                <h4 th:text="${userFullName}">Bác sĩ Nguyễn Văn Tùng</h4>
                 <span>Bác sĩ</span>
             </div>
         </div>
@@ -64,15 +68,7 @@
             <h1 th:text="${title}">Quản lý ca chẩn đoán</h1>
         </div>
         <div class="topbar-right">
-            <div class="search-wrapper">
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="globalSearchInput" placeholder="Tìm kiếm...">
-                </div>
-            </div>
-            <div class="user-info-top">
-                <span>Bác sĩ</span>
-            </div>
+            <!-- Đã bỏ "Bác sĩ" ở topbar -->
         </div>
     </header>
 
@@ -106,7 +102,10 @@
                 <i class="fa-solid fa-times"></i> Hủy
             </button>
             <form th:action="@{/auth/logout}" method="post" style="flex: 1; display: flex;">
-                <button type="submit" class="btn-action btn-danger" style="width: 100%;"> <i class="fa-solid fa-right-from-bracket"></i>Đăng xuất</button>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn-action btn-danger" style="width: 100%;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                </button>
             </form>
         </div>
     </div>

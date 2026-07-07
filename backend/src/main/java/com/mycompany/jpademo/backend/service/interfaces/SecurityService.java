@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.service.interfaces;
 
+import com.mycompany.jpademo.backend.dto.request.UnblockIpRequest;
 import com.mycompany.jpademo.backend.entity.BlockedIP;
 import com.mycompany.jpademo.backend.dto.request.BlockIpRequest;
 import com.mycompany.jpademo.backend.dto.response.SecurityStatsResponse;
@@ -20,5 +21,5 @@ public interface SecurityService {
 
     void blockIp(BlockIpRequest request, String adminUsername);
 
-    void unblockIp(String ipAddress);
+    void unblockIp(UnblockIpRequest request);
 }

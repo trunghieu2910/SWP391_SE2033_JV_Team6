@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ReviewResponse {
     private Integer reviewId;
+    private Integer sessionId;
     private String finalDiagnosis;
     private String treatmentPlan;
     private String doctorAdvice;

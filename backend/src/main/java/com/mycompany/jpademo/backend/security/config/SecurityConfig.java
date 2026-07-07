@@ -124,6 +124,7 @@ public class SecurityConfig {
                                 "/api/integration/lis/results",
                                 "/auth/**",
                                 "/forgot-password/**",
+                                "/error/**",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",

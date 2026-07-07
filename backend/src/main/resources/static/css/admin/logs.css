@@ -1,8 +1,35 @@
-/* logs.css - Cập nhật */
+/* logs.css - Cập nhật hoàn chỉnh */
 
+/* ============================================================ */
+/* ===== ROOT VARIABLES ===== */
+/* ============================================================ */
+:root {
+    --primary: #100357;
+    --primary-hover: #2a1a6e;
+    --primary-light: rgba(16, 3, 87, 0.08);
+    --border-color: #e2e8f0;
+    --neutral-dark: #0f172a;
+    --neutral-light: #64748b;
+    --success: #10b981;
+    --success-bg: #dcfce7;
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
+    --info: #3b82f6;
+    --info-bg: #dbeafe;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.02);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================ */
+/* ===== FILTER CARD ===== */
+/* ============================================================ */
 .filter-card {
     background: #ffffff;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 24px;
     border: 1px solid var(--border-color);
     box-shadow: var(--card-shadow);
@@ -38,6 +65,8 @@
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--neutral-light);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .form-field label i {
@@ -45,7 +74,8 @@
     color: var(--primary);
 }
 
-.form-field input, .form-field select {
+.form-field input,
+.form-field select {
     padding: 9px 12px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -54,11 +84,22 @@
     color: var(--neutral-dark);
     transition: var(--transition);
     background-color: #ffffff;
+    width: 100%;
 }
 
-.form-field input:focus, .form-field select:focus {
+.form-field input:focus,
+.form-field select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(16, 3, 87, 0.05);
+    box-shadow: 0 0 0 3px rgba(16, 3, 87, 0.08);
+}
+
+.form-field input:hover,
+.form-field select:hover {
+    border-color: #94a3b8;
+}
+
+.form-field input::placeholder {
+    color: #94a3b8;
 }
 
 .date-field input {
@@ -71,6 +112,9 @@
     align-items: flex-end;
 }
 
+/* ============================================================ */
+/* ===== BUTTONS ===== */
+/* ============================================================ */
 .btn-action {
     padding: 9px 16px;
     border-radius: 8px;
@@ -84,6 +128,8 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    height: 40px;
+    white-space: nowrap;
 }
 
 .btn-primary {
@@ -93,14 +139,19 @@
 
 .btn-primary:hover {
     background-color: var(--primary-hover);
-    box-shadow: 0 4px 12px rgba(16, 3, 87, 0.15);
+    box-shadow: 0 4px 12px rgba(16, 3, 87, 0.2);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-outline {
     background-color: #ffffff;
     border: 1px solid var(--border-color);
     color: var(--neutral-dark);
-    padding: 9px 12px;
+    padding: 9px 14px;
 }
 
 .btn-outline:hover {
@@ -109,10 +160,12 @@
     color: var(--primary);
 }
 
-/* Table */
+/* ============================================================ */
+/* ===== TABLE CARD ===== */
+/* ============================================================ */
 .table-card {
     background: #ffffff;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     box-shadow: var(--card-shadow);
     overflow: hidden;
@@ -151,6 +204,9 @@
     overflow-x: auto;
 }
 
+/* ============================================================ */
+/* ===== TABLE ===== */
+/* ============================================================ */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -158,9 +214,10 @@ table {
 }
 
 th, td {
-    padding: 12px 16px;
+    padding: 14px 18px;
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.88rem;
+    font-size: 0.9rem;
+    color: var(--neutral-dark);
 }
 
 th {
@@ -168,6 +225,9 @@ th {
     color: var(--neutral-light);
     background-color: #f8fafc;
     white-space: nowrap;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
 }
 
 .log-row:hover td {
@@ -187,21 +247,6 @@ th {
     color: var(--neutral-dark);
 }
 
-.badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    display: inline-block;
-    white-space: nowrap;
-}
-
-.badge-login { background: #dcfce7; color: #16a34a; }
-.badge-logout { background: #f1f5f9; color: #475569; }
-.badge-ban { background: #fee2e2; color: #dc2626; }
-.badge-unban { background: #dcfce7; color: #16a34a; }
-.badge-other { background: #e0f2fe; color: #0369a1; }
-
 .log-desc {
     max-width: 300px;
     white-space: nowrap;
@@ -210,6 +255,150 @@ th {
     color: var(--neutral-dark);
 }
 
+.log-user {
+    font-weight: 600;
+    color: var(--neutral-dark);
+}
+
+/* ============================================================ */
+/* ===== BADGES - TO GIỐNG DASHBOARD ===== */
+/* ============================================================ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    border: 1px solid transparent;
+    transition: var(--transition);
+}
+
+.badge i {
+    font-size: 0.75rem;
+}
+
+/* Login - Xanh lá */
+.badge-login {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+}
+
+/* Logout - Xám */
+.badge-logout {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+/* Ban - Đỏ */
+.badge-ban {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+/* Unban - Xanh lá */
+.badge-unban {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+}
+
+/* Create - Xanh dương */
+.badge-create {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #93c5fd;
+}
+
+/* Update - Vàng */
+.badge-update {
+    background: #fef3c7;
+    color: #b45309;
+    border-color: #fcd34d;
+}
+
+/* Block - Đỏ đậm */
+.badge-block {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+/* Unblock - Xanh ngọc */
+.badge-unblock {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #6ee7b7;
+}
+
+/* Notification - Tím */
+.badge-notification {
+    background: #e0e7ff;
+    color: #4338ca;
+    border-color: #a5b4fc;
+}
+
+/* Diagnosis - Xanh ngọc đậm */
+.badge-diagnosis {
+    background: #a7f3d0;
+    color: #065f46;
+    border-color: #6ee7b7;
+}
+
+/* Create Session - Tím */
+.badge-create-session {
+    background: #ddd6fe;
+    color: #5b21b6;
+    border-color: #a78bfa;
+}
+
+/* Other - Xám trung tính */
+.badge-other {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+.actions-col {
+    text-align: center;
+    width: 50px;
+}
+
+.btn-detail {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary-light);
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-detail:hover {
+    background: var(--primary);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 3, 87, 0.15);
+}
+
+.btn-detail i {
+    font-size: 0.9rem;
+}
+
+/* ============================================================ */
+/* ===== TARGET INFO ===== */
+/* ============================================================ */
 .target-info {
     display: inline-flex;
     align-items: center;
@@ -224,13 +413,14 @@ th {
 .target-id {
     font-size: 0.78rem;
     color: var(--neutral-light);
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 12px;
 }
 
-.log-user {
-    font-weight: 600;
-}
-
-/* Pagination */
+/* ============================================================ */
+/* ===== PAGINATION ===== */
+/* ============================================================ */
 .pagination-bar {
     padding: 14px 24px;
     display: flex;
@@ -238,6 +428,8 @@ th {
     align-items: center;
     border-top: 1px solid var(--border-color);
     background: #fafbfc;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .pagination-info {
@@ -248,6 +440,7 @@ th {
 .page-links {
     display: flex;
     gap: 4px;
+    flex-wrap: wrap;
 }
 
 .page-btn {
@@ -267,6 +460,8 @@ th {
 .page-btn:hover {
     background: #f1f5f9;
     border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
 }
 
 .page-btn.active {
@@ -275,6 +470,13 @@ th {
     border-color: var(--primary);
 }
 
+.page-btn.active:hover {
+    background: var(--primary-hover);
+}
+
+/* ============================================================ */
+/* ===== EMPTY STATE ===== */
+/* ============================================================ */
 .empty-state {
     text-align: center;
     padding: 48px 20px;
@@ -295,17 +497,337 @@ th {
     margin: 0;
 }
 
-/* ===== BADGES ===== */
-.badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    display: inline-block;
-    white-space: nowrap;
+/* ============================================================ */
+/* ===== RESPONSIVE ===== */
+/* ============================================================ */
+@media (max-width: 992px) {
+    .filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .btn-group {
+        grid-column: span 2;
+        justify-content: flex-end;
+    }
 }
 
-.badge-create { background: #dbeafe; color: #2563eb; }
-.badge-update { background: #fef3c7; color: #d97706; }
-.badge-block-ip { background: #fef2f2; color: #dc2626; }
-.badge-unblock-ip { background: #ecfdf5; color: #059669; }
+@media (max-width: 768px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-group {
+        grid-column: span 1;
+        justify-content: stretch;
+    }
+
+    .btn-action {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .date-field input {
+        min-width: unset;
+    }
+
+    .pagination-bar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .page-links {
+        justify-content: center;
+    }
+
+    .log-desc {
+        max-width: 150px;
+    }
+}
+
+@media (max-width: 576px) {
+    .filter-card {
+        padding: 16px;
+    }
+
+    .table-header {
+        padding: 12px 16px;
+    }
+
+    .table-title {
+        font-size: 0.9rem;
+    }
+
+    th, td {
+        padding: 10px 12px;
+        font-size: 0.78rem;
+    }
+
+    .log-time {
+        font-size: 0.72rem;
+    }
+
+    .badge {
+        font-size: 0.68rem;
+        padding: 6px 14px;
+    }
+
+    .badge i {
+        font-size: 0.65rem;
+    }
+
+    .page-btn {
+        padding: 4px 10px;
+        font-size: 0.78rem;
+        min-width: 30px;
+    }
+
+    .pagination-info {
+        font-size: 0.78rem;
+    }
+
+    .log-desc {
+        max-width: 100px;
+    }
+}
+
+@media (max-width: 400px) {
+    .filter-card {
+        padding: 12px;
+    }
+
+    .form-field label {
+        font-size: 0.7rem;
+    }
+
+    .form-field input,
+    .form-field select {
+        font-size: 0.78rem;
+        padding: 7px 10px;
+    }
+
+    .btn-action {
+        font-size: 0.75rem;
+        padding: 7px 12px;
+        height: 34px;
+    }
+
+    th, td {
+        padding: 8px 10px;
+        font-size: 0.7rem;
+    }
+
+    .log-desc {
+        max-width: 80px;
+    }
+
+    .target-id {
+        font-size: 0.65rem;
+        padding: 1px 6px;
+    }
+
+    .badge {
+        font-size: 0.6rem;
+        padding: 4px 10px;
+    }
+}
+
+/* ============================================================ */
+/* ===== DARK MODE SUPPORT ===== */
+/* ============================================================ */
+@media (prefers-color-scheme: dark) {
+    .filter-card,
+    .table-card {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .form-field input,
+    .form-field select {
+        background: #0f172a;
+        color: #f1f5f9;
+        border-color: #334155;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus {
+        border-color: #64748b;
+        box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.2);
+    }
+
+    .form-field input::placeholder {
+        color: #64748b;
+    }
+
+    .form-field label {
+        color: #94a3b8;
+    }
+
+    .table-header {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .table-title {
+        color: #f1f5f9;
+    }
+
+    th {
+        background: #0f172a;
+        color: #94a3b8;
+    }
+
+    td {
+        border-color: #334155;
+        color: #e2e8f0;
+    }
+
+    .log-row:hover td {
+        background-color: #0f172a;
+    }
+
+    .log-id {
+        color: #64748b;
+    }
+
+    .log-time {
+        color: #94a3b8;
+    }
+
+    .log-user {
+        color: #e2e8f0;
+    }
+
+    .log-desc {
+        color: #cbd5e1;
+    }
+
+    .target-type {
+        color: #e2e8f0;
+    }
+
+    .target-id {
+        background: #334155;
+        color: #94a3b8;
+    }
+
+    .btn-outline {
+        background: #1e293b;
+        border-color: #334155;
+        color: #94a3b8;
+    }
+
+    .btn-outline:hover {
+        background: #334155;
+        border-color: #64748b;
+        color: #f1f5f9;
+    }
+
+    .pagination-bar {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .pagination-info {
+        color: #94a3b8;
+    }
+
+    .page-btn {
+        background: #1e293b;
+        border-color: #334155;
+        color: #94a3b8;
+    }
+
+    .page-btn:hover {
+        background: #334155;
+        border-color: #64748b;
+        color: #f1f5f9;
+    }
+
+    .page-btn.active {
+        background: var(--primary);
+        color: #ffffff;
+        border-color: var(--primary);
+    }
+
+    .empty-state p {
+        color: #e2e8f0;
+    }
+
+    .empty-state i {
+        color: #475569;
+    }
+
+    /* Dark mode badges */
+    .badge-login {
+        background: #052e16;
+        color: #86efac;
+        border-color: #166534;
+    }
+
+    .badge-logout {
+        background: #1e293b;
+        color: #94a3b8;
+        border-color: #334155;
+    }
+
+    .badge-ban {
+        background: #450a0a;
+        color: #fca5a5;
+        border-color: #7f1d1d;
+    }
+
+    .badge-unban {
+        background: #052e16;
+        color: #86efac;
+        border-color: #166534;
+    }
+
+    .badge-create {
+        background: #172554;
+        color: #93c5fd;
+        border-color: #1e3a5f;
+    }
+
+    .badge-update {
+        background: #451a03;
+        color: #fcd34d;
+        border-color: #78350f;
+    }
+
+    .badge-block {
+        background: #450a0a;
+        color: #fca5a5;
+        border-color: #7f1d1d;
+    }
+
+    .badge-unblock {
+        background: #022c22;
+        color: #6ee7b7;
+        border-color: #064e3b;
+    }
+
+    .badge-notification {
+        background: #1e1b4b;
+        color: #a5b4fc;
+        border-color: #312e81;
+    }
+
+    .badge-diagnosis {
+        background: #022c22;
+        color: #6ee7b7;
+        border-color: #064e3b;
+    }
+
+    .badge-create-session {
+        background: #1e1b4b;
+        color: #a78bfa;
+        border-color: #312e81;
+    }
+
+    .badge-other {
+        background: #1e293b;
+        color: #94a3b8;
+        border-color: #334155;
+    }
+}

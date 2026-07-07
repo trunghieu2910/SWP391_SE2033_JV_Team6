@@ -3,6 +3,7 @@ package com.mycompany.jpademo.backend.service.impl;
 import com.mycompany.jpademo.backend.dto.response.SystemLogResponse;
 import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.repository.SystemLogRepository;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
@@ -29,7 +30,7 @@ public class SystemLogServiceImpl implements SystemLogService {
         String cleanAction = (action == null || action.isBlank()) ? null : action;
         String cleanKeyword = (keyword == null || keyword.isBlank()) ? null : keyword;
         Page<SystemLog> systemLogs = systemLogRepository.filterLogs(cleanAction, cleanKeyword, startDate, endDate, pageable);
-        return systemLogs.map(this::mapToSystemLogRespone);
+        return systemLogs.map(this::mapToSystemLogResponse);
     }
 
     @Override
@@ -55,10 +56,50 @@ public class SystemLogServiceImpl implements SystemLogService {
         }
     }
 
-    private SystemLogResponse mapToSystemLogRespone(SystemLog systemLog) {
+    @Override
+    public SystemLogResponse getLogDetail(Integer logId) {
+        SystemLog systemLog = systemLogRepository.findById(logId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhật ký với ID: " + logId));
+
         return SystemLogResponse.builder()
                 .logId(systemLog.getLogId())
                 .action(systemLog.getAction())
+                .actionDisplay(mapActionToVietnamese(systemLog.getAction()))
+                .targetType(systemLog.getTargetType())
+                .targetId(systemLog.getTargetId())
+                .description(systemLog.getDescription())
+                .performedAt(systemLog.getPerformedAt())
+                .userName(systemLog.getUser() != null ? systemLog.getUser().getUserName() : "Hệ thống")
+                .build();
+    }
+
+    private String mapActionToVietnamese(String action) {
+        switch (action) {
+            case "LOGIN": return "Đăng nhập";
+            case "LOGOUT": return "Đăng xuất";
+            case "BAN_USER": return "Khóa User";
+            case "UNBAN_USER": return "Mở khóa";
+            case "CREATE_DOCTOR": return "Tạo bác sĩ";
+            case "UPDATE_USER_STATUS": return "Đổi trạng thái";
+            case "BLOCK_IP": return "Chặn IP";
+            case "UNBLOCK_IP": return "Mở khóa IP";
+            case "PATIENT_NOTIFICATION": return "Thông báo bệnh nhân";
+            case "CREATE_FINAL_DIAGNOSIS": return "Tạo chẩn đoán cuối";
+            case "CREATE": return "Tạo phiên khám";
+            case "UPDATE_SESSION_STATUS": return "Cập nhật trạng thái ca chẩn đoán";
+            case "UPDATE_SESSION_SHARE": return "Cập nhật trạng thái công bố ca chẩn đoán";
+            case "UPDATE_CLINICAL_SYMPTOMS": return "Cập nhật triệu chứng lâm sàng";
+            case "BLOCKED_IP": return "Chặn IP";
+            case "UNBLOCKED_IP": return "Mở khóa IP";
+            default: return action;
+        }
+    }
+
+    private SystemLogResponse mapToSystemLogResponse(SystemLog systemLog) {
+        return SystemLogResponse.builder()
+                .logId(systemLog.getLogId())
+                .action(systemLog.getAction())
+                .actionDisplay(mapActionToVietnamese(systemLog.getAction()))
                 .targetId(systemLog.getTargetId())
                 .targetType(systemLog.getTargetType())
                 .description(systemLog.getDescription())

@@ -10,5 +10,7 @@ public interface SystemLogService {
     Page<SystemLogResponse> getLogs(String action, String keyword, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     void logActivity(String targetType, Integer targetId, String action, String description);
+
+    SystemLogResponse getLogDetail(Integer logId);
 }
 

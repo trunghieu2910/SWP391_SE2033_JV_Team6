@@ -100,26 +100,70 @@
 
     <!-- Block IP Form -->
     <div class="panel-card block-ip-card">
-        <h3><i class="fa-solid fa-shield-halved"></i> Chặn địa chỉ IP</h3>
-        <form th:action="@{/admin/security/block-ip}" method="post" class="ip-block-form">
-            <div class="form-field">
-                <label><i class="fa-regular fa-network"></i> Địa chỉ IP <span class="required">*</span></label>
-                <input type="text" name="ipAddress" placeholder="Ví dụ: 192.168.1.100"
-                       required pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$">
+        <div class="block-ip-header">
+            <h3><i class="fa-solid fa-shield-halved"></i> Chặn địa chỉ IP</h3>
+            <span class="block-ip-badge">Bảo mật</span>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">&times;</button>
+        </div>
+
+        <form th:action="@{/admin/security/block-ip}" method="post" class="ip-block-form"
+              th:object="${blockIpRequest}">
+            <div class="form-group">
+                <div class="form-field">
+                    <label><i class="fa-solid fa-network-wired"></i> Địa chỉ IP <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-wifi"></i>
+                        <input type="text"
+                               name="ipAddress"
+                               th:field="*{ipAddress}"
+                               placeholder="Ví dụ: 192.168.1.100 hoặc ::1"
+                               required>
+                    </div>
+                    <small class="field-hint">
+                        <i class="fa-solid fa-circle-question"></i>
+                        Hỗ trợ cả IPv4 (192.168.1.100) và IPv6 (::1)
+                    </small>
+                </div>
+
+                <div class="form-field">
+                    <label><i class="fa-solid fa-pen"></i> Lý do chặn <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-message"></i>
+                        <input type="text"
+                               name="reason"
+                               th:field="*{reason}"
+                               placeholder="DDOS, Spam, Brute Force..."
+                               required>
+                    </div>
+                    <small class="field-hint">
+                        <i class="fa-solid fa-circle-question"></i>
+                        Mô tả ngắn gọn lý do chặn IP này
+                    </small>
+                </div>
             </div>
-            <div class="form-field">
-                <label><i class="fa-regular fa-message"></i> Lý do chặn <span class="required">*</span></label>
-                <input type="text" name="reason" placeholder="DDOS, Spam, Brute Force..." required>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-action btn-block">
+                    <i class="fa-solid fa-ban"></i> Chặn IP
+                </button>
+                <button type="reset" class="btn-action btn-reset">
+                    <i class="fa-solid fa-rotate"></i> Làm mới
+                </button>
             </div>
-            <button type="submit" class="btn-action btn-danger">
-                <i class="fa-solid fa-ban"></i> Chặn IP
-            </button>
         </form>
     </div>
 
     <!-- Blocked IPs -->
     <div class="panel-card">
-        <h3><i class="fa-solid fa-list"></i> Danh sách IP bị chặn</h3>
+        <div class="panel-header">
+            <h3><i class="fa-solid fa-list"></i> Danh sách IP bị chặn</h3>
+            <span class="panel-badge" th:text="${#lists.size(blockedIps)} + ' IP'">0 IP</span>
+        </div>
         <div class="table-container">
             <table>
                 <thead>
@@ -138,13 +182,11 @@
                     <td th:text="${#temporals.format(ip.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</td>
                     <td th:text="${ip.createdBy}">admin</td>
                     <td class="actions-col">
-                        <form th:action="@{/admin/security/unlock-ip}" method="post"
-                              onsubmit="return confirm('Bạn có chắc chắn muốn bỏ chặn IP này?')">
-                            <input type="hidden" name="ipAddress" th:value="${ip.ipAddress}">
-                            <button type="submit" class="btn-action btn-unblock">
-                                <i class="fa-solid fa-unlock"></i> Bỏ chặn
-                            </button>
-                        </form>
+                        <button type="button" class="btn-action btn-unblock"
+                                th:data-ip="${ip.ipAddress}"
+                                onclick="openUnblockModal(this.getAttribute('data-ip'))">
+                            <i class="fa-solid fa-unlock"></i> Bỏ chặn
+                        </button>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(blockedIps)}">
@@ -162,7 +204,9 @@
     <div class="stats-grid">
         <!-- Top IPs -->
         <div class="panel-card">
-            <h3><i class="fa-solid fa-arrow-trend-up"></i> Top 10 IP truy cập nhiều</h3>
+            <div class="panel-header">
+                <h3><i class="fa-solid fa-arrow-trend-up"></i> Top 10 IP truy cập nhiều</h3>
+            </div>
             <div class="ranking-list">
                 <div th:each="ipStat, iter : ${topIps}" class="ranking-item">
                     <span class="rank" th:text="${iter.index + 1}">1</span>
@@ -177,7 +221,9 @@
 
         <!-- Top Endpoints -->
         <div class="panel-card">
-            <h3><i class="fa-solid fa-link"></i> Top 10 Endpoints</h3>
+            <div class="panel-header">
+                <h3><i class="fa-solid fa-link"></i> Top 10 Endpoints</h3>
+            </div>
             <div class="ranking-list">
                 <div th:each="endpoint, iter : ${topEndpoints}" class="ranking-item">
                     <span class="rank" th:text="${iter.index + 1}">1</span>
@@ -190,6 +236,34 @@
                 <div th:if="${#lists.isEmpty(topEndpoints)}" class="empty-state">
                     <p>Chưa có dữ liệu thống kê</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL XÁC NHẬN BỎ CHẶN ===== -->
+    <div id="unblockModal" class="unblock-modal" style="display: none;">
+        <div class="unblock-modal-overlay" onclick="closeUnblockModal()"></div>
+        <div class="unblock-modal-content">
+            <div class="unblock-modal-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3>Xác nhận bỏ chặn</h3>
+            <p>Bạn có chắc chắn muốn bỏ chặn IP <strong id="unblockIpAddress"></strong>?</p>
+            <p class="unblock-warning">
+                <i class="fa-solid fa-circle-info"></i>
+                Sau khi bỏ chặn, IP này sẽ có thể truy cập lại hệ thống.
+            </p>
+            <div class="unblock-modal-actions">
+                <button type="button" class="btn-action btn-outline" onclick="closeUnblockModal()">
+                    <i class="fa-solid fa-times"></i> Hủy
+                </button>
+                <form id="unblockForm" th:action="@{/admin/security/unlock-ip}" method="post" style="flex: 1; display: flex;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" name="ipAddress" id="unblockIpInput">
+                    <button type="submit" class="btn-action btn-unblock-confirm" style="width: 100%;">
+                        <i class="fa-solid fa-unlock"></i> Bỏ chặn
+                    </button>
+                </form>
             </div>
         </div>
     </div>

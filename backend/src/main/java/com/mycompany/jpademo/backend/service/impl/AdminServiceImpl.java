@@ -123,7 +123,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @AdminActionLog(action = "UPDATE_USER_STATUS",
             targetType = "User")
-    public boolean updateUserStatus(UpdateUserStatusRequest request) {
+    public boolean updateUserStatus(UpdateUserStatusRequest request, User admin) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException(
                         "User not found with id: " + request.getUserId()));
@@ -142,25 +142,28 @@ public class AdminServiceImpl implements AdminService {
             user.setStatus(UserStatus.INACTIVE);
         }
         userRepository.save(user);
-        sendStatusEmail(user, request.getStatus(), request.getReason());
+        sendStatusEmail(user, request.getStatus(), request.getReason(), admin);
         return true;
     }
+
     @Override
     public void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin) {
         String otp = request.getOtp();
+        String adminEmail = admin.getEmail();
 
-        PendingDoctorData pending = PendingDoctorStore.getPendingByAdminEmail(admin.getEmail());
+        PendingDoctorData pending = PendingDoctorStore.getPendingByAdminEmail(adminEmail);
         if (pending == null) {
             throw new IllegalArgumentException("Không tìm thấy yêu cầu tạo bác sĩ hoặc đã hết hạn.");
         }
 
-        boolean isOtpValid = OtpUtil.verifyOtp(admin.getEmail(), otp);
+        boolean isOtpValid = OtpUtil.verifyOtp(adminEmail, otp);
         if (!isOtpValid) {
             throw new InvalidOtpException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
 
-        OtpUtil.removeOtp(admin.getEmail());
+        OtpUtil.removeOtp(adminEmail);
         PendingDoctorStore.removePending(pending.getRequestId());
+
         if (userRepository.existsByEmail(pending.getEmail())) {
             throw new DuplicateResourceException("Tài khoản email đã tồn tại: " + pending.getEmail());
         }
@@ -206,9 +209,10 @@ public class AdminServiceImpl implements AdminService {
         );
     }
 
-
     @Override
     public InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin) {
+        String adminEmail = admin.getEmail();
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Tài khoản email đã tồn tại: " + request.getEmail());
         }
@@ -221,6 +225,7 @@ public class AdminServiceImpl implements AdminService {
         if (request.getNationalId() != null && userRepository.existsByNationalID(request.getNationalId())) {
             throw new DuplicateResourceException("CCCD đã được sử dụng: " + request.getNationalId());
         }
+
         String requestId = UUID.randomUUID().toString();
         String certificateUrl = null;
         if (request.getCertificateFile() != null && !request.getCertificateFile().isEmpty()) {
@@ -241,6 +246,7 @@ public class AdminServiceImpl implements AdminService {
                 throw new RuntimeException("Không thể lưu file bằng cấp: " + e.getMessage());
             }
         }
+
         PendingDoctorData pending = PendingDoctorData.builder()
                 .requestId(requestId)
                 .userName(request.getUserName())
@@ -250,17 +256,20 @@ public class AdminServiceImpl implements AdminService {
                 .nationalId(request.getNationalId())
                 .certificateUrl(certificateUrl)
                 .build();
-        PendingDoctorStore.savePending(admin.getEmail(), pending);
+        PendingDoctorStore.savePending(adminEmail, pending);
+
         String otp = OtpUtil.generateOtp();
-        OtpUtil.saveOtp(admin.getEmail(), otp);
+        OtpUtil.saveOtp(adminEmail, otp);
+
         emailService.sendEmail(
-                admin.getEmail(),
+                adminEmail,
                 "Mã xác thực OTP tạo tài khoản Bác sĩ",
                 EmailUtil.buildCreateDoctorOtpForAdmin(admin.getFullName(), otp)
         );
+
         return InitiateCreateDoctorResponse.builder()
                 .requestId(requestId)
-                .message("OTP đã được gửi đến email " + admin.getEmail())
+                .message("OTP đã được gửi đến email " + adminEmail)
                 .build();
     }
 
@@ -292,7 +301,6 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public ChartStatsResponse getChartStats(LocalDate startDate, LocalDate endDate) {
         try {
-            // Nếu không có filter, mặc định chỉ lấy 6 tháng gần nhất
             if (startDate == null && endDate == null) {
                 LocalDate now = LocalDate.now();
                 LocalDate currentMonthStart = now.withDayOfMonth(1);
@@ -390,10 +398,14 @@ public class AdminServiceImpl implements AdminService {
             }
             String otp = OtpUtil.generateOtp();
             OtpUtil.saveOtp(adminEmail, otp);
+
+            User admin = userRepository.findByEmail(adminEmail)
+                    .orElseThrow(() -> new UserNotFoundException("Không tìm thấy admin với email: " + adminEmail));
+
             emailService.sendEmail(
                     adminEmail,
                     "Mã xác thực OTP mới - Tạo tài khoản Bác sĩ",
-                    EmailUtil.buildCreateDoctorOtpForAdmin(adminEmail, otp)
+                    EmailUtil.buildCreateDoctorOtpForAdmin(admin.getFullName(), otp)
             );
             response.put("success", true);
             response.put("message", "Đã gửi lại mã OTP mới. Vui lòng kiểm tra email.");
@@ -418,7 +430,6 @@ public class AdminServiceImpl implements AdminService {
             List<Object[]> results = userRepository.getMonthlyUserRegistrations(start, end);
             return mapToMonthlyStats(results);
         } catch (Exception e) {
-            log.error("Lỗi khi lấy monthly user registrations: ", e);
             return new ArrayList<>();
         }
     }
@@ -431,7 +442,6 @@ public class AdminServiceImpl implements AdminService {
             List<Object[]> results = diagnosisSessionRepository.getMonthlyDiagnosisSessions(start, end);
             return mapToMonthlyStats(results);
         } catch (Exception e) {
-            log.error("Lỗi khi lấy monthly diagnosis sessions: ", e);
             return new ArrayList<>();
         }
     }
@@ -497,6 +507,14 @@ public class AdminServiceImpl implements AdminService {
             case "UPDATE_USER_STATUS": return "Đổi trạng thái";
             case "BLOCK_IP": return "Chặn IP";
             case "UNBLOCK_IP": return "Mở khóa IP";
+            case "PATIENT_NOTIFICATION": return "Thông báo bệnh nhân";
+            case "CREATE_FINAL_DIAGNOSIS": return "Tạo chẩn đoán cuối";
+            case "CREATE": return "Tạo phiên khám";
+            case "UPDATE_SESSION_STATUS": return "Cập nhật trạng thái ca chẩn đoán";
+            case "UPDATE_SESSION_SHARE": return "Cập nhật trạng thái công bố ca chẩn đoán";
+            case "UPDATE_CLINICAL_SYMPTOMS": return "Cập nhật triệu chứng lâm sàng";
+            case "BLOCKED_IP": return "Chặn IP";
+            case "UNBLOCKED_IP": return "Mở khóa IP";
             default: return action;
         }
     }
@@ -529,7 +547,6 @@ public class AdminServiceImpl implements AdminService {
             return new ArrayList<>();
         }
 
-        // Giả sử month có format "MM/yyyy"
         List<MonthlyStats> filtered = new ArrayList<>();
         for (MonthlyStats item : data) {
             try {
@@ -552,8 +569,7 @@ public class AdminServiceImpl implements AdminService {
         return filtered;
     }
 
-
-    private void sendStatusEmail(User user, UserStatus userStatus, String reason) {
+    private void sendStatusEmail(User user, UserStatus userStatus, String reason, User admin) {
         switch (userStatus) {
             case BANNED:
                 emailService.sendEmail(
@@ -561,15 +577,17 @@ public class AdminServiceImpl implements AdminService {
                         "Tài khoản của bạn đã bị khoá",
                         EmailUtil.buildBanAccountTemplate(user.getFullName(), reason));
                 break;
-            case ACTIVE: emailService.sendEmail(
-                    user.getEmail(),
-                    "Tài khoản của bạn đã được mở khoá",
-                    EmailUtil.buildUnbanAccountTemplate(user.getFullName(), reason));
+            case ACTIVE:
+                emailService.sendEmail(
+                        user.getEmail(),
+                        "Tài khoản của bạn đã được mở khoá",
+                        EmailUtil.buildUnbanAccountTemplate(user.getFullName(), reason));
                 break;
-            case INACTIVE: emailService.sendEmail(
-                    user.getEmail(),
-                    "Tài khoản của bạn đã được mở khoá",
-                    EmailUtil.buildInactiveAccountTemplate(user.getFullName(), reason));
+            case INACTIVE:
+                emailService.sendEmail(
+                        user.getEmail(),
+                        "Tài khoản của bạn đã được mở khoá",
+                        EmailUtil.buildInactiveAccountTemplate(user.getFullName(), reason));
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported user status: " + userStatus);

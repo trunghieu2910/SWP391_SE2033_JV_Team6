@@ -15,11 +15,10 @@
           <div class="image-header">
             <span th:text="${img.imageType}">MRI</span>
             <span th:text="${img.status.name() == 'PENDING' ? 'Chờ xử lý' :
-                                             img.status.name() == 'COMPLETED' ? 'Hoàn thành' :
-                                             img.status.name() == 'CANCELED' ? 'Đã hủy' : img.status}">COMPLETED</span>
+                                         img.status.name() == 'COMPLETED' ? 'Hoàn thành' :
+                                         img.status.name() == 'CANCELED' ? 'Đã hủy' : img.status}">COMPLETED</span>
           </div>
           <div class="image-thumbs">
-            <!-- SỬA: đổi từ detail thành d -->
             <div th:each="d : ${img.images}" class="thumb">
               <img th:src="${d.imageUrl}" alt="Medical Image">
             </div>

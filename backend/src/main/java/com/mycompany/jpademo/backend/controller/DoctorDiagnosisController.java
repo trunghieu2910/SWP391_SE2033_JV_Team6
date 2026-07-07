@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -36,8 +35,6 @@ public class DoctorDiagnosisController {
 
     private final DoctorDiagnosisService doctorDiagnosisService;
 
-    private static final Integer TEST_DOCTOR_ID = 3;
-
     @GetMapping({"/create-session", "/sessions/create-session"})
     public String createSessionPage(Model model) {
         return "doctor/create-session";
@@ -50,7 +47,7 @@ public class DoctorDiagnosisController {
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
-        Integer doctorId = userDetails != null ? userDetails.getUser().getUserId() : TEST_DOCTOR_ID;
+        Integer doctorId = userDetails.getUser().getUserId();
         Page<DoctorSessionResponse> sessions = doctorDiagnosisService.getSessionsByDoctor(
                 doctorId, pageable, keyword, status);
         model.addAttribute("sessions", sessions);
@@ -66,12 +63,11 @@ public class DoctorDiagnosisController {
             @PathVariable Integer sessionId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
-        Integer doctorId = userDetails != null ? userDetails.getUser().getUserId() : TEST_DOCTOR_ID;
+        Integer doctorId = userDetails.getUser().getUserId();
 
         DoctorSessionDetailResponse sessionDetail = doctorDiagnosisService.getSessionDetail(sessionId, doctorId);
         model.addAttribute("sessionDetail", sessionDetail);
         model.addAttribute("statuses", DiagnosisSessionStatus.values());
-
         return "doctor/session-detail";
     }
 
@@ -85,7 +81,8 @@ public class DoctorDiagnosisController {
             UpdateSessionStatusRequest request = new UpdateSessionStatusRequest();
             request.setSessionId(sessionId);
             request.setStatus(status);
-            Integer doctorId = userDetails != null ? userDetails.getUser().getUserId() : TEST_DOCTOR_ID;
+
+            Integer doctorId = userDetails.getUser().getUserId();
             doctorDiagnosisService.updateSessionStatus(doctorId, request);
             redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
         } catch (Exception e) {
@@ -104,7 +101,8 @@ public class DoctorDiagnosisController {
             UpdateSessionShareRequest request = new UpdateSessionShareRequest();
             request.setSessionId(sessionId);
             request.setIsShared(isShared);
-            Integer doctorId = userDetails != null ? userDetails.getUser().getUserId() : TEST_DOCTOR_ID;
+
+            Integer doctorId = userDetails.getUser().getUserId();
             doctorDiagnosisService.updateSessionShare(doctorId, request);
             redirectAttributes.addFlashAttribute("success",
                     isShared ? "Đã chia sẻ phiên chẩn đoán!" : "Đã hủy chia sẻ phiên chẩn đoán!");
@@ -137,7 +135,7 @@ public class DoctorDiagnosisController {
             return "redirect:/doctor/sessions/" + sessionId;
         }
         try {
-            Integer doctorId = userDetails != null ? userDetails.getUser().getUserId() : TEST_DOCTOR_ID;
+            Integer doctorId = userDetails.getUser().getUserId();
             doctorDiagnosisService.updateClinicalSymptoms(doctorId, sessionId, request);
             redirectAttributes.addFlashAttribute("success", "Cập nhật triệu chứng thành công!");
         } catch (Exception e) {
@@ -154,7 +152,7 @@ public class DoctorDiagnosisController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         try {
-            Integer doctorId = userDetails != null ? userDetails.getUser().getUserId() : TEST_DOCTOR_ID;
+            Integer doctorId = userDetails.getUser().getUserId();
             doctorDiagnosisService.setClinicalInputMode(doctorId, sessionId, clinicalInputMode);
             redirectAttributes.addFlashAttribute("success", "Đã chọn chế độ nhập triệu chứng: " + clinicalInputMode.name());
         } catch (Exception e) {
@@ -179,7 +177,7 @@ public class DoctorDiagnosisController {
             return "redirect:/doctor/sessions/" + sessionId;
         }
         try {
-            Integer doctorId = userDetails != null ? userDetails.getUser().getUserId() : TEST_DOCTOR_ID;
+            Integer doctorId = userDetails.getUser().getUserId();
             doctorDiagnosisService.saveReview(doctorId, sessionId, request);
             redirectAttributes.addFlashAttribute("success", "Đã lưu kết luận bệnh thành công!");
         } catch (Exception e) {

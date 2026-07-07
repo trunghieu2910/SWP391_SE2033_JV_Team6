@@ -2,6 +2,8 @@ package com.mycompany.jpademo.backend.aop.aspect;
 
 import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
 import com.mycompany.jpademo.backend.aop.interfaces.LoggableTarget;
+import com.mycompany.jpademo.backend.dto.request.BlockIpRequest;
+import com.mycompany.jpademo.backend.dto.request.UnblockIpRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
 import com.mycompany.jpademo.backend.entity.SystemLog;
@@ -27,9 +29,9 @@ public class AdminActionLogAspect {
     public void logAdminAction(JoinPoint joinPoint,
                                AdminActionLog adminActionLog) {
         Object[] args = joinPoint.getArgs();
-        Integer targetID = null;
+        Integer targetId = null;
         if (args.length > 0 && args[0] instanceof LoggableTarget target) {
-            targetID = target.getTargetId();
+            targetId = target.getTargetId();
         }
         String action = adminActionLog.action();
         String description = "";
@@ -49,6 +51,12 @@ public class AdminActionLogAspect {
             if (arg instanceof VerifyPendingDoctorRequest request) {
                 description = "ADMIN: Tạo tài khoản bác sĩ";
             }
+            if (arg instanceof BlockIpRequest request) {
+                description = "ADMIN: Chặn IP " + request.getIpAddress() + ". Lý do: " + request.getReason();
+            }
+            if (arg instanceof UnblockIpRequest request) {
+                description = "ADMIN: Mở chặn IP " + request.getIpAddress();
+            }
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = null;
@@ -60,7 +68,7 @@ public class AdminActionLogAspect {
                 .user(currentUser)
                 .action(action)
                 .targetType(adminActionLog.targetType())
-                .targetId(targetID)
+                .targetId(targetId)
                 .description(description)
                 .build();
         systemLogRepository.save(systemLog);

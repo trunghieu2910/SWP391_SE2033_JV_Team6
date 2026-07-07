@@ -1,6 +1,8 @@
 package com.mycompany.jpademo.backend.service.impl;
 
+import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
 import com.mycompany.jpademo.backend.dto.request.BlockIpRequest;
+import com.mycompany.jpademo.backend.dto.request.UnblockIpRequest;
 import com.mycompany.jpademo.backend.dto.response.EndpointRequestStats;
 import com.mycompany.jpademo.backend.dto.response.IpRequestStats;
 import com.mycompany.jpademo.backend.dto.response.SecurityStatsResponse;
@@ -78,6 +80,7 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     @Transactional
+    @AdminActionLog(action = "BLOCKED_IP", targetType = "BlockedIP")
     public void blockIp(BlockIpRequest request, String adminUsername) {
         if (blockedIPRepository.existsById(request.getIpAddress())) {
             throw new BadRequestException("IP " + request.getIpAddress() + " đã bị chặn trước đó.");
@@ -92,7 +95,9 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public void unblockIp(String ipAddress) {
+    @AdminActionLog(action = "UNBLOCKED_IP", targetType = "BlockedIP")
+    public void unblockIp(UnblockIpRequest request) {
+        String ipAddress = request.getIpAddress();
         BlockedIP blockedIP = blockedIPRepository.findById(ipAddress).orElseThrow(
                 () -> new BadRequestException("IP " + ipAddress + " không tồn tại trong danh sách chặn.")
         );

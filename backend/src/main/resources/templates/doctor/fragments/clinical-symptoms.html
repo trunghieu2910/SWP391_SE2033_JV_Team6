@@ -9,14 +9,15 @@
 <!-- ========================================== -->
 <div th:fragment="form(sessionDetail)">
     <div class="symptom-container" id="symptomContainer">
+        <!-- ===== MODE PANEL ===== -->
         <div class="mode-panel">
             <div class="mode-header">
                 <i class="fa-solid fa-sliders"></i>
                 <div>
                     <h4>Chế độ nhập triệu chứng</h4>
                     <p th:if="${sessionDetail.clinicalInputMode == null}">Chưa chọn chế độ. Vui lòng chọn chế độ để xác định ai sẽ nhập triệu chứng đầu tiên.</p>
-                    <p th:if="${sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR}">Bác sĩ sẽ nhập triệu chứng trực tiếp. Bệnh nhân chỉ xem.</p>
-                    <p th:if="${sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).PATIENT}">Bệnh nhân sẽ điền triệu chứng ban đầu. Bác sĩ có thể chỉnh sửa sau khi bệnh nhân gửi.</p>
+                    <p th:if="${sessionDetail.clinicalInputMode != null and sessionDetail.clinicalInputMode.name() == 'DOCTOR'}">Bác sĩ sẽ nhập triệu chứng trực tiếp. Bệnh nhân chỉ xem.</p>
+                    <p th:if="${sessionDetail.clinicalInputMode != null and sessionDetail.clinicalInputMode.name() == 'PATIENT'}">Bệnh nhân sẽ điền triệu chứng ban đầu. Bác sĩ có thể chỉnh sửa sau khi bệnh nhân gửi.</p>
                 </div>
             </div>
             <div class="mode-actions" th:if="${sessionDetail.clinicalInputMode == null}">
@@ -34,25 +35,35 @@
             </div>
             <div class="mode-chip" th:if="${sessionDetail.clinicalInputMode != null}">
                 <span>Chế độ hiện tại:</span>
-                <strong th:text="${sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR ? 'Bác sĩ nhập trực tiếp' : 'Bệnh nhân nhập trước'}">—</strong>
+                <strong th:text="${sessionDetail.clinicalInputMode.name() == 'DOCTOR' ? 'Bác sĩ nhập trực tiếp' : 'Bệnh nhân nhập trước'}">—</strong>
             </div>
         </div>
 
         <!-- Chế độ xem (không chỉnh sửa) -->
         <div id="symptomView" class="symptom-view">
-            <div class="symptom-actions" th:if="${sessionDetail.clinicalInputMode == null or sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR or (sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).PATIENT and sessionDetail.symptomResult != null and sessionDetail.symptomResult.status != null and sessionDetail.symptomResult.status.name() == 'COMPLETED')}">
+            <div class="symptom-actions"
+                 th:if="${sessionDetail.clinicalInputMode == null or
+                         sessionDetail.clinicalInputMode.name() == 'DOCTOR' or
+                         (sessionDetail.clinicalInputMode.name() == 'PATIENT' and sessionDetail.symptomResult != null and
+                          sessionDetail.symptomResult.status != null and sessionDetail.symptomResult.status.name() == 'COMPLETED')}">
                 <button class="btn-action btn-edit" onclick="editSymptoms()">
                     <i class="fa-solid fa-pen"></i> Chỉnh sửa
                 </button>
             </div>
 
-            <div th:if="${sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).PATIENT and (sessionDetail.symptomResult == null or sessionDetail.symptomResult.status == null or sessionDetail.symptomResult.status.name() != 'COMPLETED')}" class="empty-state">
+            <!-- Chờ bệnh nhân -->
+            <div th:if="${sessionDetail.clinicalInputMode != null and
+                         sessionDetail.clinicalInputMode.name() == 'PATIENT' and
+                         (sessionDetail.symptomResult == null or sessionDetail.symptomResult.status == null or
+                          sessionDetail.symptomResult.status.name() != 'COMPLETED')}" class="empty-state">
                 <i class="fa-regular fa-hourglass-half"></i>
                 <p>Đang chờ bệnh nhân gửi triệu chứng.</p>
-                <p>Sau khi bệnh nhân gửi, bác sĩ có thể xem và chỉnh sửa dữ liệu.</p>
+                <p style="font-size: 0.85rem; color: var(--neutral-light);">Sau khi bệnh nhân gửi, bác sĩ có thể xem và chỉnh sửa dữ liệu.</p>
             </div>
 
-            <div th:if="${sessionDetail.symptomResult == null and (sessionDetail.clinicalInputMode == null or sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR)}" class="empty-state">
+            <!-- Chưa có dữ liệu (DOCTOR mode) -->
+            <div th:if="${sessionDetail.symptomResult == null and
+                         (sessionDetail.clinicalInputMode == null or sessionDetail.clinicalInputMode.name() == 'DOCTOR')}" class="empty-state">
                 <i class="fa-regular fa-notes-medical"></i>
                 <p>Chưa có dữ liệu triệu chứng lâm sàng</p>
                 <button class="btn-action btn-primary" onclick="editSymptoms()">
@@ -60,6 +71,7 @@
                 </button>
             </div>
 
+            <!-- Hiển thị dữ liệu -->
             <div th:if="${sessionDetail.symptomResult != null}" class="symptom-display">
                 <!-- Chiều cao, cân nặng -->
                 <div class="symptom-row">
@@ -77,10 +89,10 @@
                     <span class="symptom-value" th:text="${sessionDetail.symptomResult.menopauseStatus == 'PRE' ? 'Chưa mãn kinh' : sessionDetail.symptomResult.menopauseStatus == 'POST' ? 'Đã mãn kinh' : '—'}">—</span>
                 </div>
 
-                <!-- Triệu chứng -->
+                <!-- ===== SỬA LỖI: detail.symptom.symptomName → detail.symptomName ===== -->
                 <div th:if="${not #lists.isEmpty(sessionDetail.symptomResult.symptomDetails)}" class="symptom-tags">
                     <span class="symptom-tag" th:each="detail : ${sessionDetail.symptomResult.symptomDetails}"
-                          th:text="${detail.symptom.symptomName}">Đau bụng</span>
+                          th:text="${detail.symptomName}">Đau bụng</span>
                 </div>
                 <div th:if="${#lists.isEmpty(sessionDetail.symptomResult.symptomDetails)}" class="empty-text">
                     Chưa có triệu chứng nào được ghi nhận
@@ -99,9 +111,14 @@
         </div>
 
         <!-- Chế độ chỉnh sửa -->
-        <div id="symptomEdit" class="symptom-edit" style="display: none;" th:if="${sessionDetail.clinicalInputMode == null or sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).DOCTOR or (sessionDetail.clinicalInputMode == T(com.mycompany.jpademo.backend.enums.ClinicalInputMode).PATIENT and sessionDetail.symptomResult != null and sessionDetail.symptomResult.status != null and sessionDetail.symptomResult.status.name() == 'COMPLETED')}" >
-            <!-- ===== THÊM ID CHO FORM ===== -->
-            <form id="symptomForm" class="symptom-form" method="post" th:action="@{/doctor/sessions/{id}/symptoms(id=${sessionDetail.sessionId})}">
+        <div id="symptomEdit" class="symptom-edit" style="display: none;"
+             th:if="${sessionDetail.clinicalInputMode == null or
+                     sessionDetail.clinicalInputMode.name() == 'DOCTOR' or
+                     (sessionDetail.clinicalInputMode.name() == 'PATIENT' and sessionDetail.symptomResult != null and
+                      sessionDetail.symptomResult.status != null and sessionDetail.symptomResult.status.name() == 'COMPLETED')}">
+
+            <form id="symptomForm" class="symptom-form" method="post"
+                  th:action="@{/doctor/sessions/{id}/symptoms(id=${sessionDetail.sessionId})}">
                 <input type="hidden" name="sessionId" th:value="${sessionDetail.sessionId}">
 
                 <!-- Chiều cao, Cân nặng -->
@@ -129,7 +146,6 @@
                     </div>
                 </div>
 
-                <!-- ===== SỬA: THÊM [] VÀO TÊN FIELD CHO CHECKBOX ===== -->
                 <!-- Ra máu bất thường -->
                 <div class="form-group">
                     <label class="section-label">Ra máu âm đạo bất thường</label>

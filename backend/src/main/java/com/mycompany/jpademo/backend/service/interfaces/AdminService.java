@@ -8,25 +8,26 @@ import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 public interface AdminService {
-    Page<UserResponse> getUser(String keyword, String role, UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<UserResponse> getUser(String keyword, String role, UserStatus status,
+                               LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
-    boolean updateUserStatus(UpdateUserStatusRequest request);
-
-    DashboardStatsResponse getDashboardStats(java.time.LocalDate startDate, java.time.LocalDate endDate);
-
-    UserDetailResponse getUserDetail(Integer userId);
-
-    InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin);
+    boolean updateUserStatus(UpdateUserStatusRequest request, User admin);
 
     void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin);
 
-    ChartStatsResponse getChartStats(java.time.LocalDate startDate, java.time.LocalDate endDate);
+    InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin);
+
+    DashboardStatsResponse getDashboardStats(LocalDate startDate, LocalDate endDate);
+
+    UserDetailResponse getUserDetail(Integer userId);
+
+    ChartStatsResponse getChartStats(LocalDate startDate, LocalDate endDate);
 
     GlobalSearchResponse searchGlobal(String keyword);
 
@@ -34,4 +35,3 @@ public interface AdminService {
 
     User getAdminUser();
 }
-

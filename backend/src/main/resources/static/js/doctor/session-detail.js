@@ -3,7 +3,19 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // ============================================
-    // 1. AUTO CLOSE ALERT AFTER 5 SECONDS
+    // CSRF TOKEN UTILITY
+    // ============================================
+    function getCsrfToken() {
+        const token = document.querySelector('meta[name="_csrf"]');
+        const header = document.querySelector('meta[name="_csrf_header"]');
+        return {
+            token: token ? token.getAttribute('content') : '',
+            header: header ? header.getAttribute('content') : 'X-CSRF-TOKEN'
+        };
+    }
+
+    // ============================================
+    // AUTO CLOSE ALERT AFTER 5 SECONDS
     // ============================================
     const alerts = document.querySelectorAll('.alert-success, .alert-danger');
     alerts.forEach(function(alert) {
@@ -17,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // 2. ACCORDION TOGGLE
+    // ACCORDION TOGGLE
     // ============================================
     window.toggleAccordion = function(id) {
         const body = document.getElementById(id);
@@ -33,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // ============================================
-    // 3. SYMPTOM FORM - EDIT / CANCEL
+    // SYMPTOM FORM - EDIT / CANCEL
     // ============================================
     window.editSymptoms = function() {
         const view = document.getElementById('symptomView');
@@ -50,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // ============================================
-    // 4. SYMPTOM FORM - CONFIRM WITH CUSTOM MODAL
+    // SYMPTOM FORM - CONFIRM WITH CUSTOM MODAL
     // ============================================
     const symptomForm = document.getElementById('symptomForm');
     const confirmModal = document.getElementById('confirmModal');
@@ -66,6 +78,17 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmModalMessage.textContent = 'Bạn có chắc chắn muốn lưu các thay đổi về triệu chứng lâm sàng?';
 
             confirmModalOkBtn.onclick = function() {
+                // Thêm CSRF token vào form trước khi submit
+                const csrf = getCsrfToken();
+                let csrfInput = symptomForm.querySelector('input[name="_csrf"]');
+                if (!csrfInput) {
+                    csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_csrf';
+                    symptomForm.appendChild(csrfInput);
+                }
+                csrfInput.value = csrf.token;
+
                 symptomForm.submit();
                 closeConfirmModal();
             };
@@ -75,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================
-    // 5. CONFIRM MODAL FUNCTIONS
+    // CONFIRM MODAL FUNCTIONS
     // ============================================
     function openConfirmModal() {
         const modal = document.getElementById('confirmModal');
@@ -107,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // 6. STATUS MODAL FUNCTIONS
+    // STATUS MODAL FUNCTIONS
     // ============================================
     let selectedStatusSessionId = null;
     let selectedStatusCurrent = null;
@@ -118,11 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const statusSelect = document.getElementById('statusSelect');
 
         if (modal) {
-            // Lấy sessionId từ DOM
             const sessionIdText = sessionId ? sessionId.textContent : '';
             selectedStatusSessionId = sessionIdText;
-
-            // Lưu giá trị hiện tại
             selectedStatusCurrent = statusSelect ? statusSelect.value : '';
 
             modal.style.display = 'flex';
@@ -152,10 +172,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Tạo form và submit
+        // Tạo form và submit với CSRF token
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/doctor/sessions/' + selectedStatusSessionId + '/status';
+
+        // Thêm CSRF token
+        const csrf = getCsrfToken();
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_csrf';
+        csrfInput.value = csrf.token;
+        form.appendChild(csrfInput);
 
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -178,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // 7. SHARE MODAL FUNCTIONS
+    // SHARE MODAL FUNCTIONS
     // ============================================
     let selectedShareSessionId = null;
     let selectedShareCurrent = null;
@@ -186,29 +214,25 @@ document.addEventListener('DOMContentLoaded', function() {
     window.openShareModal = function() {
         const modal = document.getElementById('shareModal');
         const sessionId = document.getElementById('shareSessionId');
-        const message = document.getElementById('shareMessage');
-        const actionText = document.getElementById('shareActionText');
-        const warningText = document.getElementById('shareWarningText');
-        const confirmBtn = document.getElementById('shareConfirmBtn');
-        const btnText = document.getElementById('shareBtnText');
 
         if (modal) {
-            // Lấy sessionId
             const sessionIdText = sessionId ? sessionId.textContent : '';
             selectedShareSessionId = sessionIdText;
 
-            // Xác định trạng thái hiện tại
             const isShared = document.querySelector('.badge-shared') !== null;
             selectedShareCurrent = isShared;
 
+            const actionText = document.getElementById('shareActionText');
+            const warningText = document.getElementById('shareWarningText');
+            const btnText = document.getElementById('shareBtnText');
+            const confirmBtn = document.getElementById('shareConfirmBtn');
+
             if (isShared) {
-                // Đang công bố -> gỡ công bố
                 actionText.textContent = 'gỡ công bố';
                 warningText.textContent = 'Sau khi gỡ công bố, bệnh nhân và các bác sĩ khác sẽ không thể xem ca chẩn đoán này.';
                 btnText.textContent = 'Gỡ công bố';
                 confirmBtn.className = 'btn-action btn-danger';
             } else {
-                // Chưa công bố -> công bố
                 actionText.textContent = 'công bố';
                 warningText.textContent = 'Sau khi công bố, bệnh nhân và các bác sĩ khác có thể xem ca chẩn đoán này.';
                 btnText.textContent = 'Công bố';
@@ -231,10 +255,18 @@ document.addEventListener('DOMContentLoaded', function() {
     window.confirmShareUpdate = function() {
         const isShared = !selectedShareCurrent;
 
-        // Tạo form và submit
+        // Tạo form và submit với CSRF token
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/doctor/sessions/' + selectedShareSessionId + '/share';
+
+        // Thêm CSRF token
+        const csrf = getCsrfToken();
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_csrf';
+        csrfInput.value = csrf.token;
+        form.appendChild(csrfInput);
 
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -257,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // 8. ADD LAB MODAL FUNCTIONS
+    // ADD LAB MODAL FUNCTIONS
     // ============================================
     window.openAddLabModal = function() {
         const modal = document.getElementById('addLabModal');
@@ -287,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // 9. ADD LAB FORM SUBMIT
+    // ADD LAB FORM SUBMIT
     // ============================================
     const addLabForm = document.getElementById('addLabForm');
     if (addLabForm) {
@@ -298,11 +330,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Vui lòng chọn loại xét nghiệm.');
                 return;
             }
+
+            // Thêm CSRF token vào form nếu chưa có
+            const csrf = getCsrfToken();
+            let csrfInput = addLabForm.querySelector('input[name="_csrf"]');
+            if (!csrfInput) {
+                csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                addLabForm.appendChild(csrfInput);
+            }
+            csrfInput.value = csrf.token;
         });
     }
 
     // ============================================
-    // 10. IMAGE VIEWER
+    // IMAGE VIEWER
     // ============================================
     const images = document.querySelectorAll('.image-thumbs .thumb img');
     images.forEach(function(img) {
@@ -313,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // 11. PRINT SESSION DETAIL
+    // PRINT SESSION DETAIL
     // ============================================
     const printBtn = document.createElement('button');
     printBtn.className = 'btn-action btn-outline';
@@ -335,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================
-    // 12. KEYBOARD SHORTCUTS
+    // KEYBOARD SHORTCUTS
     // ============================================
     document.addEventListener('keydown', function(e) {
         // Ctrl + E: Mở chế độ chỉnh sửa triệu chứng
@@ -369,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // 13. RESPONSIVE TABLE - Lab results scroll
+    // RESPONSIVE TABLE - Lab results scroll
     // ============================================
     const labTables = document.querySelectorAll('.lab-params');
     labTables.forEach(function(table) {
@@ -380,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ============================================
-    // 14. CLOSE ALERT FUNCTION
+    // CLOSE ALERT FUNCTION
     // ============================================
     window.closeAlert = function(button) {
         const alert = button.closest('.alert');
@@ -392,6 +435,41 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }
     };
+
+    // ============================================
+    // INITIALIZE: Kiểm tra và thêm CSRF token cho các form có sẵn
+    // ============================================
+    const allForms = document.querySelectorAll('form');
+    allForms.forEach(function(form) {
+        // Chỉ thêm CSRF cho các form POST chưa có
+        if (form.method.toLowerCase() === 'post') {
+            let csrfInput = form.querySelector('input[name="_csrf"]');
+            if (!csrfInput) {
+                const csrf = getCsrfToken();
+                csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                csrfInput.value = csrf.token;
+                form.appendChild(csrfInput);
+            }
+        }
+    });
+
+    // ============================================
+    // FIX: Đảm bảo form addLab có CSRF token
+    // ============================================
+    const addLabFormFix = document.getElementById('addLabForm');
+    if (addLabFormFix) {
+        let csrfInput = addLabFormFix.querySelector('input[name="_csrf"]');
+        if (!csrfInput) {
+            const csrf = getCsrfToken();
+            csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_csrf';
+            csrfInput.value = csrf.token;
+            addLabFormFix.appendChild(csrfInput);
+        }
+    }
 
     console.log('🚀 Doctor Session Detail page loaded');
 });

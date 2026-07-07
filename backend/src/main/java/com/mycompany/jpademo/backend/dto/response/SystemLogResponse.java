@@ -14,6 +14,8 @@ public class SystemLogResponse {
 
     private String action;
 
+    private String actionDisplay;
+
     private String description;
 
     private String targetType;

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quá nhiều yêu cầu</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/error/rate-limit.css}">
+</head>
+<body>
+<div class="error-container">
+    <!-- Icon -->
+    <div class="error-icon">
+        <i class="fa-solid fa-clock"></i>
+    </div>
+
+    <!-- Title -->
+    <h1 class="error-title">Quá nhiều yêu cầu</h1>
+
+    <!-- Description -->
+    <p class="error-description">
+        Bạn đã gửi quá nhiều yêu cầu đến hệ thống trong một khoảng thời gian ngắn.
+    </p>
+
+    <p class="error-detail">
+        Vui lòng <strong>đợi 1 phút</strong> trước khi thử lại.
+    </p>
+
+    <!-- Actions -->
+    <div class="error-actions">
+        <a th:href="${redirectUrl}" class="btn-primary btn-disabled" id="retryBtn" style="pointer-events: none; opacity: 0.6; cursor: not-allowed;">
+            <i class="fa-solid fa-rotate"></i> <span id="retryText">Vui lòng chờ...</span>
+        </a>
+    </div>
+
+    <!-- Retry info -->
+    <div class="retry-info">
+        <i class="fa-regular fa-clock"></i>
+        Vui lòng đợi 1 phút trước khi thử lại
+    </div>
+</div>
+
+<script>
+    let seconds = 60;
+    const countdownElement = document.getElementById('countdown');
+    const retryBtn = document.getElementById('retryBtn');
+    const retryText = document.getElementById('retryText');
+
+    function updateCountdown() {
+        if (seconds > 0) {
+            retryText.textContent = 'Vui lòng chờ ' + seconds + 's...';
+            seconds--;
+        } else {
+            // Hết thời gian chờ: Kích hoạt nút
+            retryText.textContent = 'Thử lại';
+
+            // Kích hoạt nút
+            retryBtn.style.pointerEvents = 'auto';
+            retryBtn.style.opacity = '1';
+            retryBtn.style.cursor = 'pointer';
+            retryBtn.classList.remove('btn-disabled');
+
+            // Tự động redirect
+            const redirectUrl = retryBtn.getAttribute('href');
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            } else {
+                window.location.reload();
+            }
+        }
+    }
+
+    setInterval(updateCountdown, 1000);
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const isEnabled = retryBtn.style.pointerEvents !== 'none';
+            if (isEnabled) {
+                const redirectUrl = retryBtn.getAttribute('href');
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
+            }
+        }
+
+        if (e.key === 'Escape') {
+            window.location.href = '/';
+        }
+    });
+
+    console.log('🚀 Rate Limit Error Page loaded');
+    console.log('⏳ Auto redirect in 60 seconds');
+    console.log('⌨️  Press Enter to retry, Esc to go home');
+</script>
+</body>
+</html>

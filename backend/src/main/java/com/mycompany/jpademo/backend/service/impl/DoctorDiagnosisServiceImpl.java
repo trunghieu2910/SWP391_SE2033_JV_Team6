@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.service.impl;
 
+import com.mycompany.jpademo.backend.aop.annotation.DoctorActionLog;
 import com.mycompany.jpademo.backend.dto.request.CreateReviewRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateClinicalSymptomsRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateSessionShareRequest;
@@ -64,6 +65,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     @Override
     @Transactional
+    @DoctorActionLog(action = "UPDATE_SESSION_STATUS", targetType = "DiagnosisSession")
     public void updateSessionStatus(Integer doctorId, UpdateSessionStatusRequest request) {
         Integer sessionId = request.getSessionId();
         DiagnosisSession session = sessionRepository.findById(sessionId)
@@ -87,6 +89,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     @Override
     @Transactional
+    @DoctorActionLog(action = "UPDATE_SESSION_SHARE", targetType = "DiagnosisSession")
     public void updateSessionShare(Integer doctorId, UpdateSessionShareRequest request) {
         Integer sessionId = request.getSessionId();
         DiagnosisSession session = sessionRepository.findById(sessionId)
@@ -103,6 +106,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     @Override
     @Transactional(readOnly = true)
+    @DoctorActionLog(action = "UPDATE_CLINICAL_SYMPTOMS", targetType = "DiagnosisSession")
     public List<SymptomResponse> getSessionSymptoms(Integer sessionId) {
         SymptomResult symptomResult = symptomResultRepository
                 .findByDiagnosisSessionSessionId(sessionId)
@@ -217,9 +221,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             throw new UnauthorizedActionException("Bạn không có quyền thay đổi chế độ nhập triệu chứng của ca chẩn đoán này.");
         }
         // Allow changing mode only if patient hasn't submitted yet
-        if (session.getClinicalInputMode() != null && 
-            session.getSymptomResult() != null && 
-            session.getSymptomResult().getStatus() == SymptomResultStatus.COMPLETED) {
+        if (session.getClinicalInputMode() != null &&
+                session.getSymptomResult() != null &&
+                session.getSymptomResult().getStatus() == SymptomResultStatus.COMPLETED) {
             throw new BadRequestException("Bệnh nhân đã gửi triệu chứng. Không thể thay đổi chế độ nhập.");
         }
         session.setClinicalInputMode(clinicalInputMode);
@@ -242,7 +246,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         List<LabResult> labResults = labResultRepository.findByDiagnosisSessionSessionId(sessionId);
         List<MedicalImage> medicalImages = medicalImageRepository.findByDiagnosisSession_SessionId(sessionId);
 
-        return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages);
+        Review review = reviewRepository.findByDiagnosisSessionSessionId(sessionId).orElse(null);
+
+        return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages, review);
     }
 
     @Override
@@ -259,7 +265,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (review == null) {
             User doctor = userRepository.findById(doctorId)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ"));
-            
+
             review = new Review();
             review.setDiagnosisSession(session);
             review.setUser(doctor);
@@ -280,18 +286,19 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             User user,
             SymptomResult symptomResult,
             List<LabResult> labResults,
-            List<MedicalImage> medicalImages) {
+            List<MedicalImage> medicalImages,
+            Review review) {
 
         SymptomResultResponse symptomResultResponse = null;
         if (symptomResult != null) {
             List<SymptomDetailResponse> symptomDetails = symptomResult.getSymptomDetails() != null ?
                     symptomResult.getSymptomDetails().stream()
-                    .map(sd -> SymptomDetailResponse.builder()
-                               .symptomDetailId(sd.getSymptomDetailsId())
-                               .symptomId(sd.getSymptom().getSymptomId())
-                               .symptomName(sd.getSymptom().getSymptomName())
-                               .build())
-                    .collect(Collectors.toList()) : null;
+                            .map(sd -> SymptomDetailResponse.builder()
+                                    .symptomDetailId(sd.getSymptomDetailsId())
+                                    .symptomId(sd.getSymptom().getSymptomId())
+                                    .symptomName(sd.getSymptom().getSymptomName())
+                                    .build())
+                            .collect(Collectors.toList()) : null;
 
             symptomResultResponse = SymptomResultResponse.builder()
                     .symptomResultId(symptomResult.getSymptomResultId())
@@ -314,21 +321,21 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .collect(Collectors.toList());
 
         ReviewResponse reviewResponse = null;
-        if (session.getReview() != null) {
-            Review rev = session.getReview();
+        if (review != null) {
             reviewResponse = ReviewResponse.builder()
-                    .reviewId(rev.getReviewId())
-                    .finalDiagnosis(rev.getFinalDiagnosis())
-                    .treatmentPlan(rev.getTreatmentPlan())
-                    .doctorAdvice(rev.getDoctorAdvice())
-                    .note(rev.getNote())
-                    .reviewedAt(rev.getReviewedAt())
+                    .reviewId(review.getReviewId())
+                    .sessionId(review.getDiagnosisSession().getSessionId())
+                    .finalDiagnosis(review.getFinalDiagnosis())
+                    .treatmentPlan(review.getTreatmentPlan())
+                    .doctorAdvice(review.getDoctorAdvice())
+                    .note(review.getNote())
+                    .reviewedAt(review.getReviewedAt())
                     .build();
         }
 
         return DoctorSessionDetailResponse.builder()
                 .sessionId(session.getSessionId())
-                .status(session.getStatus() != null ? session.getStatus().name() : null)
+                .status(session.getStatus().name())
                 .isShared(session.getIsShared())
                 .createdAt(session.getCreatedAt())
                 .weight(session.getWeight())
@@ -340,7 +347,6 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .patientGender(patient.getGender())
                 .patientDob(patient.getDob() != null ? patient.getDob().atStartOfDay() : null)
                 .patientAddress(patient.getAddress())
-                .clinicalInputMode(session.getClinicalInputMode())
                 .symptomResult(symptomResultResponse)
                 .labResults(labResultResponses)
                 .medicalImages(medicalImageResponses)

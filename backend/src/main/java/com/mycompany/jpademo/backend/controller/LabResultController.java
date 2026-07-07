@@ -39,7 +39,7 @@ public class LabResultController {
 
         model.addAttribute("labResultForm", form);
         model.addAttribute("session", session);
-        return "doctor/lab-result-create";
+        return "doctor/lab-result";
     }
 
     @PostMapping("/doctor/lab-results/create")
@@ -52,7 +52,7 @@ public class LabResultController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("session",
                     sessionRepository.findById(form.getSessionId()).orElse(null));
-            return "doctor/lab-result-create";
+            return "doctor/lab-result";
         }
 
         try {
@@ -63,9 +63,7 @@ public class LabResultController {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
 
-        // SỬA LẠI: trỏ thẳng đến trang Xem xét nghiệm vừa tạo
-        // (thay vì "/doctor/sessions/{id}" — trang đó CHƯA tồn tại)
-        return "redirect:/doctor/lab-results/session/" + form.getSessionId();
+        return "redirect:/doctor/sessions/" + form.getSessionId();
     }
 
     // ══════════════════════════════════════════════

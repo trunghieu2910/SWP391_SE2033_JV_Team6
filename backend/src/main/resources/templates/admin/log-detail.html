@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: main-layout(~{::main}, 'Chi tiết nhật ký', 'logs')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/admin/log-detail.css}">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a th:href="@{/admin/logs}">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+        </a>
+        <span class="separator">/</span>
+        <span>Chi tiết nhật ký #<span th:text="${log.logId}">1</span></span>
+    </nav>
+
+    <!-- Log Detail -->
+    <div class="log-detail-card">
+        <div class="log-detail-header">
+            <div class="log-detail-id">
+                <span class="label">Mã nhật ký</span>
+                <span class="value" th:text="'#' + ${log.logId}">#1</span>
+            </div>
+            <span class="badge" th:classappend="${log.action == 'LOGIN' ? 'badge-login' :
+                                                log.action == 'LOGOUT' ? 'badge-logout' :
+                                                log.action == 'BAN_USER' ? 'badge-ban' :
+                                                log.action == 'UNBAN_USER' ? 'badge-unban' :
+                                                log.action == 'CREATE_DOCTOR' ? 'badge-create' :
+                                                log.action == 'UPDATE_USER_STATUS' ? 'badge-update' :
+                                                log.action == 'BLOCK_IP' ? 'badge-ban' :
+                                                log.action == 'UNBLOCK_IP' ? 'badge-unban' : 'badge-other'}"
+                  th:text="${log.actionDisplay}">Đăng nhập</span>
+        </div>
+
+        <div class="log-detail-grid">
+            <div class="log-detail-item">
+                <span class="label"><i class="fa-regular fa-clock"></i> Thời gian</span>
+                <span class="value" th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026 12:00:00</span>
+            </div>
+            <div class="log-detail-item">
+                <span class="label"><i class="fa-regular fa-user"></i> Người thực hiện</span>
+                <span class="value" th:text="${log.userName != null ? log.userName : 'Hệ thống'}">admin</span>
+            </div>
+            <div class="log-detail-item">
+                <span class="label"><i class="fa-solid fa-bullseye"></i> Mục tiêu</span>
+                <span class="value" th:text="${log.targetType != null ? log.targetType + ' #' + log.targetId : 'Không có'}">User #10</span>
+            </div>
+            <div class="log-detail-item">
+                <span class="label"><i class="fa-solid fa-tag"></i> Hành động</span>
+                <span class="value" th:text="${log.actionDisplay}">Đăng nhập</span>
+            </div>
+        </div>
+
+        <div class="log-detail-description">
+            <span class="label"><i class="fa-regular fa-message"></i> Mô tả chi tiết</span>
+            <p class="value" th:text="${log.description}">Mô tả hoạt động</p>
+        </div>
+    </div>
+
+    <script th:src="@{/js/admin/log-detail.js}"></script>
+</main>
+</body>
+</html>

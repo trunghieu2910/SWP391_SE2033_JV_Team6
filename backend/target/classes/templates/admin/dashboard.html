@@ -166,13 +166,19 @@
                 <tr th:each="log : ${recentLogs}">
                     <td th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026 12:00:00</td>
                     <td>
-                        <span th:if="${log.action == 'LOGIN'}" class="badge badge-login">Đăng nhập</span>
-                        <span th:if="${log.action == 'LOGOUT'}" class="badge badge-logout">Đăng xuất</span>
-                        <span th:if="${log.action == 'BAN_USER'}" class="badge badge-ban">Khóa User</span>
-                        <span th:if="${log.action == 'UNBAN_USER'}" class="badge badge-unban">Mở khóa</span>
-                        <span th:if="${log.action == 'CREATE_DOCTOR'}" class="badge badge-create">Tạo bác sĩ</span>
-                        <span th:if="${log.action != 'LOGIN' && log.action != 'LOGOUT' && log.action != 'BAN_USER' && log.action != 'UNBAN_USER' && log.action != 'CREATE_DOCTOR'}"
-                              class="badge badge-other" th:text="${log.action}">Hoạt động</span>
+                        <span th:if="${log.actionDisplay == 'Đăng nhập'}" class="badge badge-login" th:text="${log.actionDisplay}">Đăng nhập</span>
+                        <span th:if="${log.actionDisplay == 'Đăng xuất'}" class="badge badge-logout" th:text="${log.actionDisplay}">Đăng xuất</span>
+                        <span th:if="${log.actionDisplay == 'Khóa User'}" class="badge badge-ban" th:text="${log.actionDisplay}">Khóa User</span>
+                        <span th:if="${log.actionDisplay == 'Mở khóa'}" class="badge badge-unban" th:text="${log.actionDisplay}">Mở khóa</span>
+                        <span th:if="${log.actionDisplay == 'Tạo bác sĩ'}" class="badge badge-create" th:text="${log.actionDisplay}">Tạo bác sĩ</span>
+                        <span th:if="${log.actionDisplay == 'Đổi trạng thái'}" class="badge badge-update" th:text="${log.actionDisplay}">Đổi trạng thái</span>
+                        <span th:if="${log.actionDisplay == 'Chặn IP'}" class="badge badge-block" th:text="${log.actionDisplay}">Chặn IP</span>
+                        <span th:if="${log.actionDisplay == 'Mở khóa IP'}" class="badge badge-unblock" th:text="${log.actionDisplay}">Mở khóa IP</span>
+                        <span th:if="${log.actionDisplay == 'Thông báo bệnh nhân'}" class="badge badge-notification" th:text="${log.actionDisplay}">Thông báo bệnh nhân</span>
+                        <span th:if="${log.actionDisplay == 'Tạo chẩn đoán cuối'}" class="badge badge-diagnosis" th:text="${log.actionDisplay}">Tạo chẩn đoán cuối</span>
+                        <span th:if="${log.actionDisplay == 'Tạo phiên khám'}" class="badge badge-create-session" th:text="${log.actionDisplay}">Tạo phiên khám</span>
+                        <span th:if="${log.actionDisplay != 'Đăng nhập' && log.actionDisplay != 'Đăng xuất' && log.actionDisplay != 'Khóa User' && log.actionDisplay != 'Mở khóa' && log.actionDisplay != 'Tạo bác sĩ' && log.actionDisplay != 'Đổi trạng thái' && log.actionDisplay != 'Chặn IP' && log.actionDisplay != 'Mở khóa IP' && log.actionDisplay != 'Thông báo bệnh nhân' && log.actionDisplay != 'Tạo chẩn đoán cuối' && log.actionDisplay != 'Tạo phiên khám'}"
+                              class="badge badge-other" th:text="${log.actionDisplay}">Hoạt động</span>
                     </td>
                     <td th:text="${log.description}">Mô tả hoạt động</td>
                     <td th:text="${log.userName != null ? log.userName : 'Hệ thống'}">admin</td>
@@ -193,23 +199,21 @@
 
     <!-- Truyền dữ liệu từ Backend vào JavaScript -->
     <script th:inline="javascript">
-        /*<![CDATA[*/
         try {
             var userData = /*[[${charts.userRegistrations}]]*/ [];
             var sessionData = /*[[${charts.diagnosisSessions}]]*/ [];
 
-            console.log('✅ User Data:', userData);
-            console.log('✅ Session Data:', sessionData);
+            console.log('User Data:', userData);
+            console.log('Session Data:', sessionData);
 
             window._userData = userData;
             window._sessionData = sessionData;
 
         } catch(e) {
-            console.error('❌ Lỗi lấy dữ liệu:', e);
+            console.error('Lỗi lấy dữ liệu:', e);
             window._userData = [];
             window._sessionData = [];
         }
-        /*]]>*/
     </script>
 
     <!-- Dashboard JavaScript -->

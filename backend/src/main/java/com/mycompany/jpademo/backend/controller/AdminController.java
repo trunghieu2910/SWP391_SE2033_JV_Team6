@@ -46,6 +46,7 @@ import com.mycompany.jpademo.backend.entity.User;
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     private final AdminService adminService;
     private final SystemLogService systemLogService;
@@ -54,17 +55,18 @@ public class AdminController {
     public String dashboard(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
         try {
-            // Nếu không có filter, mặc định 6 tháng gần nhất
+            // Lấy admin email từ user đăng nhập
+            String adminEmail = userDetails.getUser().getEmail();
+
+            //Mặc định lấy ngày hôm nay để lọc
             if (startDate == null && endDate == null) {
                 LocalDate now = LocalDate.now();
-                LocalDate currentMonthStart = now.withDayOfMonth(1);
-                LocalDate sixMonthsAgoStart = currentMonthStart.minusMonths(5);
-
-                startDate = sixMonthsAgoStart;
-                endDate = currentMonthStart;
+                startDate = now;
+                endDate = now;
             }
 
             // Nếu chỉ có startDate, set endDate = startDate + 1 tháng
@@ -83,8 +85,10 @@ public class AdminController {
                 startDate = endDate;
                 endDate = temp;
             }
+
             DashboardStatsResponse stats = adminService.getDashboardStats(startDate, endDate);
             ChartStatsResponse charts = adminService.getChartStats(startDate, endDate);
+
             if (stats == null) {
                 stats = DashboardStatsResponse.builder()
                         .totalUsers(0L)
@@ -112,6 +116,7 @@ public class AdminController {
                         .diagnosisSessions(new ArrayList<>())
                         .build();
             }
+
             LocalDateTime startLogs = startDate != null ? startDate.atStartOfDay() : null;
             LocalDateTime endLogs = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
 
@@ -119,11 +124,13 @@ public class AdminController {
                     PageRequest.of(0, 10, Sort.by("performedAt").descending())
             );
             List<SystemLogResponse> logList = recentLogs != null ? recentLogs.getContent() : new ArrayList<>();
+
             model.addAttribute("stats", stats);
             model.addAttribute("charts", charts);
             model.addAttribute("recentLogs", logList);
             model.addAttribute("startDate", startDate);
             model.addAttribute("endDate", endDate);
+            model.addAttribute("adminEmail", adminEmail);
             return "admin/dashboard";
 
         } catch (Exception e) {
@@ -185,6 +192,7 @@ public class AdminController {
             @PathVariable Integer id,
             @Valid @ModelAttribute UpdateUserStatusRequest request,
             BindingResult bindingResult,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         request.setUserId(id);
         if (bindingResult.hasErrors()) {
@@ -195,7 +203,8 @@ public class AdminController {
             return "redirect:/admin/users/" + id;
         }
         try {
-            boolean isUpdated = adminService.updateUserStatus(request);
+            User adminUser = userDetails.getUser();
+            boolean isUpdated = adminService.updateUserStatus(request, adminUser);
             if (isUpdated) {
                 redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
             } else {
@@ -208,13 +217,16 @@ public class AdminController {
     }
 
     @GetMapping("/create-doctor")
-    public String createDoctorPage(@RequestParam(defaultValue = "1") int step,
-                                   @RequestParam(required = false) Integer remainingTime,
-                                   Model model) {
+    public String createDoctorPage(
+            @RequestParam(defaultValue = "1") int step,
+            @RequestParam(required = false) Integer remainingTime,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
         if (!model.containsAttribute("doctorRequest")) {
             model.addAttribute("doctorRequest", new InitiateCreateDoctorRequest());
         }
-        String adminEmail = "luugiang205@gmail.com";
+
+        String adminEmail = userDetails.getUser().getEmail();
 
         int remainingTimeValue;
         if (remainingTime != null) {
@@ -224,6 +236,7 @@ public class AdminController {
         }
         model.addAttribute("step", step);
         model.addAttribute("remainingTime", remainingTimeValue);
+        model.addAttribute("adminEmail", adminEmail);
         return "admin/create-doctor";
     }
 
@@ -244,11 +257,11 @@ public class AdminController {
             if (certificateFile != null && !certificateFile.isEmpty()) {
                 request.setCertificateFile(certificateFile);
             }
-            User adminUser = (userDetails != null) ? userDetails.getUser() :
-                    adminService.getAdminUser();
+            User adminUser = userDetails.getUser();
             InitiateCreateDoctorResponse response = adminService.initiateCreateDoctor(request, adminUser);
             redirectAttributes.addFlashAttribute("requestId", response.getRequestId());
             redirectAttributes.addFlashAttribute("step", 2);
+            redirectAttributes.addFlashAttribute("adminEmail", adminUser.getEmail());
             return "redirect:/admin/create-doctor/verify";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -258,14 +271,17 @@ public class AdminController {
     }
 
     @GetMapping("/create-doctor/verify")
-    public String verifyDoctorPage(Model model) {
+    public String verifyDoctorPage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
         if (!model.containsAttribute("step")) {
             model.addAttribute("step", 2);
         }
         if (!model.containsAttribute("remainingTime")) {
-            String adminEmail = "luugiang205@gmail.com";
+            String adminEmail = userDetails.getUser().getEmail();
             int remainingTime = OtpUtil.getRemainingTime(adminEmail);
             model.addAttribute("remainingTime", remainingTime);
+            model.addAttribute("adminEmail", adminEmail);
         }
         return "admin/create-doctor";
     }
@@ -276,7 +292,7 @@ public class AdminController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
 
-        User adminUser = (userDetails != null) ? userDetails.getUser() : adminService.getAdminUser();
+        User adminUser = userDetails.getUser();
         adminService.verifyAndCreateDoctor(request, adminUser);
 
         redirectAttributes.addFlashAttribute("success", "Tạo tài khoản bác sĩ thành công!");
@@ -285,11 +301,10 @@ public class AdminController {
 
     @PostMapping("/create-doctor/resend-otp")
     @ResponseBody
-    public Map<String, Object> resendOtp() {
-        String adminEmail = "luugiang205@gmail.com";
+    public Map<String, Object> resendOtp(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        String adminEmail = userDetails.getUser().getEmail();
         return adminService.resendOtp(adminEmail);
     }
-
 
     @GetMapping("/logs")
     public String systemLogs(
@@ -310,5 +325,17 @@ public class AdminController {
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         return "admin/logs";
+    }
+
+    @GetMapping("/logs/{id}")
+    public String logDetail(@PathVariable Integer id, Model model) {
+        try {
+            SystemLogResponse log = systemLogService.getLogDetail(id);
+            model.addAttribute("log", log);
+            return "admin/log-detail";
+        } catch (Exception e) {
+            log.error("Lỗi khi lấy chi tiết nhật ký: {}", e.getMessage());
+            return "redirect:/admin/logs";
+        }
     }
 }
