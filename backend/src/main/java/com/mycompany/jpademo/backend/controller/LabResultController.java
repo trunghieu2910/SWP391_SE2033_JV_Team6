@@ -57,13 +57,13 @@ public class LabResultController {
 
         try {
             labResultService.createLabResult(form);
-            redirectAttributes.addFlashAttribute("successMessage",
+            redirectAttributes.addFlashAttribute("success",
                     "Tạo chỉ định xét nghiệm thành công!");
         } catch (RuntimeException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
 
-        return "redirect:/doctor/sessions/" + form.getSessionId();
+        return "redirect:/doctor/sessions/" + form.getSessionId() + "?openLab=true";
     }
 
     // ══════════════════════════════════════════════
@@ -89,10 +89,10 @@ public class LabResultController {
             return "doctor/lab-result-list";
 
         } catch (ResourceNotFoundException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
             return "redirect:/doctor/patients";
         } catch (UnauthorizedActionException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
             return "redirect:/doctor/patients";
         }
     }
@@ -116,11 +116,11 @@ public class LabResultController {
             return "patient/lab-result-list";
 
         } catch (ResourceNotFoundException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
             return "redirect:/patient/dashboard";
         } catch (UnauthorizedActionException ex) {
             // Bao gồm cả trường hợp session.isShared = false — service đã tự chặn
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
             return "redirect:/patient/dashboard";
         }
     }

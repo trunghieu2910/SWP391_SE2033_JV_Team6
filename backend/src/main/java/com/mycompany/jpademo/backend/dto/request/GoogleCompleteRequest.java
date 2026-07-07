@@ -19,7 +19,7 @@ public class GoogleCompleteRequest {
     private String userName;
 
     @NotBlank
-    @Pattern(regexp = "^\\d{10}$", message = "Số điện thoại phải đúng 10 chữ số.")
+    @Pattern(regexp = "^0\\d{9}$", message = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0.")
     private String phoneNumber;
 
     @NotBlank

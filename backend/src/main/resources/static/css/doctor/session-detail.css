@@ -242,7 +242,7 @@
 }
 .accordion-icon { color: var(--neutral-light); transition: var(--transition); }
 .accordion-body {
-    padding: 20px;
+    padding: 14px;
     border-top: 1px solid var(--border-color);
 }
 
@@ -263,6 +263,7 @@
     padding: 20px 24px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    margin-bottom: 16px;
 }
 
 .lab-item:hover {
@@ -1561,7 +1562,6 @@
     .session-meta { gap: 8px; }
     .detail-container { gap: 16px; }
     .patient-card { padding: 14px 16px; }
-    .accordion-body { padding: 14px; }
     .symptom-form .form-actions { flex-direction: column; }
     .symptom-form .form-actions .btn-action { flex: none; }
     .confirm-modal-content { padding: 24px 20px 20px; }
@@ -1576,4 +1576,42 @@
     .review-display .review-field .field-value {
         font-size: 0.88rem;
     }
+}
+
+/* ============================================ */
+/* TOAST NOTIFICATION — chỉ áp dụng cho trang này */
+/* (ghi đè .alert mặc định của layout.css bằng    */
+/*  selector cụ thể hơn: .wrapper .alert)         */
+/* ============================================ */
+.wrapper .alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    left: auto;
+    max-width: 420px;
+    min-width: 300px;
+    z-index: 9999;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
+    animation: toastSlideIn 0.3s ease;
+}
+
+/* Nếu có cả 2 thông báo cùng lúc (hiếm khi xảy ra), xếp chồng xuống dưới */
+.wrapper .alert.alert-danger ~ .alert.alert-success,
+.wrapper .alert.alert-success ~ .alert.alert-danger {
+    top: 84px;
+}
+
+.wrapper .alert.toast-hide {
+    animation: toastSlideOut 0.3s ease forwards;
+}
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastSlideOut {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(30px); }
 }

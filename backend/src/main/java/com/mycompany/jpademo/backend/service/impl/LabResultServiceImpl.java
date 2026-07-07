@@ -56,6 +56,15 @@ public class LabResultServiceImpl implements LabResultService {
                     "Không thể tạo xét nghiệm cho phiên khám đã hoàn thành");
         }
 
+        boolean alreadyExists = labResultRepository
+                .existsByDiagnosisSession_SessionIdAndTestType(request.getSessionId(), request.getTestType());
+
+        if (alreadyExists) {
+            throw new BadRequestException(
+                    "Phiên khám này đã có xét nghiệm loại \"" + request.getTestType() + "\". " +
+                            "Vui lòng chọn loại xét nghiệm khác.");
+        }
+
         LabResult labResult = LabResult.builder()
                 .diagnosisSession(session)
                 .testType(request.getTestType())

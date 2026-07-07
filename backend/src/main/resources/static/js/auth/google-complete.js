@@ -31,6 +31,17 @@ function restrictToDigits(inputEl, maxLength) {
 restrictToDigits(document.getElementById("phoneNumber"), 10);
 restrictToDigits(document.getElementById("nationalID"), 12);
 
+// Tùy chỉnh thông báo lỗi validate HTML5 cho số điện thoại
+const phoneInput = document.getElementById("phoneNumber");
+phoneInput.addEventListener("invalid", () => {
+    if (phoneInput.validity.patternMismatch || phoneInput.validity.valueMissing) {
+        phoneInput.setCustomValidity("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0.");
+    }
+});
+phoneInput.addEventListener("input", () => {
+    phoneInput.setCustomValidity(""); // reset lỗi mỗi khi người dùng gõ lại
+});
+
 function showError(message) {
     errorBox.textContent = message;
     errorBox.style.display = "block";
@@ -43,8 +54,8 @@ form.addEventListener("submit", async () => {
     const phoneNumber = document.getElementById("phoneNumber").value.trim();
     const nationalID  = document.getElementById("nationalID").value.trim();
 
-    if (!/^\d{10}$/.test(phoneNumber)) {
-        showError("Số điện thoại phải đúng 10 chữ số.");
+    if (!/^0\d{9}$/.test(phoneNumber)) {
+        showError("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0.");
         return;
     }
     if (!/^\d{12}$/.test(nationalID)) {

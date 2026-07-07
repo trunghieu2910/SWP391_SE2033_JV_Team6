@@ -25,4 +25,6 @@ public interface LabResultRepository extends JpaRepository<LabResult, Integer> {
      * (dùng để đảm bảo chỉ xử lý các bản ghi đang PENDING từ LIS).
      */
     Optional<LabResult> findByLabResultIdAndStatus(Integer labResultId, LabResultStatus status);
+
+    boolean existsByDiagnosisSession_SessionIdAndTestType(Integer sessionId, String testType);
 }

@@ -1,5 +1,21 @@
 // session-detail.js
 
+// ============================================
+// TOAST: tự động tắt sau 5 giây (chỉ trang session-detail)
+// ============================================
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.wrapper .alert').forEach(function (alertEl) {
+        setTimeout(function () {
+            // Dùng lại đúng animation "toastSlideOut" rồi ẩn hẳn,
+            // tái sử dụng cách closeAlert() trong layout.html đang làm (opacity + display:none)
+            alertEl.classList.add('toast-hide');
+            setTimeout(function () {
+                alertEl.style.display = 'none';
+            }, 300); // khớp với thời lượng animation toastSlideOut
+        }, 5000);
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // ============================================
@@ -43,6 +59,22 @@ document.addEventListener('DOMContentLoaded', function() {
             if (icon) icon.className = 'fa-solid fa-chevron-down accordion-icon';
         }
     };
+
+    // ============================================
+    // TỰ ĐỘNG MỞ LẠI KHUNG "XÉT NGHIỆM Y TẾ" SAU KHI
+    // TẠO XÉT NGHIỆM (server redirect kèm ?openLab=true)
+    // ============================================
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('openLab') === 'true') {
+        toggleAccordion('labAccordion');
+        const labSection = document.getElementById('labAccordion');
+        if (labSection) {
+            labSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // Xoá query param khỏi URL để lần F5 sau không tự mở lại nữa
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+    }
 
     // ============================================
     // SYMPTOM FORM - EDIT / CANCEL

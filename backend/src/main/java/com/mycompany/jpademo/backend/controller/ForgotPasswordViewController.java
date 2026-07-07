@@ -6,6 +6,7 @@ import com.mycompany.jpademo.backend.dto.request.ResetPasswordRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyOtpRequest;
 import com.mycompany.jpademo.backend.dto.response.VerifyOtpResponse;
 import com.mycompany.jpademo.backend.service.interfaces.ForgotPasswordService;
+import com.mycompany.jpademo.backend.util.OtpUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -51,6 +52,7 @@ public class ForgotPasswordViewController {
             return "redirect:/forgot-password";
         }
         model.addAttribute("email", email);
+        model.addAttribute("remainingSeconds", OtpUtil.getRemainingTime(email)); // ← thêm dòng này
         return "auth/forgot-password-step2";
     }
 
@@ -73,6 +75,7 @@ public class ForgotPasswordViewController {
         } catch (RuntimeException ex) {
             model.addAttribute("email", email);
             model.addAttribute("error", ex.getMessage());
+            model.addAttribute("remainingSeconds", OtpUtil.getRemainingTime(email)); 
             return "auth/forgot-password-step2";
         }
     }

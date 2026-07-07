@@ -1,5 +1,4 @@
 (function () {
-    // ── Chỉ cho phép nhập số ở ô OTP: ký tự không phải chữ số bị "nuốt" ngay khi gõ ──
     const otpInput = document.getElementById('otp');
     if (otpInput) {
         otpInput.addEventListener('input', () => {
@@ -7,12 +6,13 @@
         });
     }
 
-    const OTP_TTL = 120; // giây — khớp với OTP_EXPIRE_MINUTES = 2 bên backend
+    const timerEl = document.getElementById('otp-timer');
     const countdownEl = document.getElementById('otp-countdown');
     const resendBtn = document.getElementById('resend-btn');
-    if (!countdownEl || !resendBtn) return;
+    if (!timerEl || !countdownEl || !resendBtn) return;
 
-    let remaining = OTP_TTL;
+    let remaining = parseInt(timerEl.dataset.remaining, 10);
+    if (isNaN(remaining) || remaining < 0) remaining = 0;
 
     const format = (s) => {
         const m = String(Math.floor(s / 60)).padStart(2, '0');
