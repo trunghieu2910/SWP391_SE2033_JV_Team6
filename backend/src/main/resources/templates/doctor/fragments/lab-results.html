@@ -7,23 +7,34 @@
 <!-- ========================================== -->
 <!-- FRAGMENT: DANH SÁCH XÉT NGHIỆM             -->
 <!-- ========================================== -->
-<div th:fragment="list(labResults)">
+<div th:fragment="list(labResults, sessionId)">
     <div class="lab-container">
         <div th:if="${not #lists.isEmpty(labResults)}">
             <div th:each="lab : ${labResults}" class="lab-item">
                 <div class="lab-header">
                     <span class="lab-name" th:text="${lab.testType}">Xét nghiệm máu</span>
-                    <span class="lab-status" th:switch="${lab.status.name()}">
-                        <span th:case="'PENDING'" class="status-pending">Chờ xử lý</span>
-                        <span th:case="'COMPLETED'" class="status-completed">Hoàn thành</span>
-                        <span th:case="'CANCELED'" class="status-canceled">Đã hủy</span>
-                        <span th:case="*" class="status-unknown"><span th:text="${lab.status}">UNKNOWN</span></span>
-                    </span>
+                    <div class="lab-header-right">
+                        <!-- Nút Lấy kết quả giả lập — chỉ hiện khi xét nghiệm đang CHỜ XỬ LÝ -->
+                        <form th:if="${lab.status.name() == 'PENDING'}"
+                              th:action="@{/api/integration/lis/simulate/{sessionId}/{labResultId}(sessionId=${sessionId}, labResultId=${lab.labResultId})}"
+                              method="post" class="lab-simulate-form">
+                            <input type="hidden" name="testType" th:value="${lab.testType}">
+                            <button type="submit" class="btn-action btn-outline btn-simulate">
+                                <i class="fa-solid fa-flask-vial"></i> Lấy kết quả giả lập
+                            </button>
+                        </form>
+                        <span class="lab-status" th:switch="${lab.status.name()}">
+                            <span th:case="'PENDING'" class="status-pending">Chờ xử lý</span>
+                            <span th:case="'COMPLETED'" class="status-completed">Hoàn thành</span>
+                            <span th:case="'CANCELED'" class="status-canceled">Đã hủy</span>
+                            <span th:case="*" class="status-unknown"><span th:text="${lab.status}">UNKNOWN</span></span>
+                        </span>
+                    </div>
                 </div>
                 <div class="lab-params">
                     <div th:each="item : ${lab.parameters}" class="param-row">
                         <span class="param-name" th:text="${item.parameterName}">Hb</span>
-                        <span class="param-value" th:text="${item.value} + ' ' + ${item.unit}">12.5 g/dL</span>
+                        <span class="param-value" th:text="${item.value} + ' ' + ${item.unit == null ? '' : item.unit}">12.5 g/dL</span>
                     </div>
                     <div th:if="${#lists.isEmpty(lab.parameters)}" class="no-params">
                         <span style="color: #94a3b8; font-style: italic;">Chưa có tham số xét nghiệm</span>

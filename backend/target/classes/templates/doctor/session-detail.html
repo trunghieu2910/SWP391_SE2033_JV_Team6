@@ -121,7 +121,7 @@
                     <i class="fa-solid fa-chevron-down accordion-icon" id="labIcon"></i>
                 </div>
                 <div class="accordion-body" id="labAccordion" style="display: none;">
-                    <div th:replace="~{/doctor/fragments/lab-results :: list(labResults=${sessionDetail.labResults})}"></div>
+                    <div th:replace="~{/doctor/fragments/lab-results :: list(labResults=${sessionDetail.labResults}, sessionId=${sessionDetail.sessionId})}"></div>
                 </div>
             </div>
 

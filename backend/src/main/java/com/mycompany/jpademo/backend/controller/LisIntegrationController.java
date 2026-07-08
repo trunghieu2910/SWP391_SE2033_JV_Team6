@@ -81,7 +81,7 @@ public class LisIntegrationController {
         if (mockResults.isEmpty()) {
             httpRequest.getSession().setAttribute("flashError",
                     "Chưa có dữ liệu mẫu LIS cho loại xét nghiệm: \"" + testType + "\"");
-            httpResponse.sendRedirect("/doctor/sessions/" + sessionId);
+            httpResponse.sendRedirect("/doctor/sessions/" + sessionId + "?openLab=true");
             return;
         }
 
@@ -96,6 +96,6 @@ public class LisIntegrationController {
             httpRequest.getSession().setAttribute("flashError", e.getMessage());
         }
 
-        httpResponse.sendRedirect("/doctor/sessions/" + sessionId);
+        httpResponse.sendRedirect("/doctor/sessions/" + sessionId + "?openLab=true");
     }
 }

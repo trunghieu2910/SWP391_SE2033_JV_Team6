@@ -297,6 +297,32 @@
     opacity: 0.8;
 }
 
+/* Bọc nút "Lấy kết quả giả lập" + badge trạng thái cạnh nhau bên phải */
+.lab-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.lab-simulate-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.btn-simulate {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.btn-simulate i {
+    font-size: 0.85rem;
+}
+
 /* Status Badges - Bo tròn, padding đẹp */
 .lab-status {
     display: inline-flex;
@@ -413,8 +439,9 @@
 .param-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 6px 0;
+    align-items: flex-start;
+    gap: 100px;
+    padding: 8px 0;
     border-bottom: 1px solid #f1f5f9;
     font-size: 0.88rem;
 }
@@ -427,12 +454,17 @@
     color: var(--neutral-light);
     font-weight: 500;
     font-size: 0.85rem;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .param-value {
     font-weight: 600;
     color: var(--neutral-dark);
     font-size: 0.9rem;
+    text-align: left;
+    line-height: 1.5;
+    word-break: break-word;
 }
 
 .param-unit {

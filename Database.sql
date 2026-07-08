@@ -127,7 +127,7 @@ CREATE TABLE LabResultParameter
     LabResultParameterID INT IDENTITY (1,1) PRIMARY KEY,
     labResultID          INT NOT NULL,
     parameterID          INT NOT NULL,
-    value                NVARCHAR(100),
+    value                NVARCHAR(MAX),
     FOREIGN KEY (labResultID) REFERENCES LabResult (labResultID),
     FOREIGN KEY (parameterID) REFERENCES Parameter (parameterID)
 );
