@@ -1,62 +1,44 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="Danh sách hồ sơ bệnh án - Hệ thống chẩn đoán y tế"/>
-    <title>Hồ Sơ Bệnh Án | Bác Sĩ</title>
-    <link rel="stylesheet" th:href="@{/css/doctor/doctor-medical-records.css}"/>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{doctor/layout :: main-layout(~{::main}, 'Xem hồ sơ bệnh án', 'medical-records')}">
 <body>
 
 <main class="mr-page animate-fade">
-
-    <!-- ══ TOP NAV BAR ══ -->
-    <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 20px; box-shadow: var(--shadow-sm);">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 14px; font-weight: 700; color: var(--text-secondary);">
-                👨‍⚕️ Bác sĩ: <span th:text="${doctorName}" style="color: var(--primary);">Bác sĩ</span>
-            </span>
-        </div>
-        <a href="/logout" style="font-size: 13px; font-weight: 700; color: var(--red); display: flex; align-items: center; gap: 6px; text-decoration: none; transition: var(--transition);">
-            Đăng xuất
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-            </svg>
-        </a>
-    </div>
+    <link rel="stylesheet" th:href="@{/css/doctor/doctor-medical-records.css}"/>
 
     <!-- ══ PAGE HEADER ══ -->
     <div class="page-header">
-        <h1 class="page-title">📁 Hồ Sơ Bệnh Án</h1>
+        <h1 class="page-title">
+            <i class="fa-solid fa-folder-open"></i> Hồ Sơ Bệnh Án
+        </h1>
         <p class="page-subtitle">Tìm kiếm và xem chi tiết bệnh án bằng tên bệnh nhân hoặc số CCCD</p>
     </div>
 
     <!-- ══ STATS GRID ══ -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon blue">📋</div>
+            <div class="stat-icon blue"><i class="fa-solid fa-clipboard-list"></i></div>
             <div>
                 <div class="stat-num" th:text="${totalElements}">0</div>
                 <div class="stat-lbl">Tổng phiên khám</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">✅</div>
+            <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
             <div>
                 <div class="stat-num" th:text="${completedCount}">0</div>
                 <div class="stat-lbl">Đã hoàn thành</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon yellow">⏳</div>
+            <div class="stat-icon yellow"><i class="fa-solid fa-hourglass-half"></i></div>
             <div>
                 <div class="stat-num" th:text="${pendingCount}">0</div>
                 <div class="stat-lbl">Đang chờ xử lý</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon purple">📝</div>
+            <div class="stat-icon purple"><i class="fa-solid fa-file-signature"></i></div>
             <div>
                 <div class="stat-num" th:text="${withDiagnosisCount}">0</div>
                 <div class="stat-lbl">Đã có kết luận</div>
@@ -70,10 +52,7 @@
             <!-- giữ lại selectedStatus khi submit tìm kiếm -->
             <input type="hidden" name="status" th:value="${selectedStatus}"/>
             <div class="search-field">
-                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
                 <input id="searchInput"
                        class="search-input"
                        type="text"
@@ -81,7 +60,7 @@
                        th:value="${keyword}"
                        placeholder="Nhập tên bệnh nhân hoặc số CCCD 12 chữ số..."/>
             </div>
-            <button type="submit" class="btn-search">Tìm kiếm</button>
+            <button type="submit" class="btn-search"><i class="fa-solid fa-search"></i> Tìm kiếm</button>
         </form>
 
         <div class="filter-row">
@@ -159,10 +138,6 @@
                     <span class="rec-val" th:text="${rec.doctorFullName ?: '—'}">—</span>
                 </div>
                 <div class="rec-row">
-                    <span class="rec-lbl">Chẩn đoán</span>
-                    <span class="rec-val" th:text="${rec.diagnosis ?: 'Chưa có chẩn đoán'}">—</span>
-                </div>
-                <div class="rec-row">
                     <span class="rec-lbl">Chia sẻ hồ sơ</span>
                     <span th:if="${rec.isShared}" class="badge badge-shared">🔗 Đã chia sẻ</span>
                     <span th:unless="${rec.isShared}" class="badge badge-private">🔒 Riêng tư</span>
@@ -196,7 +171,7 @@
 
     <!-- ══ EMPTY STATE ══ -->
     <div th:if="${records == null or records.isEmpty()}" class="empty-state">
-        <div class="empty-icon">🔍</div>
+        <div class="empty-icon"><i class="fa-regular fa-face-meh"></i></div>
         <h3 class="empty-title">Không tìm thấy bệnh án</h3>
         <p class="empty-sub">Thử tìm bằng tên đầy đủ hoặc số CCCD 12 chữ số.</p>
     </div>

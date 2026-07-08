@@ -1,39 +1,15 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="Chi tiết hồ sơ bệnh án - Hệ thống chẩn đoán y tế"/>
-    <title th:text="${record.sessionID != null ? 'Hồ Sơ #S' + #numbers.formatInteger(record.sessionID, 4) + ' | Bác Sĩ' : 'Chi Tiết Bệnh Án | Bác Sĩ'}">Chi Tiết Bệnh Án | Bác Sĩ</title>
-    <link rel="stylesheet" th:href="@{/css/doctor/doctor-medical-records.css}"/>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{doctor/layout :: main-layout(~{::main}, ${record.sessionID != null ? 'Chi tiết bệnh án #S' + #numbers.formatInteger(record.sessionID, 4) : 'Chi tiết bệnh án'}, 'medical-records')}">
 <body>
 
 <main class="mr-page animate-fade">
-
-    <!-- ══ TOP NAV BAR ══ -->
-    <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 20px; box-shadow: var(--shadow-sm);">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 14px; font-weight: 700; color: var(--text-secondary);">
-                👨‍⚕️ Bác sĩ: <span th:text="${doctorName}" style="color: var(--primary);">Bác sĩ</span>
-            </span>
-        </div>
-        <a href="/logout" style="font-size: 13px; font-weight: 700; color: var(--red); display: flex; align-items: center; gap: 6px; text-decoration: none; transition: var(--transition);">
-            Đăng xuất
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-            </svg>
-        </a>
-    </div>
+    <link rel="stylesheet" th:href="@{/css/doctor/doctor-medical-records.css}"/>
 
     <!-- ══ BACK BAR ══ -->
     <div class="back-bar">
         <a href="/doctor/medical-records" class="btn-back">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5">
-                <path d="M15 18l-6-6 6-6"/>
-            </svg>
-            Quay lại danh sách
+            <i class="fa-solid fa-chevron-left"></i> Quay lại danh sách
         </a>
     </div>
 
@@ -56,7 +32,7 @@
                     <div class="info-pair">
                         <span class="info-lbl">Giới tính</span>
                         <span class="info-val"
-                              th:text="${record.patientGender == 'Male'} ? '♂ Nam' : '♀ Nữ'">—</span>
+                              th:text="${record.patientGender == 'Female'} ? '♂ Nữ' : '♀ Nam'">—</span>
                     </div>
                     <div class="info-pair">
                         <span class="info-lbl">Ngày sinh</span>
@@ -97,7 +73,7 @@
     <div class="card">
         <div class="sec-hdr">
             <div class="sec-hdr-left">
-                <div class="sec-icon">🏥</div>
+                <div class="sec-icon"><i class="fa-solid fa-hospital"></i></div>
                 <span class="sec-title">Thông Tin Phiên Khám</span>
             </div>
             <span class="session-id"
@@ -163,7 +139,7 @@
     <div th:if="${record.symptomResultID != null}" class="card">
         <div class="sec-hdr">
             <div class="sec-hdr-left">
-                <div class="sec-icon">🛡️</div>
+                <div class="sec-icon"><i class="fa-solid fa-shield-halved"></i></div>
                 <span class="sec-title">Kết Quả Triệu Chứng</span>
             </div>
             <span class="sec-badge"
@@ -225,7 +201,7 @@
     <div class="card">
         <div class="sec-hdr">
             <div class="sec-hdr-left">
-                <div class="sec-icon">🧪</div>
+                <div class="sec-icon"><i class="fa-solid fa-flask"></i></div>
                 <span class="sec-title">Kết Quả Xét Nghiệm</span>
             </div>
             <span class="sec-badge"
@@ -305,7 +281,7 @@
     <div class="card">
         <div class="sec-hdr">
             <div class="sec-hdr-left">
-                <div class="sec-icon">🖼️</div>
+                <div class="sec-icon"><i class="fa-solid fa-image"></i></div>
                 <span class="sec-title">Hình Ảnh Y Khoa</span>
             </div>
             <span class="sec-badge"
@@ -371,7 +347,7 @@
                                   th:text="${d.uploadedAt != null}
                                            ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
                                            : '—'">—</span>
-                            <a th:href="@{/ai-result.html(imageId=${d.imageID})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: #2563eb; color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block;"><i class="fa-solid fa-robot"></i> Xem chi tiết hình ảnh</a>
+                            <a th:href="@{/ai-result.html(imageId=${d.imageID})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-robot"></i> Xem chi tiết hình ảnh</a>
                         </div>
                     </div>
                 </div>
@@ -383,7 +359,7 @@
     <div class="card">
         <div class="sec-hdr">
             <div class="sec-hdr-left">
-                <div class="sec-icon">📋</div>
+                <div class="sec-icon"><i class="fa-solid fa-clipboard-check"></i></div>
                 <span class="sec-title">Kết Luận Bác Sĩ</span>
             </div>
         </div>
