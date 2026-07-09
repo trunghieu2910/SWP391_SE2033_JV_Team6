@@ -227,6 +227,11 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         }
         detail.setMedicalImages(imageDTOs);
 
+        if (isPatient && (session.getIsShared() == null || !session.getIsShared())) {
+            detail.setLabTests(Collections.emptyList());
+            detail.setMedicalImages(Collections.emptyList());
+        }
+
         // DATA MASKING: Bệnh nhân chỉ thấy kết quả khi bác sĩ đã isShared = true
         final boolean canSeeDiagnosis = !(isPatient && (session.getIsShared() == null || !session.getIsShared()));
 

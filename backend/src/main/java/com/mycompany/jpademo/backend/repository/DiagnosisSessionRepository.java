@@ -40,20 +40,23 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     @Query(value = """
         SELECT
             ds.sessionID AS id,
+            ds.isShared AS isShared,
             COALESCE(u.fullName, '') AS patientName,
             r.finalDiagnosis AS diagnosis,
             ds.createdAt AS visitDate,
-            s.symptomName AS symptoms,
+            ISNULL((SELECT TOP 1 sym.symptomName
+                   FROM SymptomResult sr
+                   JOIN SymptomDetails sd ON sd.symptomResultID = sr.symptomResultID
+                   JOIN Symptom sym ON sd.symptomID = sym.symptomID
+                   WHERE sr.sessionID = ds.sessionID), N'Không có triệu chứng') AS symptoms,
             r.treatmentPlan AS prescription,
             r.doctorAdvice AS doctorNotes
         FROM DiagnosisSession ds
         LEFT JOIN Patient p ON ds.patientID = p.patientID
         LEFT JOIN Users u ON p.userID = u.userID
         LEFT JOIN Review r ON r.sessionID = ds.sessionID
-        LEFT JOIN SymptomResult sr ON sr.sessionID = ds.sessionID
-        LEFT JOIN SymptomDetails sd ON sd.symptomResultID = sr.symptomResultID
-        LEFT JOIN Symptom s ON sd.symptomID = s.symptomID
         WHERE p.patientID = :patientId
+        ORDER BY ds.createdAt DESC
         """, nativeQuery = true)
     List<Map<String, Object>> findMedicalRecordsByPatientId(@Param("patientId") Integer patientId);
 
