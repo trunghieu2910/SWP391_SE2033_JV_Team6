@@ -3,28 +3,34 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng ký</title>
+    <title>Đăng ký tài khoản - MedAI</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/auth/auth.css}" />
 </head>
 <body>
 <div class="login-page">
+    <!-- Left panel (Branding) -->
     <div class="login-left">
         <div class="login-left-content">
             <div class="login-logo">+</div>
             <h1 class="login-app-name">MedAI</h1>
-            <p class="login-tagline">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo</p>
+            <p class="login-tagline">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo (AI)</p>
             <div class="decor-circle c1"></div>
             <div class="decor-circle c2"></div>
             <div class="decor-circle c3"></div>
         </div>
     </div>
+    
+    <!-- Right panel (Registration Form) -->
     <div class="login-right">
-        <div class="login-card card">
+        <div class="login-card card" style="max-width: 680px;">
             <div class="login-card-header">
                 <h2>Đăng ký tài khoản bệnh nhân</h2>
-                <p>Điền thông tin để tạo tài khoản bệnh nhân mới.</p>
+                <p>Điền đầy đủ thông tin bên dưới để tạo tài khoản bệnh nhân mới.</p>
             </div>
 
+            <!-- Messages -->
             <div th:if="${successMessage}" class="alert alert-success">
                 <span>✓</span>
                 <span th:text="${successMessage}"></span>
@@ -34,65 +40,77 @@
                 <span th:text="${error}"></span>
             </div>
 
+            <!-- Form -->
             <form id="registerForm" th:action="@{/auth/register}" th:object="${registerRequest}" method="post">
+                
+                <!-- Họ và tên (Full width) -->
                 <div class="form-group">
-                    <label class="form-label" for="fullName">Họ và tên</label>
-                    <input class="form-control" type="text" id="fullName" th:field="*{fullName}" placeholder="Nguyễn Thị Hoa" />
+                    <label class="form-label" for="fullName">Họ và tên <span style="color:var(--error)">*</span></label>
+                    <input class="form-control" type="text" id="fullName" th:field="*{fullName}" placeholder="Nguyễn Thị Hoa" required />
                     <p th:if="${#fields.hasErrors('fullName')}" class="field-error" th:errors="*{fullName}"></p>
                 </div>
+
+                <!-- Giới tính & Ngày sinh -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Giới tính</label>
-                        <label class="custom-control" th:classappend="${registerRequest.gender == 'nam'} ? ' checked'">
-                            <input type="radio" th:field="*{gender}" value="nam" /> Nam
-                        </label>
+                        <label class="form-label">Giới tính <span style="color:var(--error)">*</span></label>
+                        <div style="display: flex; gap: 12px; width: 100%;">
+                            <label class="custom-control" style="flex: 1;" th:classappend="${registerRequest.gender == 'nam'} ? ' checked'">
+                                <input type="radio" th:field="*{gender}" value="nam" /> Nam
+                            </label>
+                            <label class="custom-control" style="flex: 1;" th:classappend="${registerRequest.gender == 'nu'} ? ' checked'">
+                                <input type="radio" th:field="*{gender}" value="nu" /> Nữ
+                            </label>
+                        </div>
+                        <p th:if="${#fields.hasErrors('gender')}" class="field-error" th:errors="*{gender}"></p>
                     </div>
+                    
                     <div class="form-group">
-                        <label class="form-label">Giới tính</label>
-                        <label class="custom-control" th:classappend="${registerRequest.gender == 'nu'} ? ' checked'">
-                            <input type="radio" th:field="*{gender}" value="nu" /> Nữ
-                        </label>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="dob">Ngày sinh</label>
-                        <input class="form-control" type="date" id="dob" th:field="*{dob}" />
+                        <label class="form-label" for="dob">Ngày sinh <span style="color:var(--error)">*</span></label>
+                        <input class="form-control" type="date" id="dob" th:field="*{dob}" required />
                         <p th:if="${#fields.hasErrors('dob')}" class="field-error" th:errors="*{dob}"></p>
                     </div>
+                </div>
+
+                <!-- CMND/CCCD & Số điện thoại -->
+                <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label" for="nationalID">CMND/CCCD</label>
-                        <input class="form-control" type="text" id="nationalID" th:field="*{nationalID}" placeholder="012345678901" />
+                        <label class="form-label" for="nationalID">CMND/CCCD (12 số) <span style="color:var(--error)">*</span></label>
+                        <input class="form-control" type="text" id="nationalID" th:field="*{nationalID}" placeholder="012345678901" required pattern="^\d{12}$" title="CCCD phải đúng 12 chữ số" />
                         <p th:if="${#fields.hasErrors('nationalID')}" class="field-error" th:errors="*{nationalID}"></p>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="address">Địa chỉ</label>
-                    <input class="form-control" type="text" id="address" th:field="*{address}" placeholder="Số nhà, đường, quận, tỉnh" />
-                    <p th:if="${#fields.hasErrors('address')}" class="field-error" th:errors="*{address}"></p>
-                </div>
-                <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label" for="phoneNumber">Số điện thoại</label>
-                        <input class="form-control" type="text" id="phoneNumber" th:field="*{phoneNumber}" placeholder="038xxxxxxxx" />
+                        <label class="form-label" for="phoneNumber">Số điện thoại <span style="color:var(--error)">*</span></label>
+                        <input class="form-control" type="text" id="phoneNumber" th:field="*{phoneNumber}" placeholder="038xxxxxxxx" required pattern="^\d{10}$" title="Số điện thoại phải đúng 10 chữ số" />
                         <p th:if="${#fields.hasErrors('phoneNumber')}" class="field-error" th:errors="*{phoneNumber}"></p>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input class="form-control" type="email" id="email" th:field="*{email}" placeholder="email@example.com" />
-                        <p th:if="${#fields.hasErrors('email')}" class="field-error" th:errors="*{email}"></p>
-                    </div>
                 </div>
+
+                <!-- Email & Địa chỉ -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label" for="userName">Tên đăng nhập</label>
-                        <input class="form-control" type="text" id="userName" th:field="*{userName}" placeholder="username" />
+                        <label class="form-label" for="email">Email <span style="color:var(--error)">*</span></label>
+                        <input class="form-control" type="email" id="email" th:field="*{email}" placeholder="email@example.com" required />
+                        <p th:if="${#fields.hasErrors('email')}" class="field-error" th:errors="*{email}"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="address">Địa chỉ cư trú <span style="color:var(--error)">*</span></label>
+                        <input class="form-control" type="text" id="address" th:field="*{address}" placeholder="Số nhà, đường, quận, tỉnh" required />
+                        <p th:if="${#fields.hasErrors('address')}" class="field-error" th:errors="*{address}"></p>
+                    </div>
+                </div>
+
+                <!-- Tên đăng nhập & Mật khẩu -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="userName">Tên đăng nhập <span style="color:var(--error)">*</span></label>
+                        <input class="form-control" type="text" id="userName" th:field="*{userName}" placeholder="Nhập tên đăng nhập" required />
                         <p th:if="${#fields.hasErrors('userName')}" class="field-error" th:errors="*{userName}"></p>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="password">Mật khẩu</label>
+                        <label class="form-label" for="password">Mật khẩu <span style="color:var(--error)">*</span></label>
                         <div class="input-wrapper">
-                            <input class="form-control" type="password" id="password" th:field="*{password}" placeholder="********" />
+                            <input class="form-control" type="password" id="password" th:field="*{password}" placeholder="********" required />
                             <button type="button" class="input-action" data-toggle-target="password" aria-label="Hiện mật khẩu">
                                 <img class="eye-icon" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>" alt="Hiện mật khẩu" />
                             </button>
@@ -100,26 +118,54 @@
                         <p th:if="${#fields.hasErrors('password')}" class="field-error" th:errors="*{password}"></p>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label class="form-label" for="confirmPassword">Xác nhận mật khẩu</label>
-                        <div class="input-wrapper">
-                            <input class="form-control" type="password" id="confirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" />
-                            <button type="button" class="input-action" data-toggle-target="confirmPassword" aria-label="Hiện mật khẩu">
-                                <img class="eye-icon" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>" alt="Hiện mật khẩu" />
-                            </button>
-                        </div>
-                        <p id="confirmPasswordError" class="field-error" style="display:none;"></p>
+
+                <!-- Xác nhận mật khẩu -->
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Xác nhận mật khẩu <span style="color:var(--error)">*</span></label>
+                    <div class="input-wrapper">
+                        <input class="form-control" type="password" id="confirmPassword" th:field="*{confirmPassword}" placeholder="Nhập lại mật khẩu" required />
+                        <button type="button" class="input-action" data-toggle-target="confirmPassword" aria-label="Hiện mật khẩu">
+                            <img class="eye-icon" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>" alt="Hiện mật khẩu" />
+                        </button>
                     </div>
+                    <p id="confirmPasswordError" class="field-error" style="display:none;"></p>
                 </div>
-                <button type="submit" class="btn btn-primary">Đăng ký</button>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Đăng ký tài khoản</button>
             </form>
+
             <div class="login-action-row">
-                <a class="login-forgot-link" th:href="@{/auth/login}">Đã có tài khoản? Đăng nhập</a>
+                <a class="login-forgot-link" th:href="@{/auth/login}">Đã có tài khoản? Đăng nhập ngay</a>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Scripts -->
 <script th:src="@{/js/auth/auth.js}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Gender Selector selection synchronization logic
+        const genderLabels = document.querySelectorAll('.custom-control');
+        const genderInputs = document.querySelectorAll('input[name="gender"]');
+
+        function updateGenderPills() {
+            genderInputs.forEach((input, index) => {
+                if (input.checked) {
+                    genderLabels[index].classList.add('checked');
+                } else {
+                    genderLabels[index].classList.remove('checked');
+                }
+            });
+        }
+
+        genderInputs.forEach(input => {
+            input.addEventListener('change', updateGenderPills);
+        });
+
+        // Sync initial state on load
+        updateGenderPills();
+    });
+</script>
 </body>
 </html>

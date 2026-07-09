@@ -49,6 +49,8 @@ public class RegisterRequest {
     @Email(message = "Email không hợp lệ.")
     private String email;
 
+    private String confirmPassword;
+
     public String getFullName() {
         return fullName;
     }
@@ -119,5 +121,13 @@ public class RegisterRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
     }
 }

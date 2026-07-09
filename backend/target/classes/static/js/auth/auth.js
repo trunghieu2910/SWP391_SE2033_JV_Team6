@@ -11,20 +11,46 @@ document.addEventListener('click', function (event) {
   toggle.classList.toggle('active', isPassword);
 });
 
+const password = document.getElementById('password');
+const confirmPassword = document.getElementById('confirmPassword');
+const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+function validatePasswordMatch() {
+  if (!password || !confirmPassword || !confirmPasswordError) return;
+  
+  if (confirmPassword.value === '') {
+    confirmPasswordError.style.display = 'none';
+    confirmPassword.classList.remove('has-error');
+    return;
+  }
+  
+  if (password.value !== confirmPassword.value) {
+    confirmPasswordError.textContent = 'Mật khẩu xác nhận không khớp.';
+    confirmPasswordError.style.display = 'block';
+    confirmPassword.classList.add('has-error');
+  } else {
+    confirmPasswordError.style.display = 'none';
+    confirmPassword.classList.remove('has-error');
+  }
+}
+
+if (password && confirmPassword) {
+  password.addEventListener('input', validatePasswordMatch);
+  confirmPassword.addEventListener('input', validatePasswordMatch);
+}
+
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
   registerForm.addEventListener('submit', function (event) {
-    const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('confirmPassword');
-    const errorEl = document.getElementById('confirmPasswordError');
-
-    if (password && confirmPassword && errorEl) {
+    if (password && confirmPassword && confirmPasswordError) {
       if (password.value !== confirmPassword.value) {
         event.preventDefault();
-        errorEl.textContent = 'Mật khẩu xác nhận không khớp.';
-        errorEl.style.display = 'block';
+        confirmPasswordError.textContent = 'Mật khẩu xác nhận không khớp.';
+        confirmPasswordError.style.display = 'block';
+        confirmPassword.classList.add('has-error');
       } else {
-        errorEl.style.display = 'none';
+        confirmPasswordError.style.display = 'none';
+        confirmPassword.classList.remove('has-error');
       }
     }
   });
