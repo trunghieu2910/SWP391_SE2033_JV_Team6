@@ -1,51 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ bệnh nhân - MedAI</title>
-    <link rel="stylesheet" th:href="@{/css/patient/patient.css}"/>
-    <link rel="stylesheet" th:href="@{/css/patient/profile.css}"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{patient/layout :: main-layout(~{::main}, 'Hồ sơ cá nhân', 'profile')}">
 <body>
-<div class="container">
-    <nav class="navbar">
-        <div class="navbar-left">
-            <div class="logo-container">
-                <div class="logo-icon"><span>~</span></div>
-                <div>
-                    <div class="logo-text">MedAI</div>
-                    <div class="logo-sub">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo</div>
-                </div>
-            </div>
-
-            <div class="nav-links">
-                <a th:href="@{/patient/home}" class="nav-link">
-                    <span>Trang chính</span>
-                </a>
-                <a th:href="@{/patient/medical-records}" class="nav-link">
-                    <span>Hồ sơ bệnh án</span>
-                </a>
-                <a th:href="@{/patient/profile}" class="nav-link active">
-                    <span>Hồ sơ cá nhân</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="navbar-right">
-            <div class="user-info">
-                <div>
-                    <div class="user-username" th:text="${profile.fullName != null ? profile.fullName : ''}">Tên người dùng</div>
-                </div>
-                <div class="user-avatar" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'U'}">P</div>
-            </div>
-
-            <button type="button" class="logout-btn" onclick="showLogoutModal();" title="Đăng xuất">
-                <span>→</span>
-            </button>
-        </div>
-    </nav>
+<main>
+    <link rel="stylesheet" th:href="@{/css/patient/profile.css}"/>
 
     <div class="page-shell">
         <div class="page-header">
@@ -63,7 +21,7 @@
 
         <div class="content-grid">
             <section class="summary-card">
-                <div class="avatar-large" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'U'}">P</div>
+                <div class="avatar-large" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'P'}">P</div>
                 <h2 th:text="${profile.fullName != null ? profile.fullName : 'Chưa cập nhật'}">Tên bệnh nhân</h2>
                 <p class="muted" th:text="${profile.email != null ? profile.email : 'Chưa có email'}">email@example.com</p>
                 <div class="summary-list">
@@ -113,9 +71,10 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="dob">Ngày sinh</label>
-                            <input id="dob" type="date" th:field="*{dob}" class="form-input"
-                                th:attr="max=${#temporals.format(today, 'yyyy-MM-dd')}" />
+                            <label for="dob">Ngày sinh (ngày/tháng/năm)</label>
+                            <input id="dob" type="text" th:field="*{dob}" class="form-input" placeholder="dd/MM/yyyy"
+                                   pattern="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/[0-9]{4}$"
+                                   title="Vui lòng nhập ngày sinh theo định dạng ngày/tháng/năm (ví dụ: 15/08/1995)" />
                             <div class="error" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></div>
                         </div>
 
@@ -135,28 +94,21 @@
             </section>
         </div>
     </div>
-</div>
-    <!-- Logout Confirm Modal -->
-    <div id="logoutModal" class="modal-overlay" style="display: none;">
-        <div class="modal-card">
-            <h3 class="modal-title">Xác nhận đăng xuất</h3>
-            <p class="modal-desc">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?</p>
-            <div class="modal-actions">
-                <button type="button" class="btn-modal-cancel" onclick="hideLogoutModal();">Hủy</button>
-                <form th:action="@{/auth/logout}" method="post" style="flex: 1; display: flex;">
-                    <button type="submit" class="btn-modal-confirm" style="width: 100%;">Đăng xuất</button>
-                </form>
-            </div>
-        </div>
-    </div>
 
+    <!-- Flatpickr CSS & JS for elegant Vietnamese Calendar Date Picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
     <script>
-        function showLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'flex';
-        }
-        function hideLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'none';
-        }
+        document.addEventListener("DOMContentLoaded", function() {
+            flatpickr("#dob", {
+                dateFormat: "d/m/Y",
+                maxDate: "today",
+                locale: "vn",
+                allowInput: true
+            });
+        });
     </script>
+</main>
 </body>
 </html>

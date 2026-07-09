@@ -32,7 +32,7 @@ public class UpdateProfileRequest {
     @Pattern(regexp = "^(|Male|Female|Other)$", message = "Giới tính không hợp lệ")
     private String gender;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
     @Past(message = "Ngày sinh phải là ngày trong quá khứ")
     private LocalDate dob;
 

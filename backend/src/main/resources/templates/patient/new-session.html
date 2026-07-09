@@ -1,39 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Khai báo triệu chứng - MedAI</title>
-    <link rel="stylesheet" th:href="@{/css/patient/patient.css}"/>
-    <link rel="stylesheet" th:href="@{/css/patient/new-session.css}"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{patient/layout :: main-layout(~{::main}, 'Khai báo triệu chứng', 'home')}">
 <body>
-<div class="container">
-    <nav class="navbar">
-        <div class="navbar-left">
-            <div class="logo-container">
-                <div class="logo-icon"><span>~</span></div>
-                <div>
-                    <div class="logo-text">MedAI</div>
-                    <div class="logo-sub">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo</div>
-                </div>
-            </div>
-            <div class="nav-links">
-                <a th:href="@{/patient/home}" class="nav-link">Trang chính</a>
-                <a th:href="@{/patient/medical-records}" class="nav-link">Hồ sơ bệnh án</a>
-            </div>
-        </div>
-        <div class="navbar-right">
-            <div class="user-info">
-                <div>
-                    <div class="user-username" th:text="${profile.fullName != null ? profile.fullName : ''}">Tên người dùng</div>
-                </div>
-                <div class="user-avatar" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'P'}">P</div>
-            </div>
-            <button type="button" class="logout-btn" onclick="showLogoutModal();" title="Đăng xuất"><span>→</span></button>
-        </div>
-    </nav>
+<main>
+    <link rel="stylesheet" th:href="@{/css/patient/new-session.css}"/>
 
     <div class="page-shell">
         <div class="page-header">
@@ -97,7 +67,7 @@
                     </div>
                 </div>
 
-                <!-- Các nhóm triệu chứng giống doctor fragment -->
+                <!-- Các nhóm triệu chứng -->
                 <div class="form-group">
                     <label class="section-label">Ra máu âm đạo bất thường</label>
                     <div class="checkbox-group">
@@ -188,7 +158,7 @@
         </section>
 
         <section class="form-card" th:if="${activeSession.clinicalInputMode != null and activeSession.clinicalInputMode.name() == 'PATIENT' and activeSession.symptomResultStatus != null and activeSession.symptomResultStatus.name() == 'COMPLETED'}">
-            <h2><i class="fa-solid fa-check-circle"></i> Triệu chứng của bạn đã được gửi</h2>
+            <h2>Triệu chứng của bạn đã được gửi</h2>
             <p>Hệ thống đã ghi nhận thông tin triệu chứng của bạn. Bác sĩ sẽ xem xét và có thể cập nhật thêm thông tin nếu cần thiết.</p>
             <div class="submitted-data">
                 <div class="data-section">
@@ -207,99 +177,78 @@
                 <a th:href="@{/patient/home}" class="btn-secondary">Quay lại trang chính</a>
             </div>
         </section>
-
-
     </div>
-</div>
 
-<div id="logoutModal" class="modal-overlay" style="display:none;">
-    <div class="modal-card">
-        <h3 class="modal-title">Xác nhận đăng xuất</h3>
-        <p class="modal-desc">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?</p>
-        <div class="modal-actions">
-            <button type="button" class="btn-modal-cancel" onclick="hideLogoutModal();">Hủy</button>
-            <form th:action="@{/auth/logout}" method="post" style="flex:1; display:flex;">
-                <button type="submit" class="btn-modal-confirm" style="width:100%;">Đăng xuất</button>
-            </form>
+    <!-- Submit Confirm Modal -->
+    <div id="submitConfirmModal" class="modal-overlay" style="display:none;">
+        <div class="modal-card">
+            <h3 class="modal-title">Xác nhận gửi triệu chứng</h3>
+            <p class="modal-desc">Khi bạn ấn gửi, bạn sẽ không thể chỉnh sửa lại. Bạn có chắc chắn muốn gửi không?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="hideSubmitConfirmModal();">Hủy</button>
+                <button type="button" class="btn-modal-confirm" onclick="submitPatientSymptomForm();">OK</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="submitConfirmModal" class="modal-overlay" style="display:none;">
-    <div class="modal-card">
-        <h3 class="modal-title">Xác nhận gửi triệu chứng</h3>
-        <p class="modal-desc">Khi bạn ấn gửi, bạn sẽ không thể chỉnh sửa lại. Bạn có chắc chắn muốn gửi không?</p>
-        <div class="modal-actions">
-            <button type="button" class="btn-modal-cancel" onclick="hideSubmitConfirmModal();">Hủy</button>
-            <button type="button" class="btn-modal-confirm" onclick="submitPatientSymptomForm();">OK</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    function showLogoutModal() {
-        document.getElementById('logoutModal').style.display = 'flex';
-    }
-    function hideLogoutModal() {
-        document.getElementById('logoutModal').style.display = 'none';
-    }
-
-    function openSubmitConfirmModal() {
-        document.getElementById('submitConfirmModal').style.display = 'flex';
-    }
-    function hideSubmitConfirmModal() {
-        document.getElementById('submitConfirmModal').style.display = 'none';
-    }
-
-    function submitPatientSymptomForm() {
-        const form = document.getElementById('patientSymptomForm');
-        const sessionId = document.getElementById('sessionIdHidden').value || /*[[${activeSession.sessionId}]]*/ 0;
-        const formData = new FormData(form);
-        const symptoms = [];
-        form.querySelectorAll('.symptom-checkbox:checked').forEach(el => symptoms.push(parseInt(el.value, 10)));
-
-        if (symptoms.length === 0) {
-            alert('Vui lòng chọn ít nhất một triệu chứng.');
-            return false;
+    <script>
+        function openSubmitConfirmModal() {
+            document.getElementById('submitConfirmModal').style.display = 'flex';
+        }
+        function hideSubmitConfirmModal() {
+            document.getElementById('submitConfirmModal').style.display = 'none';
         }
 
-        const payload = {
-            weight: parseFloat(formData.get('weight')),
-            height: parseFloat(formData.get('height')),
-            menopauseStatus: formData.get('menopauseStatus'),
-            symptoms: symptoms,
-            symptomDuration: formData.get('symptomDuration'),
-            symptomProgressing: formData.get('symptomProgressing') === 'true'
-        };
+        function submitPatientSymptomForm() {
+            const form = document.getElementById('patientSymptomForm');
+            const sessionId = document.getElementById('sessionIdHidden').value || 0;
+            const formData = new FormData(form);
+            const symptoms = [];
+            form.querySelectorAll('.symptom-checkbox:checked').forEach(el => symptoms.push(parseInt(el.value, 10)));
 
-        if (!payload.weight || !payload.height || !payload.menopauseStatus || !payload.symptomDuration || payload.symptomProgressing === undefined) {
-            alert('Vui lòng điền đầy đủ thông tin.');
-            return false;
-        }
-
-        hideSubmitConfirmModal();
-
-        fetch('/api/diagnosis-sessions/' + sessionId + '/symptom-result', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.message || 'Lỗi gửi biểu mẫu'); });
+            if (symptoms.length === 0) {
+                alert('Vui lòng chọn ít nhất một triệu chứng.');
+                return false;
             }
-            return response.json();
-        })
-        .then(() => {
-            alert('Gửi triệu chứng thành công!');
-            window.location.href = '/patient/home';
-        })
-        .catch(error => {
-            alert('Lỗi: ' + (error.message || 'Không thể gửi biểu mẫu.'));
-        });
 
-        return false;
-    }
-</script>
+            const payload = {
+                weight: parseFloat(formData.get('weight')),
+                height: parseFloat(formData.get('height')),
+                menopauseStatus: formData.get('menopauseStatus'),
+                symptoms: symptoms,
+                symptomDuration: formData.get('symptomDuration'),
+                symptomProgressing: formData.get('symptomProgressing') === 'true'
+            };
+
+            if (!payload.weight || !payload.height || !payload.menopauseStatus || !payload.symptomDuration || payload.symptomProgressing === undefined) {
+                alert('Vui lòng điền đầy đủ thông tin.');
+                return false;
+            }
+
+            hideSubmitConfirmModal();
+
+            fetch('/api/diagnosis-sessions/' + sessionId + '/symptom-result', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || 'Lỗi gửi biểu mẫu'); });
+                }
+                return response.json();
+            })
+            .then(() => {
+                alert('Gửi triệu chứng thành công!');
+                window.location.href = '/patient/home';
+            })
+            .catch(error => {
+                alert('Lỗi: ' + (error.message || 'Không thể gửi biểu mẫu.'));
+            });
+
+            return false;
+        }
+    </script>
+</main>
 </body>
 </html>

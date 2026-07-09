@@ -2,18 +2,11 @@
    DASHBOARD STYLES - Profile card, Session card, Records list
    ============================================================================ */
 
-/* Dashboard Grid Layout */
+/* Dashboard Layout */
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 24px;
-    align-items: start;
-}
-
-@media (min-width: 1024px) {
-    .dashboard-grid {
-        grid-template-columns: 360px 1fr;
-    }
 }
 
 /* ============================================================================

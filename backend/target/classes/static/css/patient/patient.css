@@ -16,12 +16,15 @@ body {
     color: #1e293b;
     margin: 0;
     padding: 0;
+    display: flex;
+    min-height: 100vh;
 }
 
 .container {
+    width: 100%;
     max-width: 1280px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 0;
 }
 
 /* ============================================================================
@@ -307,4 +310,209 @@ body {
     font-size: 14px;
     color: #64748b;
     margin: 0 0 24px 0;
+}
+
+/* ============================================================================
+   SIDEBAR & CONTENT WRAPPER - Thiết kế mới dọc bên trái
+   ============================================================================ */
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background-color: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+.sidebar-brand .logo-icon {
+    width: 40px;
+    height: 40px;
+    background-color: #eff6ff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    font-weight: bold;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-brand .logo-text {
+    font-weight: 800;
+    font-size: 20px;
+    color: #1e3a8a;
+    line-height: 1;
+}
+
+.sidebar-brand .logo-sub {
+    font-size: 9px;
+    color: #64748b;
+    margin-top: 3px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.nav-item i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    color: #64748b;
+    transition: color 0.2s;
+}
+
+.nav-item:hover {
+    background-color: #f8fafc;
+    color: #2563eb;
+}
+
+.nav-item:hover i {
+    color: #2563eb;
+}
+
+.nav-item.active {
+    background-color: #2563eb;
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.nav-item.active i {
+    color: white;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+.sidebar-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.sidebar-user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sidebar-user-info h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-user-info span {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.logout-sidebar-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    color: #ef4444;
+    background: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    width: 100%;
+}
+
+.logout-sidebar-btn:hover {
+    background-color: #fef2f2;
+    border-color: #fee2e2;
+}
+
+.logout-sidebar-btn i {
+    font-size: 16px;
+}
+
+/* Wrapper cho phần nội dung chính bên phải */
+.wrapper {
+    flex-grow: 1;
+    min-width: 0;
+    padding: 32px 40px;
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.top-bar h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
 }

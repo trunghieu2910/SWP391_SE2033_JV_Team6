@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="main-layout(content, title, currentTab)" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - MedAI'">MedAI</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+    <!-- Patient Base CSS -->
+    <link rel="stylesheet" th:href="@{/css/patient/patient.css}"/>
+</head>
+<body>
+    <!-- Vertical Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-icon">
+                <span>~</span>
+            </div>
+            <div>
+                <div class="logo-text">MedAI</div>
+                <div class="logo-sub">Hệ thống sàng lọc ung thư cổ tử cung</div>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a th:href="@{/patient/home}" class="nav-item" th:classappend="${currentTab == 'home' ? 'active' : ''}">
+                <i class="fa-solid fa-house"></i>
+                <span>Trang chính</span>
+            </a>
+            <a th:href="@{/patient/medical-records}" class="nav-item" th:classappend="${currentTab == 'records' ? 'active' : ''}">
+                <i class="fa-solid fa-file-medical"></i>
+                <span>Hồ sơ bệnh án</span>
+            </a>
+            <a th:href="@{/patient/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>Hồ sơ cá nhân</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-bottom">
+            <div class="sidebar-user-profile">
+                <div class="sidebar-user-avatar" th:text="${profile != null && profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : (userFullName != null ? userFullName.substring(0,1).toUpperCase() : 'P')}">P</div>
+                <div class="sidebar-user-info">
+                    <h4 th:text="${profile != null && profile.fullName != null ? profile.fullName : (userFullName != null ? userFullName : 'Bệnh nhân')}">Bệnh nhân</h4>
+                    <span>Bệnh nhân</span>
+                </div>
+            </div>
+            <button type="button" class="logout-sidebar-btn" onclick="showLogoutModal();" title="Đăng xuất">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Đăng xuất</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="wrapper">
+        <header class="top-bar">
+            <h1 class="page-title" th:text="${title}">Tiêu đề trang</h1>
+        </header>
+
+        <!-- Dynamic content replaced here -->
+        <div th:replace="${content}"></div>
+    </div>
+
+    <!-- Logout Confirm Modal -->
+    <div id="logoutModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <h3 class="modal-title">Xác nhận đăng xuất</h3>
+            <p class="modal-desc">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="hideLogoutModal();">Hủy</button>
+                <form th:action="@{/auth/logout}" method="post" style="flex: 1; display: flex;">
+                    <button type="submit" class="btn-modal-confirm" style="width: 100%;">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+        function hideLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

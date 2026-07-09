@@ -30,6 +30,7 @@ com\mycompany\jpademo\backend\controller\DiagnosisSessionController.class
 com\mycompany\jpademo\backend\controller\WebGoogleAuthController.class
 com\mycompany\jpademo\backend\exception\GlobalExceptionHandler.class
 com\mycompany\jpademo\backend\dto\request\UnblockIpRequest$UnblockIpRequestBuilder.class
+com\mycompany\jpademo\backend\aop\annotation\DoctorActionLog.class
 com\mycompany\jpademo\backend\dto\response\SecuritySearchDTO$SecuritySearchDTOBuilder.class
 com\mycompany\jpademo\backend\dto\response\SymptomResponse$SymptomResponseBuilder.class
 com\mycompany\jpademo\backend\enums\UserStatus.class
@@ -82,6 +83,7 @@ com\mycompany\jpademo\backend\dto\response\ProfileResponse$ProfileResponseBuilde
 com\mycompany\jpademo\backend\service\impl\LabResultServiceImpl.class
 com\mycompany\jpademo\backend\service\impl\AdminServiceImpl.class
 com\mycompany\jpademo\backend\entity\SystemLog.class
+com\mycompany\jpademo\backend\aop\aspect\DoctorActionLogAspect.class
 com\mycompany\jpademo\backend\dto\response\LogSearchDTO.class
 com\mycompany\jpademo\backend\dto\request\LisResultRequest.class
 com\mycompany\jpademo\backend\dto\response\DoctorSessionResponse.class
@@ -184,6 +186,7 @@ com\mycompany\jpademo\backend\service\interfaces\LabResultService.class
 com\mycompany\jpademo\backend\cache\OtpData.class
 com\mycompany\jpademo\backend\dto\request\CreatePatientSessionRequest$CreatePatientSessionRequestBuilder.class
 com\mycompany\jpademo\backend\dto\response\GlobalSearchResponse$GlobalSearchResponseBuilder.class
+com\mycompany\jpademo\backend\aop\aspect\DoctorActionLogAspect$1.class
 com\mycompany\jpademo\backend\security\handler\CustomLogoutSuccessHandler.class
 com\mycompany\jpademo\backend\entity\Review$ReviewBuilder.class
 com\mycompany\jpademo\backend\dto\response\UserSearchDTO.class
@@ -216,6 +219,7 @@ com\mycompany\jpademo\backend\aop\interfaces\LoggableTarget.class
 com\mycompany\jpademo\backend\dto\response\ParameterResponse.class
 com\mycompany\jpademo\backend\service\interfaces\AuthService.class
 com\mycompany\jpademo\backend\dto\request\VerifyOtpRequest.class
+com\mycompany\jpademo\backend\controller\GlobalControllerAdvice.class
 com\mycompany\jpademo\backend\dto\response\ChartStatsResponse$ChartStatsResponseBuilder.class
 com\mycompany\jpademo\backend\service\interfaces\SecurityService.class
 com\mycompany\jpademo\backend\entity\DiagnosisSession.class
@@ -232,6 +236,7 @@ com\mycompany\jpademo\backend\enums\DiagnosisSessionStatus.class
 com\mycompany\jpademo\backend\dto\response\MedicalImageResponse.class
 com\mycompany\jpademo\backend\cache\PendingDoctorData.class
 com\mycompany\jpademo\backend\exception\UnauthorizedActionException.class
+com\mycompany\jpademo\backend\controller\ErrorController.class
 com\mycompany\jpademo\backend\aop\annotation\LogActivity.class
 com\mycompany\jpademo\backend\service\impl\SecurityServiceImpl.class
 com\mycompany\jpademo\backend\util\EmailUtil.class

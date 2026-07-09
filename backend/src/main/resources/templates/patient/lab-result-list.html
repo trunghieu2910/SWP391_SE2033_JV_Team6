@@ -1,71 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{patient/layout}">
-<head><title>Kết quả xét nghiệm</title></head>
+      th:replace="~{patient/layout :: main-layout(~{::main}, 'Kết quả xét nghiệm', 'records')}">
 <body>
-<div layout:fragment="content">
-
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Kết quả xét nghiệm</h1>
-      <p class="page-subtitle" th:if="${session != null}">
-        Phiên khám #<span th:text="${session.sessionId}"></span> —
-        <span th:text="${#temporals.format(session.createdAt, 'dd/MM/yyyy')}"></span>
-      </p>
+<main>
+    <div class="page-header" style="margin-bottom: 20px;">
+        <p class="page-subtitle" th:if="${session != null}" style="font-size: 14px; color: #64748b;">
+            Phiên khám #<span th:text="${session.sessionId}"></span> —
+            Ngày tạo: <span th:text="${#temporals.format(session.createdAt, 'dd/MM/yyyy')}"></span>
+        </p>
     </div>
-  </div>
 
-  <div class="alert alert-error mb-4" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    <div class="alert alert-error mb-4" th:if="${errorMessage}" th:text="${errorMessage}" style="background-color: #fef2f2; border: 1px solid #fee2e2; color: #ef4444; padding: 12px; border-radius: 12px; font-size: 14px; margin-bottom: 20px;"></div>
 
-  <div th:if="${#lists.isEmpty(labResults)}" class="empty-state">
-    <span class="empty-state-icon">🔬</span>
-    <h3>Chưa có kết quả xét nghiệm</h3>
-    <p>Phiên khám này chưa có chỉ định xét nghiệm nào.</p>
-  </div>
+    <div th:if="${#lists.isEmpty(labResults)}" class="empty-state">
+        <span class="empty-state-icon">🔬</span>
+        <h3>Chưa có kết quả xét nghiệm</h3>
+        <p>Phiên khám này chưa có chỉ định xét nghiệm nào.</p>
+    </div>
 
-  <!-- Cùng cấu trúc accordion như trang doctor, chỉ khác layout:decorate -->
-  <details th:each="lab : ${labResults}" class="card mb-4">
-    <summary style="display:flex; align-items:center; justify-content:space-between; list-style:none;">
-      <div style="display:flex; align-items:center; gap:14px;">
-        <div style="width:40px;height:40px;border-radius:8px;background:rgba(59,130,246,0.1);
-                            display:flex;align-items:center;justify-content:center;font-size:20px;">🔬</div>
-        <div>
-          <div style="font-weight:600;font-size:15px;color:var(--navy);" th:text="${lab.testType}"></div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
-            <span th:text="${#temporals.format(lab.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
-          </div>
-        </div>
-      </div>
-      <span th:switch="${lab.status.name()}">
-                <span th:case="'PENDING'"   class="badge badge-yellow">Chờ xử lý</span>
-                <span th:case="'COMPLETED'" class="badge badge-green">Hoàn thành</span>
-                <span th:case="'CANCELED'"  class="badge badge-red">Đã hủy</span>
-                <span th:case="*"           class="badge badge-gray" th:text="${lab.status}"></span>
+    <!-- Accordion lists of lab results -->
+    <details th:each="lab : ${labResults}" class="card mb-4" style="background-color: white; border: 1px solid #f1f5f9; border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);">
+        <summary style="display:flex; align-items:center; justify-content:space-between; list-style:none; cursor: pointer; outline: none; user-select: none;">
+            <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:40px;height:40px;border-radius:8px;background:rgba(59,130,246,0.1); display:flex;align-items:center;justify-content:center;font-size:20px;">🔬</div>
+                <div>
+                    <div style="font-weight:600;font-size:15px;color: #1e3a8a;" th:text="${lab.testType}"></div>
+                    <div style="font-size:12px;color: #64748b;margin-top:2px;">
+                        <span th:text="${#temporals.format(lab.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                </div>
+            </div>
+            <span th:switch="${lab.status.name()}">
+                <span th:case="'PENDING'"   class="badge" style="background-color: #fffbeb; color: #b45309; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700;">Chờ xử lý</span>
+                <span th:case="'COMPLETED'" class="badge" style="background-color: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700;">Hoàn thành</span>
+                <span th:case="'CANCELED'"  class="badge" style="background-color: #fef2f2; color: #ef4444; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700;">Đã hủy</span>
+                <span th:case="*"           class="badge" style="background-color: #f1f5f9; color: #94a3b8; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700;" th:text="${lab.status}"></span>
             </span>
-    </summary>
+        </summary>
 
-    <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:20px;">
-      <div th:if="${!#lists.isEmpty(lab.parameters)}" class="table-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Thông số</th><th>Đơn vị</th><th>Kết quả</th></tr></thead>
-          <tbody>
-          <tr th:each="p, iter : ${lab.parameters}">
-            <td th:text="${iter.count}" style="color:var(--text-muted);"></td>
-            <td style="font-weight:500;" th:text="${p.parameterName}"></td>
-            <td style="color:var(--text-muted);" th:text="${p.unit ?: '—'}"></td>
-            <td style="font-weight:600;color:var(--navy);" th:text="${p.value}"></td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <p th:if="${#lists.isEmpty(lab.parameters)}"
-         style="color:var(--text-muted);font-size:14px;text-align:center;padding:12px 0;">
-        Bác sĩ đang chờ kết quả từ phòng xét nghiệm
-      </p>
-    </div>
-  </details>
-
-</div>
+        <div style="margin-top:20px;border-top:1px solid #f1f5f9;padding-top:20px;">
+            <div th:if="${!#lists.isEmpty(lab.parameters)}" class="table-wrap" style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #f1f5f9; color: #64748b;">
+                            <th style="padding: 10px 8px;">#</th>
+                            <th style="padding: 10px 8px;">Thông số</th>
+                            <th style="padding: 10px 8px;">Đơn vị</th>
+                            <th style="padding: 10px 8px;">Kết quả</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p, iter : ${lab.parameters}" style="border-bottom: 1px solid #f8fafc;">
+                            <td th:text="${iter.count}" style="color: #94a3b8; padding: 12px 8px;"></td>
+                            <td style="font-weight:500; color: #1e293b; padding: 12px 8px;" th:text="${p.parameterName}"></td>
+                            <td style="color:#64748b; padding: 12px 8px;" th:text="${p.unit ?: '—'}"></td>
+                            <td style="font-weight:600;color:#1e3a8a; padding: 12px 8px;" th:text="${p.value}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p th:if="${#lists.isEmpty(lab.parameters)}"
+               style="color:#64748b;font-size:14px;text-align:center;padding:12px 0;">
+                Bác sĩ đang chờ kết quả từ phòng xét nghiệm
+            </p>
+        </div>
+    </details>
+</main>
 </body>
 </html>

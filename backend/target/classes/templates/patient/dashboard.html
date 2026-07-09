@@ -1,271 +1,124 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ bệnh nhân - MedAI</title>
-    <link rel="stylesheet" th:href="@{/css/patient/patient.css}"/>
-    <link rel="stylesheet" th:href="@{/css/patient/dashboard.css}"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{patient/layout :: main-layout(~{::main}, 'Trang chính', 'home')}">
 <body>
-    <div class="container">
-        <!-- ── NAVBAR ── -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <div class="logo-container">
-                    <div class="logo-icon">
-                        <span>~</span>
+<main>
+    <link rel="stylesheet" th:href="@{/css/patient/dashboard.css}"/>
+
+    <div class="dashboard-grid">
+        <!-- RIGHT MAIN PANELS COLUMN -->
+        <div class="main-content">
+            <!-- active session card -->
+            <div class="session-card">
+                <div class="session-card-header">
+                    <div class="session-card-title">
+                        <span class="session-card-title-dot" th:classappend="${activeSession != null ? 'green' : 'blue'}"></span>
+                        <span>Phiên khám đang hoạt động</span>
                     </div>
-                    <div>
-                        <div class="logo-text">MedAI</div>
-                        <div class="logo-sub">Hệ thống sàng lọc ung thư cổ tử cung hỗ trợ bởi trí tuệ nhân tạo</div>
-                    </div>
-                </div>
-                
-                <div class="nav-links">
-                    <a th:href="@{/patient/home}" class="nav-link active">
-                        <span>Trang chính</span>
-                    </a>
-                    <a th:href="@{/patient/medical-records}" class="nav-link">
-                        <span>Hồ sơ bệnh án</span>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="navbar-right">
-                <div class="user-info">
-                    <div>
-                        <div class="user-username" th:text="${profile.fullName != null ? profile.fullName : ''}">Tên người dùng</div>
-                    </div>
-                    <div class="user-avatar" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'U'}">P</div>
+                    <span th:if="${activeSession}" class="session-status-badge">
+                        CÓ PHIÊN KHÁM MỚI
+                    </span>
                 </div>
 
-                <button type="button" class="logout-btn" onclick="showLogoutModal();" title="Đăng xuất">
-                    <span>→</span>
-                </button>
-            </div>
-        </nav>
+                <div th:if="${activeSession != null}">
+                    <div class="session-meta-grid">
+                        <div class="session-meta-item">
+                            <span class="session-meta-label">Mã phiên khám</span>
+                            <span class="session-meta-value" th:text="'#' + ${activeSession.sessionId}">#10</span>
+                        </div>
+                        <div class="session-meta-item session-meta-item-right">
+                            <span class="session-meta-label">Ngày tạo</span>
+                            <span class="session-meta-value" th:text="${activeSession.createdAt != null ? #temporals.format(activeSession.createdAt, 'dd/MM/yyyy HH:mm') : 'Chưa có'}">29/6/2026</span>
+                        </div>
+                    </div>
 
-        <!-- ── MAIN CONTENT GRID ── -->
-        <div class="dashboard-grid">
-            
-            <!-- LEFT PROFILE COLUMN -->
-            <aside>
-                <div class="profile-card">
-                    <div class="profile-avatar-large" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'U'}">P</div>
-                    <h2 class="profile-name" th:text="${profile.fullName}">Phạm Thùy Linh</h2>
-                    <span class="profile-id-badge" th:text="'Mã bệnh nhân: #' + ${profile.patientID}">MÃ BỆNH NHÂN: #1</span>
-                    <a th:href="@{/patient/profile}" class="edit-profile-btn">Chỉnh sửa hồ sơ</a>
-                    
-                    <div class="profile-details-list">
-                        <!-- Tài khoản -->
-                        <div class="profile-detail-row">
-                            <div class="profile-detail-label-container">
-                                <div class="profile-detail-icon">👤</div>
-                                <span class="profile-detail-label">Họ và tên</span>
+                     <div th:if="${activeSession.symptomResultStatus != null and activeSession.symptomResultStatus.name() == 'COMPLETED'}">
+                        <div class="session-success-box">
+                            <div class="session-success-icon">✓</div>
+                            <div>
+                                <div class="session-success-title">Bạn đã gửi biểu mẫu triệu chứng thành công</div>
+                                <div class="session-success-desc">Bác sĩ hiện đã có thể xem đầy đủ thông tin triệu chứng của bạn để đưa ra chẩn đoán.</div>
                             </div>
-                            <span class="profile-detail-value" th:text="${profile.fullName != null ? profile.fullName : 'Chưa cập nhật'}">Họ và tên</span>
                         </div>
                         
-                        <!-- Email -->
-                        <div class="profile-detail-row">
-                            <div class="profile-detail-label-container">
-                                <div class="profile-detail-icon">✉️</div>
-                                <span class="profile-detail-label">Email</span>
+                        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
+                            <span style="font-size: 13px; color: #64748b; font-weight: 500;">Trạng thái: Đang chờ bác sĩ xử lý</span>
+                            <a th:href="@{/patient/new-session(viewForm=true)}" class="btn-view-submitted">Xem lại thông tin đã gửi</a>
+                        </div>
+                    </div>
+
+                    <!-- Symptom NOT submitted yet -->
+                    <div th:unless="${activeSession.symptomResultStatus != null and activeSession.symptomResultStatus.name() == 'COMPLETED'}">
+                        <div class="session-waiting-box" style="margin-bottom: 16px;">
+                            <div class="session-waiting-icon">!</div>
+                            <div>
+                                <div class="session-waiting-title">Chưa hoàn thành khai báo triệu chứng</div>
+                                <div class="session-waiting-desc">Vui lòng hoàn thành khai báo các triệu chứng lâm sàng để bác sĩ có cơ sở chẩn đoán.</div>
                             </div>
-                            <span class="profile-detail-value" th:text="${profile.email != null ? profile.email : 'Chưa cập nhật'}">namvipnhatg@gmail.com</span>
                         </div>
                         
-                        <!-- Số điện thoại -->
-                        <div class="profile-detail-row">
-                            <div class="profile-detail-label-container">
-                                <div class="profile-detail-icon">📞</div>
-                                <span class="profile-detail-label">Số điện thoại</span>
-                            </div>
-                            <span class="profile-detail-value" th:text="${profile.phoneNumber != null ? profile.phoneNumber : 'Chưa cập nhật'}">0904445466</span>
+                        <div style="display: flex; justify-content: flex-end;">
+                            <a th:href="@{/patient/new-session}" class="btn-submit-symptoms">Điền thông tin lâm sàng</a>
                         </div>
+                    </div>
+                </div>
+
+                <!-- No Active Session -->
+                <div th:unless="${activeSession != null}" class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-title">Không có phiên khám nào đang hoạt động.</div>
+                    <div class="empty-state-desc">Vui lòng liên hệ bác sĩ phụ trách để được tạo phiên khám mới trên hệ thống.</div>
+                </div>
+            </div>
+
+            <!-- recent records card list -->
+            <div>
+                <div class="records-section-title">
+                    <div class="records-section-title-icon">📄</div>
+                    <span>Bệnh án gần đây</span>
+                </div>
+
+                <div th:if="${recentRecords != null and !recentRecords.isEmpty()}" class="records-list">
+                    <div th:each="record : ${recentRecords}" class="record-history-card"
+                         th:onclick="|window.location.href='/patient/medical-record/' + ${record.id}|">
                         
-                        <!-- CCCD/CMND -->
-                        <div class="profile-detail-row">
-                            <div class="profile-detail-label-container">
-                                <div class="profile-detail-icon">💳</div>
-                                <span class="profile-detail-label">CCCD/CMND</span>
+                        <div class="record-history-info">
+                            <div class="record-history-meta">
+                                <span th:text="'PHIÊN KHÁM #' + ${record.id}"></span>
+                                <span> • </span>
+                                <span th:text="${record.visitDate != null ? #dates.format(record.visitDate, 'dd/MM/yyyy') : 'Chưa có'}">29/06/2026</span>
                             </div>
-                            <span class="profile-detail-value" th:text="${profile.nationalID != null ? profile.nationalID : 'Chưa cập nhật'}">043678901234</span>
+                            <h3 class="record-history-diagnosis" th:text="${record.isShared ? (record.diagnosis != null ? record.diagnosis : 'Chưa có chẩn đoán') : 'Chưa công bố'}">
+                                Chẩn đoán
+                            </h3>
+                            <p class="record-history-symptoms">
+                                <span style="font-weight: 700; color: #94a3b8;">Triệu chứng:</span> 
+                                <span th:text="${record.symptoms != null ? record.symptoms : 'Không ghi nhận'}">Triệu chứng</span>
+                            </p>
                         </div>
-                        
-                        <!-- Ngày sinh -->
-                        <div class="profile-detail-row">
-                            <div class="profile-detail-label-container">
-                                <div class="profile-detail-icon">📅</div>
-                                <span class="profile-detail-label">Ngày sinh</span>
-                            </div>
-                            <span class="profile-detail-value" th:text="${profile.dob != null ? #temporals.format(profile.dob, 'dd/MM/yyyy') : '—'}">15/8/1995</span>
-                        </div>
-                        
-                        <!-- Giới tính -->
-                        <div class="profile-detail-row">
-                            <div class="profile-detail-label-container">
-                                <div class="profile-detail-icon">👤</div>
-                                <span class="profile-detail-label">Giới tính</span>
-                            </div>
-                            <span class="profile-detail-value" th:text="${profile.gender == 'Female' ? 'Nữ' : (profile.gender == 'Male' ? 'Nam' : '—')}">Nữ</span>
-                        </div>
-                        
-                        <!-- SỬA: Thêm thông tin loại tài khoản -->
-                        <div class="profile-detail-row" style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 4px;">
-                            <div class="profile-detail-label-container">
-                                <div class="profile-detail-icon">🔑</div>
-                                <span class="profile-detail-label">Loại đăng nhập</span>
-                            </div>
-                            <span class="profile-detail-value" style="font-size: 12px; color: #64748b;">
-                                <span th:if="${profile.email != null}">📧 Email </span>
-                                <span th:if="${profile.phoneNumber != null}">📱 SĐT </span>
-                                <span th:if="${profile.nationalID != null}">🪪 CCCD </span>
-                                <span th:unless="${profile.email != null or profile.phoneNumber != null or profile.nationalID != null}">👤 Tên đăng nhập</span>
+
+                        <div class="record-history-badge-container">
+                            <span class="record-history-badge" th:if="${record.isShared}">
+                                <span>✓</span> ĐÃ CÓ CHẨN ĐOÁN
                             </span>
+                            <span class="record-history-badge" th:unless="${record.isShared}" style="background: #f1f5f9; color: #94a3b8;">
+                                <span>⏳</span> CHƯA CÔNG BỐ
+                            </span>
+                            <div class="record-history-arrow">
+                                <span>&gt;</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </aside>
 
-            <!-- RIGHT MAIN PANELS COLUMN -->
-            <main class="main-content">
-                
-                <!-- active session card -->
-                <div class="session-card">
-                    <div class="session-card-header">
-                        <div class="session-card-title">
-                            <span class="session-card-title-dot" th:classappend="${activeSession != null ? 'green' : 'blue'}"></span>
-                            <span>Phiên khám đang hoạt động</span>
-                        </div>
-                        <span th:if="${activeSession}" class="session-status-badge">
-                            CÓ PHIÊN KHÁM MỚI
-                        </span>
-                    </div>
-
-                    <div th:if="${activeSession != null}">
-                        <div class="session-meta-grid">
-                            <div class="session-meta-item">
-                                <span class="session-meta-label">Mã phiên khám</span>
-                                <span class="session-meta-value" th:text="'#' + ${activeSession.sessionId}">#10</span>
-                            </div>
-                            <div class="session-meta-item session-meta-item-right">
-                                <span class="session-meta-label">Ngày tạo</span>
-                                <span class="session-meta-value" th:text="${activeSession.createdAt != null ? #temporals.format(activeSession.createdAt, 'dd/MM/yyyy HH:mm') : 'Chưa có'}">16:29:00 29/6/2026</span>
-                            </div>
-                        </div>
-
-                         <div th:if="${activeSession.symptomResultStatus != null and activeSession.symptomResultStatus.name() == 'COMPLETED'}">
-                            <div class="session-success-box">
-                                <div class="session-success-icon">✓</div>
-                                <div>
-                                    <div class="session-success-title">Bạn đã gửi biểu mẫu triệu chứng thành công</div>
-                                    <div class="session-success-desc">Bác sĩ hiện đã có thể xem đầy đủ thông tin triệu chứng của bạn để đưa ra chẩn đoán.</div>
-                                </div>
-                            </div>
-                            
-                            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
-                                <span style="font-size: 13px; color: #64748b; font-weight: 500;">Trạng thái: Đang chờ bác sĩ xử lý</span>
-                                <a th:href="@{/patient/new-session(viewForm=true)}" class="btn-view-submitted">Xem lại thông tin đã gửi</a>
-                            </div>
-                        </div>
-
-                        <!-- Symptom NOT submitted yet -->
-                        <div th:unless="${activeSession.symptomResultStatus != null and activeSession.symptomResultStatus.name() == 'COMPLETED'}">
-                            <div class="session-waiting-box" style="margin-bottom: 16px;">
-                                <div class="session-waiting-icon">!</div>
-                                <div>
-                                    <div class="session-waiting-title">Chưa hoàn thành khai báo triệu chứng</div>
-                                    <div class="session-waiting-desc">Vui lòng hoàn thành khai báo các triệu chứng lâm sàng để bác sĩ có cơ sở chẩn đoán.</div>
-                                </div>
-                            </div>
-                            
-                            <div style="display: flex; justify-content: flex-end;">
-                                <a th:href="@{/patient/new-session}" class="btn-submit-symptoms">Điền thông tin lâm sàng</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- No Active Session -->
-                    <div th:unless="${activeSession != null}" class="empty-state">
-                        <div class="empty-state-icon">📋</div>
-                        <div class="empty-state-title">Không có phiên khám nào đang hoạt động.</div>
-                        <div class="empty-state-desc">Vui lòng liên hệ bác sĩ phụ trách để được tạo phiên khám mới trên hệ thống.</div>
-                    </div>
+                <!-- No records empty state -->
+                <div th:if="${recentRecords == null or recentRecords.isEmpty()}" class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-title">Chưa ghi nhận bệnh án hoàn thành nào trong quá khứ.</div>
                 </div>
-
-                <!-- recent records card list -->
-                <div>
-                    <div class="records-section-title">
-                        <div class="records-section-title-icon">📄</div>
-                        <span>Bệnh án gần đây</span>
-                    </div>
-
-                    <div th:if="${recentRecords != null and !recentRecords.isEmpty()}" class="records-list">
-                        <div th:each="record : ${recentRecords}" class="record-history-card"
-                             th:onclick="|window.location.href='/patient/medical-record/' + ${record.id}|">
-                            
-                            <div class="record-history-info">
-                                <div class="record-history-meta">
-                                    <span th:text="'PHIÊN KHÁM #' + ${record.id}"></span>
-                                    <span> • </span>
-                                    <span th:text="${record.visitDate != null ? #dates.format(record.visitDate, 'dd/MM/yyyy') : 'Chưa có'}">29/06/2026</span>                                </div>
-                                <h3 class="record-history-diagnosis" th:text="${record.isShared ? (record.diagnosis != null ? record.diagnosis : 'Chưa có chẩn đoán') : 'Chưa công bố'}">
-                                    Viêm phế quản cấp tính
-                                </h3>
-                                <p class="record-history-symptoms">
-                                    <span style="font-weight: 700; color: #94a3b8;">Triệu chứng:</span> 
-                                    <span th:text="${record.symptoms != null ? record.symptoms : 'Không ghi nhận'}">Kinh nguyệt kéo dài bất thường</span>
-                                </p>
-                            </div>
-
-                            <div class="record-history-badge-container">
-                                <span class="record-history-badge" th:if="${record.isShared}">
-                                    <span>✓</span> ĐÃ CÓ CHẨN ĐOÁN
-                                </span>
-                                <span class="record-history-badge" th:unless="${record.isShared}" style="background: #f1f5f9; color: #94a3b8;">
-                                    <span>⏳</span> CHƯA CÔNG BỐ
-                                </span>
-                                <div class="record-history-arrow">
-                                    <span>&gt;</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- No records empty state -->
-                    <div th:if="${recentRecords == null or recentRecords.isEmpty()}" class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <div class="empty-state-title">Chưa ghi nhận bệnh án hoàn thành nào trong quá khứ.</div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Logout Confirm Modal -->
-    <div id="logoutModal" class="modal-overlay" style="display: none;">
-        <div class="modal-card">
-            <h3 class="modal-title">Xác nhận đăng xuất</h3>
-            <p class="modal-desc">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?</p>
-            <div class="modal-actions">
-                <button type="button" class="btn-modal-cancel" onclick="hideLogoutModal();">Hủy</button>
-                <form th:action="@{/auth/logout}" method="post" style="flex: 1; display: flex;">
-                    <button type="submit" class="btn-modal-confirm" style="width: 100%;">Đăng xuất</button>
-                </form>
             </div>
         </div>
     </div>
-
-    <script>
-        function showLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'flex';
-        }
-        function hideLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'none';
-        }
-    </script>
+</main>
 </body>
 </html>
