@@ -32,6 +32,10 @@
                 <i class="fa-solid fa-file-medical"></i>
                 <span>Hồ sơ bệnh án</span>
             </a>
+            <a th:href="@{/patient/reminders/new}" class="nav-item" th:classappend="${currentTab == 'reminders' ? 'active' : ''}">
+                <i class="fa-solid fa-bell"></i>
+                <span>Nhắc uống thuốc</span>
+            </a>
             <a th:href="@{/patient/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
                 <i class="fa-solid fa-user-gear"></i>
                 <span>Hồ sơ cá nhân</span>

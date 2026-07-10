@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{patient/layout :: main-layout(~{::main}, 'Tạo nhắc uống thuốc', 'reminders')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/patient/reminder-new.css}"/>
+
+    <div class="page-shell">
+        <div class="page-header">
+            <div>
+                <p class="eyebrow"><i class="fa-solid fa-bell"></i> Nhắc uống thuốc</p>
+                <h1 th:text="${editingReminderId != null} ? 'Chỉnh sửa nhắc uống thuốc' : 'Tạo nhắc uống thuốc mới'">Tạo nhắc uống thuốc mới</h1>
+                <p class="subtext" th:text="${editingReminderId != null} ? 'Sửa lại nhắc hiện tại và lưu để tiếp tục nhận nhắc.' : 'Ghi chú này sẽ được gửi email cho bạn khi đến thời gian đã lên lịch.'">Ghi chú này sẽ được gửi email cho bạn khi đến thời gian đã lên lịch.</p>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Cột trái: Form tạo nhắc nhở -->
+            <div class="form-card">
+                <form th:action="${editingReminderId != null} ? @{/patient/reminders/{id}/edit(id=${editingReminderId})} : @{/patient/reminders/new}" th:object="${reminderRequest}" method="post">
+                    <div class="form-group full-width">
+                        <label for="note">
+                            <i class="fa-solid fa-prescription-bottle-medical"></i> Ghi chú nhắc
+                        </label>
+                        <textarea id="note" class="form-input form-textarea" th:field="*{note}" placeholder="Ví dụ: Uống thuốc 2 viên sau bữa sáng" rows="5"></textarea>
+                        <p class="error" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></p>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="scheduledTime">
+                            <i class="fa-regular fa-clock"></i> Giờ nhắc
+                        </label>
+                        <input id="scheduledTime" type="time" class="form-input" th:field="*{scheduledTime}"/>
+                        <p class="error" th:if="${#fields.hasErrors('scheduledTime')}" th:errors="*{scheduledTime}"></p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span th:text="${editingReminderId != null} ? 'Cập nhật nhắc' : 'Lưu nhắc'">Lưu nhắc</span>
+                        </button>
+                        <a th:if="${editingReminderId != null}" th:href="@{/patient/reminders/new}" class="btn-secondary">
+                            <i class="fa-solid fa-ban"></i> Hủy
+                        </a>
+                    </div>
+                </form>
+
+                <div th:if="${successMessage}" class="success-box">
+                    <span th:text="${successMessage}"></span>
+                </div>
+            </div>
+
+            <!-- Cột phải: Danh sách nhắc nhở -->
+            <div class="summary-card">
+                <h2><i class="fa-solid fa-calendar-day"></i> Nhắc hàng ngày</h2>
+                <p class="muted">Nhắc sẽ được gửi mỗi ngày vào giờ đã chọn cho đến khi bạn xóa.</p>
+
+                <div th:if="${reminders != null and !reminders.isEmpty()}" class="reminder-list-container">
+                    <div th:each="reminder : ${reminders}" class="reminder-card">
+                        <div class="reminder-card-left">
+                            <div class="reminder-icon-wrapper">
+                                <i class="fa-solid fa-pills"></i>
+                            </div>
+                            <div class="reminder-details">
+                                <span class="reminder-time">
+                                    <i class="fa-regular fa-clock" style="font-size: 13.5px; color: #64748b; margin-top: 1px;"></i>
+                                    <span th:text="${reminder.scheduledTime != null ? reminder.scheduledTime.format(T(java.time.format.DateTimeFormatter).ofPattern('HH:mm')) : ''}"></span>
+                                </span>
+                                <span class="reminder-note" th:text="${reminder.note}"></span>
+                                <div class="reminder-meta">
+                                    <span class="reminder-created">
+                                        <i class="fa-regular fa-calendar-check"></i>
+                                        <span th:text="${reminder.createdAt != null ? reminder.createdAt.format(T(java.time.format.DateTimeFormatter).ofPattern('dd/MM/yyyy')) : ''}"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="reminder-actions">
+                            <a th:href="@{/patient/reminders/{id}/edit(id=${reminder.reminderId})}" class="btn-edit-icon" title="Sửa nhắc">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </a>
+                            <form th:action="@{/patient/reminders/{id}/delete(id=${reminder.reminderId})}" method="post" class="reminder-action-form">
+                                <button type="submit" class="btn-delete-icon" title="Xóa nhắc nhở">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${reminders == null or reminders.isEmpty()}" class="empty-state-card">
+                    <i class="fa-solid fa-bell-slash"></i>
+                    <p class="empty-state-title">Chưa có nhắc uống thuốc</p>
+                    <p class="empty-state-desc">Danh sách nhắc nhở hàng ngày của bạn sẽ xuất hiện tại đây.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

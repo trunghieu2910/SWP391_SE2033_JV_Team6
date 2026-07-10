@@ -1,5 +1,6 @@
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\security\handler\RoleBasedSuccessHandler.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\controller\AdminProfileViewController.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\controller\MedicationReminderController.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\enums\RoleName.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\entity\Patient.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\security\userdetails\CustomUserDetailsService.java
@@ -22,6 +23,7 @@ E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpadem
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\interfaces\EmailService.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\response\SecurityStatsResponse.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\impl\PatientSearchServiceImpl.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\impl\MedicationReminderServiceImpl.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\aop\aspect\AdminActionLogAspect.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\interfaces\MedicalRecordService.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\request\CreatePatientSessionRequest.java
@@ -37,6 +39,7 @@ E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpadem
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\request\UpdateSymptomsRequest.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\repository\MedicalImageDetailsRepository.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\repository\PatientRepository.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\repository\MedicationReminderRepository.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\response\MedicalImageDetailResponse.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\controller\UltrasoundAIController.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\impl\LisMockDataProvider.java
@@ -47,9 +50,13 @@ E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpadem
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\controller\MedicalRecordController.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\impl\DiagnosisSessionServiceImpl.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\aop\aspect\DoctorActionLogAspect.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\impl\MedicationReminderScheduler.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\interfaces\MedicationReminderService.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\entity\MedicationReminder.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\repository\RoleRepository.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\controller\LisIntegrationController.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\interfaces\DiagnosisSessionService.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\response\MedicationReminderResponse.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\enums\ClinicalInputMode.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\interfaces\AuthService.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\enums\SymptomResultStatus.java
@@ -72,6 +79,7 @@ E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpadem
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\response\SymptomResponse.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\service\interfaces\AdminService.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\cache\PendingDoctorData.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\request\MedicationReminderRequest.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\response\VerifyOtpResponse.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\controller\DoctorProfileViewController.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\request\VerifyPendingDoctorRequest.java
@@ -144,10 +152,12 @@ E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpadem
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\entity\SystemLog.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\exception\WeakPasswordException.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\repository\SystemLogRepository.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\Application.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\entity\RequestLog.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\request\OtpVerificationRequest.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\exception\UseResetTokenAgainException.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\response\ChartStatsResponse.java
+E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\enums\ReminderStatus.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\BackendApplication.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\dto\response\ReviewResponse.java
 E:\SWP391\as18\SWP391_SE2033_JV_Team6\backend\src\main\java\com\mycompany\jpademo\backend\security\filter\BlockedIpFilter.java

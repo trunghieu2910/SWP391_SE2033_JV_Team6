@@ -24,7 +24,6 @@ public class EmailServiceImpl implements EmailService {
     @Value("${mail.from-name}")
     private String fromName;
 
-    @Async
     @Override
     public void sendEmail(String to, String subject, String body) {
         buildAndSendEmail(to, subject, body);

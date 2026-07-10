@@ -86,6 +86,18 @@ CREATE TABLE DiagnosisSession
     FOREIGN KEY (patientID) REFERENCES Patient (patientID)
 );
 
+CREATE TABLE MedicationReminder
+(
+    reminderID INT IDENTITY (1,1) PRIMARY KEY,
+    patientID  INT NOT NULL,
+    note       NVARCHAR(500) NOT NULL,
+    scheduledAt DATETIME NOT NULL,
+    createdAt  DATETIME NOT NULL DEFAULT GETDATE(),
+    sentAt     DATETIME NULL,
+    status     NVARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    FOREIGN KEY (patientID) REFERENCES Patient (patientID)
+);
+
 -- CẬP NHẬT: Thêm 3 trường lưu trữ cố định (Radio button) trực tiếp từ Form
 CREATE TABLE SymptomResult
 (

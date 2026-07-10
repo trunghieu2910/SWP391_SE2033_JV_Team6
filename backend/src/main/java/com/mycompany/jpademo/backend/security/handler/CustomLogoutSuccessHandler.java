@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Component
 @RequiredArgsConstructor
 public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
@@ -20,14 +22,12 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
                                 Authentication authentication) throws IOException {
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
             Integer userId = userDetails.getUser().getUserId();
-            userRepository.findById(userId).ifPresent(user -> {
-                user.setLastLogoutTime(LocalDateTime.now());
-                userRepository.save(user);
-            });
+            userRepository.updateLastLogoutTime(userId, LocalDateTime.now());
         }
         response.sendRedirect("/auth/login?logout");
     }
