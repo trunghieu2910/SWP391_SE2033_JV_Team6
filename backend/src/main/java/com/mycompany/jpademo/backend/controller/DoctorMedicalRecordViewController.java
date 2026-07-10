@@ -18,15 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * SOLID:
- *  - SRP: Controller này chỉ phụ trách render Thymeleaf views cho trang hồ sơ bệnh án của bác sĩ.
- *         Toàn bộ logic nghiệp vụ nằm trong MedicalRecordService.
- *  - OCP: Không sửa MedicalRecordController (REST API cũ), chỉ mở rộng thêm controller view mới.
- *  - LSP: Không vi phạm — không kế thừa class nào.
- *  - ISP: Phụ thuộc đúng interface MedicalRecordService, không phụ thuộc interface dư thừa.
- *  - DIP: Phụ thuộc vào interface MedicalRecordService, không phụ thuộc implementation cụ thể.
- */
 @Controller
 @RequestMapping("/doctor/medical-records")
 @PreAuthorize("hasRole('DOCTOR')")
