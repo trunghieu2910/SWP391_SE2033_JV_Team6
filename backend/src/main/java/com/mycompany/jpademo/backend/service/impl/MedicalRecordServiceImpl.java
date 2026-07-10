@@ -227,12 +227,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         }
         detail.setMedicalImages(imageDTOs);
 
-        if (isPatient && (session.getIsShared() == null || !session.getIsShared())) {
-            detail.setLabTests(Collections.emptyList());
-            detail.setMedicalImages(Collections.emptyList());
-        }
-
-        // DATA MASKING: Bệnh nhân chỉ thấy kết quả khi bác sĩ đã isShared = true
+        // DATA MASKING: Bệnh nhân chỉ thấy kết quả chẩn đoán khi bác sĩ đã isShared = true
         final boolean canSeeDiagnosis = !(isPatient && (session.getIsShared() == null || !session.getIsShared()));
 
         reviewRepository.findByDiagnosisSessionSessionId(sessionID).ifPresent(r -> {
@@ -246,15 +241,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
             if (canSeeDiagnosis) {
                 detail.setFinalDiagnosis(r.getFinalDiagnosis());
-                detail.setTreatmentPlan(r.getTreatmentPlan());
-                detail.setDoctorAdvice(r.getDoctorAdvice());
-                detail.setNote(r.getNote());
             } else {
                 detail.setFinalDiagnosis("Đang chờ bác sĩ công bố...");
-                detail.setTreatmentPlan("Chờ công bố");
-                detail.setDoctorAdvice("Chờ công bố");
-                detail.setNote("Bảo mật");
             }
+            detail.setTreatmentPlan(r.getTreatmentPlan());
+            detail.setDoctorAdvice(r.getDoctorAdvice());
+            detail.setNote(r.getNote());
         });
 
         return detail;

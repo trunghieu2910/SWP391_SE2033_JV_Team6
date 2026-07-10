@@ -77,7 +77,7 @@
                 <div class="diagnosis-box">
                     <span class="diagnosis-box-label">💊 Đơn thuốc & Phác đồ</span>
                     <div class="diagnosis-box-content"
-                         th:text="${record.isShared ? (record.treatmentPlan ?: 'Chưa ghi nhận đơn thuốc') : 'Chờ công bố'}">Đơn thuốc</div>
+                         th:text="${record.treatmentPlan ?: 'Chưa ghi nhận đơn thuốc'}">Đơn thuốc</div>
                 </div>
             </div>
 
@@ -86,26 +86,26 @@
                 <div class="diagnosis-box">
                     <span class="diagnosis-box-label">💡 Hướng dẫn & Lời khuyên</span>
                     <div class="diagnosis-box-content"
-                         th:text="${record.isShared ? (record.doctorAdvice ?: 'Chưa ghi nhận lời khuyên') : 'Chờ công bố'}">Lời khuyên</div>
+                         th:text="${record.doctorAdvice ?: 'Chưa ghi nhận lời khuyên'}">Lời khuyên</div>
                 </div>
 
                 <!-- Additional notes box -->
                 <div class="diagnosis-box">
                     <span class="diagnosis-box-label">📎 Ghi chú thêm</span>
                     <div class="diagnosis-box-content"
-                         th:text="${record.isShared ? (record.note ?: 'Không có ghi chú') : 'Chờ công bố'}">Ghi chú</div>
+                         th:text="${record.note ?: 'Không có ghi chú'}">Ghi chú</div>
                 </div>
             </div>
 
             <!-- Review footer -->
-            <div class="review-footer" th:if="${record.isShared and record.reviewedByDoctorName != null}">
+            <div class="review-footer" th:if="${record.reviewedByDoctorName != null}">
                 Được kết luận bởi <strong th:text="${record.reviewedByDoctorName}">Bác sĩ</strong> lúc <strong th:text="${record.reviewedAt != null ? #dates.format(record.reviewedAt, 'dd/MM/yyyy HH:mm') : '—'}">Thời gian</strong>
             </div>
         </div>
     </div>
 
     <!-- 3. LAB TESTS SECTION -->
-    <div class="glass-panel" th:if="${record.isShared and record.labTests != null and record.labTests.size() > 0}">
+    <div class="glass-panel" th:if="${record.labTests != null and record.labTests.size() > 0}">
         <h3>🔬 Kết quả xét nghiệm</h3>
         <div class="lab-test-container">
             <div class="lab-test-card" th:each="labTest : ${record.labTests}">
@@ -131,7 +131,7 @@
     </div>
 
     <!-- 4. MEDICAL IMAGES SECTION -->
-    <div class="glass-panel" th:if="${record.isShared and record.medicalImages != null and record.medicalImages.size() > 0}">
+    <div class="glass-panel" th:if="${record.medicalImages != null and record.medicalImages.size() > 0}">
         <h3>📸 Hình ảnh y tế</h3>
         <div class="lab-test-container">
             <div class="lab-test-card" th:each="image : ${record.medicalImages}">
