@@ -1,3 +1,4 @@
+
 package com.mycompany.jpademo.backend.repository;
 
 import com.mycompany.jpademo.backend.entity.MedicationReminder;
@@ -20,3 +21,4 @@ public interface MedicationReminderRepository extends JpaRepository<MedicationRe
 
     Optional<MedicationReminder> findByReminderIdAndPatientPatientId(Integer reminderId, Integer patientId);
 }
+

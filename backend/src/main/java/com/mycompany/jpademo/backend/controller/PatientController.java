@@ -14,8 +14,13 @@ import com.mycompany.jpademo.backend.repository.SymptomResultRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.MedicalRecordService;
 import com.mycompany.jpademo.backend.service.interfaces.ProfileService;
+import com.mycompany.jpademo.backend.service.interfaces.PdfService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +52,7 @@ public class PatientController {
     private final PatientRepository patientRepository;
     private final DiagnosisSessionRepository sessionRepository;
     private final SymptomResultRepository symptomResultRepository;
+    private final PdfService pdfService;
 
     @GetMapping("")
     public String redirectToHome() {
@@ -121,6 +127,33 @@ public class PatientController {
         model.addAttribute("record", record);
 
         return "patient/medical-record-detail";
+    }
+
+    @GetMapping("/medical-record/{id}/export")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<byte[]> exportMedicalRecordPdf(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Patient patient = getPatient(userDetails);
+
+        DiagnosisSession session = sessionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hồ sơ bệnh án: " + id));
+
+        if (!session.getPatient().getPatientId().equals(patient.getPatientId())) {
+            throw new IllegalArgumentException("Bạn không có quyền truy cập hồ sơ này.");
+        }
+
+        // Bệnh nhân chỉ xuất được bản có che/mask chẩn đoán nếu bác sĩ chưa công bố
+        MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordDetail(id, true);
+        byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "medical_record_S" + id + ".pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 
     @GetMapping("/new-session")

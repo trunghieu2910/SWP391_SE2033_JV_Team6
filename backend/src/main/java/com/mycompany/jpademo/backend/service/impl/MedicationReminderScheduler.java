@@ -1,3 +1,4 @@
+
 package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.entity.MedicationReminder;
@@ -87,3 +88,4 @@ public class MedicationReminderScheduler {
                 .replace("'", "&#39;");
     }
 }
+

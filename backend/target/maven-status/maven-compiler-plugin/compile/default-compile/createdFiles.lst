@@ -44,11 +44,11 @@ com\mycompany\jpademo\backend\dto\request\UpdateUserStatusRequest.class
 com\mycompany\jpademo\backend\entity\Symptom$SymptomBuilder.class
 com\mycompany\jpademo\backend\service\interfaces\PatientSearchService.class
 com\mycompany\jpademo\backend\controller\SearchApiController.class
+com\mycompany\jpademo\backend\service\impl\PdfServiceImpl.class
 com\mycompany\jpademo\backend\dto\response\PatientSearchResponse.class
 com\mycompany\jpademo\backend\service\impl\InMemoryOtpStore$OtpEntry.class
 com\mycompany\jpademo\backend\service\interfaces\LogAsyncService.class
 com\mycompany\jpademo\backend\security\handler\LoginFailureHandler.class
-com\mycompany\jpademo\backend\service\impl\MedicationReminderScheduler.class
 com\mycompany\jpademo\backend\entity\Role.class
 com\mycompany\jpademo\backend\dto\request\LisResultRequest$TestResultItem.class
 com\mycompany\jpademo\backend\entity\RequestLog.class
@@ -58,6 +58,7 @@ com\mycompany\jpademo\backend\dto\response\UserResponse.class
 com\mycompany\jpademo\backend\entity\SymptomResult.class
 com\mycompany\jpademo\backend\service\interfaces\ProfileService.class
 com\mycompany\jpademo\backend\entity\Review.class
+com\mycompany\jpademo\backend\service\interfaces\PdfService.class
 com\mycompany\jpademo\backend\exception\ResourceAlreadyExistsException.class
 com\mycompany\jpademo\backend\dto\request\CreateLabResultRequest.class
 com\mycompany\jpademo\backend\service\impl\LisMockDataProvider.class
@@ -99,7 +100,6 @@ com\mycompany\jpademo\backend\service\impl\DiagnosisSessionServiceImpl$Diagnosis
 com\mycompany\jpademo\backend\dto\request\CreateDiagnosisSessionRequest.class
 com\mycompany\jpademo\backend\aop\aspect\LoggingAspect.class
 com\mycompany\jpademo\backend\config\WebConfig.class
-com\mycompany\jpademo\backend\controller\MedicalRecordController.class
 com\mycompany\jpademo\backend\dto\response\SearchResponse.class
 com\mycompany\jpademo\backend\service\interfaces\FirebaseService.class
 com\mycompany\jpademo\backend\security\filter\BlockedIpFilter.class
@@ -118,7 +118,6 @@ com\mycompany\jpademo\backend\entity\MedicalImageDetails$MedicalImageDetailsBuil
 com\mycompany\jpademo\backend\controller\WebGoogleAuthController$1.class
 com\mycompany\jpademo\backend\service\interfaces\SystemLogService.class
 com\mycompany\jpademo\backend\enums\LabResultStatus.class
-com\mycompany\jpademo\backend\entity\MedicationReminder.class
 com\mycompany\jpademo\backend\dto\request\ResendOtpRequest.class
 com\mycompany\jpademo\backend\entity\Parameter.class
 com\mycompany\jpademo\backend\dto\request\CreateDoctorRequest.class
@@ -140,7 +139,6 @@ com\mycompany\jpademo\backend\service\impl\EmailServiceImpl.class
 com\mycompany\jpademo\backend\enums\ClinicalInputMode.class
 com\mycompany\jpademo\backend\cache\OtpData$OtpDataBuilder.class
 com\mycompany\jpademo\backend\repository\SymptomRepository.class
-com\mycompany\jpademo\backend\service\impl\MedicationReminderServiceImpl.class
 com\mycompany\jpademo\backend\dto\request\ChangePasswordRequest.class
 com\mycompany\jpademo\backend\dto\response\SecurityStatsResponse$SecurityStatsResponseBuilder.class
 com\mycompany\jpademo\backend\service\impl\DoctorDiagnosisServiceImpl.class
@@ -164,7 +162,6 @@ com\mycompany\jpademo\backend\dto\request\UpdateProfileRequest.class
 com\mycompany\jpademo\backend\exception\UnauthorizedException.class
 com\mycompany\jpademo\backend\dto\response\DoctorSessionDetailResponse$DoctorSessionDetailResponseBuilder.class
 com\mycompany\jpademo\backend\repository\LabResultRepository.class
-com\mycompany\jpademo\backend\service\interfaces\MedicationReminderService.class
 com\mycompany\jpademo\backend\dto\request\VerifyPendingDoctorRequest$VerifyPendingDoctorRequestBuilder.class
 com\mycompany\jpademo\backend\dto\response\SymptomResultResponse$SymptomResultResponseBuilder.class
 com\mycompany\jpademo\backend\dto\request\CreateDoctorRequest$CreateDoctorRequestBuilder.class
@@ -197,13 +194,11 @@ com\mycompany\jpademo\backend\dto\request\CreatePatientSessionRequest$CreatePati
 com\mycompany\jpademo\backend\dto\response\GlobalSearchResponse$GlobalSearchResponseBuilder.class
 com\mycompany\jpademo\backend\aop\aspect\DoctorActionLogAspect$1.class
 com\mycompany\jpademo\backend\security\handler\CustomLogoutSuccessHandler.class
-com\mycompany\jpademo\backend\controller\MedicationReminderController.class
 com\mycompany\jpademo\backend\entity\Review$ReviewBuilder.class
 com\mycompany\jpademo\backend\dto\response\UserSearchDTO.class
 com\mycompany\jpademo\backend\dto\response\MedicalRecordDetailResponse$ParamDTO.class
 com\mycompany\jpademo\backend\dto\response\InitiateCreateDoctorResponse$InitiateCreateDoctorResponseBuilder.class
 com\mycompany\jpademo\backend\dto\response\MedicalRecordDetailResponse$LabTestDTO.class
-com\mycompany\jpademo\backend\repository\MedicationReminderRepository.class
 com\mycompany\jpademo\backend\dto\request\UpdateSessionShareRequest.class
 com\mycompany\jpademo\backend\security\handler\RoleBasedSuccessHandler.class
 com\mycompany\jpademo\backend\repository\PatientRepository.class
@@ -237,7 +232,6 @@ com\mycompany\jpademo\backend\entity\DiagnosisSession.class
 com\mycompany\jpademo\backend\controller\UltrasoundAIController$ImageDetailDto.class
 com\mycompany\jpademo\backend\entity\RequestLog$RequestLogBuilder.class
 com\mycompany\jpademo\backend\repository\BlockedIPRepository.class
-com\mycompany\jpademo\backend\entity\MedicationReminder$MedicationReminderBuilder.class
 com\mycompany\jpademo\backend\dto\response\DashboardStatsResponse$DashboardStatsResponseBuilder.class
 com\mycompany\jpademo\backend\service\interfaces\LisIntegrationService.class
 com\mycompany\jpademo\backend\dto\response\ChartStatsResponse.class

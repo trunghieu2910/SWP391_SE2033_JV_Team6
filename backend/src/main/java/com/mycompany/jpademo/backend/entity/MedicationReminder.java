@@ -1,3 +1,4 @@
+
 package com.mycompany.jpademo.backend.entity;
 
 import com.mycompany.jpademo.backend.enums.ReminderStatus;
@@ -50,3 +51,4 @@ public class MedicationReminder {
         }
     }
 }
+
