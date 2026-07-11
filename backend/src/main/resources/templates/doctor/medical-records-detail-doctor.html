@@ -6,11 +6,12 @@
 <main class="mr-page animate-fade">
     <link rel="stylesheet" th:href="@{/css/doctor/doctor-medical-records.css}"/>
 
-    <!-- ══ BACK BAR ══ -->
-    <div class="back-bar">
-        <a href="/doctor/medical-records" class="btn-back">
+    <!-- ══ ACTIONS BAR ══ -->
+    <div class="back-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <a href="/doctor/medical-records" class="btn-back" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-secondary); transition: var(--transition);">
             <i class="fa-solid fa-chevron-left"></i> Quay lại danh sách
         </a>
+        <a th:href="@{/doctor/medical-records/{id}/export(id=${record.sessionID})}" class="btn-export-pdf" style="padding: 10px 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.2s;"><i class="fa-solid fa-file-pdf"></i> Xuất bản đầy đủ PDF</a>
     </div>
 
     <!-- ══ PATIENT BANNER ══ -->

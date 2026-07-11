@@ -1,3 +1,4 @@
+
 package com.mycompany.jpademo.backend.service.interfaces;
 
 import com.mycompany.jpademo.backend.dto.request.MedicationReminderRequest;
@@ -19,3 +20,4 @@ public interface MedicationReminderService {
 
     void deleteReminder(Integer patientId, Integer reminderId);
 }
+

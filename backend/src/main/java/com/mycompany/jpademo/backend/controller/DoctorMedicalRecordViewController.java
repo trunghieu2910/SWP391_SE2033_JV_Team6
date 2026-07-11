@@ -4,11 +4,15 @@ import com.mycompany.jpademo.backend.dto.response.MedicalRecordDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.MedicalRecordResponse;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.MedicalRecordService;
+import com.mycompany.jpademo.backend.service.interfaces.PdfService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -18,15 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * SOLID:
- *  - SRP: Controller này chỉ phụ trách render Thymeleaf views cho trang hồ sơ bệnh án của bác sĩ.
- *         Toàn bộ logic nghiệp vụ nằm trong MedicalRecordService.
- *  - OCP: Không sửa MedicalRecordController (REST API cũ), chỉ mở rộng thêm controller view mới.
- *  - LSP: Không vi phạm — không kế thừa class nào.
- *  - ISP: Phụ thuộc đúng interface MedicalRecordService, không phụ thuộc interface dư thừa.
- *  - DIP: Phụ thuộc vào interface MedicalRecordService, không phụ thuộc implementation cụ thể.
- */
 @Controller
 @RequestMapping("/doctor/medical-records")
 @PreAuthorize("hasRole('DOCTOR')")
@@ -34,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class DoctorMedicalRecordViewController {
 
     private final MedicalRecordService medicalRecordService;
+    private final PdfService pdfService;
 
     private static final int DEFAULT_PAGE_SIZE = 10;
 
@@ -117,5 +113,22 @@ public class DoctorMedicalRecordViewController {
         }
 
         return "doctor/medical-records-detail-doctor";
+    }
+// danh cho xuat file pdf
+    @GetMapping("/{sessionId}/export")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<byte[]> exportMedicalRecordPdf(
+            @PathVariable Integer sessionId) {
+        // Bác sĩ xuất được bản đầy đủ (isPatient = false → không che chẩn đoán)
+        MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordDetail(sessionId, false);
+        byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "medical_record_S" + sessionId + "_full.pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 }

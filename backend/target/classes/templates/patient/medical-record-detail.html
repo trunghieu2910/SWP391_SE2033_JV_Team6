@@ -5,9 +5,10 @@
 <main>
     <link rel="stylesheet" th:href="@{/css/patient/medical-record-detail.css}"/>
 
-    <!-- Back Button -->
-    <div style="text-align: left; margin-bottom: 20px;">
+    <!-- Actions Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <a th:href="@{/patient/medical-records}" class="back-btn" style="margin-bottom: 0;">← Quay lại danh sách</a>
+        <a th:href="@{/patient/medical-record/{id}/export(id=${record.sessionID})}" class="btn-export-pdf" style="padding: 10px 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.2s;"><i class="fa-solid fa-file-pdf"></i> Xuất file PDF</a>
     </div>
 
     <!-- Patient Banner -->
