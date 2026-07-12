@@ -338,3 +338,10 @@
     font-weight: 500;
 }
 
+.warning-text {
+    font-size: 0.8rem; /* nhỏ hơn */
+    color: #dc3545;    /* đỏ */
+    font-style: italic;
+    margin-top: 4px;
+    margin-bottom: 12px;
+}

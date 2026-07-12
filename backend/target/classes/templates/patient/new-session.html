@@ -70,6 +70,7 @@
                 <!-- Các nhóm triệu chứng -->
                 <div class="form-group">
                     <label class="section-label">Ra máu âm đạo bất thường</label>
+                    <p class="subtext warning-text">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
                     <div class="checkbox-group">
                         <label><input type="checkbox" class="symptom-checkbox" value="1" /> Ra máu giữa kỳ kinh</label>
                         <label><input type="checkbox" class="symptom-checkbox" value="2" /> Kinh nguyệt kéo dài bất thường</label>
@@ -81,6 +82,7 @@
 
                 <div class="form-group">
                     <label class="section-label">Khí hư bất thường</label>
+                    <p class="subtext warning-text">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
                     <div class="checkbox-group">
                         <label><input type="checkbox" class="symptom-checkbox" value="6" /> Khí hư nhiều</label>
                         <label><input type="checkbox" class="symptom-checkbox" value="7" /> Khí hư có mùi hôi</label>
@@ -91,6 +93,7 @@
 
                 <div class="form-group">
                     <label class="section-label">Đau</label>
+                    <p class="subtext warning-text">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
                     <div class="checkbox-group">
                         <label><input type="checkbox" class="symptom-checkbox" value="10" /> Đau vùng chậu</label>
                         <label><input type="checkbox" class="symptom-checkbox" value="11" /> Đau bụng dưới</label>
@@ -101,6 +104,7 @@
 
                 <div class="form-group">
                     <label class="section-label">Triệu chứng tiết niệu</label>
+                    <p class="subtext warning-text">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
                     <div class="checkbox-group">
                         <label><input type="checkbox" class="symptom-checkbox" value="17" /> Tiểu nhiều lần</label>
                         <label><input type="checkbox" class="symptom-checkbox" value="18" /> Tiểu buốt</label>
@@ -111,6 +115,7 @@
 
                 <div class="form-group">
                     <label class="section-label">Triệu chứng tiêu hóa</label>
+                    <p class="subtext warning-text">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
                     <div class="checkbox-group">
                         <label><input type="checkbox" class="symptom-checkbox" value="21" /> Táo bón kéo dài</label>
                         <label><input type="checkbox" class="symptom-checkbox" value="22" /> Đầy bụng</label>
@@ -121,6 +126,7 @@
 
                 <div class="form-group">
                     <label class="section-label">Yếu tố nguy cơ</label>
+                    <p class="subtext warning-text">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
                     <div class="checkbox-group">
                         <label><input type="checkbox" class="symptom-checkbox" value="25" /> Tiền sử gia đình ung thư phụ khoa</label>
                         <label><input type="checkbox" class="symptom-checkbox" value="26" /> Béo phì</label>
@@ -159,20 +165,115 @@
 
         <section class="form-card" th:if="${activeSession.clinicalInputMode != null and activeSession.clinicalInputMode.name() == 'PATIENT' and activeSession.symptomResultStatus != null and activeSession.symptomResultStatus.name() == 'COMPLETED'}">
             <h2>Triệu chứng của bạn đã được gửi</h2>
-            <p>Hệ thống đã ghi nhận thông tin triệu chứng của bạn. Bác sĩ sẽ xem xét và có thể cập nhật thêm thông tin nếu cần thiết.</p>
-            <div class="submitted-data">
-                <div class="data-section">
-                    <h3>Thông tin đã gửi</h3>
-                    <div class="data-row">
-                        <span class="data-label">Chiều cao</span>
-                        <span class="data-value" th:if="${activeSession.height != null}" th:text="${activeSession.height} + ' cm'">—</span>
+            <p>Hệ thống đã ghi nhận thông tin triệu chứng của bạn. Đây là biểu mẫu đã điền, chỉ xem không được sửa.</p>
+            <form class="readonly-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Chiều cao (cm)</label>
+                        <input type="number" name="height" class="form-input" disabled="disabled" th:value="${activeSession.height}" />
                     </div>
-                    <div class="data-row">
-                        <span class="data-label">Cân nặng</span>
-                        <span class="data-value" th:if="${activeSession.weight != null}" th:text="${activeSession.weight} + ' kg'">—</span>
+                    <div class="form-group">
+                        <label>Cân nặng (kg)</label>
+                        <input type="number" name="weight" class="form-input" disabled="disabled" th:value="${activeSession.weight}" />
                     </div>
                 </div>
-            </div>
+
+                <div class="form-group">
+                    <label>Tình trạng mãn kinh</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="menopauseStatus" value="PRE" disabled="disabled" th:checked="${activeSession.symptomResult != null and activeSession.symptomResult.menopauseStatus == 'PRE'}" /> Chưa mãn kinh</label>
+                        <label><input type="radio" name="menopauseStatus" value="POST" disabled="disabled" th:checked="${activeSession.symptomResult != null and activeSession.symptomResult.menopauseStatus == 'POST'}" /> Đã mãn kinh</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="section-label">Ra máu âm đạo bất thường</label>
+                    <p class="subtext">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 1)}" /> Ra máu giữa kỳ kinh</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 2)}" /> Kinh nguyệt kéo dài bất thường</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 3)}" /> Rong kinh (lượng máu nhiều)</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 4)}" /> Ra máu sau mãn kinh</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 5)}" /> Ra máu sau quan hệ</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="section-label">Khí hư bất thường</label>
+                    <p class="subtext">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 6)}" /> Khí hư nhiều</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 7)}" /> Khí hư có mùi hôi</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 8)}" /> Khí hư lẫn máu</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 9)}" /> Dịch tiết màu nâu</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="section-label">Đau</label>
+                    <p class="subtext">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 10)}" /> Đau vùng chậu</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 11)}" /> Đau bụng dưới</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 12)}" /> Đau lưng dưới</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 13)}" /> Đau khi quan hệ</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="section-label">Triệu chứng tiết niệu</label>
+                    <p class="subtext">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 17)}" /> Tiểu nhiều lần</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 18)}" /> Tiểu buốt</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 19)}" /> Tiểu khó</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 20)}" /> Tiểu ra máu</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="section-label">Triệu chứng tiêu hóa</label>
+                    <p class="subtext">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 21)}" /> Táo bón kéo dài</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 22)}" /> Đầy bụng</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 23)}" /> Chướng bụng</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 24)}" /> Buồn nôn</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="section-label">Yếu tố nguy cơ</label>
+                    <p class="subtext">Bỏ qua nếu bạn không có các dấu hiệu trên</p>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 25)}" /> Tiền sử gia đình ung thư phụ khoa</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 26)}" /> Béo phì</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 27)}" /> Đái tháo đường</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 28)}" /> Tăng huyết áp</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 29)}" /> Hội chứng buồng trứng đa nang (PCOS)</label>
+                        <label><input type="checkbox" disabled="disabled" th:checked="${activeSession.symptomResult != null and #lists.contains(activeSession.symptomResult.symptomIds, 30)}" /> Điều trị hormone estrogen kéo dài</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="section-label">Đánh giá mức độ triệu chứng</label>
+                    <div class="radio-group">
+                        <label>Thời gian xuất hiện triệu chứng:
+                            <select class="form-input" disabled="disabled">
+                                <option value="">Chọn</option>
+                                <option value="DƯỚI_1_THÁNG" th:selected="${activeSession.symptomResult != null and activeSession.symptomResult.symptomDuration == 'DƯỚI_1_THÁNG'}">Dưới 1 tháng</option>
+                                <option value="1-3_THÁNG" th:selected="${activeSession.symptomResult != null and activeSession.symptomResult.symptomDuration == '1-3_THÁNG'}">1–3 tháng</option>
+                                <option value="3-6_THÁNG" th:selected="${activeSession.symptomResult != null and activeSession.symptomResult.symptomDuration == '3-6_THÁNG'}">3–6 tháng</option>
+                                <option value="TRÊN_6_THÁNG" th:selected="${activeSession.symptomResult != null and activeSession.symptomResult.symptomDuration == 'TRÊN_6_THÁNG'}">Trên 6 tháng</option>
+                            </select>
+                        </label>
+                        <label>Triệu chứng có nặng dần không?
+                            <input type="radio" name="symptomProgressingReadonly" value="true" disabled="disabled" th:checked="${activeSession.symptomResult != null and activeSession.symptomResult.symptomProgressing == true}"> Có
+                            <input type="radio" name="symptomProgressingReadonly" value="false" disabled="disabled" th:checked="${activeSession.symptomResult != null and activeSession.symptomResult.symptomProgressing == false}"> Không
+                        </label>
+                    </div>
+                </div>
+            </form>
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
                 <a th:href="@{/patient/home}" class="btn-secondary">Quay lại trang chính</a>
             </div>

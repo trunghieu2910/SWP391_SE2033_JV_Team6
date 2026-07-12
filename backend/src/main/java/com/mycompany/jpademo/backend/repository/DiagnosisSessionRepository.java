@@ -137,6 +137,13 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "WHERE ds.sessionId = :sessionId")
     Optional<DiagnosisSession> findSessionWithDetails(@Param("sessionId") Integer sessionId);
 
+    @Query("SELECT DISTINCT ds FROM DiagnosisSession ds " +
+            "LEFT JOIN FETCH ds.symptomResult sr " +
+            "LEFT JOIN FETCH sr.symptomDetails sd " +
+            "LEFT JOIN FETCH sd.symptom " +
+            "WHERE ds.patient.patientId = :patientId")
+    List<DiagnosisSession> findByPatientPatientIdWithDetails(@Param("patientId") Integer patientId);
+
     @Query("SELECT ds FROM DiagnosisSession ds " +
             "WHERE ds.user.userId = :doctorId " +
             "AND (:keyword IS NULL OR LOWER(ds.patient.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +

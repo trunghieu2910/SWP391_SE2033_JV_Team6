@@ -3,6 +3,7 @@ package com.mycompany.jpademo.backend.service.impl;
 import com.mycompany.jpademo.backend.dto.request.CreateDiagnosisSessionRequest;
 import com.mycompany.jpademo.backend.dto.request.SubmitSymptomFormRequest;
 import com.mycompany.jpademo.backend.dto.response.DiagnosisSessionResponse;
+import com.mycompany.jpademo.backend.dto.response.SymptomDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.SymptomResultResponse;
 import com.mycompany.jpademo.backend.entity.*;
 import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
@@ -208,15 +209,24 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .symptomResultStatus(symptomStatus)
                 .clinicalInputMode(session.getClinicalInputMode())
                 .createdAt(session.getCreatedAt())
+                .symptomResult(session.getSymptomResult() != null ? mapSymptomResultToResponse(session.getSymptomResult()) : null)
                 .build();
     }
 
     private SymptomResultResponse mapSymptomResultToResponse(SymptomResult symptomResult) {
-        List<Integer> symptomIds = symptomResult.getSymptomDetails() != null
+        List<SymptomDetailResponse> symptomDetails = symptomResult.getSymptomDetails() != null
                 ? symptomResult.getSymptomDetails().stream()
-                .map(sd -> sd.getSymptom().getSymptomId())
+                .map(sd -> SymptomDetailResponse.builder()
+                        .symptomDetailId(sd.getSymptomDetailsId())
+                        .symptomId(sd.getSymptom().getSymptomId())
+                        .symptomName(sd.getSymptom().getSymptomName())
+                        .build())
                 .collect(Collectors.toList())
                 : List.of();
+
+        List<Integer> symptomIds = symptomDetails.stream()
+                .map(SymptomDetailResponse::getSymptomId)
+                .collect(Collectors.toList());
 
         return SymptomResultResponse.builder()
                 .symptomResultId(symptomResult.getSymptomResultId())
@@ -227,6 +237,7 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .menopauseStatus(symptomResult.getMenopauseStatus())
                 .symptomDuration(symptomResult.getSymptomDuration())
                 .symptomProgressing(symptomResult.getSymptomProgressing())
+                .symptomDetails(symptomDetails)
                 .build();
     }
 

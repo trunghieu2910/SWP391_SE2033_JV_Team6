@@ -5,8 +5,12 @@ import com.mycompany.jpademo.backend.dto.response.MedicalRecordResponse;
 import com.mycompany.jpademo.backend.dto.response.MedicalRecordDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.ProfileResponse;
 import com.mycompany.jpademo.backend.dto.response.DiagnosisSessionResponse;
+import com.mycompany.jpademo.backend.dto.response.SymptomDetailResponse;
+import com.mycompany.jpademo.backend.dto.response.SymptomResultResponse;
 import com.mycompany.jpademo.backend.entity.DiagnosisSession;
 import com.mycompany.jpademo.backend.entity.Patient;
+import com.mycompany.jpademo.backend.entity.SymptomDetails;
+import com.mycompany.jpademo.backend.entity.SymptomResult;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.repository.DiagnosisSessionRepository;
 import com.mycompany.jpademo.backend.repository.PatientRepository;
@@ -39,6 +43,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.time.LocalDate;
 
 @Controller
@@ -176,21 +181,61 @@ public class PatientController {
     }
 
     private DiagnosisSessionResponse getActiveSession(Patient patient) {
-        return sessionRepository.findByPatientPatientId(patient.getPatientId()).stream()
+        return sessionRepository.findByPatientPatientIdWithDetails(patient.getPatientId()).stream()
                 .filter(s -> s.getStatus() != null && s.getStatus() != DiagnosisSessionStatus.COMPLETED)
                 .max(Comparator.comparing(DiagnosisSession::getCreatedAt))
-                .map(session -> DiagnosisSessionResponse.builder()
-                        .sessionId(session.getSessionId())
-                        .patientId(session.getPatient().getPatientId())
-                        .patientName(session.getPatient().getUser().getFullName())
-                        .status(session.getStatus())
-                        .symptomResultStatus(session.getSymptomResult() != null ? session.getSymptomResult().getStatus() : null)
-                        .clinicalInputMode(session.getClinicalInputMode())
-                        .createdAt(session.getCreatedAt())
-                        .weight(session.getWeight())
-                        .height(session.getHeight())
-                        .build())
+                .map(session -> {
+                    SymptomResult symptomResult = session.getSymptomResult();
+                    if (symptomResult != null) {
+                        symptomResult = symptomResultRepository.findBySessionIdWithDetails(session.getSessionId())
+                                .orElse(symptomResult);
+                    }
+                    return DiagnosisSessionResponse.builder()
+                            .sessionId(session.getSessionId())
+                            .patientId(session.getPatient().getPatientId())
+                            .patientName(session.getPatient().getUser().getFullName())
+                            .status(session.getStatus())
+                            .symptomResultStatus(symptomResult != null ? symptomResult.getStatus() : null)
+                            .clinicalInputMode(session.getClinicalInputMode())
+                            .createdAt(session.getCreatedAt())
+                            .weight(session.getWeight())
+                            .height(session.getHeight())
+                            .symptomResult(symptomResult != null ? mapSymptomResult(symptomResult) : null)
+                            .build();
+                })
                 .orElse(null);
+    }
+
+    private SymptomResultResponse mapSymptomResult(SymptomResult symptomResult) {
+        if (symptomResult == null) {
+            return null;
+        }
+
+        List<SymptomDetailResponse> symptomDetails = symptomResult.getSymptomDetails() != null
+                ? symptomResult.getSymptomDetails().stream()
+                .map(detail -> SymptomDetailResponse.builder()
+                        .symptomDetailId(detail.getSymptomDetailsId())
+                        .symptomId(detail.getSymptom().getSymptomId())
+                        .symptomName(detail.getSymptom().getSymptomName())
+                        .build())
+                .collect(Collectors.toList())
+                : List.of();
+
+        List<Integer> symptomIds = symptomDetails.stream()
+                .map(SymptomDetailResponse::getSymptomId)
+                .collect(Collectors.toList());
+
+        return SymptomResultResponse.builder()
+                .symptomResultId(symptomResult.getSymptomResultId())
+                .sessionId(symptomResult.getDiagnosisSession().getSessionId())
+                .status(symptomResult.getStatus())
+                .createdAt(symptomResult.getCreatedAt())
+                .symptomIds(symptomIds)
+                .menopauseStatus(symptomResult.getMenopauseStatus())
+                .symptomDuration(symptomResult.getSymptomDuration())
+                .symptomProgressing(symptomResult.getSymptomProgressing())
+                .symptomDetails(symptomDetails)
+                .build();
     }
 
     @GetMapping("/profile")
