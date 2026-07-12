@@ -1,4 +1,4 @@
-﻿/* ============================================================================
+/* ============================================================================
    NEW SESSION STYLES - form layout for patient new-session
    ============================================================================ */
 
@@ -339,9 +339,25 @@
 }
 
 .warning-text {
-    font-size: 0.8rem; /* nhỏ hơn */
-    color: #dc3545;    /* đỏ */
-    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #2563eb;
+    background-color: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    padding: 6px 10px;
     margin-top: 4px;
     margin-bottom: 12px;
+    font-weight: 500;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.warning-text .info-icon {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    flex-shrink: 0;
 }
