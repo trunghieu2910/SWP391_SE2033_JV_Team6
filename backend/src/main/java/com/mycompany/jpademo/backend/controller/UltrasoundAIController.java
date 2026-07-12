@@ -52,24 +52,91 @@ public class UltrasoundAIController {
             if (sessionOpt.isEmpty()) {
                 return ResponseEntity.badRequest().body("Không tìm thấy phiên khám (Session ID: " + sessionId + ")");
             }
+
+            // Kiểm tra dung lượng file tối thiểu (10KB)
+            if (file.getSize() < 10240) {
+                return ResponseEntity.badRequest().body("Vui lòng chọn ảnh chất lượng hơn.");
+            }
+
+            // Kiểm tra định dạng file
+            String originalName = file.getOriginalFilename();
+            String ext = "";
+            if (originalName != null && originalName.contains(".")) {
+                ext = originalName.substring(originalName.lastIndexOf(".")).toLowerCase();
+            }
+            if (!ext.equals(".jpg") && !ext.equals(".jpeg") && !ext.equals(".png") && !ext.equals(".dcm") && !ext.equals(".dicom")) {
+                return ResponseEntity.badRequest().body("Định dạng file không hỗ trợ. Hệ thống chỉ chấp nhận JPG, PNG hoặc DICOM.");
+            }
             
-            // 2. Lưu file gốc
-            String originalFileName = "orig_" + UUID.randomUUID().toString() + ".jpg";
+            // 2. Tạo thư mục lưu file
             Path uploadDir = Paths.get("uploads");
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
+            
+            String originalFileName = "orig_" + UUID.randomUUID().toString() + ext;
             Path originalPath = uploadDir.resolve(originalFileName);
             Files.copy(file.getInputStream(), originalPath, StandardCopyOption.REPLACE_EXISTING);
-            String originalUrlPath = "/uploads/" + originalFileName;
+            
+            String originalUrlPath = null;
+            byte[] predictImageBytes = null;
 
-            // 3. Gửi sang Python AI
+            // 3. Nếu là file DICOM, gọi Python chuyển đổi sang JPEG trước khi lưu và phân tích
+            if (ext.equals(".dcm") || ext.equals(".dicom")) {
+                String convertUrl = "http://localhost:5000/convert-dicom";
+                HttpHeaders convertHeaders = new HttpHeaders();
+                convertHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+                
+                final String finalExt = ext;
+                MultiValueMap<String, Object> convertBody = new LinkedMultiValueMap<>();
+                convertBody.add("file", new ByteArrayResource(file.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return "image" + finalExt;
+                    }
+                });
+                
+                HttpEntity<MultiValueMap<String, Object>> convertRequestEntity = new HttpEntity<>(convertBody, convertHeaders);
+                ResponseEntity<byte[]> convertResponse;
+                try {
+                    convertResponse = restTemplate.postForEntity(convertUrl, convertRequestEntity, byte[].class);
+                } catch (org.springframework.web.client.HttpStatusCodeException e) {
+                    String errorBody = e.getResponseBodyAsString();
+                    try {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(errorBody);
+                        if (node.has("error")) {
+                            return ResponseEntity.badRequest().body(node.get("error").asText());
+                        }
+                    } catch (Exception jsonEx) {}
+                    return ResponseEntity.badRequest().body("Lỗi kiểm tra chất lượng DICOM: " + errorBody);
+                } catch (Exception e) {
+                    return ResponseEntity.status(500).body("Không thể kết nối Python AI Service ở cổng 5000");
+                }
+
+                if (convertResponse.getStatusCode() == HttpStatus.OK && convertResponse.getBody() != null) {
+                    // Lưu ảnh JPEG được trích xuất từ DICOM để trình duyệt có thể hiển thị
+                    String origJpgName = "orig_" + UUID.randomUUID().toString() + ".jpg";
+                    Path origJpgPath = uploadDir.resolve(origJpgName);
+                    Files.write(origJpgPath, convertResponse.getBody());
+                    originalUrlPath = "/uploads/" + origJpgName;
+                    predictImageBytes = convertResponse.getBody();
+                } else {
+                    return ResponseEntity.status(500).body("Lỗi chuyển đổi file DICOM sang ảnh JPEG.");
+                }
+            } else {
+                originalUrlPath = "/uploads/" + originalFileName;
+                predictImageBytes = file.getBytes();
+            }
+            
+            // 4. Gửi sang Python AI
             String aiServiceUrl = "http://localhost:5000/predict";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             
+            final byte[] bytesToSend = predictImageBytes;
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new ByteArrayResource(file.getBytes()) {
+            body.add("file", new ByteArrayResource(bytesToSend) {
                 @Override
                 public String getFilename() {
                     return "image.jpg";
@@ -80,6 +147,16 @@ public class UltrasoundAIController {
             ResponseEntity<byte[]> aiResponse;
             try {
                 aiResponse = restTemplate.postForEntity(aiServiceUrl, requestEntity, byte[].class);
+            } catch (org.springframework.web.client.HttpStatusCodeException e) {
+                String errorBody = e.getResponseBodyAsString();
+                try {
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(errorBody);
+                    if (node.has("error")) {
+                        return ResponseEntity.badRequest().body(node.get("error").asText());
+                    }
+                } catch (Exception jsonEx) {}
+                return ResponseEntity.badRequest().body(errorBody);
             } catch (Exception e) {
                 return ResponseEntity.status(500).body("Không thể kết nối Python AI Service ở cổng 5000");
             }
@@ -103,15 +180,13 @@ public class UltrasoundAIController {
                 return ResponseEntity.status(500).body("Lỗi xử lý AI");
             }
 
-            // 4. Lưu vào Database
-            // Tạo nhóm ảnh (MedicalImage)
+            // 5. Lưu vào Database
             MedicalImage mi = new MedicalImage();
             mi.setDiagnosisSession(sessionOpt.get());
             mi.setImageType("Siêu âm bụng");
             mi.setStatus(com.mycompany.jpademo.backend.enums.MedicalImageStatus.COMPLETED);
             mi = medicalImageRepository.save(mi);
             
-            // Tạo chi tiết ảnh (MedicalImageDetails)
             MedicalImageDetails detail = new MedicalImageDetails();
             detail.setMedicalImage(mi);
             detail.setImageUrl(originalUrlPath);
@@ -155,7 +230,7 @@ public class UltrasoundAIController {
         MedicalImageDetails detail = opt.get();
 
         try {
-            // Tải ảnh gốc từ URL (vì db lưu dạng http) hoặc file local
+            // Tải ảnh gốc từ URL hoặc file local
             byte[] imageBytes;
             String originalUrl = detail.getImageUrl();
             if (originalUrl.startsWith("http")) {
@@ -167,13 +242,62 @@ public class UltrasoundAIController {
                 imageBytes = Files.readAllBytes(path);
             }
 
+            String ext = "";
+            if (originalUrl.contains(".")) {
+                ext = originalUrl.substring(originalUrl.lastIndexOf(".")).toLowerCase();
+            }
+
+            byte[] predictImageBytes = imageBytes;
+            
+            // Nếu file gốc là DICOM, cần chuyển đổi trước
+            if (ext.equals(".dcm") || ext.equals(".dicom")) {
+                String convertUrl = "http://localhost:5000/convert-dicom";
+                HttpHeaders convertHeaders = new HttpHeaders();
+                convertHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+                
+                final byte[] dcmBytes = imageBytes;
+                final String finalExt = ext;
+                MultiValueMap<String, Object> convertBody = new LinkedMultiValueMap<>();
+                convertBody.add("file", new ByteArrayResource(dcmBytes) {
+                    @Override
+                    public String getFilename() {
+                        return "image" + finalExt;
+                    }
+                });
+                
+                HttpEntity<MultiValueMap<String, Object>> convertRequestEntity = new HttpEntity<>(convertBody, convertHeaders);
+                ResponseEntity<byte[]> convertResponse;
+                try {
+                    convertResponse = restTemplate.postForEntity(convertUrl, convertRequestEntity, byte[].class);
+                } catch (org.springframework.web.client.HttpStatusCodeException e) {
+                    String errorBody = e.getResponseBodyAsString();
+                    try {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(errorBody);
+                        if (node.has("error")) {
+                            return ResponseEntity.badRequest().body(node.get("error").asText());
+                        }
+                    } catch (Exception jsonEx) {}
+                    return ResponseEntity.badRequest().body("Lỗi kiểm tra chất lượng DICOM: " + errorBody);
+                } catch (Exception e) {
+                    return ResponseEntity.status(500).body("Không thể kết nối Python AI Service ở cổng 5000");
+                }
+
+                if (convertResponse.getStatusCode() == HttpStatus.OK && convertResponse.getBody() != null) {
+                    predictImageBytes = convertResponse.getBody();
+                } else {
+                    return ResponseEntity.status(500).body("Lỗi chuyển đổi file DICOM sang ảnh JPEG.");
+                }
+            }
+
             // Gửi ảnh sang Python AI Service
             String aiServiceUrl = "http://localhost:5000/predict";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
+            final byte[] bytesToSend = predictImageBytes;
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new ByteArrayResource(imageBytes) {
+            body.add("file", new ByteArrayResource(bytesToSend) {
                 @Override
                 public String getFilename() {
                     return "image.jpg";
@@ -181,7 +305,22 @@ public class UltrasoundAIController {
             });
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-            ResponseEntity<byte[]> response = restTemplate.postForEntity(aiServiceUrl, requestEntity, byte[].class);
+            ResponseEntity<byte[]> response;
+            try {
+                response = restTemplate.postForEntity(aiServiceUrl, requestEntity, byte[].class);
+            } catch (org.springframework.web.client.HttpStatusCodeException e) {
+                String errorBody = e.getResponseBodyAsString();
+                try {
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(errorBody);
+                    if (node.has("error")) {
+                        return ResponseEntity.badRequest().body(node.get("error").asText());
+                    }
+                } catch (Exception jsonEx) {}
+                return ResponseEntity.badRequest().body(errorBody);
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("Lỗi kết nối Python AI Service: " + e.getMessage());
+            }
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 // Lưu file ảnh AI
