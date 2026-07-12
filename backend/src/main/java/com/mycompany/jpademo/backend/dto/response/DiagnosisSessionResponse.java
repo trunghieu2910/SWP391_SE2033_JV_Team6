@@ -2,6 +2,7 @@ package com.mycompany.jpademo.backend.dto.response;
 
 import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
+import com.mycompany.jpademo.backend.dto.response.SymptomResultResponse;
 import com.mycompany.jpademo.backend.enums.SymptomResultStatus;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,4 +21,5 @@ public class DiagnosisSessionResponse {
     private SymptomResultStatus symptomResultStatus;
     private ClinicalInputMode clinicalInputMode;
     private LocalDateTime createdAt;
+    private SymptomResultResponse symptomResult;
 }
