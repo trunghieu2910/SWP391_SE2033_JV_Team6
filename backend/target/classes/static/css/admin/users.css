@@ -69,7 +69,7 @@
     color: var(--primary);
 }
 
-.form-field input, .form-field select {
+.form-field input, .form-field select, .form-field textarea {
     padding: 11px 14px;
     border: 1px solid var(--border-color);
     border-radius: 10px;
@@ -79,9 +79,11 @@
     background-color: #ffffff;
     color: var(--neutral-dark);
     width: 100%;
+    font-family: inherit;
+    resize: vertical;
 }
 
-.form-field input:focus, .form-field select:focus {
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(16, 3, 87, 0.05);
 }

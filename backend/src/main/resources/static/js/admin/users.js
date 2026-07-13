@@ -67,9 +67,7 @@ function openStatusModal(button) {
         const form = document.getElementById('statusForm');
         const title = document.getElementById('modalTitle');
         const desc = document.getElementById('modalDescription');
-        const statusInput = document.getElementById('formStatusInput');
-        const submitBtn = document.getElementById('modalSubmitBtn');
-        const submitText = document.getElementById('modalSubmitText');
+        const statusSelect = document.getElementById('statusSelect');
         const reasonInput = document.getElementById('reasonInput');
         const userIdInput = document.getElementById('formUserIdInput');
 
@@ -91,18 +89,12 @@ function openStatusModal(button) {
         }
 
         // Set modal content
-        if (selectedUserStatus === 'BANNED') {
-            if (title) title.innerText = 'Mở khóa tài khoản';
-            if (desc) desc.innerText = 'Bạn có chắc chắn muốn mở khóa tài khoản "' + selectedUserName + '"?';
-            if (statusInput) statusInput.value = 'ACTIVE';
-            if (submitText) submitText.innerText = 'Mở khóa';
-            if (submitBtn) submitBtn.className = 'btn-action btn-success';
-        } else {
-            if (title) title.innerText = 'Khóa tài khoản';
-            if (desc) desc.innerText = 'Bạn có chắc chắn muốn khóa tài khoản "' + selectedUserName + '"?';
-            if (statusInput) statusInput.value = 'BANNED';
-            if (submitText) submitText.innerText = 'Khóa';
-            if (submitBtn) submitBtn.className = 'btn-action btn-danger';
+        if (title) title.innerText = 'Cập nhật trạng thái';
+        if (desc) desc.innerText = 'Thay đổi trạng thái cho tài khoản "' + selectedUserName + '"';
+        
+        // Select current status
+        if (statusSelect && selectedUserStatus) {
+            statusSelect.value = selectedUserStatus;
         }
 
         // ✅ Hiển thị modal
@@ -143,7 +135,8 @@ function submitStatusForm() {
         const form = document.getElementById('statusForm');
         const reason = document.getElementById('reasonInput');
 
-        if (!reason || !reason.value || reason.value.trim() === '') {
+        if (!reason || !reason.value || reason.value.trim().length < 5) {
+            alert('Lý do thay đổi trạng thái phải từ 5 ký tự trở lên.');
             if (reason) {
                 reason.focus();
                 reason.style.borderColor = '#ef4444';

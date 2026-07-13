@@ -103,6 +103,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // ===== MODAL HANDLING =====
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeStatusModal();
+        }
+    });
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('statusModal');
+        if (e.target === modal) {
+            closeStatusModal();
+        }
+    });
 });
 
 function closeAlert(button) {
@@ -113,5 +129,80 @@ function closeAlert(button) {
         setTimeout(function() {
             alert.style.display = 'none';
         }, 300);
+    }
+}
+
+// ===== MODAL FUNCTIONS =====
+function openStatusModal() {
+    try {
+        const modal = document.getElementById('statusModal');
+        const reasonInput = document.getElementById('reasonInput');
+
+        // Reset form
+        if (reasonInput) {
+            reasonInput.value = '';
+            reasonInput.style.borderColor = '';
+            reasonInput.style.borderWidth = '';
+        }
+
+        // ✅ Hiển thị modal
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.style.pointerEvents = 'auto';
+            document.body.style.overflow = 'hidden';
+        }
+
+    } catch (error) {
+        console.error('❌ Lỗi khi mở modal:', error);
+        alert('Có lỗi xảy ra khi mở modal. Vui lòng thử lại.');
+    }
+}
+
+function closeStatusModal() {
+    try {
+        const modal = document.getElementById('statusModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.style.pointerEvents = 'none';
+        }
+        document.body.style.overflow = '';
+
+        const reasonInput = document.getElementById('reasonInput');
+        if (reasonInput) {
+            reasonInput.value = '';
+            reasonInput.style.borderColor = '';
+            reasonInput.style.borderWidth = '';
+        }
+    } catch (error) {
+        console.error('❌ Lỗi khi đóng modal:', error);
+    }
+}
+
+function submitStatusForm() {
+    try {
+        const form = document.getElementById('statusForm');
+        const reason = document.getElementById('reasonInput');
+
+        if (!reason || !reason.value || reason.value.trim().length < 5) {
+            alert('Lý do thay đổi trạng thái phải từ 5 ký tự trở lên.');
+            if (reason) {
+                reason.focus();
+                reason.style.borderColor = '#ef4444';
+                reason.style.borderWidth = '2px';
+                setTimeout(() => {
+                    reason.style.borderColor = '';
+                    reason.style.borderWidth = '';
+                }, 2000);
+            }
+            return;
+        }
+
+        console.log('📤 Submitting form...');
+        if (form) {
+            form.submit();
+        }
+    } catch (error) {
+        console.error('❌ Lỗi khi submit form:', error);
+        alert('Có lỗi xảy ra khi gửi form. Vui lòng thử lại.');
     }
 }

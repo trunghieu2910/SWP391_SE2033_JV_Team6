@@ -113,12 +113,11 @@
                             </a>
                             <button th:if="${user.roleName != null && user.roleName.toString() != 'ADMIN'}"
                                     type="button"
-                                    class="btn-action btn-status"
-                                    th:classappend="${user.status != null && user.status.toString() == 'BANNED' ? 'btn-unlock' : 'btn-lock'}"
+                                    class="btn-action btn-status btn-lock"
                                     th:attr="data-id=${user.userId},data-name=${user.fullName},data-status=${user.status.toString()}"
                                     onclick="openStatusModal(this)">
-                                <i th:class="${user.status != null && user.status.toString() == 'BANNED' ? 'fa-solid fa-unlock' : 'fa-solid fa-lock'}"></i>
-                                <span th:text="${user.status != null && user.status.toString() == 'BANNED' ? 'Mở khóa' : 'Khóa'}">Khóa</span>
+                                <i class="fa-solid fa-user-gear"></i>
+                                <span>Trạng thái</span>
                             </button>
                         </div>
                     </td>
@@ -170,7 +169,7 @@
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <div>
-                    <h3 id="modalTitle">Khóa tài khoản</h3>
+                    <h3 id="modalTitle">Cập nhật trạng thái</h3>
                     <p id="modalDescription">Bạn có chắc chắn muốn thay đổi trạng thái?</p>
                 </div>
                 <button type="button" class="modal-close" onclick="closeStatusModal()">
@@ -179,19 +178,20 @@
             </div>
             <form id="statusForm" method="post" class="modal-body">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" name="status" id="formStatusInput">
                 <input type="hidden" name="userId" id="formUserIdInput">
+
+                <div class="form-field" style="margin-bottom: 16px;">
+                    <label for="statusSelect">Trạng thái mới <span class="required">*</span></label>
+                    <select name="status" id="statusSelect" required>
+                        <option value="ACTIVE">Mở khoá tài khoản</option>
+                        <option value="BANNED">Khoá tài khoản</option>
+                        <option value="INACTIVE">Không hoạt động</option>
+                    </select>
+                </div>
 
                 <div class="form-field">
                     <label for="reasonInput">Lý do thay đổi trạng thái <span class="required">*</span></label>
-                    <select name="reason" id="reasonInput" required>
-                        <option value="">Chọn lý do...</option>
-                        <option value="Vi phạm điều khoản dịch vụ hệ thống">Vi phạm điều khoản dịch vụ</option>
-                        <option value="Yêu cầu từ người dùng sở hữu tài khoản">Người dùng tự yêu cầu đóng</option>
-                        <option value="Hoạt động đáng ngờ cần kiểm tra bảo mật">Hoạt động bất thường / Nghi vấn hack</option>
-                        <option value="Tài khoản bác sĩ giả mạo chứng chỉ">Nghi ngờ thông tin chứng chỉ</option>
-                        <option value="Mở khóa tài khoản sau thời gian tạm ngưng">Mở khóa - Đã xác minh lại</option>
-                    </select>
+                    <textarea name="reason" id="reasonInput" rows="3" placeholder="Nhập lý do thay đổi trạng thái..." required></textarea>
                 </div>
             </form>
             <div class="modal-footer">
