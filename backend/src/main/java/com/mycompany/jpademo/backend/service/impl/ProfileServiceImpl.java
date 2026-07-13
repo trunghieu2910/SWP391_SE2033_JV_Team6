@@ -12,6 +12,9 @@ import com.mycompany.jpademo.backend.service.interfaces.ProfileService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -64,10 +67,14 @@ public class ProfileServiceImpl implements ProfileService {
             userRepository.save(user);
             patientRepository.save(patient);
 
+            updateSessionUser(user);
+
             return mapPatientProfile(user, patient);
         }
 
         userRepository.save(user);
+
+        updateSessionUser(user);
 
         return mapUserProfile(user);
     }
@@ -184,5 +191,23 @@ public class ProfileServiceImpl implements ProfileService {
                 .address(patient.getAddress())
 
                 .build();
+    }
+
+    private void updateSessionUser(User updatedUser) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+                CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+                User sessionUser = userDetails.getUser();
+                if (sessionUser != null && sessionUser.getUserId().equals(updatedUser.getUserId())) {
+                    sessionUser.setFullName(updatedUser.getFullName());
+                    sessionUser.setUserName(updatedUser.getUserName());
+                    sessionUser.setPhoneNumber(updatedUser.getPhoneNumber());
+                    sessionUser.setNationalID(updatedUser.getNationalID());
+                }
+            }
+        } catch (Exception e) {
+            // Ignore if security context is not available or exception occurs
+        }
     }
 }
