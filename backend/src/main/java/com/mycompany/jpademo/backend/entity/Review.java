@@ -39,7 +39,7 @@ public class Review {
     @JoinColumn(name = "sessionID", nullable = false, unique = true)
     private DiagnosisSession diagnosisSession;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID", nullable = false)
     private User user;
 }

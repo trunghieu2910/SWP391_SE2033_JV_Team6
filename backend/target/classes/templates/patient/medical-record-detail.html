@@ -1,161 +1,365 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{patient/layout :: main-layout(~{::main}, 'Chi tiết bệnh án', 'records')}">
+      th:replace="~{patient/layout :: main-layout(~{::main}, ${record.sessionID != null ? 'Chi tiết bệnh án #S' + #numbers.formatInteger(record.sessionID, 4) : 'Chi tiết bệnh án'}, 'records')}">
 <body>
-<main>
+
+<main class="mr-page animate-fade">
     <link rel="stylesheet" th:href="@{/css/patient/medical-record-detail.css}"/>
 
-    <!-- Actions Bar -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <a th:href="@{/patient/medical-records}" class="back-btn" style="margin-bottom: 0;">← Quay lại danh sách</a>
+    <!-- ══ ACTIONS BAR ══ -->
+    <div class="back-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <a href="/patient/medical-records" class="btn-back" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-secondary); transition: var(--transition);">
+            <i class="fa-solid fa-chevron-left"></i> Quay lại danh sách
+        </a>
         <a th:href="@{/patient/medical-record/{id}/export(id=${record.sessionID})}" class="btn-export-pdf" style="padding: 10px 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: all 0.2s;"><i class="fa-solid fa-file-pdf"></i> Xuất file PDF</a>
     </div>
 
-    <!-- Patient Banner -->
-    <div class="glass-panel">
-        <div class="patient-banner-header">
-            <div class="patient-info-group">
-                <div class="banner-avatar" th:text="${record.patientFullName != null ? record.patientFullName[0].toUpperCase() : 'P'}">P</div>
-                <div class="patient-basic-info">
-                    <h2 th:text="${record.patientFullName}">Họ tên bệnh nhân</h2>
-                    <div class="info-row">
-                        <span>CCCD: <strong th:text="${record.patientNationalID ?: '—'}">CCCD</strong></span>
-                        <span>•</span>
-                        <span>Giới tính: <strong th:text="${record.patientGender == 'Female' ? 'Nữ' : 'Nam'}">Nữ</strong></span>
-                        <span>•</span>
-                        <span th:if="${record.patientDob != null}">
-                            Tuổi: <strong th:text="${T(java.time.LocalDate).now().getYear() - T(java.lang.Integer).parseInt(#dates.format(record.patientDob, 'yyyy')) + ' tuổi'}">Tuổi</strong>
-                        </span>
+    <!-- ══ PATIENT BANNER ══ -->
+    <div class="patient-banner">
+        <div class="patient-left">
+            <!-- Avatar initials (lấy ký tự đầu của họ và tên) -->
+            <div class="patient-avatar"
+                 th:text="${record.patientFullName != null and record.patientFullName.length() > 0}
+                          ? ${record.patientFullName.substring(0,1).toUpperCase()}
+                          : '?'">?</div>
+
+            <div>
+                <div class="patient-name" th:text="${record.patientFullName ?: '—'}">—</div>
+                <div class="patient-meta-grid">
+                    <div class="info-pair">
+                        <span class="info-lbl">Số CCCD</span>
+                        <span class="info-val" th:text="${record.patientNationalID ?: '—'}">—</span>
+                    </div>
+                    <div class="info-pair">
+                        <span class="info-lbl">Giới tính</span>
+                        <span class="info-val"
+                              th:text="${record.patientGender == 'Female'} ? '♂ Nữ' : '♀ Nam'">—</span>
+                    </div>
+                    <div class="info-pair">
+                        <span class="info-lbl">Ngày sinh</span>
+                        <span class="info-val"
+                              th:text="${record.patientDob != null}
+                                       ? ${#dates.format(record.patientDob, 'dd/MM/yyyy')}
+                                       : '—'">—</span>
+                    </div>
+                    <div class="info-pair">
+                        <span class="info-lbl">Địa chỉ</span>
+                        <span class="info-val" th:text="${record.patientAddress ?: '—'}">—</span>
+                    </div>
+                    <div class="info-pair">
+                        <span class="info-lbl">Số điện thoại</span>
+                        <span class="info-val" th:text="${record.patientPhone ?: '—'}">—</span>
                     </div>
                 </div>
             </div>
-            <span class="status-badge" th:classappend="${record.isShared ? 'status-published' : 'status-unpublished'}"
-                  th:text="${record.isShared ? '🔗 Đã công bố' : '🔒 Chưa công bố'}">Đã công bố</span>
+        </div>
+
+        <div class="patient-right">
+            <!-- Trạng thái phiên khám -->
+            <span th:if="${record.status != null and record.status.name() == 'COMPLETED'}"
+                  class="badge badge-completed">
+                <span class="badge-dot"></span>HOÀN THÀNH
+            </span>
+            <span th:unless="${record.status != null and record.status.name() == 'COMPLETED'}"
+                  class="badge badge-pending">
+                <span class="badge-dot"></span>ĐANG XỬ LÝ
+            </span>
+            <!-- Chia sẻ -->
+            <span th:if="${record.isShared}" class="badge badge-shared">🔗 Đã công bố</span>
+            <span th:unless="${record.isShared}" class="badge badge-private">🔒 Chưa công bố</span>
         </div>
     </div>
 
-    <!-- 1. CLINICAL GENERAL INFO -->
-    <div class="glass-panel">
-        <h3>🏥 Thông tin khám bệnh</h3>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Ngày khám</span>
-                <span class="info-value" th:text="${record.createdAt != null ? #dates.format(record.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">Ngày khám</span>
+    <!-- ══ 1. THÔNG TIN PHIÊN KHÁM ══ -->
+    <div class="card">
+        <div class="sec-hdr">
+            <div class="sec-hdr-left">
+                <div class="sec-icon"><i class="fa-solid fa-hospital"></i></div>
+                <span class="sec-title">Thông Tin Phiên Khám</span>
             </div>
-            <div class="info-item">
-                <span class="info-label">Bác sĩ phụ trách</span>
-                <span class="info-value" th:text="${record.doctorFullName ?: '—'}">Bác sĩ phụ trách</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Chiều cao / Cân nặng</span>
-                <span class="info-value" th:text="${(record.height != null ? record.height + ' cm' : '—') + ' / ' + (record.weight != null ? record.weight + ' kg' : '—')}">Chiều cao / Cân nặng</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Tình trạng triệu chứng</span>
-                <span class="info-value" th:if="${record.symptoms != null and record.symptoms.size() > 0}"
-                      th:text="${#strings.listJoin(record.symptoms.![symptomName], ', ')}">Triệu chứng</span>
-                <span class="info-value" th:unless="${record.symptoms != null and record.symptoms.size() > 0}">Không ghi nhận triệu chứng</span>
+            <span class="session-id"
+                  th:text="${record.sessionID != null ? '#S' + #numbers.formatInteger(record.sessionID, 4) : '#S0000'}">—</span>
+        </div>
+        <div class="sec-inner">
+            <div class="info-grid info-grid-3">
+                <div class="info-pair">
+                    <span class="info-lbl">Mã phiên khám</span>
+                    <span class="info-val mono accent"
+                          th:text="${record.sessionID != null ? '#S' + #numbers.formatInteger(record.sessionID, 4) : '#S0000'}">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Bác sĩ phụ trách</span>
+                    <span class="info-val" th:text="${record.doctorFullName ?: '—'}">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Trạng thái</span>
+                    <span th:if="${record.status != null and record.status.name() == 'COMPLETED'}"
+                          class="badge badge-completed">
+                        <span class="badge-dot"></span>HOÀN THÀNH
+                    </span>
+                    <span th:unless="${record.status != null and record.status.name() == 'COMPLETED'}"
+                          class="badge badge-pending">
+                        <span class="badge-dot"></span>ĐANG XỬ LÝ
+                    </span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Cân nặng</span>
+                    <span class="info-val"
+                          th:text="${record.weight != null} ? ${record.weight + ' kg'} : '—'">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Chiều cao</span>
+                    <span class="info-val"
+                          th:text="${record.height != null} ? ${record.height + ' cm'} : '—'">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Chỉ số BMI</span>
+                    <span class="info-val accent"
+                          th:with="bmiVal=${record.weight != null and record.height != null
+                                           ? #numbers.formatDecimal(record.weight / ((record.height / 100) * (record.height / 100)), 1, 1)
+                                           : null}"
+                          th:text="${bmiVal ?: '—'}">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Ngày tạo phiên khám</span>
+                    <span class="info-val"
+                          th:text="${record.createdAt != null}
+                                   ? ${#dates.format(record.createdAt, 'dd/MM/yyyy HH:mm')}
+                                   : '—'">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Chia sẻ hồ sơ</span>
+                    <span th:if="${record.isShared}" class="badge badge-shared">🔗 Đã công bố</span>
+                    <span th:unless="${record.isShared}" class="badge badge-private">🔒 Chưa công bố</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. DIAGNOSIS RESULTS -->
-    <div class="glass-panel">
-        <h3>📋 Kết quả chẩn đoán & điều trị</h3>
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div class="diagnosis-grid">
-                <!-- Diagnosis box -->
-                <div class="diagnosis-box">
-                    <span class="diagnosis-box-label">🔬 Chẩn đoán của bác sĩ</span>
-                    <div th:if="!${record.isShared}" class="diagnosis-box-content diagnosis-unpublished">
-                        🔒 Bác sĩ chưa công bố chẩn đoán
+    <!-- ══ 2. KẾT QUẢ TRIỆU CHỨNG ══ -->
+    <div th:if="${record.symptomResultID != null}" class="card">
+        <div class="sec-hdr">
+            <div class="sec-hdr-left">
+                <div class="sec-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <span class="sec-title">Kết Quả Triệu Chứng</span>
+            </div>
+            <span class="sec-badge"
+                  th:text="${'Trạng thái: ' + (record.symptomResultStatus ?: '—')}">—</span>
+        </div>
+        <div class="sec-inner" style="display:flex; flex-direction:column; gap:20px;">
+            <div class="info-grid info-grid-3">
+                <div class="info-pair">
+                    <span class="info-lbl">Mã kết quả triệu chứng</span>
+                    <span class="info-val mono"
+                          th:text="${'#SR' + record.symptomResultID}">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Tình trạng mãn kinh</span>
+                    <span class="info-val" th:text="${record.menopauseStatus ?: '—'}">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Thời gian triệu chứng</span>
+                    <span class="info-val" th:text="${record.symptomDuration ?: '—'}">—</span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Triệu chứng nặng dần</span>
+                    <span th:if="${record.symptomProgressing}" class="badge badge-pending">
+                        ⚠️ Có – Đang nặng dần
+                    </span>
+                    <span th:unless="${record.symptomProgressing}" class="badge badge-completed">
+                        ✓ Không – Ổn định
+                    </span>
+                </div>
+                <div class="info-pair">
+                    <span class="info-lbl">Trạng thái</span>
+                    <span class="badge badge-completed">
+                        <span class="badge-dot"></span>HOÀN THÀNH
+                    </span>
+                </div>
+            </div>
+
+            <!-- Symptom list -->
+            <div style="border-top:1px solid var(--border-light); padding-top:16px;">
+                <div class="sub-lbl">
+                    📌 Danh sách triệu chứng đã chọn
+                    (<span th:text="${record.symptoms != null ? record.symptoms.size() : 0}">0</span>)
+                </div>
+                <div th:if="${record.symptoms != null and !record.symptoms.isEmpty()}"
+                     class="tags-wrap">
+                    <span th:each="s : ${record.symptoms}"
+                          class="tag"
+                          th:text="${s.symptomName}">—</span>
+                </div>
+                <p th:if="${record.symptoms == null or record.symptoms.isEmpty()}"
+                   style="font-size:12px; color:var(--text-xmuted);">
+                    Không có triệu chứng nào được ghi nhận.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 3. KẾT QUẢ XÉT NGHIỆM ══ -->
+    <div class="card" th:if="${record.labTests != null and record.labTests.size() > 0}">
+        <div class="sec-hdr">
+            <div class="sec-hdr-left">
+                <div class="sec-icon"><i class="fa-solid fa-flask"></i></div>
+                <span class="sec-title">Kết Quả Xét Nghiệm</span>
+            </div>
+            <span class="sec-badge"
+                  th:text="${record.labTests.size() + ' chỉ định'}">0 chỉ định</span>
+        </div>
+        <div class="sec-inner">
+            <div class="lab-test-container">
+                <div class="lab-test-card" th:each="lr : ${record.labTests}">
+                    <div class="lab-test-header">
+                        <div class="lab-test-name" th:text="${lr.testName ?: 'Xét nghiệm'}">Tên xét nghiệm</div>
+                        <span class="lab-status-badge"
+                              th:classappend="${lr.status == 'COMPLETED' ? 'completed' : ''}"
+                              th:text="${lr.status == 'PENDING' ? '⏳ Chờ' : lr.status == 'COMPLETED' ? '✓ Hoàn thành' : lr.status}">Trạng thái</span>
                     </div>
-                    <div th:if="${record.isShared}" class="diagnosis-box-content diagnosis-published"
-                         th:text="${record.finalDiagnosis ?: 'Chưa ghi nhận chẩn đoán cuối cùng'}">Chẩn đoán</div>
-                </div>
 
-                <!-- Treatment plan box -->
-                <div class="diagnosis-box">
-                    <span class="diagnosis-box-label">💊 Đơn thuốc & Phác đồ</span>
-                    <div class="diagnosis-box-content"
-                         th:text="${record.treatmentPlan ?: 'Chưa ghi nhận đơn thuốc'}">Đơn thuốc</div>
-                </div>
-            </div>
-
-            <div class="diagnosis-grid">
-                <!-- Doctor advice box -->
-                <div class="diagnosis-box">
-                    <span class="diagnosis-box-label">💡 Hướng dẫn & Lời khuyên</span>
-                    <div class="diagnosis-box-content"
-                         th:text="${record.doctorAdvice ?: 'Chưa ghi nhận lời khuyên'}">Lời khuyên</div>
-                </div>
-
-                <!-- Additional notes box -->
-                <div class="diagnosis-box">
-                    <span class="diagnosis-box-label">📎 Ghi chú thêm</span>
-                    <div class="diagnosis-box-content"
-                         th:text="${record.note ?: 'Không có ghi chú'}">Ghi chú</div>
-                </div>
-            </div>
-
-            <!-- Review footer -->
-            <div class="review-footer" th:if="${record.reviewedByDoctorName != null}">
-                Được kết luận bởi <strong th:text="${record.reviewedByDoctorName}">Bác sĩ</strong> lúc <strong th:text="${record.reviewedAt != null ? #dates.format(record.reviewedAt, 'dd/MM/yyyy HH:mm') : '—'}">Thời gian</strong>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. LAB TESTS SECTION -->
-    <div class="glass-panel" th:if="${record.labTests != null and record.labTests.size() > 0}">
-        <h3>🔬 Kết quả xét nghiệm</h3>
-        <div class="lab-test-container">
-            <div class="lab-test-card" th:each="labTest : ${record.labTests}">
-                <div class="lab-test-header">
-                    <div class="lab-test-name" th:text="${labTest.testName}">Tên xét nghiệm</div>
-                    <span class="lab-status-badge" 
-                          th:classappend="${labTest.status == 'COMPLETED' ? 'completed' : ''}"
-                          th:text="${labTest.status == 'PENDING' ? '⏳ Chờ' : labTest.status == 'COMPLETED' ? '✓ Hoàn thành' : labTest.status}">Trạng thái</span>
-                </div>
-                
-                <div th:if="${labTest.parameters != null and labTest.parameters.size() > 0}" class="lab-parameters">
-                    <div class="lab-param-row" th:each="labParam : ${labTest.parameters}">
-                        <span class="lab-param-name" th:text="${labParam.paramName}">Tên chỉ số</span>
-                        <span class="lab-param-value" th:text="${labParam.value + ' ' + (labParam.unit ?: '')}">Giá trị</span>
-                    </div>
-                </div>
-                
-                <div th:unless="${labTest.parameters != null and labTest.parameters.size() > 0}" class="empty-state">
-                    Không có chi tiết tham số
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4. MEDICAL IMAGES SECTION -->
-    <div class="glass-panel" th:if="${record.medicalImages != null and record.medicalImages.size() > 0}">
-        <h3>📸 Hình ảnh y tế</h3>
-        <div class="lab-test-container">
-            <div class="lab-test-card" th:each="image : ${record.medicalImages}">
-                <div class="lab-test-header">
-                    <div class="lab-test-name" th:text="${image.imageType}">Loại hình ảnh</div>
-                    <span class="lab-status-badge" 
-                          th:classappend="${image.status == 'COMPLETED' ? 'completed' : ''}"
-                          th:text="${image.status == 'PENDING' ? '⏳ Chờ' : image.status == 'COMPLETED' ? '✓ Hoàn thành' : image.status}">Trạng thái</span>
-                </div>
-                
-                <div th:if="${image.details != null and image.details.size() > 0}">
-                    <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
-                        <strong th:text="${image.details.size()}">0</strong> ảnh được tải lên
-                    </p>
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                        <div th:each="detail : ${image.details}" style="font-size: 12px; color: #64748b;">
-                            <span th:text="${'📁 ' + detail.imageUrl}">imageUrl</span>
+                    <div th:if="${lr.parameters != null and !lr.parameters.isEmpty()}" class="lab-parameters">
+                        <div class="lab-param-row" th:each="lp : ${lr.parameters}">
+                            <span class="lab-param-name" th:text="${lp.paramName}">Tên chỉ số</span>
+                            <span class="lab-param-value" th:text="${lp.value + ' ' + (lp.unit ?: '')}">Giá trị</span>
                         </div>
                     </div>
+
+                    <div th:unless="${lr.parameters != null and !lr.parameters.isEmpty()}" style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 12px 0;">
+                        Không có chi tiết tham số
+                    </div>
                 </div>
-                
-                <div th:unless="${image.details != null and image.details.size() > 0}" class="empty-state">
-                    Chưa có hình ảnh được tải lên
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 4. HÌNH ẢNH Y KHOA ══ -->
+    <div class="card" th:if="${record.medicalImages != null and record.medicalImages.size() > 0}">
+        <div class="sec-hdr">
+            <div class="sec-hdr-left">
+                <div class="sec-icon"><i class="fa-solid fa-image"></i></div>
+                <span class="sec-title">Hình Ảnh Y Khoa</span>
+            </div>
+            <span class="sec-badge"
+                  th:text="${record.medicalImages.size() + ' chỉ định'}">0 chỉ định</span>
+        </div>
+        <div class="sec-inner">
+            <div class="lab-test-container">
+                <div class="lab-test-card" th:each="mi : ${record.medicalImages}">
+                    <div class="lab-test-header">
+                        <div class="lab-test-name" th:text="${mi.imageType ?: 'Hình ảnh'}">Loại hình ảnh</div>
+                        <span class="lab-status-badge"
+                              th:classappend="${mi.status == 'COMPLETED' ? 'completed' : ''}"
+                              th:text="${mi.status == 'PENDING' ? '⏳ Chờ' : mi.status == 'COMPLETED' ? '✓ Hoàn thành' : mi.status}">Trạng thái</span>
+                    </div>
+
+                    <div th:if="${mi.details != null and !mi.details.isEmpty()}">
+                        <div class="sub-lbl" style="margin-bottom: 12px;">
+                            🖼 Danh sách ảnh (<span th:text="${mi.details.size()}">0</span>)
+                        </div>
+                        <div class="img-grid">
+                            <div th:each="d : ${mi.details}" class="img-thumb">
+                                <div class="img-thumb-box">
+                                    <img th:src="${d.imageUrl}"
+                                         th:alt="${mi.imageType}"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                         style="width:100%;height:100%;object-fit:cover;"/>
+                                    <span style="display:none; align-items:center; justify-content:center;
+                                                 font-size:28px; color:var(--text-xmuted);
+                                                 position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                                </div>
+                                <span class="img-name"
+                                      th:text="${d.imageUrl != null and d.imageUrl.contains('/')}
+                                               ? ${d.imageUrl.substring(d.imageUrl.lastIndexOf('/') + 1)}
+                                               : ${d.imageUrl ?: '—'}">—</span>
+                                <span class="img-date"
+                                      th:text="${d.uploadedAt != null}
+                                               ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
+                                               : '—'">—</span>
+                                <a th:href="@{/ai-result.html(imageId=${d.imageID})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-robot"></i> Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:unless="${mi.details != null and !mi.details.isEmpty()}" style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 12px 0;">
+                        Chưa có hình ảnh được tải lên
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 5. KẾT LUẬN BÁC SĨ ══ -->
+    <div class="card">
+        <div class="sec-hdr">
+            <div class="sec-hdr-left">
+                <div class="sec-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                <span class="sec-title">Kết Luận Bác Sĩ</span>
+            </div>
+        </div>
+        <div class="sec-inner">
+            <!-- Has review -->
+            <div th:if="${record.reviewID != null}"
+                 style="display:flex; flex-direction:column; gap:22px;">
+
+                <div class="info-grid info-grid-3">
+                    <div class="info-pair">
+                        <span class="info-lbl">Mã đánh giá</span>
+                        <span class="info-val mono" th:text="${'#R' + record.reviewID}">—</span>
+                    </div>
+                    <div class="info-pair">
+                        <span class="info-lbl">Bác sĩ kết luận</span>
+                        <span class="info-val"
+                              th:text="${record.reviewedByDoctorName ?: record.doctorFullName ?: '—'}">—</span>
+                    </div>
+                    <div class="info-pair">
+                        <span class="info-lbl">Ngày kết luận</span>
+                        <span class="info-val"
+                              th:text="${record.reviewedAt != null}
+                                       ? ${#dates.format(record.reviewedAt, 'dd/MM/yyyy HH:mm')}
+                                       : '—'">—</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <!-- Final diagnosis -->
+                    <div>
+                        <div class="info-lbl" style="margin-bottom:6px;">🔬 Chẩn đoán cuối cùng</div>
+                        <div th:if="!${record.isShared}" class="diagnosis-block bold" style="color: var(--red); font-weight: 500;">
+                            🔒 Bác sĩ chưa công bố chẩn đoán
+                        </div>
+                        <div th:if="${record.isShared}" class="diagnosis-block bold" th:text="${record.finalDiagnosis ?: '—'}">—</div>
+                    </div>
+
+                    <div class="info-grid info-grid-2">
+                        <!-- Treatment plan -->
+                        <div>
+                            <div class="info-lbl" style="margin-bottom:6px;">💊 Phác đồ điều trị</div>
+                            <div class="diagnosis-block normal" th:text="${record.treatmentPlan ?: '—'}">—</div>
+                        </div>
+                        <!-- Doctor advice -->
+                        <div>
+                            <div class="info-lbl" style="margin-bottom:6px;">💡 Lời khuyên bác sĩ</div>
+                            <div class="diagnosis-block normal" th:text="${record.doctorAdvice ?: '—'}">—</div>
+                        </div>
+                    </div>
+
+                    <!-- Additional note -->
+                    <div th:if="${record.note != null and record.note != ''}">
+                        <div class="info-lbl" style="margin-bottom:6px;">📎 Ghi chú thêm</div>
+                        <div class="diagnosis-block normal" th:text="${record.note}">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No review yet -->
+            <div th:unless="${record.reviewID != null}" class="no-review">
+                <span style="font-size:36px;">⏳</span>
+                <div style="font-size:14px; font-weight:700; color:var(--text-secondary);">
+                    Chưa có kết luận từ bác sĩ cho phiên khám này.
+                </div>
+                <div style="font-size:12px; color:var(--text-xmuted);">
+                    Kết quả sẽ được cập nhật sau khi bác sĩ hoàn tất đánh giá.
                 </div>
             </div>
         </div>

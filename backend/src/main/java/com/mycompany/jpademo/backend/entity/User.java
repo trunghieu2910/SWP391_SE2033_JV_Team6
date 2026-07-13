@@ -63,8 +63,8 @@ public class User {
     @OneToOne(mappedBy = "user" ,cascade = CascadeType.ALL)
     private Patient patient;
 
-    @OneToOne(mappedBy = "user")
-    private Review review;
+    @OneToMany(mappedBy = "user")
+    private List<Review> review;
 
     @OneToMany(mappedBy = "user")
     private List<SystemLog> systemLogs;
