@@ -124,4 +124,24 @@ public class LabResultController {
             return "redirect:/patient/dashboard";
         }
     }
+
+    // ══════════════════════════════════════════════
+    //  XÓA XÉT NGHIỆM (chỉ khi đang PENDING)
+    // ══════════════════════════════════════════════
+
+    @PostMapping("/doctor/lab-results/{labResultId}/delete")
+    public String deleteLabResult(
+            @PathVariable Integer labResultId,
+            @RequestParam("sessionId") Integer sessionId,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            labResultService.deleteLabResult(labResultId);
+            redirectAttributes.addFlashAttribute("success", "Đã xóa xét nghiệm thành công!");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        }
+
+        return "redirect:/doctor/sessions/" + sessionId + "?openLab=true";
+    }
 }

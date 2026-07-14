@@ -7,6 +7,7 @@ import com.mycompany.jpademo.backend.entity.DiagnosisSession;
 import com.mycompany.jpademo.backend.entity.LabResult;
 import com.mycompany.jpademo.backend.entity.LabResultParameter;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
+import com.mycompany.jpademo.backend.enums.LabResultStatus;
 import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
@@ -155,5 +156,39 @@ public class LabResultServiceImpl implements LabResultService {
                         : null)
                 .parameters(paramResponses)
                 .build();
+    }
+
+    @Override
+    public void deleteLabResult(Integer labResultId) {
+
+        LabResult labResult = labResultRepository.findById(labResultId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy xét nghiệm với ID: " + labResultId));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
+        Integer currentDoctorId = currentUser.getUser().getUserId();
+
+        DiagnosisSession session = labResult.getDiagnosisSession();
+
+        if (!session.getUser().getUserId().equals(currentDoctorId)) {
+            throw new UnauthorizedActionException(
+                    "Bạn không có quyền xóa xét nghiệm của phiên khám này");
+        }
+
+        if (labResult.getStatus() != LabResultStatus.PENDING) {
+            throw new BadRequestException(
+                    "Chỉ có thể xóa xét nghiệm đang ở trạng thái Chờ xử lý");
+        }
+
+        // Xóa các tham số liên quan trước (phòng trường hợp phát sinh dữ liệu bất
+        // thường), dù về nghiệp vụ PENDING vốn dĩ chưa có tham số nào.
+        List<LabResultParameter> params =
+                labResultParameterRepository.findByLabResultLabResultId(labResultId);
+        if (params != null && !params.isEmpty()) {
+            labResultParameterRepository.deleteAll(params);
+        }
+
+        labResultRepository.delete(labResult);
     }
 }

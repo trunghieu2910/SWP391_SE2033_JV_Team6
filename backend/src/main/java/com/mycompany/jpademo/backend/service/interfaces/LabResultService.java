@@ -10,4 +10,7 @@ public interface LabResultService {
     LabResultResponse createLabResult(CreateLabResultRequest request);
 
     List<LabResultResponse> getLabResultsBySession(Integer sessionId);
+
+    void deleteLabResult(Integer labResultId);
+
 }
