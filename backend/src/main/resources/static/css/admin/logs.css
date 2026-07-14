@@ -1,4 +1,4 @@
-/* logs.css - Cập nhật hoàn chỉnh */
+/* logs.css - Hoàn chỉnh */
 
 /* ============================================================ */
 /* ===== ROOT VARIABLES ===== */
@@ -200,31 +200,100 @@
     font-size: 0.85rem;
 }
 
+/* ============================================================ */
+/* ===== TABLE CONTAINER - FIX LỖI TRÀN LAYOUT ===== */
+/* ============================================================ */
 .table-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+/* Scrollbar đẹp */
+.table-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
 /* ============================================================ */
-/* ===== TABLE ===== */
+/* ===== TABLE - FIX CỘT BỊ TRÀN ===== */
 /* ============================================================ */
 table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     text-align: left;
 }
 
+th:nth-child(1), td:nth-child(1) {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+}
+
+th:nth-child(2), td:nth-child(2) {
+    width: 140px !important;
+    min-width: 140px !important;
+    max-width: 140px !important;
+}
+
+th:nth-child(3), td:nth-child(3) {
+    width: 100px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+}
+
+th:nth-child(4), td:nth-child(4) {
+    width: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px !important;
+}
+
+th:nth-child(5), td:nth-child(5) {
+    width: 110px !important;
+    min-width: 110px !important;
+    max-width: 110px !important;
+}
+
+th:nth-child(6), td:nth-child(6) {
+    width: 90px !important;
+    min-width: 90px !important;
+    max-width: 90px !important;
+}
+
+th:nth-child(7), td:nth-child(7) {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+}
+
 th, td {
-    padding: 14px 18px;
+    padding: 12px 12px;
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--neutral-dark);
+    overflow: hidden;
 }
 
 th {
     font-weight: 700;
     color: var(--neutral-light);
     background-color: #f8fafc;
-    white-space: nowrap;
     text-transform: uppercase;
     font-size: 0.72rem;
     letter-spacing: 0.5px;
@@ -234,140 +303,167 @@ th {
     background-color: #fafbfc;
 }
 
+.log-desc {
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.4;
+    width: 100%;
+}
+
+/* Cột #ID */
 .log-id {
     font-weight: 600;
     color: var(--neutral-light);
     font-size: 0.8rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: visible;
 }
 
+/* Cột thời gian */
 .log-time {
     font-weight: 500;
     white-space: nowrap;
     font-size: 0.82rem;
     color: var(--neutral-dark);
+    overflow: visible;
 }
 
-.log-desc {
-    max-width: 300px;
+/* Cột hành động (badge) - giữ nguyên */
+td .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--neutral-dark);
+    border: 1px solid transparent;
+    transition: var(--transition);
+    overflow: visible;
 }
 
+/* Cột mục tiêu - giữ nguyên */
+.target-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    overflow: visible;
+}
+
+.target-type {
+    font-weight: 600;
+    color: var(--neutral-dark);
+    white-space: nowrap;
+}
+
+.target-id {
+    font-size: 0.75rem;
+    color: var(--neutral-light);
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Cột người thực hiện - giữ nguyên */
 .log-user {
     font-weight: 600;
     color: var(--neutral-dark);
-}
-
-/* ============================================================ */
-/* ===== BADGES - TO GIỐNG DASHBOARD ===== */
-/* ============================================================ */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
-    border-radius: 50px;
-    font-size: 0.78rem;
-    font-weight: 700;
     white-space: nowrap;
-    letter-spacing: 0.3px;
-    border: 1px solid transparent;
-    transition: var(--transition);
+    overflow: visible;
 }
 
-.badge i {
-    font-size: 0.75rem;
+.log-id, .log-time, .log-user, .target-info {
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: unset;
 }
 
-/* Login - Xanh lá */
+/* ============================================================ */
+/* ===== BADGES ===== */
+/* ============================================================ */
 .badge-login {
     background: #dcfce7;
     color: #15803d;
     border-color: #86efac;
 }
 
-/* Logout - Xám */
 .badge-logout {
     background: #f1f5f9;
     color: #475569;
     border-color: #cbd5e1;
 }
 
-/* Ban - Đỏ */
 .badge-ban {
     background: #fee2e2;
     color: #b91c1c;
     border-color: #fca5a5;
 }
 
-/* Unban - Xanh lá */
 .badge-unban {
     background: #dcfce7;
     color: #15803d;
     border-color: #86efac;
 }
 
-/* Create - Xanh dương */
 .badge-create {
     background: #dbeafe;
     color: #1d4ed8;
     border-color: #93c5fd;
 }
 
-/* Update - Vàng */
 .badge-update {
     background: #fef3c7;
     color: #b45309;
     border-color: #fcd34d;
 }
 
-/* Block - Đỏ đậm */
 .badge-block {
     background: #fee2e2;
     color: #991b1b;
     border-color: #fca5a5;
 }
 
-/* Unblock - Xanh ngọc */
 .badge-unblock {
     background: #d1fae5;
     color: #065f46;
     border-color: #6ee7b7;
 }
 
-/* Notification - Tím */
 .badge-notification {
     background: #e0e7ff;
     color: #4338ca;
     border-color: #a5b4fc;
 }
 
-/* Diagnosis - Xanh ngọc đậm */
 .badge-diagnosis {
     background: #a7f3d0;
     color: #065f46;
     border-color: #6ee7b7;
 }
 
-/* Create Session - Tím */
 .badge-create-session {
     background: #ddd6fe;
     color: #5b21b6;
     border-color: #a78bfa;
 }
 
-/* Other - Xám trung tính */
 .badge-other {
     background: #f1f5f9;
     color: #475569;
     border-color: #cbd5e1;
 }
 
+/* ============================================================ */
+/* ===== CỘT HÀNH ĐỘNG (NÚT XEM) ===== */
+/* ============================================================ */
 .actions-col {
     text-align: center;
-    width: 50px;
 }
 
 .btn-detail {
@@ -383,6 +479,7 @@ th {
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
+    flex-shrink: 0;
 }
 
 .btn-detail:hover {
@@ -394,28 +491,6 @@ th {
 
 .btn-detail i {
     font-size: 0.9rem;
-}
-
-/* ============================================================ */
-/* ===== TARGET INFO ===== */
-/* ============================================================ */
-.target-info {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.target-type {
-    font-weight: 600;
-    color: var(--neutral-dark);
-}
-
-.target-id {
-    font-size: 0.78rem;
-    color: var(--neutral-light);
-    background: #f1f5f9;
-    padding: 2px 8px;
-    border-radius: 12px;
 }
 
 /* ============================================================ */
@@ -500,6 +575,15 @@ th {
 /* ============================================================ */
 /* ===== RESPONSIVE ===== */
 /* ============================================================ */
+
+@media (max-width: 1200px) {
+    th:nth-child(4), td:nth-child(4) {
+        width: 150px;
+        min-width: 150px;
+        max-width: 150px;
+    }
+}
+
 @media (max-width: 992px) {
     .filter-grid {
         grid-template-columns: 1fr 1fr;
@@ -508,6 +592,34 @@ th {
     .btn-group {
         grid-column: span 2;
         justify-content: flex-end;
+    }
+
+    th, td {
+        padding: 10px 10px;
+        font-size: 0.8rem;
+    }
+
+    th:nth-child(2), td:nth-child(2) {
+        width: 130px;
+        min-width: 130px;
+        max-width: 130px;
+    }
+
+    th:nth-child(4), td:nth-child(4) {
+        width: 160px;
+        min-width: 160px;
+        max-width: 160px;
+    }
+
+    th:nth-child(5), td:nth-child(5) {
+        width: 110px;
+        min-width: 110px;
+        max-width: 110px;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        padding: 4px 10px;
     }
 }
 
@@ -540,8 +652,56 @@ th {
         justify-content: center;
     }
 
-    .log-desc {
-        max-width: 150px;
+    th, td {
+        padding: 8px 8px;
+        font-size: 0.75rem;
+    }
+
+    th:nth-child(1), td:nth-child(1) {
+        width: 45px;
+        min-width: 45px;
+        max-width: 45px;
+    }
+
+    th:nth-child(2), td:nth-child(2) {
+        width: 110px;
+        min-width: 110px;
+        max-width: 110px;
+    }
+
+    th:nth-child(3), td:nth-child(3) {
+        width: 100px;
+        min-width: 100px;
+        max-width: 100px;
+    }
+
+    th:nth-child(4), td:nth-child(4) {
+        width: 130px;
+        min-width: 130px;
+        max-width: 130px;
+    }
+
+    th:nth-child(5), td:nth-child(5) {
+        width: 100px;
+        min-width: 100px;
+        max-width: 100px;
+    }
+
+    th:nth-child(6), td:nth-child(6) {
+        width: 90px;
+        min-width: 90px;
+        max-width: 90px;
+    }
+
+    th:nth-child(7), td:nth-child(7) {
+        width: 45px;
+        min-width: 45px;
+        max-width: 45px;
+    }
+
+    .badge {
+        font-size: 0.65rem;
+        padding: 3px 8px;
     }
 }
 
@@ -559,21 +719,48 @@ th {
     }
 
     th, td {
-        padding: 10px 12px;
-        font-size: 0.78rem;
+        padding: 6px 6px;
+        font-size: 0.7rem;
+    }
+
+    th:nth-child(2), td:nth-child(2) {
+        width: 90px;
+        min-width: 90px;
+        max-width: 90px;
+    }
+
+    th:nth-child(3), td:nth-child(3) {
+        width: 80px;
+        min-width: 80px;
+        max-width: 80px;
+    }
+
+    th:nth-child(4), td:nth-child(4) {
+        width: 100px;
+        min-width: 100px;
+        max-width: 100px;
+    }
+
+    th:nth-child(5), td:nth-child(5) {
+        width: 80px;
+        min-width: 80px;
+        max-width: 80px;
+    }
+
+    th:nth-child(6), td:nth-child(6) {
+        width: 70px;
+        min-width: 70px;
+        max-width: 70px;
     }
 
     .log-time {
-        font-size: 0.72rem;
+        font-size: 0.7rem;
     }
 
     .badge {
-        font-size: 0.68rem;
-        padding: 6px 14px;
-    }
-
-    .badge i {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
+        padding: 2px 6px;
+        gap: 3px;
     }
 
     .page-btn {
@@ -586,8 +773,9 @@ th {
         font-size: 0.78rem;
     }
 
-    .log-desc {
-        max-width: 100px;
+    .target-id {
+        font-size: 0.6rem;
+        padding: 1px 5px;
     }
 }
 
@@ -612,23 +800,33 @@ th {
         height: 34px;
     }
 
-    th, td {
-        padding: 8px 10px;
-        font-size: 0.7rem;
+    table {
+        min-width: 550px;
     }
 
-    .log-desc {
+    th, td {
+        padding: 5px 5px;
+        font-size: 0.65rem;
+    }
+
+    th:nth-child(4), td:nth-child(4) {
+        width: 80px;
+        min-width: 80px;
         max-width: 80px;
     }
 
-    .target-id {
-        font-size: 0.65rem;
-        padding: 1px 6px;
+    .badge {
+        font-size: 0.55rem;
+        padding: 2px 5px;
     }
 
-    .badge {
-        font-size: 0.6rem;
-        padding: 4px 10px;
+    .btn-detail {
+        width: 26px;
+        height: 26px;
+    }
+
+    .btn-detail i {
+        font-size: 0.75rem;
     }
 }
 
@@ -758,7 +956,6 @@ th {
         color: #475569;
     }
 
-    /* Dark mode badges */
     .badge-login {
         background: #052e16;
         color: #86efac;
@@ -829,5 +1026,17 @@ th {
         background: #1e293b;
         color: #94a3b8;
         border-color: #334155;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #1e293b;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #475569;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
     }
 }

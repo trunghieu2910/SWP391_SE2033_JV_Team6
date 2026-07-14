@@ -1,5 +1,3 @@
-// global-search.js
-
 (function() {
     'use strict';
 

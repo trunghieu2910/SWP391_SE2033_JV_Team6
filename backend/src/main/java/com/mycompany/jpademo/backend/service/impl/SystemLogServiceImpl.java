@@ -79,18 +79,16 @@ public class SystemLogServiceImpl implements SystemLogService {
             case "LOGOUT": return "Đăng xuất";
             case "BAN_USER": return "Khóa User";
             case "UNBAN_USER": return "Mở khóa";
-            case "CREATE_DOCTOR": return "Tạo bác sĩ";
+            case "CREATE_DOCTOR": return "Tạo";
             case "UPDATE_USER_STATUS": return "Đổi trạng thái";
             case "BLOCK_IP": return "Chặn IP";
             case "UNBLOCK_IP": return "Mở khóa IP";
-            case "PATIENT_NOTIFICATION": return "Thông báo bệnh nhân";
-            case "CREATE_FINAL_DIAGNOSIS": return "Tạo chẩn đoán cuối";
-            case "CREATE": return "Tạo phiên khám";
-            case "UPDATE_SESSION_STATUS": return "Cập nhật trạng thái ca chẩn đoán";
-            case "UPDATE_SESSION_SHARE": return "Cập nhật trạng thái công bố ca chẩn đoán";
-            case "UPDATE_CLINICAL_SYMPTOMS": return "Cập nhật triệu chứng lâm sàng";
-            case "BLOCKED_IP": return "Chặn IP";
-            case "UNBLOCKED_IP": return "Mở khóa IP";
+            case "PATIENT_NOTIFICATION": return "Thông báo";
+            case "CREATE_FINAL_DIAGNOSIS": return "Tạo";
+            case "CREATE": return "Tạo";
+            case "UPDATE_SESSION_STATUS": return "Cập nhật";
+            case "UPDATE_SESSION_SHARE": return "Cập nhật";
+            case "UPDATE_CLINICAL_SYMPTOMS": return "Cập nhật";
             default: return action;
         }
     }
