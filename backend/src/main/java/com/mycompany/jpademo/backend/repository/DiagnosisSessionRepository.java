@@ -147,14 +147,17 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     @Query("SELECT ds FROM DiagnosisSession ds " +
             "WHERE ds.user.userId = :doctorId " +
             "AND (:keyword IS NULL OR LOWER(ds.patient.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-            "AND (:status IS NULL OR ds.status = :status)")
+            "AND (:status IS NULL OR ds.status = :status) " +
+            "AND (:startDate IS NULL OR ds.createdAt >= :startDate) " +
+            "AND (:endDate IS NULL OR ds.createdAt <= :endDate)")
     Page<DiagnosisSession> searchByDoctorWithKeywordAndStatus(
             @Param("doctorId") Integer doctorId,
             @Param("keyword") String keyword,
             @Param("status") DiagnosisSessionStatus status,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
 
-    //Giang
     @Query(value = """
     SELECT 
         FORMAT(createdAt, 'yyyy-MM') as month,
@@ -166,14 +169,14 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     ORDER BY month ASC
     """, nativeQuery = true)
     List<Object[]> getDiagnosisSessionsByMonthWithFilter(
-            @Param("startDate") java.time.LocalDateTime startDate,
-            @Param("endDate") java.time.LocalDateTime endDate);
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
 
     @Query("SELECT COUNT(ds) FROM DiagnosisSession ds WHERE " +
             "(CAST(:startDate AS timestamp) IS NULL OR ds.createdAt >= :startDate) AND " +
             "(CAST(:endDate AS timestamp) IS NULL OR ds.createdAt <= :endDate)")
-    long countSessionsWithDateFilter(@Param("startDate") java.time.LocalDateTime startDate, @Param("endDate") java.time.LocalDateTime endDate);
+    long countSessionsWithDateFilter(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT FUNCTION('FORMAT', d.createdAt, 'MM/yyyy') as month, COUNT(d) as count " +
             "FROM DiagnosisSession d " +

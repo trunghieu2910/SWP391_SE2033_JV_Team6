@@ -10,12 +10,14 @@ import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface DoctorDiagnosisService {
 
     Page<DoctorSessionResponse> getSessionsByDoctor(Integer doctorId, Pageable pageable,
-                                                    String keyword, DiagnosisSessionStatus status);
+                                                    String keyword, DiagnosisSessionStatus status,
+                                                    LocalDate startDate, LocalDate endDate);
 
     void updateSessionStatus(Integer doctorId, UpdateSessionStatusRequest request);
 

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -24,6 +25,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -44,15 +46,19 @@ public class DoctorDiagnosisController {
     public String getMySessions(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) DiagnosisSessionStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         Integer doctorId = userDetails.getUser().getUserId();
         Page<DoctorSessionResponse> sessions = doctorDiagnosisService.getSessionsByDoctor(
-                doctorId, pageable, keyword, status);
+                doctorId, pageable, keyword, status, startDate, endDate);
         model.addAttribute("sessions", sessions);
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         model.addAttribute("statuses", DiagnosisSessionStatus.values());
 
         return "doctor/sessions";

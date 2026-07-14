@@ -22,6 +22,16 @@
           <option value="FAILED" th:selected="${status != null && status.name() == 'FAILED'}">Thất bại</option>
         </select>
       </div>
+      <div class="form-field date-field">
+        <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
+        <input type="date" name="startDate"
+               th:value="${param.startDate != null ? param.startDate : T(java.time.LocalDate).now()}">
+      </div>
+      <div class="form-field date-field">
+        <label><i class="fa-regular fa-calendar"></i> Đến ngày</label>
+        <input type="date" name="endDate"
+               th:value="${param.endDate != null ? param.endDate : T(java.time.LocalDate).now()}">
+      </div>
       <div class="btn-group">
         <button type="submit" class="btn-action btn-primary">
           <i class="fa-solid fa-search"></i> Tìm kiếm
@@ -111,18 +121,18 @@
       </div>
       <div class="page-links">
         <a th:if="${sessions.number > 0}"
-           th:href="@{/doctor/sessions(page=${sessions.number - 1}, keyword=${keyword}, status=${status})}"
+           th:href="@{/doctor/sessions(page=${sessions.number - 1}, keyword=${keyword}, status=${status}, startDate=${param.startDate}, endDate=${param.endDate})}"
            class="page-btn">
           <i class="fa-solid fa-chevron-left"></i>
         </a>
         <a th:each="pageIdx : ${#numbers.sequence(0, sessions.totalPages - 1)}"
            th:if="${pageIdx >= sessions.number - 2 and pageIdx <= sessions.number + 2}"
-           th:href="@{/doctor/sessions(page=${pageIdx}, keyword=${keyword}, status=${status})}"
+           th:href="@{/doctor/sessions(page=${pageIdx}, keyword=${keyword}, status=${status}, startDate=${param.startDate}, endDate=${param.endDate})}"
            th:text="${pageIdx + 1}"
            class="page-btn"
            th:classappend="${pageIdx == sessions.number ? 'active' : ''}"></a>
         <a th:if="${sessions.number < sessions.totalPages - 1}"
-           th:href="@{/doctor/sessions(page=${sessions.number + 1}, keyword=${keyword}, status=${status})}"
+           th:href="@{/doctor/sessions(page=${sessions.number + 1}, keyword=${keyword}, status=${status}, startDate=${param.startDate}, endDate=${param.endDate})}"
            class="page-btn">
           <i class="fa-solid fa-chevron-right"></i>
         </a>

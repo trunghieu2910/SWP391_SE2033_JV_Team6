@@ -22,7 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,11 +49,34 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     public Page<DoctorSessionResponse> getSessionsByDoctor(Integer doctorId,
                                                            Pageable pageable,
                                                            String keyword,
-                                                           DiagnosisSessionStatus status) {
+                                                           DiagnosisSessionStatus status,
+                                                           LocalDate startDate, LocalDate endDate) {
+        if (startDate == null && endDate == null) {
+            startDate = LocalDate.now();
+            endDate = LocalDate.now();
+        }
+
+        if (startDate == null) {
+            startDate = endDate;
+        }
+
+        if (endDate == null) {
+            endDate = startDate;
+        }
+
+        if (startDate.isAfter(endDate)) {
+            LocalDate temp = startDate;
+            startDate = endDate;
+            endDate = temp;
+        }
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
         String normalizedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
 
         Page<DiagnosisSession> sessionPage = sessionRepository.searchByDoctorWithKeywordAndStatus(
-                doctorId, normalizedKeyword, status, pageable);
+                doctorId, keyword, status, startDateTime, endDateTime, pageable);
 
         return sessionPage.map(session -> DoctorSessionResponse.builder()
                 .sessionId(session.getSessionId())
