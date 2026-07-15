@@ -12,27 +12,27 @@
                 <label><i class="fa-regular fa-circle-play"></i> Hành động</label>
                 <select name="action">
                     <option value="">Tất cả</option>
-                    <option value="LOGIN" th:selected="${action == 'LOGIN'}">Đăng nhập</option>
-                    <option value="LOGOUT" th:selected="${action == 'LOGOUT'}">Đăng xuất</option>
-                    <option value="BAN_USER" th:selected="${action == 'BAN_USER'}">Khóa tài khoản</option>
-                    <option value="UNBAN_USER" th:selected="${action == 'UNBAN_USER'}">Mở khóa</option>
-                    <option value="CREATE_DOCTOR" th:selected="${action == 'CREATE_DOCTOR'}">Tạo bác sĩ</option>
-                    <option value="UPDATE_USER_STATUS" th:selected="${action == 'UPDATE_USER_STATUS'}">Đổi trạng thái</option>
-                    <option value="BLOCK_IP" th:selected="${action == 'BLOCK_IP'}">Chặn IP</option>
-                    <option value="UNBLOCK_IP" th:selected="${action == 'UNBLOCK_IP'}">Mở khóa IP</option>
+                    <option value="LOGIN" th:selected="${param.action == 'LOGIN'}">Đăng nhập</option>
+                    <option value="LOGOUT" th:selected="${param.action == 'LOGOUT'}">Đăng xuất</option>
+                    <option value="BAN_USER" th:selected="${param.action == 'BAN_USER'}">Khóa tài khoản</option>
+                    <option value="UNBAN_USER" th:selected="${param.action == 'UNBAN_USER'}">Mở khóa</option>
+                    <option value="CREATE_DOCTOR" th:selected="${param.action == 'CREATE_DOCTOR'}">Tạo bác sĩ</option>
+                    <option value="UPDATE_USER_STATUS" th:selected="${param.action == 'UPDATE_USER_STATUS'}">Đổi trạng thái</option>
+                    <option value="BLOCK_IP" th:selected="${param.action == 'BLOCK_IP'}">Chặn IP</option>
+                    <option value="UNBLOCK_IP" th:selected="${param.action == 'UNBLOCK_IP'}">Mở khóa IP</option>
                 </select>
             </div>
             <div class="form-field">
                 <label><i class="fa-regular fa-keyboard"></i> Từ khóa</label>
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm hành động, mô tả, mục tiêu...">
+                <input type="text" name="keyword" th:value="${param.keyword}" placeholder="Tìm kiếm hành động, mô tả, mục tiêu...">
             </div>
             <div class="form-field date-field">
                 <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
-                <input type="date" name="startDate" th:value="${startDate}">
+                <input type="date" name="startDate" th:value="${param.startDate}">
             </div>
             <div class="form-field date-field">
                 <label><i class="fa-regular fa-calendar"></i> Đến ngày</label>
-                <input type="date" name="endDate" th:value="${endDate}">
+                <input type="date" name="endDate" th:value="${param.endDate}">
             </div>
             <div class="btn-group">
                 <button type="submit" class="btn-action btn-primary">
@@ -46,7 +46,7 @@
     </div>
 
     <!-- Logs Table -->
-    <div class="table-card">
+    <div class="table-card" th:if="${logs != null}">
         <div class="table-header">
             <div class="table-title">
                 <i class="fa-solid fa-list-check"></i>
@@ -103,7 +103,7 @@
                         </a>
                     </td>
                 </tr>
-                <tr th:if="${logs.isEmpty()}">
+                <tr th:if="${logs.content.isEmpty()}">
                     <td colspan="7" class="empty-state">
                         <i class="fa-regular fa-folder-open"></i>
                         <p>Không tìm thấy nhật ký hoạt động</p>
@@ -119,19 +119,24 @@
                 <span th:text="'Trang ' + (${logs.number} + 1) + ' / ' + ${logs.totalPages}">Trang 1 / 10</span>
             </div>
             <div class="page-links">
+                <!-- Previous button -->
                 <a th:if="${logs.number > 0}"
-                   th:href="@{/admin/logs(page=${logs.number - 1}, action=${action}, keyword=${keyword}, startDate=${startDate}, endDate=${endDate})}"
+                   th:href="@{/admin/logs(page=${logs.number - 1}, action=${param.action}, keyword=${param.keyword}, startDate=${param.startDate}, endDate=${param.endDate})}"
                    class="page-btn">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
+
+                <!-- Page numbers -->
                 <a th:each="pageIdx : ${#numbers.sequence(0, logs.totalPages - 1)}"
                    th:if="${pageIdx >= logs.number - 2 and pageIdx <= logs.number + 2}"
-                   th:href="@{/admin/logs(page=${pageIdx}, action=${action}, keyword=${keyword}, startDate=${startDate}, endDate=${endDate})}"
+                   th:href="@{/admin/logs(page=${pageIdx}, action=${param.action}, keyword=${param.keyword}, startDate=${param.startDate}, endDate=${param.endDate})}"
                    th:text="${pageIdx + 1}"
                    class="page-btn"
-                   th:classappend="${pageIdx == logs.number ? 'active' : ''}"></a>
+                   th:classappend="${pageIdx == logs.number} ? 'active' : ''"></a>
+
+                <!-- Next button -->
                 <a th:if="${logs.number < logs.totalPages - 1}"
-                   th:href="@{/admin/logs(page=${logs.number + 1}, action=${action}, keyword=${keyword}, startDate=${startDate}, endDate=${endDate})}"
+                   th:href="@{/admin/logs(page=${logs.number + 1}, action=${param.action}, keyword=${param.keyword}, startDate=${param.startDate}, endDate=${param.endDate})}"
                    class="page-btn">
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>

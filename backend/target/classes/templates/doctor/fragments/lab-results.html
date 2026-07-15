@@ -23,6 +23,15 @@
                                 <i class="fa-solid fa-flask-vial"></i> Lấy kết quả giả lập
                             </button>
                         </form>
+                        <form th:if="${lab.status.name() == 'PENDING'}"
+                              th:action="@{/doctor/lab-results/{labResultId}/delete(labResultId=${lab.labResultId})}"
+                              method="post" class="lab-delete-form"
+                              onsubmit="return confirm('Bạn có chắc muốn xóa xét nghiệm này?');">
+                            <input type="hidden" name="sessionId" th:value="${sessionId}">
+                            <button type="submit" class="btn-action btn-outline btn-danger">
+                                <i class="fa-solid fa-trash"></i> Xóa
+                            </button>
+                        </form>
                         <span class="lab-status" th:switch="${lab.status.name()}">
                             <span th:case="'PENDING'" class="status-pending">Chờ xử lý</span>
                             <span th:case="'COMPLETED'" class="status-completed">Hoàn thành</span>

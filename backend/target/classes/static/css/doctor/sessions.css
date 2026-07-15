@@ -10,7 +10,7 @@
 
 .filter-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr auto;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr auto;
     gap: 16px;
     align-items: flex-end;
 }
@@ -424,4 +424,19 @@ tr:hover td {
 
 .btn-danger:hover {
     background: #dc2626;
+}
+
+@media (max-width: 992px) {
+    .filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .btn-group {
+        grid-column: span 2;
+        justify-content: flex-end;
+    }
+}
+
+.date-field input {
+    min-width: 140px;
 }
