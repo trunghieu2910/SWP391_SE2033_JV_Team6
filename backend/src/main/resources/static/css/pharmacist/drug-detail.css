@@ -1,0 +1,46 @@
+/* Drug Detail Styles */
+
+.drug-info {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.drug-info h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.info-card {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    border-left: 4px solid #007bff;
+}
+
+.drug-batches {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.drug-batches h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.actions button,
+.actions a {
+    flex: 1;
+    max-width: 200px;
+}

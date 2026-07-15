@@ -3,5 +3,6 @@ package com.mycompany.jpademo.backend.enums;
 public enum RoleName {
     ADMIN,
     DOCTOR,
-    PATIENT
+    PATIENT,
+    PHARMACIST
 }

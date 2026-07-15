@@ -18,10 +18,11 @@ public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
     private static final String DEFAULT_HOME = "/patient/home";
 
     private static final Map<String, String> ROLE_HOME = Map.of(
-            "ROLE_ADMIN",    "/admin/dashboard",
-            "ROLE_DOCTOR",   "/doctor/sessions",
-            "ROLE_PATIENT",  "/patient/home",
-            "ROLE_AITRAINER", "/patient/home"
+            "ROLE_ADMIN",      "/admin/dashboard",
+            "ROLE_DOCTOR",     "/doctor/sessions",
+            "ROLE_PATIENT",    "/patient/home",
+            "ROLE_PHARMACIST", "/pharmacist/",
+            "ROLE_AITRAINER",  "/patient/home"
     );
 
     @Override

@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Thêm thuốc mới', 'drugs')}">
+<body>
+<main>
+    <div class="container">
+        <header class="page-header" style="margin-bottom: 24px;">
+            <h1><i class="fas fa-plus"></i> Thêm thuốc mới vào hệ thống</h1>
+            <a href="/pharmacist/drug-list" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </header>
+
+        <form th:action="@{/pharmacist/drug-add}" method="post" class="form-container" style="max-width: 800px; margin: 0 auto;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="drugCode">Mã thuốc *</label>
+                    <input type="text" id="drugCode" name="drugCode" required placeholder="Ví dụ: AMX-500">
+                </div>
+                <div class="form-group">
+                    <label for="drugName">Tên thuốc *</label>
+                    <input type="text" id="drugName" name="drugName" required placeholder="Ví dụ: Amoxicillin">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="strength">Hàm lượng *</label>
+                    <input type="number" id="strength" name="strength" step="0.01" required placeholder="Ví dụ: 500">
+                </div>
+                <div class="form-group">
+                    <label for="strengthUnit">Đơn vị hàm lượng *</label>
+                    <input type="text" id="strengthUnit" name="strengthUnit" required placeholder="Ví dụ: mg, ml">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dosageForm">Dạng bào chế *</label>
+                    <select id="dosageForm" name="dosageForm" required>
+                        <option value="">-- Chọn dạng bào chế --</option>
+                        <option value="Viên">Viên nén/nang</option>
+                        <option value="Ống">Ống tiêm</option>
+                        <option value="Siro">Siro</option>
+                        <option value="Bột">Bột pha hỗn dịch</option>
+                        <option value="Kem">Kem bôi</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="routeOfAdministration">Đường dùng *</label>
+                    <select id="routeOfAdministration" name="routeOfAdministration" required>
+                        <option value="">-- Chọn đường dùng --</option>
+                        <option value="Uống">Đường uống</option>
+                        <option value="Tiêm">Đường tiêm</option>
+                        <option value="Bôi">Đường bôi ngoài da</option>
+                        <option value="Nhỏ">Đường nhỏ mắt/tai</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="subCategoryId">Phân nhóm thuốc *</label>
+                <select id="subCategoryId" name="subCategoryId" required>
+                    <option value="">-- Chọn phân nhóm --</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="manufacturer">Nhà sản xuất</label>
+                    <input type="text" id="manufacturer" name="manufacturer" placeholder="Tên nhà sản xuất">
+                </div>
+                <div class="form-group">
+                    <label for="countryOfOrigin">Nước sản xuất</label>
+                    <input type="text" id="countryOfOrigin" name="countryOfOrigin" placeholder="Quốc gia">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="storageCondition">Điều kiện bảo quản</label>
+                <textarea id="storageCondition" name="storageCondition" rows="2" placeholder="Ví dụ: Bảo quản nơi khô ráo, nhiệt độ dưới 30 độ C"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="shelfLifeMonths">Thời hạn sử dụng (tháng)</label>
+                    <input type="number" id="shelfLifeMonths" name="shelfLifeMonths" min="1" value="24">
+                </div>
+                <div class="form-group">
+                    <label for="packaging">Quy cách đóng gói</label>
+                    <input type="text" id="packaging" name="packaging" placeholder="Ví dụ: Hộp 3 vỉ x 10 viên">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Ghi chú</label>
+                <textarea id="notes" name="notes" rows="2" placeholder="Ghi chú thêm nếu có"></textarea>
+            </div>
+
+            <div class="form-actions" style="display: flex; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">
+                    <i class="fas fa-save"></i> Lưu thông tin thuốc
+                </button>
+                <a href="/pharmacist/drug-list" class="btn btn-secondary" style="flex: 1; text-align: center;">
+                    <i class="fas fa-times"></i> Hủy bỏ
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script th:src="@{/js/pharmacist/drug-form.js}"></script>
+</main>
+</body>
+</html>

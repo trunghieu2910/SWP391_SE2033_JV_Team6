@@ -1,0 +1,26 @@
+/* Import History Styles */
+
+.import-history-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.import-history-table .table {
+    margin: 0;
+    width: 100%;
+}
+
+.import-history-table .table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.import-history-table .table td {
+    padding: 12px 15px;
+}
+
+.import-history-table .table tbody tr:hover {
+    background-color: #f9f9f9;
+}

@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Chi tiết thuốc', 'drugs')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/pharmacist/drug-detail.css}">
+
+    <div class="container">
+        <header class="page-header" style="margin-bottom: 24px;">
+            <a href="/pharmacist/drug-list" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </header>
+
+        <!-- Drug Information Card -->
+        <section class="drug-info card" th:if="${drug}" style="margin-bottom: 32px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+                <div>
+                    <h2 th:text="${drug.drugName}" style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">Tên thuốc</h2>
+                    <p style="color: var(--neutral-light); font-weight: 600; margin-top: 4px;" th:text="${drug.dosageForm} + ' | ' + ${drug.subCategoryName}">Dạng bào chế | Phân loại</p>
+                </div>
+                <div>
+                    <button type="button" class="btn" th:classappend="${drug.status == 1 ? 'btn-success' : 'btn-danger'}"
+                            th:onclick="toggleDrugStatus([[${drug.drugId}]], [[${drug.status}]])">
+                        <i class="fas" th:classappend="${drug.status == 1 ? 'fa-check-circle' : 'fa-ban'}"></i>
+                        <span th:text="${drug.status == 1 ? 'Đang dùng' : 'Ngừng sử dụng'}">Trạng thái</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile Info Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã thuốc</span>
+                    <strong th:text="${drug.drugCode}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Hàm lượng</span>
+                    <strong th:text="${drug.strength} + ' ' + ${drug.strengthUnit}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Đường dùng</span>
+                    <strong th:text="${drug.routeOfAdministration}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Nhà sản xuất</span>
+                    <strong th:text="${drug.manufacturer}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Nước sản xuất</span>
+                    <strong th:text="${drug.countryOfOrigin}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Điều kiện bảo quản</span>
+                    <strong th:text="${drug.storageCondition != null ? drug.storageCondition : 'Bình thường'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Hạn sử dụng ghi trên nhãn</span>
+                    <strong th:text="${drug.shelfLifeMonths} + ' tháng'" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Tổng số lô</span>
+                    <strong th:text="${drug.totalBatches}" style="font-size: 1rem; color: var(--neutral-dark);">0</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Tổng số lượng tồn kho</span>
+                    <strong th:text="${drug.totalQuantityInStock}" style="font-size: 1.1rem; color: var(--primary); font-weight: 800;">0</strong>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                <button type="button" class="btn btn-warning" th:onclick="showEditForm()">
+                    <i class="fas fa-edit"></i> Sửa thông tin thuốc
+                </button>
+            </div>
+        </section>
+
+        <!-- Edit Form Card (Initially Hidden) -->
+        <section id="editFormCard" class="card" style="display: none; margin-bottom: 32px;">
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 24px;">
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--neutral-dark);">Cập nhật thông tin thuốc</h2>
+            </div>
+            <form th:action="@{/pharmacist/drug-update/{id}(id=${drug.drugId})}" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editDrugName">Tên thuốc *</label>
+                        <input type="text" id="editDrugName" name="drugName" th:value="${drug.drugName}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStrength">Hàm lượng *</label>
+                        <input type="number" id="editStrength" name="strength" th:value="${drug.strength}" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editStrengthUnit">Đơn vị hàm lượng *</label>
+                        <input type="text" id="editStrengthUnit" name="strengthUnit" th:value="${drug.strengthUnit}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDosageForm">Dạng bào chế *</label>
+                        <input type="text" id="editDosageForm" name="dosageForm" th:value="${drug.dosageForm}" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editRouteOfAdministration">Đường dùng *</label>
+                        <input type="text" id="editRouteOfAdministration" name="routeOfAdministration" th:value="${drug.routeOfAdministration}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPackaging">Quy cách đóng gói</label>
+                        <input type="text" id="editPackaging" name="packaging" th:value="${drug.packaging}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editManufacturer">Nhà sản xuất</label>
+                        <input type="text" id="editManufacturer" name="manufacturer" th:value="${drug.manufacturer}">
+                    </div>
+                    <div class="form-group">
+                        <label for="editCountryOfOrigin">Nước sản xuất</label>
+                        <input type="text" id="editCountryOfOrigin" name="countryOfOrigin" th:value="${drug.countryOfOrigin}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editShelfLifeMonths">Thời hạn sử dụng (tháng)</label>
+                        <input type="number" id="editShelfLifeMonths" name="shelfLifeMonths" th:value="${drug.shelfLifeMonths}" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="editStorageCondition">Điều kiện bảo quản</label>
+                        <input type="text" id="editStorageCondition" name="storageCondition" th:value="${drug.storageCondition}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">Ghi chú</label>
+                    <textarea id="editNotes" name="notes" rows="3" th:text="${drug.notes}"></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu thay đổi
+                    </button>
+                    <button type="button" class="btn btn-secondary" th:onclick="hideEditForm()">
+                        Hủy bỏ
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Drug Batches Card -->
+        <section class="drug-batches card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 24px 32px 12px 32px; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--neutral-dark);">Danh sách lô hàng nhập kho</h2>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Số lô</th>
+                        <th>Ngày sản xuất</th>
+                        <th>HSD</th>
+                        <th>Nhập kho</th>
+                        <th>Tồn kho</th>
+                        <th>Nhà cung cấp</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="batch : ${batches}">
+                        <td th:text="${batch.batchNumber}" style="font-weight: 700; color: var(--neutral-dark);">-</td>
+                        <td th:text="${#temporals.format(batch.manufactureDate, 'dd/MM/yyyy')}">-</td>
+                        <td th:text="${#temporals.format(batch.expiryDate, 'dd/MM/yyyy')}" style="font-weight: 600; color: #b45309;">-</td>
+                        <td th:text="${batch.quantity} + ' ' + ${batch.unitName}">-</td>
+                        <td th:text="${batch.quantityInStock}" style="font-weight: 700;">-</td>
+                        <td th:text="${batch.supplier}">-</td>
+                        <td>
+                            <span th:if="${batch.status == 1}" class="badge badge-success">Sẵn dùng</span>
+                            <span th:if="${batch.status == 0}" class="badge badge-danger">Hết hạn/Ngừng</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(batches)}">
+                        <td colspan="7" style="text-align: center; color: var(--neutral-light); padding: 32px;">
+                            Chưa có lô hàng nào được nhập cho thuốc này.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script th:src="@{/js/pharmacist/drug-detail.js}"></script>
+    <script>
+        function showEditForm() {
+            document.getElementById('editFormCard').style.display = 'block';
+            document.getElementById('editFormCard').scrollIntoView({ behavior: 'smooth' });
+        }
+        function hideEditForm() {
+            document.getElementById('editFormCard').style.display = 'none';
+        }
+    </script>
+</main>
+</body>
+</html>

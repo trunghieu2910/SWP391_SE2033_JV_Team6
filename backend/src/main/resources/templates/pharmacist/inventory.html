@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Quản lý tồn kho', 'inventory')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/pharmacist/inventory.css}">
+
+    <div class="container">
+        <header class="page-header" style="margin-bottom: 24px;">
+            <h1><i class="fas fa-boxes-stacked"></i> Kiểm kê & Quản lý tồn kho</h1>
+        </header>
+
+        <!-- Alerts Section -->
+        <section class="alerts-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
+            <!-- Expiring Soon Box -->
+            <div class="alert-subsection card" style="margin-bottom: 0;">
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: #b45309; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-hourglass-half"></i> Thuốc sắp hết hạn (7 ngày)
+                </h2>
+                <div style="overflow-x: hidden;" th:if="${expiringItems.size() > 0}">
+                    <table class="table" style="margin-top: 0;">
+                        <thead>
+                            <tr>
+                                <th>Thuốc</th>
+                                <th>Số lô</th>
+                                <th>Còn lại</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${expiringItems}">
+                                <td th:text="${item.drugName}" style="font-weight: 600;">-</td>
+                                <td th:text="${item.batchNumber}">-</td>
+                                <td>
+                                    <span class="badge badge-danger" th:text="${item.daysUntilExpiry} + ' ngày'">-</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${expiringItems.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
+                    <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.5rem; display: block; margin-bottom: 8px;"></i>
+                    Không có thuốc nào sắp hết hạn.
+                </div>
+            </div>
+
+            <!-- Low Stock Box -->
+            <div class="alert-subsection card" style="margin-bottom: 0;">
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: #991b1b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-triangle-exclamation"></i> Cảnh báo tồn kho thấp (< 50)
+                </h2>
+                <div style="overflow-x: hidden;" th:if="${lowStockItems.size() > 0}">
+                    <table class="table" style="margin-top: 0;">
+                        <thead>
+                            <tr>
+                                <th>Thuốc</th>
+                                <th>Số lô</th>
+                                <th>Tồn kho</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${lowStockItems}">
+                                <td th:text="${item.drugName}" style="font-weight: 600;">-</td>
+                                <td th:text="${item.batchNumber}">-</td>
+                                <td th:text="${item.quantityInStock}" style="font-weight: 700; color: var(--danger);">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${lowStockItems.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
+                    <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.5rem; display: block; margin-bottom: 8px;"></i>
+                    Tồn kho tất cả đều ổn định.
+                </div>
+            </div>
+        </section>
+
+        <!-- Full Inventory Card -->
+        <section class="inventory-section card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 24px 24px 12px 24px;">
+                <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--neutral-dark);">Báo cáo tồn kho chi tiết</h2>
+            </div>
+            <div class="table-responsive" style="margin-top: 0;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tên thuốc</th>
+                        <th>Số lô</th>
+                        <th>Đơn vị quản lý</th>
+                        <th>Số lượng tồn</th>
+                        <th>Ngày hết hạn</th>
+                        <th>Cập nhật cuối</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="inventory : ${inventories}">
+                        <td th:text="${inventory.drugName}" style="font-weight: 700; color: var(--primary);">-</td>
+                        <td th:text="${inventory.batchNumber}" style="font-weight: 600;">-</td>
+                        <td>Viên/Đơn vị nhỏ</td>
+                        <td th:text="${inventory.quantityInStock}" style="font-weight: 700;">-</td>
+                        <td th:text="${inventory.daysUntilExpiry} + ' ngày'">-</td>
+                        <td th:text="${#temporals.format(inventory.lastUpdated, 'dd/MM/yyyy')}">-</td>
+                        <td>
+                            <span th:if="${inventory.isExpiringSoon}" class="badge badge-danger">Sắp hết hạn</span>
+                            <span th:if="${inventory.isLowStock}" class="badge badge-warning">Tồn thấp</span>
+                            <span th:if="${!inventory.isExpiringSoon && !inventory.isLowStock}" class="badge badge-success">Bình thường</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" th:onclick="adjustInventory([[${inventory.batchId}]])">
+                                <i class="fas fa-edit"></i> Điều chỉnh
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages > 1}" class="pagination">
+            <ul>
+                <li th:if="${currentPage > 0}">
+                    <a th:href="@{/pharmacist/inventory(page=${currentPage-1})}">Trước</a>
+                </li>
+                <li th:each="i : ${#numbers.sequence(0, totalPages-1)}" 
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a th:href="@{/pharmacist/inventory(page=${i})}" th:text="${i+1}">1</a>
+                </li>
+                <li th:if="${currentPage < totalPages-1}">
+                    <a th:href="@{/pharmacist/inventory(page=${currentPage+1})}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Adjust Modal -->
+    <div id="adjustModal" class="modal" style="display: none; position: fixed; top:0; left:0; right:0; bottom:0; z-index:1000; align-items:center; justify-content:center;">
+        <div class="modal-overlay" style="position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.3); backdrop-filter:blur(4px);" onclick="closeAdjustModal()"></div>
+        <div class="modal-content" style="background:#ffffff; border-radius:var(--radius-lg); padding:32px; width:100%; max-width:480px; position:relative; z-index:1001; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: scaleUp 0.2s ease;">
+            <span class="close" style="position:absolute; top:16px; right:20px; font-size:24px; font-weight:700; color:var(--neutral-light); cursor:pointer;" onclick="closeAdjustModal()">&times;</span>
+            <h2 style="font-size:1.25rem; font-weight:800; color:var(--neutral-dark); margin-bottom:20px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Điều chỉnh tồn kho lô thuốc</h2>
+            
+            <form id="adjustForm">
+                <div class="form-group">
+                    <label for="quantityChange">Số lượng thay đổi *</label>
+                    <input type="number" id="quantityChange" name="quantityChange" required placeholder="Ví dụ: 100 hoặc -50">
+                    <small style="color:var(--neutral-light); font-size:0.75rem;">Nhập số dương để cộng thêm kho, số âm để trừ bớt kho.</small>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Lý do điều chỉnh *</label>
+                    <textarea id="reason" name="reason" rows="3" required placeholder="Ví dụ: Kiểm kho phát hiện hư hỏng / bổ sung thêm hàng lẻ"></textarea>
+                </div>
+                <div style="display:flex; gap:12px; margin-top:24px; border-top:1px solid var(--border-color); padding-top:20px;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">Xác nhận</button>
+                    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeAdjustModal()">Hủy bỏ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/pharmacist/inventory.js}"></script>
+    <script>
+        // Override adjustInventory to support flex display for modal centering
+        const originalAdjustInventory = adjustInventory;
+        adjustInventory = function(batchId) {
+            originalAdjustInventory(batchId);
+            const modal = document.getElementById('adjustModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        };
+        const originalCloseAdjustModal = closeAdjustModal;
+        closeAdjustModal = function() {
+            originalCloseAdjustModal();
+            const modal = document.getElementById('adjustModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+</main>
+</body>
+</html>
