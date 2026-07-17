@@ -23,7 +23,7 @@ public interface AdminService {
 
     InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin);
 
-    DashboardStatsResponse getDashboardStats(LocalDate startDate, LocalDate endDate);
+    DashboardPageResponse getDashboardPageData(LocalDate startDate, LocalDate endDate);
 
     UserDetailResponse getUserDetail(Integer userId);
 

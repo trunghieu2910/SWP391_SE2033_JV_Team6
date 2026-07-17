@@ -102,6 +102,7 @@ public class SystemLogServiceImpl implements SystemLogService {
                 .targetType(systemLog.getTargetType())
                 .description(systemLog.getDescription())
                 .performedAt(systemLog.getPerformedAt())
+                .userName(systemLog.getUser() != null ? systemLog.getUser().getUserName() : "Hệ thống")
                 .build();
     }
 }

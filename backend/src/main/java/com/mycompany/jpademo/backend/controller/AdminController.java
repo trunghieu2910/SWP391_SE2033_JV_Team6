@@ -58,104 +58,19 @@ public class AdminController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
-        try {
-            // Lấy admin email từ user đăng nhập
-            String adminEmail = userDetails.getUser().getEmail();
+        String adminEmail = userDetails.getUser().getEmail();
+        DashboardPageResponse data = adminService.getDashboardPageData(startDate, endDate);
 
-            //Mặc định lấy ngày hôm nay để lọc
-            if (startDate == null && endDate == null) {
-                LocalDate now = LocalDate.now();
-                startDate = now;
-                endDate = now;
-            }
-
-            // Nếu chỉ có startDate, set endDate = startDate + 1 tháng
-            if (startDate != null && endDate == null) {
-                endDate = startDate.plusMonths(1);
-            }
-
-            // Nếu chỉ có endDate, set startDate = endDate - 6 tháng
-            if (endDate != null && startDate == null) {
-                startDate = endDate.minusMonths(6);
-            }
-
-            // Đảm bảo startDate <= endDate
-            if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-                LocalDate temp = startDate;
-                startDate = endDate;
-                endDate = temp;
-            }
-
-            DashboardStatsResponse stats = adminService.getDashboardStats(startDate, endDate);
-            ChartStatsResponse charts = adminService.getChartStats(startDate, endDate);
-
-            if (stats == null) {
-                stats = DashboardStatsResponse.builder()
-                        .totalUsers(0L)
-                        .totalDoctors(0L)
-                        .totalPatients(0L)
-                        .blockedUsers(0L)
-                        .totalDiagnosisSessions(0L)
-                        .build();
-            }
-            if (charts == null) {
-                charts = ChartStatsResponse.builder()
-                        .userRegistrations(new ArrayList<>())
-                        .diagnosisSessions(new ArrayList<>())
-                        .build();
-            }
-            if (charts.getUserRegistrations() == null) {
-                charts = ChartStatsResponse.builder()
-                        .userRegistrations(new ArrayList<>())
-                        .diagnosisSessions(charts.getDiagnosisSessions() != null ? charts.getDiagnosisSessions() : new ArrayList<>())
-                        .build();
-            }
-            if (charts.getDiagnosisSessions() == null) {
-                charts = ChartStatsResponse.builder()
-                        .userRegistrations(charts.getUserRegistrations() != null ? charts.getUserRegistrations() : new ArrayList<>())
-                        .diagnosisSessions(new ArrayList<>())
-                        .build();
-            }
-
-            LocalDateTime startLogs = startDate != null ? startDate.atStartOfDay() : null;
-            LocalDateTime endLogs = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
-
-            Page<SystemLogResponse> recentLogs = systemLogService.getLogs( null, null, startLogs, endLogs,
-                    PageRequest.of(0, 10, Sort.by("performedAt").descending())
-            );
-            List<SystemLogResponse> logList = recentLogs != null ? recentLogs.getContent() : new ArrayList<>();
-
-            model.addAttribute("stats", stats);
-            model.addAttribute("charts", charts);
-            model.addAttribute("recentLogs", logList);
-            model.addAttribute("startDate", startDate);
-            model.addAttribute("endDate", endDate);
-            model.addAttribute("adminEmail", adminEmail);
-            return "admin/dashboard";
-
-        } catch (Exception e) {
-            log.error("ERROR loading dashboard: ", e);
-
-            model.addAttribute("stats", DashboardStatsResponse.builder()
-                    .totalUsers(0L)
-                    .totalDoctors(0L)
-                    .totalPatients(0L)
-                    .blockedUsers(0L)
-                    .totalDiagnosisSessions(0L)
-                    .build());
-
-            model.addAttribute("charts", ChartStatsResponse.builder()
-                    .userRegistrations(new ArrayList<>())
-                    .diagnosisSessions(new ArrayList<>())
-                    .build());
-
-            model.addAttribute("recentLogs", new ArrayList<>());
-            model.addAttribute("startDate", startDate);
-            model.addAttribute("endDate", endDate);
-            model.addAttribute("error", "Không thể tải dữ liệu dashboard. Vui lòng thử lại.");
-
-            return "admin/dashboard";
+        model.addAttribute("stats", data.getStats());
+        model.addAttribute("charts", data.getCharts());
+        model.addAttribute("recentLogs", data.getRecentLogs());
+        model.addAttribute("startDate", data.getStartDate());
+        model.addAttribute("endDate", data.getEndDate());
+        model.addAttribute("adminEmail", adminEmail);
+        if (data.getErrorMessage() != null) {
+            model.addAttribute("error", data.getErrorMessage());
         }
+        return "admin/dashboard";
     }
 
     @GetMapping("/users")
