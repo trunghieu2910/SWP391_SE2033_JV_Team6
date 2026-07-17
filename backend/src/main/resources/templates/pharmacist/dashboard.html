@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Trang chủ', 'dashboard')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/pharmacist/dashboard.css}">
+
+    <!-- Quick Stats -->
+    <section class="quick-stats">
+        <div class="stat-card" th:if="${stats}">
+            <div class="stat-icon primary">
+                <i class="fas fa-pills"></i>
+            </div>
+            <div class="stat-content">
+                <h3 th:text="${stats.totalDrugs}">0</h3>
+                <p>Tổng số thuốc</p>
+            </div>
+        </div>
+
+        <div class="stat-card" th:if="${stats}">
+            <div class="stat-icon warning">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-content">
+                <h3 th:text="${stats.pendingPrescriptions}">0</h3>
+                <p>Đơn thuốc chờ cấp phát</p>
+            </div>
+        </div>
+
+        <div class="stat-card" th:if="${stats}">
+            <div class="stat-icon danger">
+                <i class="fas fa-hourglass-end"></i>
+            </div>
+            <div class="stat-content">
+                <h3 th:text="${stats.expiringDrugs}">0</h3>
+                <p>Sắp hết hạn (7 ngày)</p>
+            </div>
+        </div>
+
+        <div class="stat-card" th:if="${stats}">
+            <div class="stat-icon info">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 th:text="${stats.lowStockDrugs}">0</h3>
+                <p>Tồn kho thấp</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="quick-actions">
+        <h2>Hành động nhanh</h2>
+        <div class="action-buttons">
+            <a href="/pharmacist/drug-add" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Thêm thuốc mới
+            </a>
+            <a href="/pharmacist/drug-import" class="btn btn-success">
+                <i class="fas fa-file-import"></i> Nhập kho thuốc
+            </a>
+            <a href="/pharmacist/dispense-list" class="btn btn-info">
+                <i class="fas fa-hand-holding-medical"></i> Cấp phát thuốc
+            </a>
+            <a href="/pharmacist/inventory" class="btn btn-warning">
+                <i class="fas fa-boxes-stacked"></i> Xem tồn kho
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

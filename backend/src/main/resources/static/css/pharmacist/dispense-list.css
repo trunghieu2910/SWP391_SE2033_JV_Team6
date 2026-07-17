@@ -1,0 +1,35 @@
+/* Dispense List Styles */
+
+.dispense-list-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dispense-list-table .table {
+    margin: 0;
+    width: 100%;
+}
+
+.dispense-list-table .table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.dispense-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dispense-status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.dispense-status.completed {
+    background-color: #d4edda;
+    color: #155724;
+}

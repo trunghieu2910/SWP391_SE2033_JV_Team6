@@ -1,0 +1,25 @@
+/* Dispense Form Styles */
+
+.prescription-info {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.prescription-info h2 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.batch-info {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    border-left: 4px solid #007bff;
+}
+
+.batch-info div {
+    margin: 5px 0;
+}

@@ -21,6 +21,7 @@ public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
             "ROLE_ADMIN",    "/admin/dashboard",
             "ROLE_DOCTOR",   "/doctor/sessions",
             "ROLE_RECEPTIONIST", "/receptionist/create-session",
+            "ROLE_PHARMACIST", "/pharmacist/",
             "ROLE_PATIENT",  "/patient/home",
             "ROLE_AITRAINER", "/patient/home"
     );

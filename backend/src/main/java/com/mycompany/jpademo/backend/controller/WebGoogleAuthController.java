@@ -126,9 +126,10 @@ public class WebGoogleAuthController {
 
     private String redirectByRole(User user) {
         return switch (user.getRole().getRoleName()) {
-            case DOCTOR  -> "/doctor/sessions";
-            case PATIENT -> "/patient/home";
-            case ADMIN   -> "/admin/dashboard";
+            case DOCTOR     -> "/doctor/sessions";
+            case PATIENT    -> "/patient/home";
+            case ADMIN      -> "/admin/dashboard";
+            case PHARMACIST -> "/pharmacist/";
             case RECEPTIONIST -> "/receptionist/create-session";
             default -> "/";
         };

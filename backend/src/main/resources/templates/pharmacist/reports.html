@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Báo cáo & Thống kê', 'reports')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/pharmacist/reports.css}">
+
+    <div class="container">
+        <!-- Filter Section -->
+        <section class="filter-section card" style="padding: 24px; margin-bottom: 32px;">
+            <form method="get" action="/pharmacist/reports" class="filter-form" style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 180px;">
+                    <label for="startDate">Từ ngày:</label>
+                    <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="form-control">
+                </div>
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 180px;">
+                    <label for="endDate">Đến ngày:</label>
+                    <input type="date" id="endDate" name="endDate" th:value="${endDate}" class="form-control">
+                </div>
+                <div style="display: flex; gap: 12px; margin-bottom: 2px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Lọc dữ liệu
+                    </button>
+                    <!-- FIX: Dung th:href dung cach de Thymeleaf bind tham so dynamic -->
+                    <a th:href="@{/pharmacist/export-report(startDate=${startDate}, endDate=${endDate})}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Xuất Báo Cáo
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <!-- Expiring Drugs Report -->
+        <section class="report-section card" style="padding: 0; overflow: hidden; margin-bottom: 32px;">
+            <div style="padding: 24px 32px 12px 32px;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-history"></i> Lô thuốc sắp hết hạn (trong tuần)
+                </h2>
+            </div>
+            <div class="table-responsive" style="margin-top: 0;">
+            <table class="table" th:if="${expiringBatches != null && expiringBatches.size() > 0}">
+                <thead>
+                    <tr>
+                        <th>Tên thuốc</th>
+                        <th>Số lô</th>
+                        <th>Thời gian tồn kho</th>
+                        <th>Tồn kho (đv nhỏ)</th>
+                        <th>Thời hạn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="batch : ${expiringBatches}">
+                        <td th:text="${batch.drugName}" style="font-weight: 700; color: var(--primary);">-</td>
+                        <td th:text="${batch.batchNumber}" style="font-weight: 600;">-</td>
+                        <td th:text="${batch.daysUntilExpiry} + ' ngày'">-</td>
+                        <td th:text="${batch.quantityInStock}" style="font-weight: 700;">-</td>
+                        <td>
+                            <span class="badge badge-danger" th:text="${batch.daysUntilExpiry} + ' ngày còn lại'">-</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+            <div th:if="${expiringBatches == null || expiringBatches.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
+                <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.5rem; display: block; margin-bottom: 8px;"></i>
+                Không có lô thuốc nào sắp hết hạn.
+            </div>
+        </section>
+
+        <!-- Inventory Log Report -->
+        <section class="report-section card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 24px 32px 12px 32px;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--neutral-dark); display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-list-alt"></i> Nhật ký hoạt động kho chi tiết
+                </h2>
+            </div>
+            <div class="table-responsive" style="margin-top: 0;">
+            <table class="table" th:if="${logs != null && logs.size() > 0}">
+                <thead>
+                    <tr>
+                        <th>Ngày thực hiện</th>
+                        <th>Thuốc</th>
+                        <th>Loại hoạt động</th>
+                        <th>Thay đổi</th>
+                        <th>Trước thay đổi</th>
+                        <th>Sau thay đổi</th>
+                        <th>Dược sĩ thực hiện</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm')}" style="font-weight: 600;">-</td>
+                        <td th:text="${log.batch.drug.drugName}">-</td>
+                        <td>
+                            <span th:if="${log.actionType == 'IMPORT'}" class="badge badge-success">Nhập kho</span>
+                            <span th:if="${log.actionType == 'DISPENSE'}" class="badge badge-warning">Xuất đơn</span>
+                            <span th:if="${log.actionType == 'ADJUST'}" class="badge badge-info">Cân đối</span>
+                        </td>
+                        <td th:text="${(log.quantityChange > 0 ? '+' : '') + log.quantityChange}" 
+                            th:style="'font-weight: 800; color: ' + ${(log.quantityChange > 0 ? '#10b981' : '#ef4444')}">-</td>
+                        <td th:text="${log.quantityBefore}">-</td>
+                        <td th:text="${log.quantityAfter}">-</td>
+                        <td th:text="${log.user.fullName}">-</td>
+                        <td th:text="${log.notes != null ? log.notes : '-'}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+            <div th:if="${logs == null || logs.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
+                Chưa có hoạt động kho nào trong khoảng thời gian được chọn.
+            </div>
+        </section>
+    </div>
+
+    <script th:src="@{/js/pharmacist/reports.js}"></script>
+</main>
+</body>
+</html>
