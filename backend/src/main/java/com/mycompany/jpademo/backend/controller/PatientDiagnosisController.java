@@ -71,12 +71,7 @@ public class PatientDiagnosisController {
                 .build();
         labResultRepository.save(labResult);
 
-        MedicalImage medicalImage = MedicalImage.builder()
-                .diagnosisSession(saved)
-                .imageType("Siêu âm")
-                .status(MedicalImageStatus.PENDING)
-                .build();
-        medicalImageRepository.save(medicalImage);
+
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.<DiagnosisSessionResponse>builder()

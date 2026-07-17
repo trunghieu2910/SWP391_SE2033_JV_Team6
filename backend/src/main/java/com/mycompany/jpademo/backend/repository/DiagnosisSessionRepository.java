@@ -17,6 +17,8 @@ import java.util.Optional;
 @Repository
 public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSession, Integer> {
 
+    long countByUserUserIdAndStatusNot(Integer userId, DiagnosisSessionStatus status);
+
     // ===== QUERIES CHO MedicalRecord (dùng JOIN qua SymptomResult theo DB mới) =====
     @Query(value = """
         SELECT

@@ -3,39 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} + ' | Doctor Panel'">Doctor Panel</title>
+    <title th:text="${title} + ' | Receptionist Panel'">Receptionist Panel</title>
     <meta th:name="${_csrf.parameterName}" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <!-- Google Fonts & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
-    <!-- Base Layout CSS -->
+    <!-- Reuse Doctor Layout CSS as it's just a generic dashboard layout -->
     <link rel="stylesheet" th:href="@{/css/doctor/layout.css}">
 </head>
 <body>
 <!-- Sidebar -->
-<aside class="sidebar">
+<aside class="sidebar" aria-label="Main Navigation">
     <div class="sidebar-brand">
-        <i class="fa-solid fa-stethoscope"></i>
+        <i class="fa-solid fa-notes-medical"></i>
         <h2>Cervical Dx</h2>
     </div>
     <nav class="sidebar-nav">
-        <a th:href="@{/doctor/sessions}" class="nav-item" th:classappend="${currentTab == 'sessions' ? 'active' : ''}">
-            <i class="fa-solid fa-clipboard-list"></i>
-            <span>Quản lý ca chẩn đoán</span>
+        <a th:href="@{/receptionist/create-session}" class="nav-item" th:classappend="${currentTab == 'create-session' ? 'active' : ''}">
+            <i class="fa-solid fa-calendar-plus"></i>
+            <span>Tạo ca chẩn đoán</span>
         </a>
-
-        <a th:href="@{/doctor/medical-records}" class="nav-item" th:classappend="${currentTab == 'medical-records' ? 'active' : ''}">
-            <i class="fa-solid fa-file-medical"></i>
-            <span>Xem hồ sơ bệnh án</span>
-        </a>
-        <a th:href="@{/doctor/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
-            <i class="fa-solid fa-user-md"></i>
-            <span>Hồ sơ cá nhân</span>
-        </a>
-        <a th:href="@{/doctor/ai-assistant}" class="nav-item" th:classappend="${currentTab == 'ai-assistant' ? 'active' : ''}">
-            <i class="fa-solid fa-robot"></i>
-            <span>Trợ lý AI</span>
+        <a th:href="@{/receptionist/patients/create}" class="nav-item" th:classappend="${currentTab == 'create-patient' ? 'active' : ''}">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Tạo tài khoản bệnh nhân</span>
         </a>
     </nav>
 
@@ -43,11 +34,11 @@
     <div class="sidebar-bottom">
         <div class="sidebar-user-profile">
             <div class="sidebar-user-avatar">
-                <span th:text="${#strings.substring(userFullName, 0, 1)}">B</span>
+                <span th:text="${#strings.substring(userFullName != null ? userFullName : 'L', 0, 1)}">L</span>
             </div>
             <div class="sidebar-user-info">
-                <h4 th:text="${userFullName}">Bác sĩ Nguyễn Văn Tùng</h4>
-                <span>Bác sĩ</span>
+                <h4 th:text="${userFullName != null ? userFullName : 'Lễ tân'}">Lễ tân</h4>
+                <span>Lễ tân</span>
             </div>
         </div>
         <a href="#" class="logout-btn" onclick="confirmLogout(event)">
@@ -62,23 +53,22 @@
     <!-- Topbar -->
     <header class="topbar">
         <div class="topbar-left">
-            <h1 th:text="${title}">Quản lý ca chẩn đoán</h1>
+            <h1 th:text="${title}">Tạo ca chẩn đoán</h1>
         </div>
         <div class="topbar-right">
-            <!-- Đã bỏ "Bác sĩ" ở topbar -->
         </div>
     </header>
 
     <!-- Flash Messages -->
-    <div th:if="${success}" class="alert alert-success">
+    <div th:if="${success}" class="alert alert-success" role="alert">
         <i class="fa-regular fa-circle-check"></i>
         <span th:text="${success}"></span>
-        <button type="button" class="alert-close" onclick="closeAlert(this)">&times;</button>
+        <button type="button" class="alert-close" onclick="closeAlert(this)" aria-label="Close">&times;</button>
     </div>
-    <div th:if="${error}" class="alert alert-danger">
+    <div th:if="${error}" class="alert alert-danger" role="alert">
         <i class="fa-solid fa-circle-exclamation"></i>
         <span th:text="${error}"></span>
-        <button type="button" class="alert-close" onclick="closeAlert(this)">&times;</button>
+        <button type="button" class="alert-close" onclick="closeAlert(this)" aria-label="Close">&times;</button>
     </div>
 
     <!-- Dynamic Content -->
@@ -86,13 +76,13 @@
 </div>
 
 <!-- Logout Modal -->
-<div id="logoutModal" class="logout-modal" style="display: none;">
+<div id="logoutModal" class="logout-modal" style="display: none;" role="dialog" aria-labelledby="logoutTitle" aria-modal="true">
     <div class="logout-modal-overlay" onclick="closeLogoutModal()"></div>
     <div class="logout-modal-content">
         <div class="logout-modal-icon">
             <i class="fa-solid fa-circle-exclamation"></i>
         </div>
-        <h3>Xác nhận đăng xuất</h3>
+        <h3 id="logoutTitle">Xác nhận đăng xuất</h3>
         <p>Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?</p>
         <div class="logout-modal-actions">
             <button type="button" class="btn-action btn-outline" onclick="closeLogoutModal()">

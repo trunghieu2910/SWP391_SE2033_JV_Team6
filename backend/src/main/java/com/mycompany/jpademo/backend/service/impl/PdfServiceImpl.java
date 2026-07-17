@@ -251,18 +251,37 @@ public class PdfServiceImpl implements PdfService {
                     document.add(imgMeta);
 
                     if (img.getDetails() != null && !img.getDetails().isEmpty()) {
-                        StringBuilder sb = new StringBuilder();
                         for (int i = 0; i < img.getDetails().size(); i++) {
                             String url = img.getDetails().get(i).getImageUrl();
                             String fileName = (url != null && url.contains("/")) ? url.substring(url.lastIndexOf("/") + 1) : url;
-                            sb.append("• File: ").append(fileName != null ? fileName : "—");
-                            if (i < img.getDetails().size() - 1) {
-                                sb.append("\n");
+                            Paragraph fileList = new Paragraph("• File: " + (fileName != null ? fileName : "—"), normalFont);
+                            fileList.setSpacingAfter(4f);
+                            document.add(fileList);
+
+                            if (url != null && !url.trim().isEmpty()) {
+                                try {
+                                    String imagePath = url;
+                                    if (url.startsWith("/uploads/")) {
+                                        imagePath = "uploads/" + url.substring(9);
+                                    }
+                                    
+                                    java.io.File imgFile = new java.io.File(imagePath);
+                                    if (imgFile.exists()) {
+                                        Image image = Image.getInstance(imgFile.getAbsolutePath());
+                                        image.scaleToFit(500f, 400f);
+                                        image.setAlignment(Element.ALIGN_CENTER);
+                                        image.setSpacingAfter(15f);
+                                        document.add(image);
+                                    } else {
+                                        Paragraph errorPara = new Paragraph(" (Không tìm thấy file hình ảnh thực tế trên hệ thống)", italicFont);
+                                        errorPara.setSpacingAfter(8f);
+                                        document.add(errorPara);
+                                    }
+                                } catch (Exception ex) {
+                                    System.err.println("Could not add image to PDF: " + ex.getMessage());
+                                }
                             }
                         }
-                        Paragraph fileList = new Paragraph(sb.toString(), normalFont);
-                        fileList.setSpacingAfter(8f);
-                        document.add(fileList);
                     } else {
                         Paragraph noFiles = new Paragraph("Chưa tải file ảnh nào lên.", italicFont);
                         noFiles.setSpacingAfter(8f);

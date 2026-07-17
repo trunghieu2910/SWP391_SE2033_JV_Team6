@@ -42,14 +42,34 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
 
     @Override
     @Transactional
-    public DiagnosisSessionResponse createSession(CreateDiagnosisSessionRequest request, Integer doctorId) {
+    public DiagnosisSessionResponse createSession(CreateDiagnosisSessionRequest request, Integer creatorId) {
         // Kiểm tra bệnh nhân tồn tại
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bệnh nhân không tồn tại"));
 
         // Kiểm tra bác sĩ tồn tại
-        User doctor = userRepository.findById(doctorId)
+        User doctor = userRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bác sĩ không tồn tại"));
+
+        // Kiểm tra business rule: Bệnh nhân đã có phiên khám nào chưa, nếu phiên gần nhất chưa COMPLETED thì chặn
+        List<DiagnosisSession> existingSessions = diagnosisSessionRepository.findByPatientPatientId(patient.getPatientId());
+        if (!existingSessions.isEmpty()) {
+            existingSessions.sort((s1, s2) -> s2.getCreatedAt().compareTo(s1.getCreatedAt())); // Descending
+            DiagnosisSession latestSession = existingSessions.get(0);
+            if (latestSession.getStatus() != DiagnosisSessionStatus.COMPLETED) {
+                throw new BadRequestException("Bệnh nhân này đang có một phiên khám chưa hoàn thành (Mã phiên: " + latestSession.getSessionId() + "). Không thể tạo mới.");
+            }
+        }
+
+        // Kiểm tra business rule: Bác sĩ không được có quá 10 ca chẩn đoán chưa hoàn tất
+        long incompleteDoctorSessions = diagnosisSessionRepository.countByUserUserIdAndStatusNot(doctor.getUserId(), DiagnosisSessionStatus.COMPLETED);
+        if (incompleteDoctorSessions >= 10) {
+            throw new BadRequestException("Bác sĩ này đang có " + incompleteDoctorSessions + " ca chẩn đoán chưa hoàn tất. Không thể nhận thêm ca mới (Tối đa 10 ca).");
+        }
+        
+        // Lấy thông tin người tạo (Lễ tân)
+        User creator = userRepository.findById(creatorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Người tạo không tồn tại"));
 
         // Tạo DiagnosisSession
         DiagnosisSession session = DiagnosisSession.builder()
@@ -73,17 +93,11 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .build();
         labResultRepository.save(labResult);
 
-        // Tạo MedicalImage
-        MedicalImage medicalImage = MedicalImage.builder()
-                .diagnosisSession(savedSession)
-                .imageType("Siêu âm")
-                .status(MedicalImageStatus.PENDING)
-                .build();
-        medicalImageRepository.save(medicalImage);
+
 
         // Ghi log
         systemLogService.logActivity("DiagnosisSession", savedSession.getSessionId(), "CREATE",
-                "Bác sĩ tạo phiên khám mới cho bệnh nhân " + patient.getUser().getFullName());
+                "Lễ tân " + creator.getFullName() + " tạo phiên khám mới cho bệnh nhân " + patient.getUser().getFullName() + ", chỉ định bác sĩ " + doctor.getFullName());
 
         // Emit event để notify patient
         eventPublisher.publishEvent(new DiagnosisSessionCreatedEvent(savedSession.getSessionId(), patient.getUser().getUserId()));
@@ -93,9 +107,9 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
 
     @Override
     @Transactional
-    public DiagnosisSessionResponse addPatientToSession(CreateDiagnosisSessionRequest request, Integer doctorId) {
+    public DiagnosisSessionResponse addPatientToSession(CreateDiagnosisSessionRequest request, Integer creatorId) {
         // Tương tự như createSession
-        return createSession(request, doctorId);
+        return createSession(request, creatorId);
     }
 
     @Override

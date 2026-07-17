@@ -69,6 +69,7 @@ public class AuthController {
     public String verifyRegistrationOtp(
             @Valid @ModelAttribute("otpRequest") OtpVerificationRequest request,
             BindingResult bindingResult,
+            org.springframework.security.core.Authentication authentication,
             Model model,
             RedirectAttributes redirectAttributes
     ) {
@@ -80,6 +81,13 @@ public class AuthController {
             authService.verifyRegistrationOtp(request);
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Xác thực OTP thành công. Tài khoản đã kích hoạt.");
+            
+            // Check if user is logged in and is a RECEPTIONIST
+            if (authentication != null && authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_RECEPTIONIST"))) {
+                return "redirect:/receptionist/create-session";
+            }
+            
             return "redirect:/auth/login";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());

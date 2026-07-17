@@ -32,4 +32,6 @@ public interface DoctorDiagnosisService {
     DoctorSessionDetailResponse getSessionDetail(Integer sessionId, Integer doctorId);
 
     void saveReview(Integer doctorId, Integer sessionId, com.mycompany.jpademo.backend.dto.request.CreateReviewRequest request);
+
+    void deleteMedicalImage(Integer doctorId, Integer sessionId, Integer imageId);
 }

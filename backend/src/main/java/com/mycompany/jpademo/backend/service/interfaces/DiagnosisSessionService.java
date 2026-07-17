@@ -6,9 +6,9 @@ import com.mycompany.jpademo.backend.dto.response.DiagnosisSessionResponse;
 import com.mycompany.jpademo.backend.dto.response.SymptomResultResponse;
 
 public interface DiagnosisSessionService {
-    DiagnosisSessionResponse createSession(CreateDiagnosisSessionRequest request, Integer doctorId);
+    DiagnosisSessionResponse createSession(CreateDiagnosisSessionRequest request, Integer creatorId);
 
-    DiagnosisSessionResponse addPatientToSession(CreateDiagnosisSessionRequest request, Integer doctorId);
+    DiagnosisSessionResponse addPatientToSession(CreateDiagnosisSessionRequest request, Integer creatorId);
 
     SymptomResultResponse submitSymptomForm(Integer sessionId, SubmitSymptomFormRequest request, Integer userId, String userRole);
 

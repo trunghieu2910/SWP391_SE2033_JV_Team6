@@ -37,11 +37,6 @@ public class DoctorDiagnosisController {
 
     private final DoctorDiagnosisService doctorDiagnosisService;
 
-    @GetMapping({"/create-session", "/sessions/create-session"})
-    public String createSessionPage(Model model) {
-        return "doctor/create-session";
-    }
-
     @GetMapping
     public String getMySessions(
             @RequestParam(required = false) String keyword,
@@ -190,6 +185,22 @@ public class DoctorDiagnosisController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
+        return "redirect:/doctor/sessions/" + sessionId;
+    }
+
+    @PostMapping("/{sessionId}/medical-images/{imageId}/delete")
+    public String deleteMedicalImage(
+            @PathVariable Integer sessionId,
+            @PathVariable Integer imageId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Integer doctorId = userDetails.getUser().getUserId();
+            doctorDiagnosisService.deleteMedicalImage(doctorId, sessionId, imageId);
+            redirectAttributes.addFlashAttribute("success", "Đã xóa chỉ định hình ảnh y tế chờ xử lý!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/doctor/sessions/" + sessionId;
     }
 }

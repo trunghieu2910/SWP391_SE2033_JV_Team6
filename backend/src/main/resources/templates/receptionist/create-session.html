@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{receptionist/layout :: main-layout(~{::main}, 'Tạo ca chẩn đoán', 'create-session')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/receptionist/create-session.css}">
+    <!-- Microdata for SEO/AI Context -->
+    <div itemscope itemtype="http://schema.org/MedicalWebPage" style="display: none;">
+        <meta itemprop="name" content="Tạo ca chẩn đoán mới">
+        <meta itemprop="description" content="Giao diện dành cho Lễ tân để tạo ca chẩn đoán mới và phân công Bác sĩ.">
+    </div>
+
+    <!-- Header Section -->
+    <header class="page-header">
+        <div class="page-header-info">
+            <h2><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Tạo ca chẩn đoán mới</h2>
+            <p>Tìm kiếm bệnh nhân, chọn bác sĩ và tạo phiên chẩn đoán mới trên hệ thống.</p>
+        </div>
+    </header>
+
+    <!-- Navigation/Steps Indicators -->
+    <nav aria-label="Các bước tạo ca chẩn đoán" class="steps-nav">
+        <ol class="steps-list">
+            <li class="step" th:classappend="${createdSessionId == null && selectedPatient == null} ? 'active' : (${selectedPatient != null || createdSessionId != null} ? 'completed' : '')">
+                <span class="step-number">1</span>
+                <span class="step-label">Tìm bệnh nhân</span>
+            </li>
+            <li class="step-connector" th:classappend="${selectedPatient != null || createdSessionId != null} ? 'active' : ''" aria-hidden="true"></li>
+            <li class="step" th:classappend="${createdSessionId == null && selectedPatient != null} ? 'active' : (${createdSessionId != null} ? 'completed' : '')">
+                <span class="step-number">2</span>
+                <span class="step-label">Nhập thông tin</span>
+            </li>
+            <li class="step-connector" th:classappend="${createdSessionId != null} ? 'active' : ''" aria-hidden="true"></li>
+            <li class="step" th:classappend="${createdSessionId != null} ? 'active' : ''">
+                <span class="step-number">3</span>
+                <span class="step-label">Hoàn tất</span>
+            </li>
+        </ol>
+    </nav>
+
+    <article class="content-wrapper">
+        <!-- Error / Success Messages at top level if needed -->
+        <div th:if="${successMessage}" class="alert alert-success" style="background: #ecfdf5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #10b981;">
+            <i class="fa-solid fa-circle-check"></i> <span th:text="${successMessage}"></span>
+        </div>
+
+        <!-- STEP 3: Success -->
+        <section th:if="${createdSessionId != null}" class="create-card success-card" aria-labelledby="step3Title">
+            <div class="success-content">
+                <div class="success-icon" aria-hidden="true">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 id="step3Title">Tạo phiên chẩn đoán thành công!</h3>
+                <p class="success-session-id">Mã phiên: #<span th:text="${createdSessionId}"></span></p>
+                <p class="success-desc">Phiên chẩn đoán đã được tạo và lưu vào hệ thống.</p>
+                <footer class="success-actions">
+                    <a th:href="@{/receptionist/create-session}" class="btn-action btn-outline" style="text-decoration: none;">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i> Tạo phiên mới
+                    </a>
+                </footer>
+            </div>
+        </section>
+
+        <!-- STEP 1: Search Patient -->
+        <section th:if="${createdSessionId == null && selectedPatient == null}" class="create-card" aria-labelledby="step1Title">
+            <header class="card-header">
+                <i class="fa-solid fa-search" aria-hidden="true"></i>
+                <h3 id="step1Title">Tìm kiếm bệnh nhân</h3>
+            </header>
+            <div class="card-body">
+                <form class="search-form" th:action="@{/receptionist/create-session}" method="GET" role="search">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        <label for="patientSearchInput" class="sr-only">Nhập tên bệnh nhân hoặc CCCD/CMND</label>
+                        <input type="search" id="patientSearchInput" name="keyword" th:value="${keyword}" 
+                               placeholder="Nhập tên bệnh nhân hoặc CCCD/CMND..." aria-label="Tìm kiếm bệnh nhân">
+                        <button type="submit" class="btn-search">
+                            <i class="fa-solid fa-search" aria-hidden="true"></i> Tìm kiếm
+                        </button>
+                    </div>
+                    <p class="search-hint">
+                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                        Nhập tên hoặc số CCCD/CMND để tìm bệnh nhân. Để trống để xem tất cả.
+                        <br><br>
+                        <strong>Chưa có tài khoản?</strong> 
+                        <a th:href="@{/receptionist/patients/create}" style="color: var(--primary); text-decoration: underline; font-weight: 500;">
+                            <i class="fa-solid fa-user-plus"></i> Tạo tài khoản bệnh nhân mới
+                        </a>
+                    </p>
+                </form>
+
+                <!-- Search Results -->
+                <section th:if="${patients != null && !patients.isEmpty()}" class="search-results" style="margin-top: 20px;">
+                    <header class="results-header">
+                        <h4><i class="fa-solid fa-users" aria-hidden="true"></i> Kết quả tìm kiếm (<span th:text="${patients.size()}"></span>)</h4>
+                    </header>
+                    <div class="results-body">
+                        <div class="patient-result-item" th:each="p : ${patients}">
+                            <div class="result-avatar" th:text="${#strings.substring(p.fullName, 0, 1)}">P</div>
+                            <div class="result-info">
+                                <div class="result-name" th:text="${p.fullName}">Name</div>
+                                <div class="result-meta">
+                                    <span><i class="fa-solid fa-id-badge"></i> ID: [[${p.patientId}]]</span>
+                                    <span><i class="fa-solid fa-id-card"></i> CCCD: [[${p.nationalId}]]</span>
+                                    <span><i class="fa-solid fa-venus-mars"></i> [[${p.gender}]]</span>
+                                    <span><i class="fa-solid fa-calendar"></i> [[${p.dob}]]</span>
+                                    <span><i class="fa-solid fa-phone"></i> [[${p.phoneNumber}]]</span>
+                                </div>
+                            </div>
+                            <a class="btn-select-patient" style="text-decoration: none;" 
+                               th:href="@{/receptionist/create-session(patientId=${p.patientId})}">
+                                Chọn
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Empty State -->
+                <div th:if="${infoMessage != null}" class="search-empty">
+                    <i class="fa-regular fa-face-meh" aria-hidden="true"></i>
+                    <p th:text="${infoMessage}"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: Patient Info + Session Form -->
+        <section th:if="${createdSessionId == null && selectedPatient != null}" class="create-card" aria-labelledby="step2Title">
+            <header class="card-header">
+                <i class="fa-solid fa-user-check" aria-hidden="true"></i>
+                <h3 id="step2Title">Thông tin phiên chẩn đoán</h3>
+            </header>
+            <div class="card-body">
+                <!-- Selected Patient Info -->
+                <article class="selected-patient">
+                    <header class="selected-patient-header">
+                        <div class="patient-avatar" th:text="${#strings.substring(selectedPatient.user.fullName, 0, 1)}">P</div>
+                        <div class="patient-main-info">
+                            <h4 th:text="${selectedPatient.user.fullName}">—</h4>
+                            <span class="patient-id-badge">ID: [[${selectedPatient.patientId}]]</span>
+                        </div>
+                        <a th:href="@{/receptionist/create-session}" class="btn-change-patient" style="text-decoration: none;">
+                            <i class="fa-solid fa-arrow-rotate-left" aria-hidden="true"></i> Đổi bệnh nhân
+                        </a>
+                    </header>
+                    <dl class="patient-detail-grid">
+                        <div class="detail-item">
+                            <dt class="detail-label"><i class="fa-solid fa-venus-mars" aria-hidden="true"></i> Giới tính</dt>
+                            <dd class="detail-value" th:text="${selectedPatient.gender}">—</dd>
+                        </div>
+                        <div class="detail-item">
+                            <dt class="detail-label"><i class="fa-solid fa-calendar" aria-hidden="true"></i> Ngày sinh</dt>
+                            <dd class="detail-value" th:text="${selectedPatient.dob}">—</dd>
+                        </div>
+                        <div class="detail-item">
+                            <dt class="detail-label"><i class="fa-solid fa-id-card" aria-hidden="true"></i> CCCD/CMND</dt>
+                            <dd class="detail-value" th:text="${selectedPatient.user.nationalID}">—</dd>
+                        </div>
+                        <div class="detail-item">
+                            <dt class="detail-label"><i class="fa-solid fa-phone" aria-hidden="true"></i> Số điện thoại</dt>
+                            <dd class="detail-value" th:text="${selectedPatient.user.phoneNumber}">—</dd>
+                        </div>
+                        <div class="detail-item full-width">
+                            <dt class="detail-label"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Địa chỉ</dt>
+                            <dd class="detail-value" th:text="${selectedPatient.address}">—</dd>
+                        </div>
+                    </dl>
+                </article>
+
+                <!-- Session Form -->
+                <form id="sessionForm" class="session-form" th:action="@{/receptionist/create-session}" method="POST" th:object="${createRequest}">
+                    <input type="hidden" th:field="*{patientId}" />
+                    
+                    <fieldset>
+                        <legend class="form-section-title"><i class="fa-solid fa-user-md" aria-hidden="true"></i> Bác sĩ phụ trách</legend>
+                        <div class="form-group full-width">
+                            <label for="doctorSelect">Chọn Bác sĩ <span class="required" style="color: red;">*</span></label>
+                            <select id="doctorSelect" th:field="*{doctorId}" required aria-required="true">
+                                <option value="" disabled selected>-- Vui lòng chọn Bác sĩ --</option>
+                                <option th:each="doc : ${doctors}" th:value="${doc.userId}" th:text="${doc.fullName}"></option>
+                            </select>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend class="form-section-title"><i class="fa-solid fa-notes-medical" aria-hidden="true"></i> Chỉ số cơ bản</legend>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="weightInput">Cân nặng (kg)</label>
+                                <input type="number" id="weightInput" th:field="*{weight}" step="0.1" min="10" max="300" placeholder="Ví dụ: 52.5">
+                                <span class="form-hint">Không bắt buộc</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="heightInput">Chiều cao (cm)</label>
+                                <input type="number" id="heightInput" th:field="*{height}" step="0.1" min="50" max="250" placeholder="Ví dụ: 158">
+                                <span class="form-hint">Không bắt buộc</span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Error message area for business logic (e.g. unfinished session) -->
+                    <div th:if="${errorMessage != null}" class="alert alert-danger" style="background: #fef2f2; color: #b91c1c; padding: 12px; border-radius: 8px; margin-top: 20px; border: 1px solid #ef4444;" role="alert">
+                        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                        <span th:text="${errorMessage}"></span>
+                    </div>
+
+                    <!-- Actions -->
+                    <footer class="form-actions">
+                        <a th:href="@{/receptionist/create-session}" class="btn-action btn-outline" style="text-decoration: none; padding: 10px 20px; border: 1px solid #ddd; border-radius: 10px; color: #333; display: inline-flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Quay lại
+                        </a>
+                        <button type="submit" class="btn-action btn-primary" onclick="return confirm('Bạn có chắc chắn muốn tạo phiên khám?');" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <i class="fa-solid fa-check" aria-hidden="true"></i> Tạo phiên chẩn đoán
+                        </button>
+                    </footer>
+                </form>
+            </div>
+        </section>
+    </article>
+</main>
+</body>
+</html>

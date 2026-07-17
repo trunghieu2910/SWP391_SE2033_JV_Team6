@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{receptionist/layout :: main-layout(~{::main}, 'Tạo tài khoản bệnh nhân', 'create-patient')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/receptionist/create-session.css}">
+    
+    <!-- Microdata for SEO & AI Indexing -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "MedicalWebPage",
+        "name": "Đăng ký tài khoản bệnh nhân mới",
+        "description": "Form dành cho lễ tân để khởi tạo tài khoản bệnh nhân trên hệ thống.",
+        "audience": {
+            "@type": "MedicalAudience",
+            "audienceType": "Receptionist"
+        }
+    }
+    </script>
+
+    <article class="form-container">
+        <header class="page-header">
+            <div class="page-header-info">
+                <h2><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Tạo Tài Khoản Bệnh Nhân</h2>
+                <p>Khởi tạo hồ sơ cho bệnh nhân mới. Sau khi tạo, bệnh nhân cần xác thực OTP qua Email.</p>
+            </div>
+        </header>
+
+        <section class="form-content">
+            <form th:action="@{/receptionist/patients/create}" th:object="${registerRequest}" method="POST" id="createPatientForm" aria-labelledby="form-heading">
+                <h3 id="form-heading" class="visually-hidden">Thông tin chi tiết tài khoản bệnh nhân</h3>
+                
+                <div th:if="${error != null}" class="alert alert-danger" role="alert">
+                    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                    <span th:text="${error}"></span>
+                </div>
+
+                <fieldset>
+                    <legend>Thông Tin Cá Nhân</legend>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fullName">Họ và Tên <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="text" id="fullName" th:field="*{fullName}" required aria-required="true" placeholder="Nguyễn Văn A">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Giới tính <span aria-hidden="true" style="color: red;">*</span></label>
+                            <select id="gender" th:field="*{gender}" required aria-required="true">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dob">Ngày sinh <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="date" id="dob" th:field="*{dob}" required aria-required="true">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nationalID">CMND/CCCD <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="text" id="nationalID" th:field="*{nationalID}" required aria-required="true" pattern="\d{12}" title="Gồm 12 chữ số" placeholder="012345678912">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('nationalID')}" th:errors="*{nationalID}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phoneNumber">Số điện thoại <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="tel" id="phoneNumber" th:field="*{phoneNumber}" required aria-required="true" pattern="\d{10}" title="Gồm 10 chữ số" placeholder="0912345678">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></span>
+                        </div>
+                        
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label for="address">Địa chỉ chi tiết <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="text" id="address" th:field="*{address}" required aria-required="true" placeholder="Số nhà, Đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></span>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Thông Tin Tài Khoản Đăng Nhập</legend>
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label for="email">Địa chỉ Email <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="email" id="email" th:field="*{email}" required aria-required="true" placeholder="email@example.com">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                        </div>
+
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label for="userName">Tên đăng nhập <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="text" id="userName" th:field="*{userName}" required aria-required="true" placeholder="Tên viết liền không dấu">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Mật khẩu <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="password" id="password" th:field="*{password}" required aria-required="true" placeholder="Tối thiểu 8 ký tự, có Hoa, thường, số, ký tự đặc biệt">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Xác nhận mật khẩu <span aria-hidden="true" style="color: red;">*</span></label>
+                            <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required aria-required="true" placeholder="Nhập lại mật khẩu ở trên">
+                            <span class="error-message" role="alert" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></span>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <footer class="form-actions" style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <a th:href="@{/receptionist/create-session}" class="btn-action btn-outline" style="text-decoration: none; padding: 10px 20px; border: 1px solid #ddd; border-radius: 8px; color: #333; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i> Hủy bỏ
+                    </a>
+                    <button type="submit" class="btn-action btn-primary" onclick="return confirm('Khởi tạo tài khoản này? Mã OTP sẽ được gửi tới Email.');" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <i class="fa-solid fa-check" aria-hidden="true"></i> Tạo & Gửi OTP
+                    </button>
+                </footer>
+            </form>
+        </section>
+    </article>
+</main>
+</body>
+</html>

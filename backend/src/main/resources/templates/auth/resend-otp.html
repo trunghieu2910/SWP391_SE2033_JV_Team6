@@ -22,7 +22,7 @@
         <div class="login-card card">
             <div class="login-card-header">
                 <h2>Gửi lại mã OTP</h2>
-                <p>Nhập tên đăng nhập để nhận lại mã kích hoạt.</p>
+                <p>Nhấn nút dưới đây để nhận lại mã kích hoạt vào Email của bạn.</p>
             </div>
 
             <div th:if="${successMessage}" class="alert alert-success">
@@ -35,11 +35,9 @@
             </div>
 
             <form th:action="@{/auth/register/resend-otp}" th:object="${resendRequest}" method="post">
-                <div class="form-group">
-                    <label class="form-label" for="userName">Tên đăng nhập</label>
-                    <input class="form-control" type="text" id="userName" th:field="*{userName}" readonly />
-                    <p th:if="${#fields.hasErrors('userName')}" class="field-error" th:errors="*{userName}"></p>
-                </div>
+                <!-- Ẩn username -->
+                <input type="hidden" id="userName" th:field="*{userName}" />
+                <p th:if="${#fields.hasErrors('userName')}" class="field-error" th:errors="*{userName}" style="text-align: center; margin-bottom: 10px;"></p>
                 <button type="submit" class="btn btn-primary">Gửi lại OTP</button>
             </form>
             <div class="login-action-row">

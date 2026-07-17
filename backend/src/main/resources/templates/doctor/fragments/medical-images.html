@@ -7,16 +7,28 @@
 <!-- ========================================== -->
 <!-- FRAGMENT: DANH SÁCH HÌNH ẢNH Y TẾ         -->
 <!-- ========================================== -->
-<div th:fragment="list(medicalImages)">
+<div th:fragment="list(medicalImages, sessionId)">
   <div class="image-container">
     <div th:if="${not #lists.isEmpty(medicalImages)}">
       <div class="image-grid">
         <div th:each="img : ${medicalImages}" class="image-item">
-          <div class="image-header">
-            <span th:text="${img.imageType}">MRI</span>
-            <span th:text="${img.status.name() == 'PENDING' ? 'Chờ xử lý' :
-                                         img.status.name() == 'COMPLETED' ? 'Hoàn thành' :
-                                         img.status.name() == 'CANCELED' ? 'Đã hủy' : img.status}">COMPLETED</span>
+          <div class="image-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span th:text="${img.imageType}" style="font-weight: 600;">MRI</span>
+              <span th:text="${img.status.name() == 'PENDING' ? 'Chờ xử lý' :
+                                           img.status.name() == 'COMPLETED' ? 'Hoàn thành' :
+                                           img.status.name() == 'CANCELED' ? 'Đã hủy' : img.status}"
+                    th:style="${img.status.name() == 'PENDING' ? 'color: #f59e0b; font-size: 0.85em;' : 'color: #10b981; font-size: 0.85em;'}">COMPLETED</span>
+            </div>
+            
+            <form th:if="${img.status.name() == 'PENDING'}" 
+                  th:action="@{/doctor/sessions/{sessionId}/medical-images/{imageId}/delete(sessionId=${sessionId}, imageId=${img.medicalImageId})}" 
+                  method="post" style="margin: 0;"
+                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa chỉ định hình ảnh này?');">
+                <button type="submit" class="btn btn-sm btn-outline-danger" style="padding: 2px 8px; font-size: 12px; border-radius: 4px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" title="Xóa chỉ định">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </form>
           </div>
           <div class="image-thumbs">
             <div th:each="d : ${img.images}" class="thumb">

@@ -84,7 +84,7 @@ public class PatientController {
     public String medicalRecords(Model model,
                                  @AuthenticationPrincipal CustomUserDetails userDetails,
                                  @RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "10") int size) {
+                                 @RequestParam(defaultValue = "9") int size) {
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
         Patient patient = getPatient(userDetails);
 

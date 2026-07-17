@@ -11,4 +11,6 @@ public interface AuthService {
     void verifyRegistrationOtp(OtpVerificationRequest request);
 
     void resendRegistrationOtp(ResendOtpRequest request);
+
+    void registerByReceptionist(RegisterRequest request);
 }

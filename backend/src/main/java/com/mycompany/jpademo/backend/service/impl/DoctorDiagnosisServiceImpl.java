@@ -418,4 +418,28 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .parameters(parameters)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void deleteMedicalImage(Integer doctorId, Integer sessionId, Integer imageId) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
+
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("Bạn không có quyền thao tác trên ca chẩn đoán này.");
+        }
+
+        MedicalImage image = medicalImageRepository.findById(imageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hình ảnh y tế với ID: " + imageId));
+
+        if (!image.getDiagnosisSession().getSessionId().equals(sessionId)) {
+            throw new BadRequestException("Hình ảnh không thuộc ca chẩn đoán này.");
+        }
+
+        if (image.getStatus() != com.mycompany.jpademo.backend.enums.MedicalImageStatus.PENDING) {
+            throw new BadRequestException("Chỉ có thể xóa yêu cầu hình ảnh đang ở trạng thái Chờ xử lý.");
+        }
+
+        medicalImageRepository.delete(image);
+    }
 }

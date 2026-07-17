@@ -1,12 +1,18 @@
 package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.enums.RoleName;
+import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.repository.UserRepository;
+import com.mycompany.jpademo.backend.dto.response.UserResponse;
 import com.mycompany.jpademo.backend.service.interfaces.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -42,5 +48,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsByUsername(String username) {
         return userRepository.findByUserName(username).isPresent();
+    }
+
+    @Override
+    public List<UserResponse> getActiveDoctors() {
+        Page<User> doctorsPage = userRepository.findByRoleRoleNameAndStatus(RoleName.DOCTOR, UserStatus.ACTIVE, Pageable.unpaged());
+        return doctorsPage.getContent().stream().map(user -> 
+            UserResponse.builder()
+                .userId(user.getUserId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .build()
+        ).collect(Collectors.toList());
     }
 }

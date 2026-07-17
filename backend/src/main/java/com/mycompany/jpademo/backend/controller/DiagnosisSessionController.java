@@ -34,7 +34,7 @@ public class DiagnosisSessionController {
      * Tìm kiếm bệnh nhân theo từ khóa (tên hoặc nationalID)
      */
     @GetMapping("/search-patients")
-        @PreAuthorize("hasRole('DOCTOR')")
+        @PreAuthorize("hasAnyRole('DOCTOR', 'RECEPTIONIST')")
     public ResponseEntity<ApiResponse<List<PatientSearchResponse>>> searchPatients(
             @RequestParam(value = "keyword", required = false) String keyword) {
         List<PatientSearchResponse> patients = patientSearchService.searchPatients(keyword);
@@ -47,43 +47,7 @@ public class DiagnosisSessionController {
         );
     }
 
-    /**
-     * Bác sĩ tạo phiên khám
-     */
-    @PostMapping
-        @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<ApiResponse<DiagnosisSessionResponse>> createSession(
-            @Valid @RequestBody CreateDiagnosisSessionRequest request,
-            Authentication authentication) {
-        Integer doctorId = extractUserId(authentication);
-        DiagnosisSessionResponse response = diagnosisSessionService.createSession(request, doctorId);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.<DiagnosisSessionResponse>builder()
-                        .code(201)
-                        .message("Tạo phiên khám thành công")
-                        .data(response)
-                        .build()
-                );
-    }
 
-    /**
-     * Thêm bệnh nhân vào phiên khám (click dấu cộng)
-     */
-    @PostMapping("/add-patient")
-        @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<ApiResponse<DiagnosisSessionResponse>> addPatientToSession(
-            @Valid @RequestBody CreateDiagnosisSessionRequest request,
-            Authentication authentication) {
-        Integer doctorId = extractUserId(authentication);
-        DiagnosisSessionResponse response = diagnosisSessionService.addPatientToSession(request, doctorId);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.<DiagnosisSessionResponse>builder()
-                        .code(201)
-                        .message("Thêm bệnh nhân vào phiên khám thành công")
-                        .data(response)
-                        .build()
-                );
-    }
 
     /**
      * Bệnh nhân hoặc bác sĩ submit biểu mẫu triệu chứng
