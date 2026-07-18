@@ -9,42 +9,33 @@ function initializeDrugForm() {
     if (form) {
         form.addEventListener('submit', validateDrugForm);
     }
-
-    // Load subcategories
-    loadSubcategories();
-}
-
-function loadSubcategories() {
-    const subCategorySelect = document.getElementById('subCategoryId');
-    if (subCategorySelect) {
-        // This would normally fetch from API
-        // For now, we'll use hardcoded values
-        const options = [
-            { value: 1, text: 'Thuốc kháng sinh' },
-            { value: 2, text: 'Thuốc an thần' },
-            { value: 3, text: 'Thuốc hạ sốt' },
-            { value: 4, text: 'Thuốc ho' },
-            { value: 5, text: 'Thuốc tiêu hóa' }
-        ];
-
-        options.forEach(option => {
-            const optElement = document.createElement('option');
-            optElement.value = option.value;
-            optElement.textContent = option.text;
-            subCategorySelect.appendChild(optElement);
-        });
-    }
 }
 
 function validateDrugForm(e) {
-    const drugCode = document.getElementById('drugCode').value;
-    const drugName = document.getElementById('drugName').value;
-    const strength = document.getElementById('strength').value;
-    const dosageForm = document.getElementById('dosageForm').value;
+    const fields = [
+        { id: 'drugName', label: 'Tên thuốc' },
+        { id: 'strength', label: 'Hàm lượng' },
+        { id: 'strengthUnit', label: 'Đơn vị hàm lượng' },
+        { id: 'dosageForm', label: 'Dạng bào chế' },
+        { id: 'routeOfAdministration', label: 'Đường dùng' },
+        { id: 'subCategoryId', label: 'Phân nhóm thuốc' },
+        { id: 'manufacturer', label: 'Nhà sản xuất' },
+        { id: 'countryOfOrigin', label: 'Nước sản xuất' },
+        { id: 'storageCondition', label: 'Điều kiện bảo quản' },
+        { id: 'shelfLifeMonths', label: 'Thời hạn sử dụng' },
+        { id: 'packaging', label: 'Quy cách đóng gói' }
+    ];
+    let missing = [];
+    fields.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (!el || !el.value || el.value.trim() === '') {
+            missing.push(f.label);
+        }
+    });
 
-    if (!drugCode || !drugName || !strength || !dosageForm) {
+    if (missing.length > 0) {
         e.preventDefault();
-        alert('Vui lòng điền tất cả các trường bắt buộc');
+        alert('Vui lòng điền đầy đủ các trường thông tin bắt buộc: ' + missing.join(', '));
         return false;
     }
 

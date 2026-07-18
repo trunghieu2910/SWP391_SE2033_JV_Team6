@@ -21,6 +21,9 @@ public interface InventoryLogRepository extends JpaRepository<InventoryLog, Inte
 
     List<InventoryLog> findByPerformedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
 
+    @Query("SELECT il FROM InventoryLog il WHERE il.performedAt BETWEEN :startDate AND :endDate ORDER BY il.performedAt DESC")
+    Page<InventoryLog> findByPerformedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
     @Query("SELECT il FROM InventoryLog il WHERE il.user.userId = :userId AND il.actionType = :actionType")
     List<InventoryLog> findByUserIdAndActionType(@Param("userId") Integer userId, @Param("actionType") String actionType);
 }

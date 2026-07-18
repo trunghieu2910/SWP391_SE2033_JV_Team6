@@ -26,8 +26,8 @@ public class Drug {
     @Column(name = "drugName", nullable = false, length = 200)
     private String drugName;
 
-    @Column(name = "strength", nullable = false)
-    private java.math.BigDecimal strength;
+    @Column(name = "strength", length = 50)
+    private String strength;
 
     @Column(name = "strengthUnit", nullable = false, length = 10)
     private String strengthUnit;

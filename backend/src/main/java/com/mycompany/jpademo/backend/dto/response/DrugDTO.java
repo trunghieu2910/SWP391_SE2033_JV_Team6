@@ -2,8 +2,6 @@ package com.mycompany.jpademo.backend.dto.response;
 
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,7 +11,7 @@ public class DrugDTO {
     private Integer drugId;
     private String drugCode;
     private String drugName;
-    private BigDecimal strength;
+    private String strength;
     private String strengthUnit;
     private String dosageForm;
     private String routeOfAdministration;
@@ -28,4 +26,6 @@ public class DrugDTO {
     private Byte status;
     private Integer totalQuantityInStock;
     private Integer totalBatches;
+    private String createdByName;
+    private String createdAt;
 }

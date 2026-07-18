@@ -17,7 +17,7 @@
                 <h2 style="font-size: 1.1rem; font-weight: 800; color: #b45309; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-hourglass-half"></i> Thuốc sắp hết hạn (7 ngày)
                 </h2>
-                <div style="overflow-x: hidden;" th:if="${expiringItems.size() > 0}">
+                <div style="overflow-x: hidden;" th:if="${expiringItems != null and expiringItems.size() > 0}">
                     <table class="table" style="margin-top: 0;">
                         <thead>
                             <tr>
@@ -37,7 +37,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div th:if="${expiringItems.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
+                <div th:if="${expiringItems == null or expiringItems.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
                     <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.5rem; display: block; margin-bottom: 8px;"></i>
                     Không có thuốc nào sắp hết hạn.
                 </div>
@@ -48,7 +48,7 @@
                 <h2 style="font-size: 1.1rem; font-weight: 800; color: #991b1b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-triangle-exclamation"></i> Cảnh báo tồn kho thấp (< 50)
                 </h2>
-                <div style="overflow-x: hidden;" th:if="${lowStockItems.size() > 0}">
+                <div style="overflow-x: hidden;" th:if="${lowStockItems != null and lowStockItems.size() > 0}">
                     <table class="table" style="margin-top: 0;">
                         <thead>
                             <tr>
@@ -66,7 +66,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div th:if="${lowStockItems.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
+                <div th:if="${lowStockItems == null or lowStockItems.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
                     <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.5rem; display: block; margin-bottom: 8px;"></i>
                     Tồn kho tất cả đều ổn định.
                 </div>
@@ -82,33 +82,29 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th>Mã thuốc</th>
                         <th>Tên thuốc</th>
-                        <th>Số lô</th>
-                        <th>Đơn vị quản lý</th>
-                        <th>Số lượng tồn</th>
-                        <th>Ngày hết hạn</th>
+                        <th>Mã lô</th>
+                        <th>Hạn sử dụng</th>
+                        <th>Đơn vị lớn</th>
+                        <th>Đơn vị nhỏ</th>
                         <th>Cập nhật cuối</th>
                         <th>Trạng thái</th>
-                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="inventory : ${inventories}">
+                        <td th:text="${inventory.drugCode}" style="font-weight: 600;">-</td>
                         <td th:text="${inventory.drugName}" style="font-weight: 700; color: var(--primary);">-</td>
                         <td th:text="${inventory.batchNumber}" style="font-weight: 600;">-</td>
-                        <td>Viên/Đơn vị nhỏ</td>
-                        <td th:text="${inventory.quantityInStock}" style="font-weight: 700;">-</td>
-                        <td th:text="${inventory.daysUntilExpiry} + ' ngày'">-</td>
-                        <td th:text="${#temporals.format(inventory.lastUpdated, 'dd/MM/yyyy')}">-</td>
+                        <td th:text="${inventory.expiryDate != null ? #temporals.format(inventory.expiryDate, 'dd/MM/yyyy') : '-'}">-</td>
+                        <td th:text="|${inventory.quantityInLargeUnit} ${inventory.largeUnitName}|" style="font-weight: 700; color: var(--primary);">-</td>
+                        <td th:text="|${inventory.quantityInStock} ${inventory.smallUnitName}|" style="font-weight: 700;">-</td>
+                        <td th:text="${inventory.lastUpdated != null ? #temporals.format(inventory.lastUpdated, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
                         <td>
-                            <span th:if="${inventory.isExpiringSoon}" class="badge badge-danger">Sắp hết hạn</span>
-                            <span th:if="${inventory.isLowStock}" class="badge badge-warning">Tồn thấp</span>
-                            <span th:if="${!inventory.isExpiringSoon && !inventory.isLowStock}" class="badge badge-success">Bình thường</span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary" th:onclick="adjustInventory([[${inventory.batchId}]])">
-                                <i class="fas fa-edit"></i> Điều chỉnh
-                            </button>
+                            <span th:if="${inventory.status == 1}" class="badge badge-success">Hoạt động</span>
+                            <span th:if="${inventory.status == 0}" class="badge badge-danger" style="background-color:#6b7280; color:white;">Khóa</span>
+                            <span th:if="${inventory.status == 2}" class="badge badge-warning" style="background-color: #eab308; color: white;">Hết hạn</span>
                         </td>
                     </tr>
                 </tbody>
@@ -133,51 +129,7 @@
         </nav>
     </div>
 
-    <!-- Adjust Modal -->
-    <div id="adjustModal" class="modal" style="display: none; position: fixed; top:0; left:0; right:0; bottom:0; z-index:1000; align-items:center; justify-content:center;">
-        <div class="modal-overlay" style="position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.3); backdrop-filter:blur(4px);" onclick="closeAdjustModal()"></div>
-        <div class="modal-content" style="background:#ffffff; border-radius:var(--radius-lg); padding:32px; width:100%; max-width:480px; position:relative; z-index:1001; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: scaleUp 0.2s ease;">
-            <span class="close" style="position:absolute; top:16px; right:20px; font-size:24px; font-weight:700; color:var(--neutral-light); cursor:pointer;" onclick="closeAdjustModal()">&times;</span>
-            <h2 style="font-size:1.25rem; font-weight:800; color:var(--neutral-dark); margin-bottom:20px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">Điều chỉnh tồn kho lô thuốc</h2>
-            
-            <form id="adjustForm">
-                <div class="form-group">
-                    <label for="quantityChange">Số lượng thay đổi *</label>
-                    <input type="number" id="quantityChange" name="quantityChange" required placeholder="Ví dụ: 100 hoặc -50">
-                    <small style="color:var(--neutral-light); font-size:0.75rem;">Nhập số dương để cộng thêm kho, số âm để trừ bớt kho.</small>
-                </div>
-                <div class="form-group">
-                    <label for="reason">Lý do điều chỉnh *</label>
-                    <textarea id="reason" name="reason" rows="3" required placeholder="Ví dụ: Kiểm kho phát hiện hư hỏng / bổ sung thêm hàng lẻ"></textarea>
-                </div>
-                <div style="display:flex; gap:12px; margin-top:24px; border-top:1px solid var(--border-color); padding-top:20px;">
-                    <button type="submit" class="btn btn-primary" style="flex:1;">Xác nhận</button>
-                    <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeAdjustModal()">Hủy bỏ</button>
-                </div>
-            </form>
-        </div>
     </div>
-
-    <script th:src="@{/js/pharmacist/inventory.js}"></script>
-    <script>
-        // Override adjustInventory to support flex display for modal centering
-        const originalAdjustInventory = adjustInventory;
-        adjustInventory = function(batchId) {
-            originalAdjustInventory(batchId);
-            const modal = document.getElementById('adjustModal');
-            if (modal) {
-                modal.style.display = 'flex';
-            }
-        };
-        const originalCloseAdjustModal = closeAdjustModal;
-        closeAdjustModal = function() {
-            originalCloseAdjustModal();
-            const modal = document.getElementById('adjustModal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        };
-    </script>
 </main>
 </body>
 </html>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:fragment="main-layout(content, title, currentTab)" lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -28,9 +28,9 @@
                 <i class="fa-solid fa-pills"></i>
                 <span>Quản lý thuốc</span>
             </a>
-            <a th:href="@{/pharmacist/drug-import}" class="nav-item" th:classappend="${currentTab == 'import' ? 'active' : ''}">
-                <i class="fa-solid fa-file-import"></i>
-                <span>Nhập kho</span>
+            <a th:href="@{/pharmacist/import-history}" class="nav-item" th:classappend="${currentTab == 'import' ? 'active' : ''}">
+                <i class="fa-solid fa-boxes-packing"></i>
+                <span>Quản lý kho</span>
             </a>
             <a th:href="@{/pharmacist/dispense-list}" class="nav-item" th:classappend="${currentTab == 'dispense' ? 'active' : ''}">
                 <i class="fa-solid fa-receipt"></i>
@@ -39,10 +39,6 @@
             <a th:href="@{/pharmacist/inventory}" class="nav-item" th:classappend="${currentTab == 'inventory' ? 'active' : ''}">
                 <i class="fa-solid fa-boxes-stacked"></i>
                 <span>Tồn kho</span>
-            </a>
-            <a th:href="@{/pharmacist/reports}" class="nav-item" th:classappend="${currentTab == 'reports' ? 'active' : ''}">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span>Báo cáo</span>
             </a>
             <a th:href="@{/pharmacist/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
                 <i class="fa-solid fa-user-circle"></i>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Chi tiết cấp phát đơn thuốc', 'dispense')}">
+<body>
+<main>
+    <div class="container" style="max-width: 900px; margin: 0 auto;">
+        <header class="page-header" style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="/pharmacist/dispense-list" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                </a>
+                <h1 style="margin: 0;"><i class="fas fa-receipt"></i> Đơn thuốc: <span th:text="${prescriptionCode}"></span></h1>
+            </div>
+        </header>
+
+        <!-- Messages -->
+        <div th:if="${success}" style="background: #ecfdf5; border: 1px solid #10b981; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-weight: 500;">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" style="background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-weight: 500;">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Patient Header Card -->
+        <section class="card" style="margin-bottom: 32px; padding: 24px;">
+            <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                Thông tin hành chính đơn thuốc
+            </h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Bệnh nhân</span>
+                    <strong th:text="${patientName}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã đơn thuốc</span>
+                    <strong th:text="${prescriptionCode}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- Prescription Details Table -->
+        <section class="card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px 24px;">
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--neutral-dark);">Danh sách thuốc cần phát</h3>
+            </div>
+            <div class="table-responsive" style="margin-top: 0;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Tên thuốc</th>
+                            <th>Liều dùng</th>
+                            <th>Thời gian sử dụng</th>
+                            <th>Số lượng kê</th>
+                            <th>Đã phát</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${details}">
+                            <td th:text="${item.drugName}" style="font-weight: 700; color: var(--primary);"></td>
+                            <td th:text="${item.dosePerTime} + ' mg, ' + ${item.timesPerDay} + ' lần/ngày'"></td>
+                            <td th:text="${item.daysOfTreatment} + ' ngày'"></td>
+                            <td th:text="${item.quantityPrescribed}" style="font-weight: 700;"></td>
+                            <td th:text="${item.quantityDispensed != null ? item.quantityDispensed : 0}" style="font-weight: 700;"></td>
+                            <td>
+                                <span th:if="${item.isPending}" class="badge badge-warning">Chờ cấp phát</span>
+                                <span th:if="!${item.isPending}" class="badge badge-success">Đã cấp phát</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/pharmacist/dispense-form/{id}(id=${item.detailId})}"
+                                   class="btn btn-sm btn-primary" th:if="${item.isPending}">
+                                    <i class="fas fa-hand-holding-medical"></i> Cấp phát
+                                </a>
+                                <span th:unless="${item.isPending}" style="color: var(--success); font-weight: 600;">
+                                    <i class="fas fa-check"></i> Hoàn thành
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

@@ -21,4 +21,11 @@ public class InventoryDTO {
     private Long daysUntilExpiry;
     private Boolean isExpiringSoon;
     private Boolean isLowStock;
+
+    // Display fields for Warehouse Inventory
+    private String drugCode;
+    private java.time.LocalDate expiryDate;
+    private Integer quantityInLargeUnit;
+    private String largeUnitName;
+    private String smallUnitName;
 }

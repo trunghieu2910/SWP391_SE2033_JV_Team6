@@ -19,6 +19,7 @@ public class DrugBatchDTO {
     private LocalDate manufactureDate;
     private LocalDate expiryDate;
     private String unitName;
+    private Integer unitId;
     private Integer quantity;
     private BigDecimal importPrice;
     private String supplier;

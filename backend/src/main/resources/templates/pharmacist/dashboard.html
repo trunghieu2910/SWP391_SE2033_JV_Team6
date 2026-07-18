@@ -1,12 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Trang chủ', 'dashboard')}">
 <body>
 <main>
     <link rel="stylesheet" th:href="@{/css/pharmacist/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/pharmacist/reports.css}">
 
     <!-- Quick Stats -->
-    <section class="quick-stats">
+    <section class="quick-stats" style="margin-bottom: 32px;">
         <div class="stat-card" th:if="${stats}">
             <div class="stat-icon primary">
                 <i class="fas fa-pills"></i>
@@ -48,24 +49,136 @@
         </div>
     </section>
 
-    <!-- Quick Actions -->
-    <section class="quick-actions">
-        <h2>Hành động nhanh</h2>
-        <div class="action-buttons">
-            <a href="/pharmacist/drug-add" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Thêm thuốc mới
-            </a>
-            <a href="/pharmacist/drug-import" class="btn btn-success">
-                <i class="fas fa-file-import"></i> Nhập kho thuốc
-            </a>
-            <a href="/pharmacist/dispense-list" class="btn btn-info">
-                <i class="fas fa-hand-holding-medical"></i> Cấp phát thuốc
-            </a>
-            <a href="/pharmacist/inventory" class="btn btn-warning">
-                <i class="fas fa-boxes-stacked"></i> Xem tồn kho
-            </a>
-        </div>
-    </section>
+    <!-- Reports Section -->
+    <div class="container" style="padding: 0;">
+        <!-- Filter Section -->
+        <section class="filter-section card" style="padding: 24px; margin-bottom: 32px;">
+            <form method="get" action="/pharmacist/dashboard" class="filter-form" style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 180px;">
+                    <label for="startDate">Từ ngày:</label>
+                    <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="form-control">
+                </div>
+                <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 180px;">
+                    <label for="endDate">Đến ngày:</label>
+                    <input type="date" id="endDate" name="endDate" th:value="${endDate}" class="form-control">
+                </div>
+                <div style="display: flex; gap: 12px; margin-bottom: 2px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Lọc dữ liệu
+                    </button>
+                    <a th:href="@{/pharmacist/export-report(startDate=${startDate}, endDate=${endDate})}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Xuất Báo Cáo
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <!-- Inventory Log Report -->
+        <section class="report-section card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 24px 32px 12px 32px;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--neutral-dark); display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-list-alt"></i> Nhật ký hoạt động kho chi tiết
+                </h2>
+                <p style="font-size: 0.85rem; color: var(--neutral-light); margin-top: 4px;">Nhấp vào một dòng để xem chi tiết đầy đủ.</p>
+            </div>
+            <div class="table-responsive" style="margin-top: 0;">
+                <table class="table" th:if="${logs != null && logs.size() > 0}">
+                    <thead>
+                        <tr>
+                            <th style="width: 36px;"></th>
+                            <th>Ngày thực hiện</th>
+                            <th>Thuốc</th>
+                            <th>Loại hoạt động</th>
+                            <th>Dược sĩ thực hiện</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <th:block th:each="log, iterStat : ${logs}">
+                            <!-- Main row (4 cols + toggle icon) -->
+                            <tr th:onclick="|toggleLogDetail('detail-' + ${iterStat.index})|"
+                                style="cursor: pointer;" class="log-main-row">
+                                <td style="text-align: center; color: var(--primary);">
+                                    <i class="fas fa-chevron-down toggle-icon" th:id="|icon-${iterStat.index}|"></i>
+                                </td>
+                                <td th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm')}" style="font-weight: 600;"></td>
+                                <td th:text="${log.batch.drug.drugName}"></td>
+                                <td>
+                                    <span th:if="${log.actionType == 'IMPORT'}" class="badge badge-success">Nhập kho</span>
+                                    <span th:if="${log.actionType == 'DISPENSE'}" class="badge badge-warning">Xuất đơn</span>
+                                    <span th:if="${log.actionType == 'ADJUST'}" class="badge badge-info">Cân đối</span>
+                                </td>
+                                <td th:text="${log.user.fullName}"></td>
+                            </tr>
+                            <!-- Detail row (initially hidden) -->
+                            <tr th:id="|detail-${iterStat.index}|" class="log-detail-row" style="display: none; background: #f8fafc;">
+                                <td colspan="5" style="padding: 16px 24px;">
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                                        <div>
+                                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--neutral-light); text-transform: uppercase;">Thay đổi số lượng</span>
+                                            <div th:text="${(log.quantityChange > 0 ? '+' : '') + log.quantityChange}"
+                                                 th:style="|font-weight: 800; font-size: 1.05rem; color: ${log.quantityChange > 0 ? '#10b981' : '#ef4444'}|"></div>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--neutral-light); text-transform: uppercase;">Tồn trước</span>
+                                            <div th:text="${log.quantityBefore}" style="font-weight: 700; font-size: 1rem;"></div>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--neutral-light); text-transform: uppercase;">Tồn sau</span>
+                                            <div th:text="${log.quantityAfter}" style="font-weight: 700; font-size: 1rem;"></div>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--neutral-light); text-transform: uppercase;">Ghi chú</span>
+                                            <div th:text="${log.notes != null && !log.notes.isEmpty() ? log.notes : 'Không có'}" style="font-size: 0.9rem; color: var(--neutral-dark);"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${logs == null || logs.size() == 0}" class="text-center" style="padding: 32px; color: var(--neutral-light);">
+                Chưa có hoạt động kho nào trong khoảng thời gian được chọn.
+            </div>
+
+            <!-- Pagination Controls -->
+            <div th:if="${totalPages != null && totalPages > 1}"
+                 style="display: flex; justify-content: center; align-items: center; gap: 8px; padding: 20px 32px; border-top: 1px solid var(--border-color);">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/pharmacist/dashboard(startDate=${startDate}, endDate=${endDate}, page=${currentPage - 1})}"
+                   class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    <i class="fas fa-chevron-left"></i> Trước
+                </a>
+                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/pharmacist/dashboard(startDate=${startDate}, endDate=${endDate}, page=${i})}"
+                       th:text="${i + 1}"
+                       th:class="${i == currentPage ? 'btn btn-primary' : 'btn btn-secondary'}"
+                       style="padding: 6px 12px; font-size: 0.85rem; min-width: 36px; text-align: center;">
+                    </a>
+                </span>
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/pharmacist/dashboard(startDate=${startDate}, endDate=${endDate}, page=${currentPage + 1})}"
+                   class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">
+                    Sau <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleLogDetail(detailId) {
+            const detailRow = document.getElementById(detailId);
+            if (!detailRow) return;
+            const idx = detailId.replace('detail-', '');
+            const icon = document.getElementById('icon-' + idx);
+            const isHidden = detailRow.style.display === 'none';
+            detailRow.style.display = isHidden ? 'table-row' : 'none';
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down', !isHidden);
+                icon.classList.toggle('fa-chevron-up', isHidden);
+            }
+        }
+    </script>
 </main>
 </body>
 </html>

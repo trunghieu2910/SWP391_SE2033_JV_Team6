@@ -2,8 +2,6 @@ package com.mycompany.jpademo.backend.dto.request;
 
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,7 +10,7 @@ import java.math.BigDecimal;
 public class CreateDrugRequest {
     private String drugCode;
     private String drugName;
-    private BigDecimal strength;
+    private String strength;
     private String strengthUnit;
     private String dosageForm;
     private String routeOfAdministration;

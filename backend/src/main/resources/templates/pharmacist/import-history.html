@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Lịch sử nhập kho', 'import')}">
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Quản lý kho', 'import')}">
 <body>
 <main>
     <div class="container">
         <header class="page-header" style="margin-bottom: 24px;">
-            <h1><i class="fas fa-history"></i> Nhật ký lô hàng đã nhập</h1>
+            <h1><i class="fas fa-boxes-stacked"></i> Quản lý kho thuốc</h1>
             <a href="/pharmacist/drug-import" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Nhập lô hàng mới
             </a>
@@ -20,27 +20,25 @@
                         <th>Số lô</th>
                         <th>Ngày SX</th>
                         <th>HSD</th>
-                        <th>SL nhập</th>
                         <th>Giá nhập (đ)</th>
                         <th>Nhà cung cấp</th>
                         <th>Thời gian nhập</th>
-                        <th>Tồn kho (đv nhỏ)</th>
+                        <th>Tồn kho</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="batch : ${batches}">
+                    <tr th:each="batch : ${batches}" th:onclick="viewBatchDetail([[${batch.batchId}]])" style="cursor: pointer;">
                         <td th:text="${batch.drugName}" style="font-weight: 700; color: var(--primary);">-</td>
                         <td th:text="${batch.batchNumber}" style="font-weight: 600;">-</td>
                         <td th:text="${#temporals.format(batch.manufactureDate, 'dd/MM/yyyy')}">-</td>
                         <td th:text="${#temporals.format(batch.expiryDate, 'dd/MM/yyyy')}">-</td>
-                        <td th:text="${batch.quantity} + ' ' + ${batch.unitName}">-</td>
                         <td th:text="${batch.importPrice != null ? #numbers.formatDecimal(batch.importPrice, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">-</td>
                         <td th:text="${batch.supplier}">-</td>
                         <td th:text="${#temporals.format(batch.importDate, 'dd/MM/yyyy HH:mm')}">-</td>
                         <td th:text="${batch.quantityInStock}" style="font-weight: 700;">-</td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(batches.content)}">
-                        <td colspan="9" style="text-align: center; color: var(--neutral-light); padding: 32px;">
+                    <tr th:if="${batches == null or #lists.isEmpty(batches.content)}">
+                        <td colspan="8" style="text-align: center; color: var(--neutral-light); padding: 32px;">
                             Chưa có bản ghi nhập kho nào.
                         </td>
                     </tr>
