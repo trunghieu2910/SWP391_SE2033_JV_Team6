@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RateLimitingFilter extends OncePerRequestFilter {
     private final Map<String, IpAddressCount> requestCache = new ConcurrentHashMap<>();
     private static final int MAX_REQUESTS_PER_MINUTE = 100;
+
+    @Scheduled(fixedRate = 60_000)
+    public void cleanupExpiredEntries() {
+        long currentMinute = System.currentTimeMillis() / 60000;
+        requestCache.entrySet().removeIf(entry -> {
+           IpAddressCount value = entry.getValue();
+           return value != null && (currentMinute - value.minute) > 1;
+        });
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -46,7 +56,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             if (v == null || v.minute != currentMinute) {
                 return new IpAddressCount(currentMinute, new AtomicInteger(1));
             }
-            int newCount = v.count.incrementAndGet();
+            v.count.incrementAndGet();
             return v;
         });
 

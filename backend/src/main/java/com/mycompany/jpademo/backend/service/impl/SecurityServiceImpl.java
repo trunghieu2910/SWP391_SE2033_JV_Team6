@@ -7,11 +7,13 @@ import com.mycompany.jpademo.backend.dto.response.EndpointRequestStats;
 import com.mycompany.jpademo.backend.dto.response.IpRequestStats;
 import com.mycompany.jpademo.backend.dto.response.SecurityStatsResponse;
 import com.mycompany.jpademo.backend.entity.BlockedIP;
+import com.mycompany.jpademo.backend.event.BlockedIpChangeEvent;
 import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.repository.BlockedIPRepository;
 import com.mycompany.jpademo.backend.repository.RequestLogRepository;
 import com.mycompany.jpademo.backend.service.interfaces.SecurityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import java.util.List;
 public class SecurityServiceImpl implements SecurityService {
     private final BlockedIPRepository blockedIPRepository;
     private final RequestLogRepository requestLogRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public SecurityStatsResponse getStats(LocalDateTime startDate, LocalDateTime endDate) {
@@ -92,6 +95,8 @@ public class SecurityServiceImpl implements SecurityService {
                 .createdBy(adminUsername)
                 .build();
         blockedIPRepository.save(blockedIP);
+
+        eventPublisher.publishEvent(new BlockedIpChangeEvent(request.getIpAddress(), true));
     }
 
     @Override
@@ -102,5 +107,7 @@ public class SecurityServiceImpl implements SecurityService {
                 () -> new BadRequestException("IP " + ipAddress + " không tồn tại trong danh sách chặn.")
         );
         blockedIPRepository.deleteById(ipAddress);
+
+        eventPublisher.publishEvent(new BlockedIpChangeEvent(request.getIpAddress(), false));
     }
 }
