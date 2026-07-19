@@ -25,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,6 +42,29 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     private final UserRepository userRepository;
 
     private static final String MESSAGE = "Ca chẩn đoán không tìm thấy với ID: ";
+
+
+    private static final Map<DiagnosisSessionStatus, Set<DiagnosisSessionStatus>> ALLOWED_TRANSITIONS = Map.of(
+            DiagnosisSessionStatus.PENDING,    EnumSet.of(DiagnosisSessionStatus.PROCESSING, DiagnosisSessionStatus.FAILED),
+            DiagnosisSessionStatus.PROCESSING, EnumSet.of(DiagnosisSessionStatus.COMPLETED, DiagnosisSessionStatus.FAILED),
+            DiagnosisSessionStatus.COMPLETED,  EnumSet.of(DiagnosisSessionStatus.PROCESSING),
+            DiagnosisSessionStatus.FAILED,     EnumSet.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING)
+    );
+
+    private static final Map<String, String> SYSTEMIC_SYMPTOM_NAMES = Map.of(
+            "weightLoss", "Sụt cân không rõ nguyên nhân",
+            "fatigue", "Mệt mỏi kéo dài",
+            "anorexia", "Chán ăn"
+    );
+
+    private static final Map<String, String> RISK_FACTOR_NAMES = Map.of(
+            "familyHistory", "Tiền sử gia đình ung thư phụ khoa",
+            "obesity", "Béo phì",
+            "diabetes", "Đái tháo đường",
+            "hypertension", "Tăng huyết áp",
+            "pcos", "Hội chứng buồng trứng đa nang (PCOS)",
+            "estrogenTherapy", "Điều trị hormone estrogen kéo dài"
+    );
 
     @Override
     @Transactional(readOnly = true)
@@ -92,6 +114,10 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     @Transactional
     @DoctorActionLog(action = "UPDATE_SESSION_STATUS", targetType = "DiagnosisSession")
     public void updateSessionStatus(Integer doctorId, UpdateSessionStatusRequest request) {
+        DiagnosisSessionStatus newStatus = request.getStatus();
+        if (newStatus == null) {
+            throw new BadRequestException("Trạng thái không thể bỏ trống.");
+        }
         Integer sessionId = request.getSessionId();
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
@@ -99,13 +125,16 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền cập nhật trạng thái ca chẩn đoán này.");
         }
-        if (session.getIsShared() != null && session.getIsShared()) {
+        if (Boolean.TRUE.equals(session.getIsShared())) {
             throw new BadRequestException("Ca chẩn đoán đã được chia sẻ. Không thể cập nhật trạng thái.");
         }
 
-        DiagnosisSessionStatus newStatus = request.getStatus();
-        if (newStatus == null) {
-            throw new BadRequestException("Trạng thái không thể bỏ trống.");
+        DiagnosisSessionStatus currentStatus = session.getStatus();
+        if (currentStatus.equals(newStatus)) {
+            throw new BadRequestException("Trạng thái mới đang trùng với trạng thái hiện tại.");
+        }
+        if (!ALLOWED_TRANSITIONS.getOrDefault(currentStatus, Set.of()).contains(newStatus)) {
+            throw new BadRequestException("Không thể chuyển trạng thái từ " + currentStatus + " sang " + newStatus + ".");
         }
 
         session.setStatus(newStatus);
@@ -131,8 +160,12 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     @Override
     @Transactional(readOnly = true)
-    @DoctorActionLog(action = "UPDATE_CLINICAL_SYMPTOMS", targetType = "DiagnosisSession")
-    public List<SymptomResponse> getSessionSymptoms(Integer sessionId) {
+    public List<SymptomResponse> getSessionSymptoms(Integer sessionId, Integer doctorId) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("Bạn không có quyền cập nhật triệu chứng lâm sàng của ca chẩn đoán này.");
+        }
         SymptomResult symptomResult = symptomResultRepository
                 .findByDiagnosisSessionSessionId(sessionId)
                 .orElseThrow(() ->
@@ -197,19 +230,18 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (request.getUrinarySymptomsIds() != null) allSymptomIds.addAll(request.getUrinarySymptomsIds());
         if (request.getDigestiveSymptomsIds() != null) allSymptomIds.addAll(request.getDigestiveSymptomsIds());
 
-        if (request.getSystemicSymptoms() != null) {
-            if (Boolean.TRUE.equals(request.getSystemicSymptoms().get("weightLoss"))) allSymptomIds.add(14);
-            if (Boolean.TRUE.equals(request.getSystemicSymptoms().get("fatigue"))) allSymptomIds.add(15);
-            if (Boolean.TRUE.equals(request.getSystemicSymptoms().get("anorexia"))) allSymptomIds.add(16);
-        }
+        Set<String> selectedSymptomNames = new HashSet<>();
+        collectSelectedSymptomNames(request.getSystemicSymptoms(), SYSTEMIC_SYMPTOM_NAMES, selectedSymptomNames);
+        collectSelectedSymptomNames(request.getRiskFactors(), RISK_FACTOR_NAMES, selectedSymptomNames);
 
-        if (request.getRiskFactors() != null) {
-            if (Boolean.TRUE.equals(request.getRiskFactors().get("familyHistory"))) allSymptomIds.add(25);
-            if (Boolean.TRUE.equals(request.getRiskFactors().get("obesity"))) allSymptomIds.add(26);
-            if (Boolean.TRUE.equals(request.getRiskFactors().get("diabetes"))) allSymptomIds.add(27);
-            if (Boolean.TRUE.equals(request.getRiskFactors().get("hypertension"))) allSymptomIds.add(28);
-            if (Boolean.TRUE.equals(request.getRiskFactors().get("pcos"))) allSymptomIds.add(29);
-            if (Boolean.TRUE.equals(request.getRiskFactors().get("estrogenTherapy"))) allSymptomIds.add(30);
+        List<Symptom> nameBasedSymptoms = selectedSymptomNames.isEmpty()
+                ? List.of()
+                : symptomRepository.findBySymptomNameIn(selectedSymptomNames);
+
+        if (nameBasedSymptoms.size() != selectedSymptomNames.size()) {
+            Set<String> foundNames = nameBasedSymptoms.stream().map(Symptom::getSymptomName).collect(Collectors.toSet());
+            selectedSymptomNames.removeAll(foundNames);
+            throw new ResourceNotFoundException("Không tìm thấy triệu chứng trong DB: " + selectedSymptomNames);
         }
 
         if (symptomResult.getSymptomDetails() != null) {
@@ -218,16 +250,22 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             symptomResult.setSymptomDetails(new ArrayList<>());
         }
 
-        for (Integer symptomId : allSymptomIds) {
-            Symptom symptom = symptomRepository.findById(symptomId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Symptom not found: " + symptomId));
+        List<Symptom> idBasedSymptoms = allSymptomIds.isEmpty()
+                ? List.of()
+                : symptomRepository.findAllById(allSymptomIds);
+        if (idBasedSymptoms.size() != allSymptomIds.size()) {
+            throw new ResourceNotFoundException("Một số symptomId trong request không tồn tại trong DB.");
+        }
 
+        List<Symptom> finalSymptoms = new ArrayList<>(idBasedSymptoms);
+        finalSymptoms.addAll(nameBasedSymptoms);
+
+        for (Symptom symptom : finalSymptoms) {
             SymptomDetails detail = new SymptomDetails();
             detail.setSymptomResult(symptomResult);
             detail.setSymptom(symptom);
             symptomResult.getSymptomDetails().add(detail);
         }
-        // Mark symptom result as completed when doctor saves and set session to PROCESSING
         symptomResult.setStatus(SymptomResultStatus.COMPLETED);
         symptomResultRepository.save(symptomResult);
 
@@ -305,6 +343,17 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         reviewRepository.save(review);
     }
 
+    private void collectSelectedSymptomNames(Map<String, Boolean> source,
+                                             Map<String, String> keyToSymptomName,
+                                             Set<String> target) {
+        if (source == null) return;
+        keyToSymptomName.forEach((requestKey, symptomName) -> {
+            if (Boolean.TRUE.equals(source.get(requestKey))) {
+                target.add(symptomName);
+            }
+        });
+    }
+
     private DoctorSessionDetailResponse mapToDoctorSessionDetailResponse(
             DiagnosisSession session,
             Patient patient,
@@ -370,6 +419,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .patientId(patient.getPatientId())
                 .patientName(user.getFullName())
                 .patientGender(patient.getGender())
+                .clinicalInputMode(session.getClinicalInputMode())
                 .patientDob(patient.getDob() != null ? patient.getDob().atStartOfDay() : null)
                 .patientAddress(patient.getAddress())
                 .symptomResult(symptomResultResponse)

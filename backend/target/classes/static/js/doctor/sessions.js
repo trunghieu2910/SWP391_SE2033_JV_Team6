@@ -1,4 +1,4 @@
-// sessions.js
+sessionStorage.setItem('doctorSessionsListUrl', window.location.href);
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -18,18 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('🚀 Doctor Sessions page loaded');
 });
-
-// ============================================
-// CSRF TOKEN UTILITY
-// ============================================
-function getCsrfToken() {
-    const token = document.querySelector('meta[name="_csrf"]');
-    const header = document.querySelector('meta[name="_csrf_header"]');
-    return {
-        token: token ? token.getAttribute('content') : '',
-        header: header ? header.getAttribute('content') : 'X-CSRF-TOKEN'
-    };
-}
 
 // ============================================
 // STATUS MODAL
@@ -56,36 +44,14 @@ function closeStatusModal() {
 function confirmStatusUpdate() {
     const newStatus = document.getElementById('statusSelect').value;
 
-    if (newStatus === selectedStatusCurrent) {
-        alert('Trạng thái mới trùng với trạng thái hiện tại.');
-        return;
-    }
-
     if (!newStatus) {
         alert('Vui lòng chọn trạng thái mới.');
         return;
     }
 
-    // Tạo form và submit với CSRF token
-    const form = document.createElement('form');
-    form.method = 'POST';
+    const form = document.getElementById('statusForm');
     form.action = '/doctor/sessions/' + selectedStatusSessionId + '/status';
-
-    // Thêm CSRF token
-    const csrf = getCsrfToken();
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = '_csrf';
-    csrfInput.value = csrf.token;
-    form.appendChild(csrfInput);
-
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'status';
-    input.value = newStatus;
-
-    form.appendChild(input);
-    document.body.appendChild(form);
+    document.getElementById('statusFormInput').value = newStatus;
     form.submit();
 }
 
@@ -126,26 +92,9 @@ function closeShareModal() {
 function confirmShareUpdate() {
     const isShared = !selectedShareCurrent;
 
-    // Tạo form và submit với CSRF token
-    const form = document.createElement('form');
-    form.method = 'POST';
+    const form = document.getElementById('shareForm');
     form.action = '/doctor/sessions/' + selectedShareSessionId + '/share';
-
-    // Thêm CSRF token
-    const csrf = getCsrfToken();
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = '_csrf';
-    csrfInput.value = csrf.token;
-    form.appendChild(csrfInput);
-
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'isShared';
-    input.value = isShared;
-
-    form.appendChild(input);
-    document.body.appendChild(form);
+    document.getElementById('shareFormInput').value = isShared;
     form.submit();
 }
 

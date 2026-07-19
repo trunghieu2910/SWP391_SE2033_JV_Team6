@@ -23,7 +23,7 @@ public interface DoctorDiagnosisService {
 
     void updateSessionShare(Integer doctorId, UpdateSessionShareRequest request);
 
-    List<SymptomResponse> getSessionSymptoms(Integer sessionId);
+    List<SymptomResponse> getSessionSymptoms(Integer sessionId, Integer doctorId);
 
     void updateClinicalSymptoms(Integer doctorId, Integer sessionId, UpdateClinicalSymptomsRequest request);
 
