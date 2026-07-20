@@ -77,6 +77,22 @@
         <section class="inventory-section card" style="padding: 0; overflow: hidden;">
             <div style="padding: 24px 24px 12px 24px;">
                 <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--neutral-dark);">Báo cáo tồn kho chi tiết</h2>
+                <div class="inventory-toolbar">
+                    <div class="inventory-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="inventorySearchInput" placeholder="Tìm theo tên thuốc hoặc số lô thuốc">
+                    </div>
+                    <div class="inventory-sort">
+                        <i class="fas fa-arrow-up-wide-short"></i>
+                        <select id="inventorySortSelect">
+                            <option value="">-- Sắp xếp --</option>
+                            <option value="expiry-desc">Hạn sử dụng: lớn đến bé</option>
+                            <option value="expiry-asc">Hạn sử dụng: bé đến lớn</option>
+                            <option value="stock-desc">Tồn kho: lớn đến bé</option>
+                            <option value="stock-asc">Tồn kho: bé đến lớn</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="table-responsive" style="margin-top: 0;">
             <table class="table">
@@ -92,7 +108,7 @@
                         <th>Trạng thái</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="inventoryTableBody">
                     <tr th:each="inventory : ${inventories}">
                         <td th:text="${inventory.drugCode}" style="font-weight: 600;">-</td>
                         <td th:text="${inventory.drugName}" style="font-weight: 700; color: var(--primary);">-</td>
@@ -105,6 +121,11 @@
                             <span th:if="${inventory.status == 1}" class="badge badge-success">Hoạt động</span>
                             <span th:if="${inventory.status == 0}" class="badge badge-danger" style="background-color:#6b7280; color:white;">Khóa</span>
                             <span th:if="${inventory.status == 2}" class="badge badge-warning" style="background-color: #eab308; color: white;">Hết hạn</span>
+                        </td>
+                    </tr>
+                    <tr id="inventoryEmptyRow" style="display: none;">
+                        <td colspan="8" class="text-center">
+                            Không tìm thấy thuốc hoặc số lô phù hợp.
                         </td>
                     </tr>
                 </tbody>
@@ -130,6 +151,7 @@
     </div>
 
     </div>
+    <script th:src="@{/js/pharmacist/inventory.js}"></script>
 </main>
 </body>
 </html>

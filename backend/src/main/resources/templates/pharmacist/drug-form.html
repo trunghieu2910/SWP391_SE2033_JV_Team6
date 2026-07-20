@@ -3,6 +3,7 @@
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Thêm thuốc mới', 'drugs')}">
 <body>
 <main>
+    <link rel="stylesheet" th:href="@{/css/pharmacist/drug-form.css}">
     <div class="container">
         <header class="page-header" style="margin-bottom: 24px;">
             <h1><i class="fas fa-plus"></i> Thêm thuốc mới vào hệ thống</h1>
@@ -106,6 +107,55 @@
                     <label for="packaging">Quy cách đóng gói *</label>
                     <input type="text" id="packaging" name="packaging" placeholder="Ví dụ: Hộp 3 vỉ x 10 viên" required>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label for="baseUnitId">Đơn vị gốc kê đơn *</label>
+                <select id="baseUnitId" name="baseUnitId" class="base-unit-select" required>
+                    <option value="">-- Chọn đơn vị gốc --</option>
+                    <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                </select>
+            </div>
+
+            <div class="form-group unit-conversion-builder" data-drug-name-input="drugName">
+                <div class="unit-conversion-header">
+                    <div>
+                        <span class="unit-conversion-eyebrow">Cách hiển thị trực quan</span>
+                        <h3>Thiết lập quy đổi cho: <span class="unit-conversion-drug-name">thuốc mới</span></h3>
+                        <p>Đơn vị gốc kê đơn: <strong class="unit-conversion-base-unit">Đơn vị gốc</strong></p>
+                    </div>
+                    <button type="button" class="unit-conversion-add">
+                        <i class="fas fa-plus"></i> Thêm bước
+                    </button>
+                </div>
+
+                <div class="unit-conversion-steps">
+                    <div class="unit-conversion-step">
+                        <span class="unit-conversion-one">1</span>
+                        <select name="conversionLargeUnitIds" class="unit-conversion-large-unit">
+                            <option value="">-- Đơn vị lớn --</option>
+                            <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                        </select>
+                        <span class="unit-conversion-equals">=</span>
+                        <input type="number" name="conversionQuantities" class="unit-conversion-factor" min="1" placeholder="SL">
+                        <select name="conversionSmallUnitIds" class="unit-conversion-small-unit">
+                            <option value="">-- Đơn vị nhỏ --</option>
+                            <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                        </select>
+                        <button type="button" class="unit-conversion-remove" title="Xóa bước quy đổi">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="unit-conversion-summary">
+                    Nhập đủ các bước quy đổi để hệ thống tự tính tồn kho theo đơn vị nhỏ nhất.
+                </div>
+
+                <ul class="unit-conversion-notes">
+                    <li>Ô nhập đơn vị lớn và đơn vị nhỏ là dropdown chọn từ bảng Unit.</li>
+                    <li>Hệ thống tự động tính và hiển thị dòng tóm tắt ở phía dưới để người dùng kiểm tra lại với thực tế.</li>
+                </ul>
             </div>
 
             <div class="form-group">

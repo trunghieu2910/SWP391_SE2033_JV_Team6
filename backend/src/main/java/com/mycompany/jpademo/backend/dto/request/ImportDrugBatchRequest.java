@@ -17,6 +17,7 @@ public class ImportDrugBatchRequest {
     private LocalDate expiryDate;
     private Integer unitId;
     private Integer quantity;
+    private String packagingChain;
     private BigDecimal importPrice;
     private String supplier;
     private String notes;

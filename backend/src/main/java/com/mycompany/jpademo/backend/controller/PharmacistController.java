@@ -313,6 +313,14 @@ public class PharmacistController {
             PrescriptionDetailDTO first = details.get(0);
             model.addAttribute("prescriptionCode", first.getPrescriptionCode());
             model.addAttribute("patientName", first.getPatientName());
+            model.addAttribute("patientCccd", first.getPatientCccd());
+            
+            String dobFormatted = "-";
+            if (first.getPatientDob() != null) {
+                java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                dobFormatted = first.getPatientDob().format(formatter);
+            }
+            model.addAttribute("patientDob", dobFormatted);
             model.addAttribute("prescriptionId", prescriptionId);
             model.addAttribute("details", details);
             return "pharmacist/dispense-prescription-detail";

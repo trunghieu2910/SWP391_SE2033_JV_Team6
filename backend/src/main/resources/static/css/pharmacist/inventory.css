@@ -32,6 +32,47 @@
     margin-bottom: 15px;
 }
 
+.inventory-toolbar {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) minmax(220px, 280px);
+    gap: 12px;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.inventory-search,
+.inventory-sort {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 12px;
+    background: #f8fafc;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+}
+
+.inventory-search i,
+.inventory-sort i {
+    color: #64748b;
+    flex: 0 0 auto;
+}
+
+.inventory-search input,
+.inventory-sort select {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #1f2937;
+    font: inherit;
+}
+
+.inventory-sort select {
+    cursor: pointer;
+}
+
 .modal {
     display: none;
     position: fixed;
@@ -73,6 +114,10 @@
 
 @media (max-width: 768px) {
     .alerts-section {
+        grid-template-columns: 1fr;
+    }
+
+    .inventory-toolbar {
         grid-template-columns: 1fr;
     }
 }

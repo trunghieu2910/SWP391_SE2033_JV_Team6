@@ -1,0 +1,151 @@
+/* Dispense Prescription Detail Styles */
+
+.dispense-prescription-page {
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+.dispense-prescription-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dispense-prescription-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.dispense-prescription-title h1 {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.dispense-detail-card {
+    padding: 0;
+    overflow: visible;
+}
+
+.dispense-detail-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dispense-detail-card-header h3 {
+    margin: 0;
+    color: var(--neutral-dark);
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.dispense-detail-table-wrap {
+    margin-top: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.dispense-detail-table {
+    min-width: 1040px;
+    table-layout: fixed;
+}
+
+.dispense-detail-table th,
+.dispense-detail-table td {
+    vertical-align: middle;
+}
+
+.dispense-detail-table th {
+    white-space: nowrap;
+}
+
+.dispense-detail-table .col-drug {
+    width: 22%;
+}
+
+.dispense-detail-table .col-dose {
+    width: 18%;
+}
+
+.dispense-detail-table .col-duration {
+    width: 13%;
+}
+
+.dispense-detail-table .col-quantity,
+.dispense-detail-table .col-dispensed {
+    width: 10%;
+}
+
+.dispense-detail-table .col-status {
+    width: 13%;
+}
+
+.dispense-detail-table .col-action {
+    width: 14%;
+}
+
+.drug-name-cell {
+    color: var(--primary);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.number-cell {
+    text-align: center;
+    font-weight: 700;
+}
+
+.status-cell,
+.action-cell {
+    white-space: nowrap;
+}
+
+.dispense-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 118px;
+    white-space: nowrap;
+}
+
+.dispense-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 112px;
+    white-space: nowrap;
+}
+
+.dispense-completed-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 112px;
+    color: var(--success);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .dispense-prescription-title {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dispense-prescription-title h1 {
+        font-size: 1.35rem;
+    }
+
+    .dispense-detail-card-header {
+        padding: 16px;
+    }
+
+    .dispense-detail-table {
+        min-width: 960px;
+    }
+}

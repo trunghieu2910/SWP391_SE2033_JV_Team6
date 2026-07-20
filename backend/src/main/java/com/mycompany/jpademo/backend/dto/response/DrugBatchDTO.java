@@ -26,6 +26,7 @@ public class DrugBatchDTO {
     private LocalDateTime importDate;
     private String importedBy;
     private Byte status;
+    private Byte drugStatus;
     private String notes;
     private Integer quantityInStock;
     private Long daysUntilExpiry;

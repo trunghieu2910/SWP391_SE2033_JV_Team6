@@ -33,5 +33,7 @@ public class PrescriptionDetailDTO {
     private String notes;
     private Integer patientId;
     private String patientName;
+    private String patientCccd;
+    private LocalDate patientDob;
     private Boolean isPending;
 }

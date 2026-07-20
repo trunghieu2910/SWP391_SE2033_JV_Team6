@@ -42,6 +42,10 @@ public class Drug {
     @JoinColumn(name = "subCategoryID", nullable = false)
     private DrugSubCategory subCategory;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "baseUnitID", nullable = false)
+    private Unit baseUnit;
+
     @Column(name = "packaging", length = 100)
     private String packaging;
 

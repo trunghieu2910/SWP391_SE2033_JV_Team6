@@ -41,6 +41,12 @@
                     </optgroup>
                 </select>
 
+                <select id="drugStatusFilter" class="form-control" style="flex: 1; min-width: 220px;">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="active">Đang dùng</option>
+                    <option value="inactive">Ngừng sử dụng</option>
+                </select>
+
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-search"></i> Tìm kiếm
                 </button>
@@ -64,7 +70,7 @@
                         <th style="text-align:center">Trạng thái</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="drugListTableBody">
                     <tr th:each="drug : ${drugs}"
                         th:onclick="'window.location.href=\'/pharmacist/drug-detail/' + ${drug.drugId} + '\''"
                         style="cursor: pointer;">
@@ -80,6 +86,12 @@
                         <td style="text-align:center">
                             <span th:if="${drug.status == 1}" class="badge badge-success">Đang dùng</span>
                             <span th:if="${drug.status == 0}" class="badge badge-danger">Ngừng</span>
+                        </td>
+                    </tr>
+                    <tr id="drugListEmptyRow" style="display: none;">
+                        <td colspan="6" style="text-align: center; color: var(--neutral-light); padding: 32px;">
+                            <i class="fas fa-filter" style="font-size: 2rem; margin-bottom: 8px; display: block;"></i>
+                            Không có thuốc phù hợp với trạng thái đã chọn
                         </td>
                     </tr>
                     <tr th:if="${drugs == null or #lists.isEmpty(drugs.content)}">
@@ -109,6 +121,7 @@
             </ul>
         </nav>
     </div>
+    <script th:src="@{/js/pharmacist/drug-list.js}"></script>
 </main>
 </body>
 </html>
