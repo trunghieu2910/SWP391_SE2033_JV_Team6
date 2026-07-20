@@ -98,7 +98,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         String normalizedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
 
         Page<DiagnosisSession> sessionPage = sessionRepository.searchByDoctorWithKeywordAndStatus(
-                doctorId, keyword, status, startDateTime, endDateTime, pageable);
+                doctorId, normalizedKeyword, status, startDateTime, endDateTime, pageable);
 
         return sessionPage.map(session -> DoctorSessionResponse.builder()
                 .sessionId(session.getSessionId())
@@ -196,6 +196,10 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền cập nhật triệu chứng của ca chẩn đoán này.");
+        }
+
+        if (DiagnosisSessionStatus.COMPLETED.equals(session.getStatus())) {
+            throw new BadRequestException("Không thể cập nhật trạng thái của ca chẩn đoán này vì ca chẩn đoán đã hoàn thành.");
         }
 
         if (session.getClinicalInputMode() == ClinicalInputMode.PATIENT

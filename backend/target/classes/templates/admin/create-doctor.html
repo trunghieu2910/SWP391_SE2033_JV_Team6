@@ -146,6 +146,7 @@
                 <!-- ===== KHÔNG CÓ th:if="${error}" Ở ĐÂY ===== -->
 
                 <form th:action="@{/admin/create-doctor/confirm}" method="post" class="otp-box" id="otpForm">
+                    <input type="hidden" name="requestId" th:value="${requestId}">
                     <div class="otp-icon-wrapper">
                         <div class="otp-icon">
                             <i class="fa-solid fa-shield-check"></i>

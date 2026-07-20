@@ -4,20 +4,15 @@ import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
-import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
-import com.mycompany.jpademo.backend.exception.DuplicateResourceException;
-import com.mycompany.jpademo.backend.exception.InvalidOtpException;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import com.mycompany.jpademo.backend.util.OtpUtil;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,15 +26,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.entity.User;
 
 @Slf4j
@@ -179,9 +170,7 @@ public class AdminController {
             }
             User adminUser = userDetails.getUser();
             InitiateCreateDoctorResponse response = adminService.initiateCreateDoctor(request, adminUser);
-            redirectAttributes.addFlashAttribute("requestId", response.getRequestId());
-            redirectAttributes.addFlashAttribute("step", 2);
-            redirectAttributes.addFlashAttribute("adminEmail", adminUser.getEmail());
+            redirectAttributes.addAttribute("requestId", response.getRequestId());
             return "redirect:/admin/create-doctor/verify";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -192,17 +181,15 @@ public class AdminController {
 
     @GetMapping("/create-doctor/verify")
     public String verifyDoctorPage(
+            @RequestParam(required = false) String requestId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
-        if (!model.containsAttribute("step")) {
-            model.addAttribute("step", 2);
-        }
-        if (!model.containsAttribute("remainingTime")) {
-            String adminEmail = userDetails.getUser().getEmail();
-            int remainingTime = OtpUtil.getRemainingTime(adminEmail);
-            model.addAttribute("remainingTime", remainingTime);
-            model.addAttribute("adminEmail", adminEmail);
-        }
+        String adminEmail = userDetails.getUser().getEmail();
+        int remainingTime = OtpUtil.getRemainingTime(adminEmail);
+        model.addAttribute("step", 2);
+        model.addAttribute("requestId", requestId);
+        model.addAttribute("remainingTime", remainingTime);
+        model.addAttribute("adminEmail", adminEmail);
         return "admin/create-doctor";
     }
 
@@ -219,7 +206,7 @@ public class AdminController {
             return "redirect:/admin/users";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            redirectAttributes.addFlashAttribute("step", 2);
+            redirectAttributes.addAttribute("requestId", request.getRequestId());
             return "redirect:/admin/create-doctor/verify";
         }
     }

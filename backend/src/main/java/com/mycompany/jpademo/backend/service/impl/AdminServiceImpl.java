@@ -30,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -148,13 +149,18 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin) {
         String otp = request.getOtp();
         String adminEmail = admin.getEmail();
 
-        PendingDoctorData pending = PendingDoctorStore.getPendingByAdminEmail(adminEmail);
+        PendingDoctorData pending = PendingDoctorStore.getPending(request.getRequestId());
         if (pending == null) {
             throw new IllegalArgumentException("Không tìm thấy yêu cầu tạo bác sĩ hoặc đã hết hạn.");
+        }
+
+        if (!pending.getAdminEmail().equals(adminEmail)) {
+            throw new UnauthorizedActionException("Yêu cầu này không thuộc quyền quản lý của tài khoản của bạn.");
         }
 
         boolean isOtpValid = OtpUtil.verifyOtp(adminEmail, otp);
