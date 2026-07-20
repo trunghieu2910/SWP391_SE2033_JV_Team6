@@ -96,10 +96,15 @@ public class AdminController {
     }
 
     @GetMapping("/users/{id}")
-    public String userDetail(@PathVariable Integer id, Model model) {
-        UserDetailResponse userDetail = adminService.getUserDetail(id);
-        model.addAttribute("user", userDetail);
-        return "admin/user-detail";
+    public String userDetail(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            UserDetailResponse userDetail = adminService.getUserDetail(id);
+            model.addAttribute("user", userDetail);
+            return "admin/user-detail";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/users";
+        }
     }
 
     @PostMapping("/users/{id}/status")
@@ -207,18 +212,27 @@ public class AdminController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
 
-        User adminUser = userDetails.getUser();
-        adminService.verifyAndCreateDoctor(request, adminUser);
-
-        redirectAttributes.addFlashAttribute("success", "Tạo tài khoản bác sĩ thành công!");
-        return "redirect:/admin/users";
+        try {
+            User adminUser = userDetails.getUser();
+            adminService.verifyAndCreateDoctor(request, adminUser);
+            redirectAttributes.addFlashAttribute("success", "Tạo tài khoản bác sĩ thành công!");
+            return "redirect:/admin/users";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("step", 2);
+            return "redirect:/admin/create-doctor/verify";
+        }
     }
 
     @PostMapping("/create-doctor/resend-otp")
     @ResponseBody
-    public Map<String, Object> resendOtp(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        String adminEmail = userDetails.getUser().getEmail();
-        return adminService.resendOtp(adminEmail);
+    public ResponseEntity<Map<String, Object>> resendOtp(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            String adminEmail = userDetails.getUser().getEmail();
+            return ResponseEntity.ok(adminService.resendOtp(adminEmail));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
     @GetMapping("/logs")
@@ -243,13 +257,13 @@ public class AdminController {
     }
 
     @GetMapping("/logs/{id}")
-    public String logDetail(@PathVariable Integer id, Model model) {
+    public String logDetail(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         try {
             SystemLogResponse log = systemLogService.getLogDetail(id);
             model.addAttribute("log", log);
             return "admin/log-detail";
         } catch (Exception e) {
-            log.error("Lỗi khi lấy chi tiết nhật ký: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Không thể tải chi tiết nhật kí này");
             return "redirect:/admin/logs";
         }
     }

@@ -7,8 +7,11 @@ import com.mycompany.jpademo.backend.dto.response.EndpointRequestStats;
 import com.mycompany.jpademo.backend.dto.response.IpRequestStats;
 import com.mycompany.jpademo.backend.dto.response.SecurityStatsResponse;
 import com.mycompany.jpademo.backend.entity.BlockedIP;
+import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.event.BlockedIpChangeEvent;
 import com.mycompany.jpademo.backend.exception.BadRequestException;
+import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.repository.BlockedIPRepository;
 import com.mycompany.jpademo.backend.repository.RequestLogRepository;
 import com.mycompany.jpademo.backend.service.interfaces.SecurityService;
@@ -84,7 +87,10 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     @Transactional
     @AdminActionLog(action = "BLOCKED_IP", targetType = "BlockedIP")
-    public void blockIp(BlockIpRequest request, String adminUsername) {
+    public void blockIp(BlockIpRequest request, User admin) {
+        if (!RoleName.ADMIN.equals(admin.getRole().getRoleName())) {
+            throw new UnauthorizedActionException("Bạn không có quyền thực hiện hành động này");
+        }
         if (blockedIPRepository.existsById(request.getIpAddress())) {
             throw new BadRequestException("IP " + request.getIpAddress() + " đã bị chặn trước đó.");
         }
@@ -92,7 +98,7 @@ public class SecurityServiceImpl implements SecurityService {
                 .ipAddress(request.getIpAddress())
                 .reason(request.getReason())
                 .createdAt(LocalDateTime.now())
-                .createdBy(adminUsername)
+                .createdBy(admin.getFullName())
                 .build();
         blockedIPRepository.save(blockedIP);
 
@@ -101,7 +107,10 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     @AdminActionLog(action = "UNBLOCKED_IP", targetType = "BlockedIP")
-    public void unblockIp(UnblockIpRequest request) {
+    public void unblockIp(UnblockIpRequest request, User admin) {
+        if (!RoleName.ADMIN.equals(admin.getRole().getRoleName())) {
+            throw new UnauthorizedActionException("Bạn không có quyền thực hiện hành động này");
+        }
         String ipAddress = request.getIpAddress();
         BlockedIP blockedIP = blockedIPRepository.findById(ipAddress).orElseThrow(
                 () -> new BadRequestException("IP " + ipAddress + " không tồn tại trong danh sách chặn.")

@@ -6,6 +6,7 @@ import com.mycompany.jpademo.backend.dto.request.BlockIpRequest;
 import com.mycompany.jpademo.backend.dto.response.SecurityStatsResponse;
 import com.mycompany.jpademo.backend.dto.response.IpRequestStats;
 import com.mycompany.jpademo.backend.dto.response.EndpointRequestStats;
+import com.mycompany.jpademo.backend.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +20,7 @@ public interface SecurityService {
 
     List<BlockedIP> getBlockedIps(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
-    void blockIp(BlockIpRequest request, String adminUsername);
+    void blockIp(BlockIpRequest request, User admin);
 
-    void unblockIp(UnblockIpRequest request);
+    void unblockIp(UnblockIpRequest request, User admin);
 }

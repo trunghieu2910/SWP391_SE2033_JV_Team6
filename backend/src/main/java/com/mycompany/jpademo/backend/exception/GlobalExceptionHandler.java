@@ -1,9 +1,11 @@
 package com.mycompany.jpademo.backend.exception;
 
 import com.mycompany.jpademo.backend.dto.response.ApiResponse;
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.util.OtpUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -12,6 +14,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -50,8 +53,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidOtpException.class)
-    public String handleInvalidOtp(InvalidOtpException e, RedirectAttributes redirectAttributes) {
-        String adminEmail = "luugiang205@gmail.com";
+    public String handleInvalidOtp(InvalidOtpException e,
+                                   RedirectAttributes redirectAttributes,
+                                   @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        String adminEmail = customUserDetails.getUser().getEmail();
         int remainingTime = OtpUtil.getRemainingTime(adminEmail);
 
         redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -96,8 +101,7 @@ public class GlobalExceptionHandler {
         }
 
         redirectAttributes.addFlashAttribute("error", e.getMessage());
-        redirectAttributes.addFlashAttribute("step", 2);
-        return "redirect:/admin/create-doctor/verify";
+        return "redirect:/admin/users";
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

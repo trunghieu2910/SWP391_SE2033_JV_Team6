@@ -164,7 +164,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
         if (!session.getUser().getUserId().equals(doctorId)) {
-            throw new UnauthorizedActionException("Bạn không có quyền cập nhật triệu chứng lâm sàng của ca chẩn đoán này.");
+            throw new UnauthorizedActionException("Bạn không có quyền truy cập vào ca chẩn đoán này.");
         }
         SymptomResult symptomResult = symptomResultRepository
                 .findByDiagnosisSessionSessionId(sessionId)
