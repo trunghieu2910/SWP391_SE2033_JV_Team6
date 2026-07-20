@@ -14,6 +14,13 @@
         <span>Chi tiết ca chẩn đoán #<span th:text="${sessionDetail.sessionId}" id="sessionIdDisplay">1</span></span>
     </nav>
 
+    <div th:if="${error}" class="alert alert-error" style="margin-bottom:16px;">
+        <span th:text="${error}"></span>
+    </div>
+    <div th:if="${success}" class="alert alert-success" style="margin-bottom:16px;">
+        <span th:text="${success}"></span>
+    </div>
+
     <!-- Header -->
     <div class="session-header">
         <div class="session-title">
@@ -156,61 +163,77 @@
                     <i class="fa-solid fa-chevron-down accordion-icon" id="reviewIcon"></i>
                 </div>
                 <div class="accordion-body review-section" id="reviewAccordion" style="display: block; padding: 24px;">
-                    <form th:action="@{/doctor/sessions/{id}/review(id=${sessionDetail.sessionId})}" method="post">
+                    <form id="reviewForm"
+                          th:action="@{/doctor/sessions/{id}/review(id=${sessionDetail.sessionId})}" method="post">
                         <div style="display: flex; flex-direction: column; gap: 18px;">
+
                             <div class="form-group">
-                                <label>
-                                    Kết luận chẩn đoán cuối cùng
-                                    <span class="required">*</span>
-                                    <span class="label-hint">(quan trọng nhất)</span>
-                                </label>
-                                <textarea name="finalDiagnosis" class="form-control" rows="3" required placeholder="Nhập chẩn đoán cuối cùng..."
-                                          th:if="${sessionDetail.review != null}" th:text="${sessionDetail.review.finalDiagnosis}"></textarea>
-                                <textarea name="finalDiagnosis" class="form-control" rows="3" required placeholder="Nhập chẩn đoán cuối cùng..."
-                                          th:if="${sessionDetail.review == null}"></textarea>
+                                <label class="form-label" for="diseaseTypeSelection">Loại bệnh <span class="required">*</span></label>
+                                <select id="diseaseTypeSelection" name="diseaseTypeSelection" class="form-input select-rounded" required
+                                        th:disabled="${sessionDetail.review != null}"
+                                        onchange="toggleNewDiseaseTypeInput(this)">
+                                    <option value="" disabled th:selected="${sessionDetail.review == null}">Chọn loại bệnh</option>
+                                    <option th:each="dt : ${diseaseTypes}"
+                                            th:value="${dt.diseaseTypeId}"
+                                            th:text="${dt.name}"
+                                            th:selected="${sessionDetail.review != null and sessionDetail.review.diseaseTypeId == dt.diseaseTypeId}">
+                                    </option>
+                                    <option value="NEW" style="font-weight:700; color:#0284c7; background:#f0f9ff;"
+                                            th:if="${sessionDetail.review == null}">
+                                        ✚ Thêm loại bệnh mới
+                                    </option>
+                                </select>
+
+                                <div class="form-group" id="newDiseaseTypeNameGroup" style="display:none; margin-top:10px;"
+                                     th:if="${sessionDetail.review == null}">
+                                    <label>Tên loại bệnh mới <span class="required">*</span></label>
+                                    <input type="text" id="newDiseaseTypeName" name="newDiseaseTypeName" class="form-control"
+                                           placeholder="VD: U tuyến cổ tử cung giai đoạn IIB">
+                                </div>
                             </div>
+
                             <div class="form-group">
                                 <label>
-                                    Kế hoạch điều trị (Phác đồ)
-                                    <span class="required">*</span>
+                                    Kế hoạch điều trị (Phác đồ) <span class="required">*</span>
                                     <span class="label-hint">(chi tiết các bước điều trị)</span>
                                 </label>
-                                <textarea name="treatmentPlan" class="form-control" rows="3" required placeholder="Nhập phác đồ điều trị..."
-                                          th:if="${sessionDetail.review != null}" th:text="${sessionDetail.review.treatmentPlan}"></textarea>
-                                <textarea name="treatmentPlan" class="form-control" rows="3" required placeholder="Nhập phác đồ điều trị..."
-                                          th:if="${sessionDetail.review == null}"></textarea>
+                                <textarea name="treatmentPlan" class="form-control" rows="3" placeholder="Nhập phác đồ điều trị..."
+                                          th:required="${sessionDetail.review == null}"
+                                          th:disabled="${sessionDetail.review != null}"
+                                          th:text="${sessionDetail.review != null ? sessionDetail.review.treatmentPlan : ''}"></textarea>
                             </div>
+
                             <div class="form-group">
-                                <label>
-                                    Lời khuyên của Bác sĩ
-                                    <span class="label-hint">(cho bệnh nhân)</span>
-                                </label>
+                                <label>Lời khuyên của Bác sĩ <span class="label-hint">(cho bệnh nhân)</span></label>
                                 <textarea name="doctorAdvice" class="form-control" rows="2" placeholder="Nhập lời khuyên cho bệnh nhân..."
-                                          th:if="${sessionDetail.review != null}" th:text="${sessionDetail.review.doctorAdvice}"></textarea>
-                                <textarea name="doctorAdvice" class="form-control" rows="2" placeholder="Nhập lời khuyên cho bệnh nhân..."
-                                          th:if="${sessionDetail.review == null}"></textarea>
+                                          th:disabled="${sessionDetail.review != null}"
+                                          th:text="${sessionDetail.review != null ? sessionDetail.review.doctorAdvice : ''}"></textarea>
                             </div>
+
                             <div class="form-group">
-                                <label>
-                                    Ghi chú thêm
-                                    <span class="label-hint">(nội bộ)</span>
-                                </label>
+                                <label>Ghi chú thêm <span class="label-hint">(nội bộ)</span></label>
                                 <textarea name="note" class="form-control" rows="2" placeholder="Ghi chú nội bộ (nếu có)..."
-                                          th:if="${sessionDetail.review != null}" th:text="${sessionDetail.review.note}"></textarea>
-                                <textarea name="note" class="form-control" rows="2" placeholder="Ghi chú nội bộ (nếu có)..."
-                                          th:if="${sessionDetail.review == null}"></textarea>
+                                          th:disabled="${sessionDetail.review != null}"
+                                          th:text="${sessionDetail.review != null ? sessionDetail.review.note : ''}"></textarea>
                             </div>
+
                             <div class="form-actions">
-                    <span class="last-updated" th:if="${sessionDetail.review != null}">
-                        <i class="fa-solid fa-clock"></i>
-                        Cập nhật lần cuối:
-                        <span th:text="${#temporals.format(sessionDetail.review.reviewedAt, 'dd/MM/yyyy HH:mm')}"></span>
-                    </span>
-                                <button type="submit" class="btn-save-review">
+                                <span class="last-updated" th:if="${sessionDetail.review != null}">
+                                    <i class="fa-solid fa-clock"></i>
+                                    Cập nhật lần cuối:
+                                    <span th:text="${#temporals.format(sessionDetail.review.reviewedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+
+                                <button type="button" id="reviewSubmitBtn" class="btn-save-review"
+                                        th:if="${sessionDetail.review == null}">
                                     <i class="fa-solid fa-save"></i>
-                                    <span th:if="${sessionDetail.review != null}">Cập nhật kết luận</span>
-                                    <span th:if="${sessionDetail.review == null}">Lưu kết luận</span>
+                                    <span>Lưu kết luận</span>
                                 </button>
+
+                                <span th:if="${sessionDetail.review != null}"
+                                      style="color:var(--neutral-500); font-size:0.85rem; display:flex; align-items:center; gap:6px;">
+                                    <i class="fa-solid fa-lock"></i> Đã chốt, không thể chỉnh sửa
+                                </span>
                             </div>
                         </div>
                     </form>

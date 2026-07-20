@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{doctor/layout :: main-layout(~{::main}, 'Thống kê chẩn đoán', 'statistics')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/doctor/statistics.css}">
+
+    <div class="filter-card">
+        <form th:action="@{/doctor/statistics}" method="get" class="filter-grid">
+            <div class="form-field date-field">
+                <label><i class="fa-regular fa-calendar"></i> Từ ngày</label>
+                <input type="date" name="startDate" th:value="${startDate}">
+            </div>
+            <div class="form-field date-field">
+                <label><i class="fa-regular fa-calendar"></i> Đến ngày</label>
+                <input type="date" name="endDate" th:value="${endDate}">
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn-action btn-primary">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
+                <button type="button" id="clearFilterBtn" class="btn-action btn-outline">
+                    <i class="fa-solid fa-rotate-left"></i> Xóa lọc
+                </button>
+            </div>
+        </form>
+
+        <div class="quick-range-group">
+            <button type="button" class="quick-range-btn" data-days="7">7 ngày qua</button>
+            <button type="button" class="quick-range-btn" data-days="30">30 ngày qua</button>
+            <button type="button" class="quick-range-btn" data-range="month">Tháng này</button>
+            <button type="button" class="quick-range-btn" data-range="quarter">Quý này</button>
+        </div>
+
+        <p class="filter-hint">* Thống kê theo thời điểm bác sĩ xác nhận kết luận chẩn đoán, không phải ngày tạo ca khám.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(16, 3, 87, 0.1); color: #100357;">
+                <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Tổng số ca</h3>
+                <p id="kpiTotalCases">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Chẩn đoán phổ biến nhất</h3>
+                <p id="kpiTopDisease" class="stat-value-text">--</p>
+                <small id="kpiTopDiseaseCount"></small>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                <i class="fa-solid fa-list-ul"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Số loại chẩn đoán ghi nhận</h3>
+                <p id="kpiDiseaseTypes">0</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-row">
+        <div class="stats-card">
+            <h3 class="stats-card-title">
+                <i class="fa-solid fa-chart-column"></i> Số ca theo loại chẩn đoán
+            </h3>
+            <div class="chart-wrapper">
+                <canvas id="diseaseChart"></canvas>
+            </div>
+        </div>
+
+        <div class="stats-card">
+            <h3 class="stats-card-title">
+                <i class="fa-solid fa-chart-pie"></i> Tỷ trọng loại chẩn đoán
+            </h3>
+            <div class="chart-wrapper chart-wrapper-pie">
+                <canvas id="diseasePieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-card">
+        <h3 class="stats-card-title">
+            <i class="fa-solid fa-table"></i> Chi tiết
+        </h3>
+
+        <div class="table-toolbar">
+            <button type="button" id="exportCsvBtn" class="btn-action btn-outline">
+                <i class="fa-solid fa-file-csv"></i> Xuất CSV
+            </button>
+        </div>
+
+        <table class="stats-table" th:with="totalAll=${#aggregates.sum(stats.![total])}">
+            <thead>
+            <tr>
+                <th class="sortable" data-sort="name">
+                    Loại chuẩn đoán <i class="fa-solid fa-arrow-down-a-z sort-icon"></i>
+                </th>
+                <th class="sortable text-right" data-sort="total">
+                    Số ca <i class="fa-solid fa-sort sort-icon"></i>
+                </th>
+                <th class="sortable text-right" data-sort="rate">
+                    Tỷ lệ <i class="fa-solid fa-sort sort-icon"></i>
+                </th>
+            </tr>
+            </thead>
+            <tbody id="statsTableBody">
+            <tr th:each="stat : ${stats}"
+                class="clickable-row"
+                th:onclick="|window.location.href='@{/doctor/medical-records(diseaseType=${stat.diseaseName}, startDate=${startDate}, endDate=${endDate})}'|">
+                <td th:text="${stat.diseaseName}">Bình thường</td>
+                <td class="text-right" th:text="${stat.total}">36</td>
+                <td class="text-right" th:text="${#numbers.formatDecimal((stat.total * 100.0) / totalAll, 1, 1)} + '%'">24,0%</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(stats)}">
+                <td colspan="3" class="stats-empty">Không có dữ liệu trong khoảng thời gian này</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        function toLocalDateStr(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        const labels = /*[[${stats.![diseaseName]}]]*/ [];
+        const data = /*[[${stats.![total]}]]*/ [];
+
+        const totalCases = data.reduce((sum, v) => sum + v, 0);
+        document.getElementById('kpiTotalCases').textContent = totalCases;
+        document.getElementById('kpiDiseaseTypes').textContent = labels.length;
+
+        if (data.length > 0) {
+            const maxIndex = data.indexOf(Math.max(...data));
+            document.getElementById('kpiTopDisease').textContent = labels[maxIndex];
+            document.getElementById('kpiTopDiseaseCount').textContent = data[maxIndex] + ' ca';
+        } else {
+            document.getElementById('kpiTopDisease').textContent = 'Không có dữ liệu';
+        }
+
+        const chartWrapperEl = document.getElementById('diseaseChart').closest('.chart-wrapper');
+        // Tự giãn chiều cao theo số lượng loại bệnh, tránh cột bị bóp khi có nhiều category
+        chartWrapperEl.style.height = Math.max(300, labels.length * 50) + 'px';
+
+        new Chart(document.getElementById('diseaseChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số ca',
+                    data: data,
+                    backgroundColor: '#1B4F9B',
+                    borderRadius: 6,
+                    maxBarThickness: 32
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            // luôn hiện đầy đủ tên bệnh trong tooltip dù trục bị rút gọn
+                            title: (items) => labels[items[0].dataIndex]
+                        }
+                    }
+                },
+                scales: {
+                    x: { beginAtZero: true, ticks: { precision: 0 } },
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            callback: function (value) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 28 ? label.slice(0, 26) + '…' : label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (labels.length > 0) {
+            const pieColors = ['#100357', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+            new Chart(document.getElementById('diseasePieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: labels.map((_, i) => pieColors[i % pieColors.length]),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : '0.0';
+                                    return `${context.label}: ${pct}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            if (!labels.length) return;
+            const total = data.reduce((a, b) => a + b, 0);
+
+            let csv = 'Loại chuẩn đoán,Số ca,Tỷ lệ\n';
+            labels.forEach((label, i) => {
+                const pct = total > 0 ? ((data[i] / total) * 100).toFixed(1) : '0.0';
+                csv += `"${label}",${data[i]},${pct}%\n`;
+            });
+            csv += `"Tổng",${total},100.0%\n`;
+
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const from = document.querySelector('[name="startDate"]').value;
+            const to = document.querySelector('[name="endDate"]').value;
+            a.download = `thong-ke-benh_${from}_${to}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        document.querySelectorAll('.quick-range-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const today = new Date();
+                let start;
+                if (btn.dataset.days) {
+                    start = new Date();
+                    start.setDate(today.getDate() - parseInt(btn.dataset.days, 10) + 1);
+                } else if (btn.dataset.range === 'month') {
+                    start = new Date(today.getFullYear(), today.getMonth(), 1);
+                } else {
+                    const q = Math.floor(today.getMonth() / 3);
+                    start = new Date(today.getFullYear(), q * 3, 1);
+                }
+                document.querySelector('[name="startDate"]').value = toLocalDateStr(start);
+                document.querySelector('[name="endDate"]').value = toLocalDateStr(today);
+                document.querySelector('.filter-grid').submit();
+            });
+        });
+
+        document.getElementById('clearFilterBtn').addEventListener('click', () => {
+            document.querySelector('[name="startDate"]').value = '2000-01-01';
+            document.querySelector('[name="endDate"]').value = toLocalDateStr(new Date());
+            document.querySelector('.filter-grid').submit();
+        });
+
+        // ============ SẮP XẾP BẢNG CHI TIẾT ============
+        let currentSort = { key: 'name', dir: 'asc' };   // mặc định: Loại bệnh, A-Z
+
+        function getRowValue(row, key) {
+            if (key === 'name') return row.querySelector('td:nth-child(1)').textContent.trim();
+            if (key === 'total') return parseInt(row.querySelector('td:nth-child(2)').textContent.trim(), 10);
+            if (key === 'rate') return parseFloat(row.querySelector('td:nth-child(3)').textContent.replace('%', '').replace(',', '.'));
+        }
+
+        function sortTable(key) {
+            const tbody = document.getElementById('statsTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.querySelector('.stats-empty'));
+            if (rows.length === 0) return;
+
+            // Bấm lại cùng 1 cột → đảo chiều. Bấm cột khác → về chiều mặc định của cột đó.
+            if (currentSort.key === key) {
+                currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.key = key;
+                currentSort.dir = key === 'name' ? 'asc' : 'desc';   // Loại bệnh mặc định A-Z, Tỷ lệ/Số ca mặc định Cao→Thấp
+            }
+
+            rows.sort((a, b) => {
+                const va = getRowValue(a, key);
+                const vb = getRowValue(b, key);
+                let cmp = typeof va === 'string' ? va.localeCompare(vb, 'vi') : va - vb;
+                return currentSort.dir === 'asc' ? cmp : -cmp;
+            });
+
+            rows.forEach(r => tbody.appendChild(r));
+            updateSortIcons();
+        }
+
+        function updateSortIcons() {
+            document.querySelectorAll('.stats-table th.sortable').forEach(th => {
+                const icon = th.querySelector('.sort-icon');
+                const key = th.dataset.sort;
+                if (key !== currentSort.key) {
+                    icon.className = 'fa-solid fa-sort sort-icon';
+                    return;
+                }
+                icon.className = currentSort.dir === 'asc'
+                    ? 'fa-solid fa-arrow-up sort-icon active'
+                    : 'fa-solid fa-arrow-down sort-icon active';
+            });
+        }
+
+        document.querySelectorAll('.stats-table th.sortable').forEach(th => {
+            th.addEventListener('click', () => sortTable(th.dataset.sort));
+        });
+
+        updateSortIcons();   
+    </script>
+</main>
+</body>
+</html>

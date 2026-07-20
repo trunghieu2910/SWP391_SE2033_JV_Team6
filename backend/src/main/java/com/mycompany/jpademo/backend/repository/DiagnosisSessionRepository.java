@@ -24,7 +24,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
         SELECT
             ds.sessionID AS id,
             COALESCE(u.fullName, '') AS patientName,
-            r.finalDiagnosis AS diagnosis,
+            dt.name AS diagnosis,
             ds.createdAt AS visitDate,
             s.symptomName AS symptoms,
             r.treatmentPlan AS prescription,
@@ -33,6 +33,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
         LEFT JOIN Patient p ON ds.patientID = p.patientID
         LEFT JOIN Users u ON p.userID = u.userID
         LEFT JOIN Review r ON r.sessionID = ds.sessionID
+        LEFT JOIN DiseaseType dt ON r.diseaseTypeID = dt.diseaseTypeID
         LEFT JOIN SymptomResult sr ON sr.sessionID = ds.sessionID
         LEFT JOIN SymptomDetails sd ON sd.symptomResultID = sr.symptomResultID
         LEFT JOIN Symptom s ON sd.symptomID = s.symptomID
@@ -44,7 +45,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             ds.sessionID AS id,
             ds.isShared AS isShared,
             COALESCE(u.fullName, '') AS patientName,
-            r.finalDiagnosis AS diagnosis,
+            dt.name AS diagnosis,
             ds.createdAt AS visitDate,
             ISNULL((SELECT TOP 1 sym.symptomName
                    FROM SymptomResult sr
@@ -57,6 +58,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
         LEFT JOIN Patient p ON ds.patientID = p.patientID
         LEFT JOIN Users u ON p.userID = u.userID
         LEFT JOIN Review r ON r.sessionID = ds.sessionID
+        LEFT JOIN DiseaseType dt ON r.diseaseTypeID = dt.diseaseTypeID
         WHERE p.patientID = :patientId
         ORDER BY ds.createdAt DESC
         """, nativeQuery = true)
@@ -71,7 +73,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "  u.nationalID as nationalID, " +
             "  p.gender as gender, " +
             " du.fullName AS doctorFullName, " +
-            "ISNULL(r.finalDiagnosis, N'Chưa có chẩn đoán') as diagnosis, " +
+            "ISNULL(dt.name, N'Chưa có chẩn đoán') as diagnosis, " +
             "s.createdAt as visitDate, " +
             "ISNULL((SELECT TOP 1 sym.symptomName FROM SymptomResult sr " +
             "  JOIN SymptomDetails sd ON sd.symptomResultID = sr.symptomResultID " +
@@ -84,16 +86,23 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "JOIN [Users] u ON p.userID = u.userID " +
             "JOIN [Users] du ON s.userID = du.userID " +
             "LEFT JOIN Review r ON s.sessionID = r.sessionID " +
+            "LEFT JOIN DiseaseType dt ON r.diseaseTypeID = dt.diseaseTypeID " +
             "WHERE (:keyword IS NULL OR u.fullName COLLATE Latin1_General_CI_AI\n" +
             "LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%')) " +
             "  AND (:status IS NULL OR s.status = :status) " +
             "  AND (:isShared IS NULL OR s.isShared = :isShared) " +
+            "  AND (:diseaseType IS NULL OR dt.name = :diseaseType) " +
+            "  AND (:startDate IS NULL OR r.reviewedAt >= :startDate) " +
+            "  AND (:endDate IS NULL OR r.reviewedAt <= :endDate) " +
             "ORDER BY s.createdAt DESC",
             nativeQuery = true)
     List<Map<String, Object>> getMedicalRecords(
             @Param("keyword") String keyword,
             @Param("status") String status,
-            @Param("isShared") Boolean isShared);
+            @Param("isShared") Boolean isShared,
+            @Param("diseaseType") String diseaseType,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);       
 
     @Query(value = """
     SELECT ds.* FROM DiagnosisSession ds

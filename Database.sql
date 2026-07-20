@@ -135,7 +135,7 @@ CREATE TABLE LabResult
 );
 
 -- 1. Thêm giá cho Phiếu Xét nghiệm (LabResult)
-ALTER TABLE LabResult 
+ALTER TABLE LabResult
 ADD price DECIMAL(18,2) NOT NULL DEFAULT 0;
 
 
@@ -160,7 +160,7 @@ CREATE TABLE MedicalImage
 );
 
 -- 2. Thêm giá cho Phiếu Siêu âm / Chụp chiếu (MedicalImage)
-ALTER TABLE MedicalImage 
+ALTER TABLE MedicalImage
 ADD price DECIMAL(18,2) NOT NULL DEFAULT 0;
 
 CREATE TABLE MedicalImageDetails
@@ -177,18 +177,26 @@ CREATE TABLE MedicalImageDetails
 -- ==========================================
 -- 4. REVIEW BÁC SĨ
 -- ==========================================
+CREATE TABLE DiseaseType (
+    diseaseTypeID INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+
+    CONSTRAINT UQ_DiseaseType_Name UNIQUE (name)
+);
+
 CREATE TABLE Review
 (
     reviewID       INT IDENTITY (1,1) PRIMARY KEY,
     sessionID      INT UNIQUE NOT NULL,
     userID         INT        NOT NULL, 
-    finalDiagnosis NVARCHAR(MAX),
+    diseaseTypeID  INT		  NULL,
     treatmentPlan  NVARCHAR(MAX),
     doctorAdvice   NVARCHAR(MAX),
     note           NVARCHAR(MAX),
     reviewedAt     DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (sessionID) REFERENCES DiagnosisSession (sessionID),
-    FOREIGN KEY (userID) REFERENCES [Users] (userID)
+    FOREIGN KEY (userID) REFERENCES [Users] (userID),
+	FOREIGN KEY (diseaseTypeID) REFERENCES DiseaseType(diseaseTypeID)
 );
 
 -- ==========================================
@@ -330,10 +338,20 @@ INSERT INTO MedicalImageDetails (medicalImageID, imageUrl)
 VALUES
     (1, 'https://storage.hospital.com/xray/2026/session1_lung.jpg');
 
+INSERT INTO DiseaseType (name) VALUES
+(N'Bình thường / Không phát hiện bất thường'),
+(N'Viêm cổ tử cung'),
+(N'Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1)'),
+(N'Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3)'),
+(N'Ung thư biểu mô tại chỗ (CIS)'),
+(N'Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II)'),
+(N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)'),
+(N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận');
+
 -- Review
-INSERT INTO Review (sessionID, userID, finalDiagnosis, treatmentPlan, doctorAdvice, note)
+INSERT INTO Review (sessionID, userID, treatmentPlan, doctorAdvice, note)
 VALUES
-    (1, 3, N'Viêm phế quản cấp tính', N'Kê đơn kháng sinh 5 ngày, siro ho', N'Tránh nước đá, giữ ấm cổ họng', N'Bệnh nhân có tiền sử dị ứng thời tiết');
+    (1, 3, N'Kê đơn kháng sinh 5 ngày, siro ho', N'Tránh nước đá, giữ ấm cổ họng', N'Bệnh nhân có tiền sử dị ứng thời tiết');
 
 -- SystemLog
 INSERT INTO SystemLog (userID, targetType, targetID, action, description)
@@ -408,22 +426,22 @@ CREATE TABLE Drug (
     drugID INT IDENTITY(1,1) PRIMARY KEY,
 	drugCode VARCHAR(20) NOT NULL UNIQUE,
 	drugName NVARCHAR(200) NOT NULL,
-	strength VARCHAR(50) NULL, 
-	strengthUnit VARCHAR(10) NULL, 
-	dosageForm NVARCHAR(50) NOT NULL, 
-	routeOfAdministration NVARCHAR(50) NOT NULL, 
+	strength VARCHAR(50) NULL,
+	strengthUnit VARCHAR(10) NULL,
+	dosageForm NVARCHAR(50) NOT NULL,
+	routeOfAdministration NVARCHAR(50) NOT NULL,
 	subCategoryID INT NOT NULL,
 	baseUnitID INT NOT NULL,  -- THÊM CỘT NÀY: Để biết thuốc này khi kê đơn lẻ thì dùng đơn vị gốc nào (VIÊN/ỐNG/ml)
-	packaging NVARCHAR(100), 
-	manufacturer NVARCHAR(100), 
-	countryOfOrigin NVARCHAR(50), 
-	storageCondition NVARCHAR(200), 
-	shelfLifeMonths INT DEFAULT 24, 
+	packaging NVARCHAR(100),
+	manufacturer NVARCHAR(100),
+	countryOfOrigin NVARCHAR(50),
+	storageCondition NVARCHAR(200),
+	shelfLifeMonths INT DEFAULT 24,
 	sellingPrice DECIMAL(18,2) DEFAULT 0, -- Chuyển luôn lệnh ALTER vào đây cho sạch code
 	notes NVARCHAR(500),
-	status TINYINT DEFAULT 1, 
+	status TINYINT DEFAULT 1,
 	createdAt DATETIME DEFAULT GETDATE(),
-	createdBy INT, 
+	createdBy INT,
 	FOREIGN KEY (subCategoryID) REFERENCES DrugSubCategory(subCategoryID),
 	FOREIGN KEY (createdBy) REFERENCES [Users](userID),
 	FOREIGN KEY (baseUnitID) REFERENCES Unit(unitID) -- Khóa ngoại liên kết bảng Unit
@@ -449,16 +467,16 @@ CREATE TABLE DrugBatch (
     drugID INT NOT NULL,
     batchNumber VARCHAR(50) NOT NULL,
     manufactureDate DATE NOT NULL,
-    expiryDate DATE NOT NULL, 
-    
-    -- LƯU Ý: unitID ở đây chính là Đơn vị lớn khi nhập (HỘP/LỌ). 
+    expiryDate DATE NOT NULL,
+
+    -- LƯU Ý: unitID ở đây chính là Đơn vị lớn khi nhập (HỘP/LỌ).
     -- Hệ thống sẽ lấy cặp (drugID, unitID) này đối chiếu sang bảng UnitConversion để tìm ra conversionQuantity.
-    unitID INT NOT NULL, 
+    unitID INT NOT NULL,
     quantity INT NOT NULL, -- Số lượng nhập theo Đơn vị lớn (Ví dụ: 50 hộp)
     importPrice DECIMAL(18,2) DEFAULT 0,
     supplier NVARCHAR(200),
     importDate DATETIME DEFAULT GETDATE(),
-    importedBy INT NOT NULL, 
+    importedBy INT NOT NULL,
     notes NVARCHAR(500),
     FOREIGN KEY (drugID) REFERENCES Drug(drugID),
     FOREIGN KEY (unitID) REFERENCES Unit(unitID),
@@ -535,7 +553,7 @@ CREATE TABLE InventoryLog (
 GO
 
 -- 3.1. Đơn vị tính
-INSERT INTO Unit (unitName, description) VALUES 
+INSERT INTO Unit (unitName, description) VALUES
 ('VIÊN', N'Đơn vị nhỏ nhất - viên thuốc'),
 ('VỈ', N'Đóng gói thương mại - vỉ nhôm/nhựa'),
 ('HỘP', N'Đóng gói thương mại - hộp giấy'),
@@ -544,7 +562,7 @@ INSERT INTO Unit (unitName, description) VALUES
 ('TUÝP', N'Đóng gói thương mại - tuýp nhôm/nhựa cho thuốc bôi');
 
 -- 3.2. Nhóm thuốc cấp 1
-INSERT INTO DrugCategory (categoryName, description) VALUES 
+INSERT INTO DrugCategory (categoryName, description) VALUES
 (N'Thuốc điều trị', N'Thuốc tác động trực tiếp lên tế bào ung thư'),
 (N'Thuốc hỗ trợ điều trị', N'Thuốc giảm tác dụng phụ, nâng đỡ cơ thể');
 
@@ -567,8 +585,8 @@ INSERT INTO DrugSubCategory (categoryID, subCategoryName, priorityLevel, require
 
 -- 3.4. Danh mục thuốc (Đã sửa lỗi cú pháp và bổ sung sellingPrice)
 INSERT INTO Drug (
-    drugCode, drugName, strength, strengthUnit, dosageForm, 
-    routeOfAdministration, subCategoryID, baseUnitID, packaging, manufacturer, 
+    drugCode, drugName, strength, strengthUnit, dosageForm,
+    routeOfAdministration, subCategoryID, baseUnitID, packaging, manufacturer,
     countryOfOrigin, storageCondition, shelfLifeMonths, notes, createdBy, sellingPrice
 ) VALUES
 -- ========== NHÓM 1: THUỐC ĐIỀU TRỊ UNG THƯ (baseUnitID = 1: Viên) ==========
@@ -681,7 +699,7 @@ INSERT INTO UnitConversion (drugID, largeUnitID, smallUnitID, conversionQuantity
 
 -- 3.6. Thêm tài khoản Dược sĩ
 INSERT INTO [Users] (roleID, userName, fullName, email, passwordHash, phoneNumber, status, lastChangePassTime, nationalID)
-VALUES 
+VALUES
 (6, 'pharmacist', N'Dược sĩ Nguyễn Hoàng Anh', 'anh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0908889999', 'ACTIVE', GETDATE(), '089012345678'),
 (6, 'pharmacist_linh', N'Dược sĩ Trần Thị Linh', 'linh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907776666', 'ACTIVE', GETDATE(), '090123456789');
 
@@ -813,7 +831,7 @@ INSERT INTO InventoryLog (batchID, userID, actionType, quantityChange, quantityB
 -- BỔ SUNG: 3.10. Tạo đơn thuốc mẫu (Bác sĩ kê)
 -- ============================================================================
 INSERT INTO Prescription (prescriptionCode, sessionID, patientID, doctorID, diagnosis, treatmentCycle, notes)
-VALUES 
+VALUES
 ('RX-202607-003', 1, 1, 3, N'Ung thư vú giai đoạn II, sau phẫu thuật', N'Chu kỳ 3/6', N'Bệnh nhân có biểu hiện thiếu máu nhẹ, bổ sung vi chất'),
 ('RX-202607-004', 2, 1, 5, N'Ung thư đại trực tràng giai đoạn IV, di căn gan', N'Chu kỳ 1/4', N'Theo dõi sát chức năng tiêu hóa và tình trạng nôn nghén'),
 ('RX-202607-005', 3, 1, 4, N'Ung thư phổi tế bào nhỏ, nhiễm trùng đường hô hấp kèm theo', N'Chu kỳ 2/6', N'Kết hợp kháng sinh điều trị viêm phổi cấp'),

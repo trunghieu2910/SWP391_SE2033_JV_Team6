@@ -1,0 +1,45 @@
+package com.mycompany.jpademo.backend.controller;
+
+import com.mycompany.jpademo.backend.dto.projection.DiseaseStatItem;
+import com.mycompany.jpademo.backend.repository.ReviewRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+@Controller
+@RequestMapping("/doctor/statistics")
+@RequiredArgsConstructor
+@PreAuthorize("hasRole('DOCTOR')")
+public class DoctorStatisticsController {
+
+    private final ReviewRepository reviewRepository;
+
+    @GetMapping
+    public String showStatistics(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            Model model) {
+
+        LocalDate from = startDate != null ? startDate : LocalDate.of(2000, 1, 1);
+        LocalDate to = endDate != null ? endDate : LocalDate.now();
+
+        List<DiseaseStatItem> stats = reviewRepository.countByDiseaseTypeBetween(
+                from.atStartOfDay(),
+                to.atTime(LocalTime.MAX)
+        );
+
+        model.addAttribute("stats", stats);
+        model.addAttribute("startDate", from);
+        model.addAttribute("endDate", to);
+        return "doctor/statistics";
+    }
+}

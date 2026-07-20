@@ -37,6 +37,10 @@
             <i class="fa-solid fa-robot"></i>
             <span>Trợ lý AI</span>
         </a>
+        <a th:href="@{/doctor/statistics}" class="nav-item" th:classappend="${currentTab == 'statistics' ? 'active' : ''}">
+            <i class="fa-solid fa-chart-bar"></i>
+            <span>Thống kê chẩn đoán</span>
+        </a>
     </nav>
 
     <!-- User Profile & Logout -->

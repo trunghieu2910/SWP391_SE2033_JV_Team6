@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -80,8 +82,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     // ===== LẤY DANH SÁCH (CÓ PHÂN TRANG) =====
     @Override
-    public Page<MedicalRecordResponse> getMedicalRecords(String keyword, String status, Boolean isShared, Pageable pageable) {
-        List<Map<String, Object>> rawRecords = sessionRepository.getMedicalRecords(keyword, status, isShared);
+    public Page<MedicalRecordResponse> getMedicalRecords(
+            String keyword, String status, Boolean isShared, String diseaseType,
+            LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+
+        List<Map<String, Object>> rawRecords =
+                sessionRepository.getMedicalRecords(keyword, status, isShared, diseaseType, startDate, endDate);
 
         List<MedicalRecordResponse> records = rawRecords.stream()
                 .map(this::mapToMedicalRecordResponse)
@@ -240,7 +246,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             }
 
             if (canSeeDiagnosis) {
-                detail.setFinalDiagnosis(r.getFinalDiagnosis());
+                detail.setFinalDiagnosis(r.getDiseaseType() != null ? r.getDiseaseType().getName() : "Đang chờ bác sĩ công bố...");
             } else {
                 detail.setFinalDiagnosis("Đang chờ bác sĩ công bố...");
             }
