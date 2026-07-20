@@ -1,14 +1,27 @@
 /* Dispense Form JavaScript - Dynamic batch loading from API */
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Initializing dispense form');
     initializeDispenseForm();
 });
 
 function initializeDispenseForm() {
+    console.log('Initializing dispense form...');
     const batchSelect = document.getElementById('batchId');
+    const drugIdInput = document.getElementById('drugId');
+    
+    console.log('batchSelect found:', !!batchSelect);
+    console.log('drugIdInput found:', !!drugIdInput);
+    
+    if (drugIdInput) {
+        console.log('drugIdInput value:', drugIdInput.value);
+    }
+    
     if (batchSelect) {
         batchSelect.addEventListener('change', updateBatchInfo);
         loadBatches();
+    } else {
+        console.error('Could not find batchSelect element');
     }
 
     const form = document.querySelector('form');
@@ -21,33 +34,119 @@ function initializeDispenseForm() {
 let batchData = {};
 
 function loadBatches() {
-    const drugId = document.getElementById('drugId') ? document.getElementById('drugId').value : null;
+    const drugIdInput = document.getElementById('drugId');
     const batchSelect = document.getElementById('batchId');
+    const debugDrugIdEl = document.getElementById('debugDrugId');
 
-    if (!drugId || !batchSelect) {
-        console.warn('Khong tim thay drugId hoac batchSelect.');
+    console.log('loadBatches called');
+    console.log('drugIdInput element:', drugIdInput);
+    console.log('batchSelect element:', batchSelect);
+
+    if (!batchSelect) {
+        console.error('batchSelect element not found');
         return;
     }
 
+    let drugId = null;
+    
+    // Try multiple ways to get drugId - in order of preference
+    if (drugIdInput) {
+        // Try value attribute first (from Thymeleaf th:value)
+        if (drugIdInput.value) {
+            drugId = drugIdInput.value;
+            console.log('drugId from value attribute:', drugId);
+        }
+        
+        // Try data attribute (from Thymeleaf th:data-drug-id)
+        if (!drugId || drugId === '' || drugId === 'null') {
+            drugId = drugIdInput.getAttribute('data-drug-id');
+            console.log('drugId from data-drug-id attribute:', drugId);
+        }
+        
+        // Last resort - try direct attribute
+        if (!drugId || drugId === '' || drugId === 'null') {
+            drugId = drugIdInput.getAttribute('value');
+            console.log('drugId from getAttribute(value):', drugId);
+        }
+    }
+    
+    drugId = drugId ? String(drugId).trim() : null;
+    
+    console.log('Final drugId extracted:', drugId);
+    console.log('drugId type:', typeof drugId);
+    console.log('drugId is empty:', !drugId || drugId === '' || drugId === 'null');
+
+    // Update debug display
+    if (debugDrugIdEl) {
+        debugDrugIdEl.textContent = drugId || 'NOT FOUND';
+    }
+
+    if (!drugId || drugId === '' || drugId === 'null' || drugId === '0') {
+        console.error('drugId is empty, null, or invalid');
+        batchSelect.innerHTML = '<option value="">-- Lỗi: Không có dữ liệu thuốc (drugId=' + drugId + ') --</option>';
+        return;
+    }
+
+    console.log('Loading batches for drugId: ' + drugId);
+
     // Goi API lay danh sach lo hang con hang
-    fetch('/pharmacist/api/batches?drugId=' + drugId)
+    fetch('/pharmacist/api/batches?drugId=' + encodeURIComponent(drugId))
         .then(function(response) {
-            if (!response.ok) throw new Error('Loi server: ' + response.status);
+            console.log('API Response status:', response.status);
+            console.log('API Response headers:', response.headers.get('content-type'));
+            
+            if (!response.ok) {
+                throw new Error('API Error ' + response.status + ': ' + response.statusText);
+            }
             return response.json();
         })
         .then(function(batches) {
+            console.log('Batches received from API:', batches);
+            console.log('Batches is array:', Array.isArray(batches));
+            console.log('Batches is object:', typeof batches === 'object');
+            console.log('Batches length:', batches ? (Array.isArray(batches) ? batches.length : 'not-array') : 'null');
+            
+            // Check if response is error object
+            if (batches && batches.error) {
+                throw new Error(batches.error);
+            }
+            
             batchData = {};
-            batchSelect.innerHTML = '<option value="">-- Chon lo hang --</option>';
+            batchSelect.innerHTML = '<option value="">-- Chọn lô hàng --</option>';
 
-            if (!batches || batches.length === 0) {
-                const opt = document.createElement('option');
-                opt.disabled = true;
-                opt.textContent = 'Khong co lo hang kha dung';
-                batchSelect.appendChild(opt);
+            if (!batches || !Array.isArray(batches) || batches.length === 0) {
+                console.info('No batches available for this drug');
+                batchSelect.innerHTML = '';
+                const opt1 = document.createElement('option');
+                opt1.value = '';
+                opt1.disabled = true;
+                opt1.selected = true;
+                opt1.textContent = 'Không có lô hàng khả dụng (hết hàng hoặc hết hạn)';
+                batchSelect.appendChild(opt1);
+                
+                const opt2 = document.createElement('option');
+                opt2.disabled = true;
+                opt2.textContent = '─────────────────────────────';
+                batchSelect.appendChild(opt2);
+                
+                const opt3 = document.createElement('option');
+                opt3.disabled = true;
+                opt3.textContent = 'Vui lòng kiểm tra lịch sử nhập kho';
+                batchSelect.appendChild(opt3);
+                
+                console.warn('No active batches found for drugId=' + drugId + '. Check: 1) quantityInStock > 0, 2) batch.status = 1, 3) expiryDate >= TODAY');
                 return;
             }
 
-            batches.forEach(function(batch) {
+            console.log('Adding ' + batches.length + ' batch options');
+            batches.forEach(function(batch, index) {
+                console.log('Processing batch ' + index + ':', batch);
+                
+                if (!batch || !batch.batchId) {
+                    console.warn('Batch missing required fields:', batch);
+                    return;
+                }
+                
                 // Luu du lieu batch de tra cuu nhanh
                 batchData[batch.batchId] = batch;
 
@@ -55,13 +154,16 @@ function loadBatches() {
                 option.value = batch.batchId;
                 option.textContent = batch.batchNumber
                     + ' | HSD: ' + formatDate(batch.expiryDate)
-                    + ' | Ton: ' + batch.quantityInStock;
+                    + ' | Tồn: ' + batch.quantityInStock;
                 batchSelect.appendChild(option);
             });
+            console.log('Batch options added successfully. Total options:', batchSelect.options.length);
         })
         .catch(function(err) {
-            console.error('Loi khi tai lo hang:', err);
-            batchSelect.innerHTML = '<option value="">-- Loi tai du lieu --</option>';
+            console.error('Lỗi khi tải lô hàng:', err);
+            console.error('Error message:', err.message);
+            console.error('Error stack:', err.stack);
+            batchSelect.innerHTML = '<option value="">-- LỖI: ' + err.message + ' --</option>';
         });
 }
 

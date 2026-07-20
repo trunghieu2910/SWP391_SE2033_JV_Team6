@@ -22,9 +22,13 @@ public interface DrugBatchRepository extends JpaRepository<DrugBatch, Integer> {
     
     List<DrugBatch> findByStatus(Byte status);
     
-    @Query("SELECT db FROM DrugBatch db WHERE db.expiryDate BETWEEN :startDate AND :endDate")
+    @Query("SELECT db FROM DrugBatch db WHERE db.expiryDate BETWEEN :startDate AND :endDate AND db.status IN (1, 2) " +
+           "AND EXISTS (SELECT i FROM Inventory i WHERE i.batch.batchId = db.batchId AND i.quantityInStock > 0)")
     List<DrugBatch> findExpiringBatches(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
     
     @Query("SELECT db FROM DrugBatch db WHERE db.expiryDate < :today AND db.status = 1")
     List<DrugBatch> findExpiredBatches(@Param("today") LocalDate today);
+
+    @Query("SELECT db.batchNumber FROM DrugBatch db")
+    java.util.List<String> findAllBatchNumbers();
 }

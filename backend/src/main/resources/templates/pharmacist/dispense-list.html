@@ -3,47 +3,78 @@
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Danh sách cấp phát thuốc', 'dispense')}">
 <body>
 <main>
+    <link rel="stylesheet" th:href="@{/css/pharmacist/dispense-list.css}">
+
     <div class="container">
         <header class="page-header" style="margin-bottom: 24px;">
             <h1><i class="fas fa-hand-holding-medical"></i> Đơn thuốc chờ dược sĩ cấp phát</h1>
         </header>
 
         <section class="card" style="padding: 0; overflow: hidden;">
+            <div class="dispense-filter-panel">
+                <div class="dispense-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="dispenseSearchInput" placeholder="Tìm theo tên bệnh nhân, CCCD nếu có">
+                </div>
+                <div class="dispense-filter-field">
+                    <i class="fas fa-filter"></i>
+                    <select id="dispenseStatusFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="pending">Chờ cấp phát</option>
+                        <option value="completed">Đã cấp phát</option>
+                    </select>
+                </div>
+                <div class="dispense-filter-field">
+                    <i class="fas fa-calendar-day"></i>
+                    <input type="date" id="dispenseExactDate" title="Tìm theo một ngày cụ thể">
+                </div>
+                <div class="dispense-filter-field">
+                    <span>Từ</span>
+                    <input type="date" id="dispenseDateFrom">
+                </div>
+                <div class="dispense-filter-field">
+                    <span>Đến</span>
+                    <input type="date" id="dispenseDateTo">
+                </div>
+                <button type="button" class="btn btn-secondary dispense-clear-filter" id="dispenseClearFilter">
+                    <i class="fas fa-rotate-left"></i> Xóa lọc
+                </button>
+            </div>
             <div class="table-responsive" style="margin-top: 0;">
             <table class="table">
                 <thead>
                     <tr>
                         <th>Mã đơn thuốc</th>
                         <th>Bệnh nhân</th>
-                        <th>Tên thuốc</th>
-                        <th>Liều dùng hàng ngày</th>
-                        <th>Số lượng kê</th>
-                        <th>Số lượng còn</th>
+                        <th>Ngày kê đơn</th>
+                        <th>Số loại thuốc</th>
+                        <th>Còn chờ cấp phát</th>
                         <th>Trạng thái</th>
-                        <th>Hành động</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr th:each="prescription : ${prescriptions}">
-                        <td th:text="${prescription.prescriptionCode}" style="font-weight: 700; color: var(--neutral-dark);">-</td>
-                        <td th:text="${prescription.patientName}" style="font-weight: 600;">-</td>
-                        <td th:text="${prescription.drugName}" style="color: var(--primary); font-weight: 700;">-</td>
-                        <td th:text="${prescription.dosePerTime} + ' mg, ' + ${prescription.timesPerDay} + ' lần/ngày'">-</td>
-                        <td th:text="${prescription.quantityPrescribed}" style="font-weight: 700;">-</td>
-                        <td th:text="${prescription.quantityPrescribed - (prescription.quantityDispensed != null ? prescription.quantityDispensed : 0)}" style="font-weight: 700; color: #b45309;">-</td>
+                <tbody id="dispenseListTableBody">
+                    <tr th:each="prescription : ${prescriptions}"
+                        th:onclick="|window.location.href='/pharmacist/dispense-prescription/' + ${prescription.prescriptionId}|"
+                        style="cursor: pointer;"
+                        title="Nhấp để xem chi tiết đơn thuốc">
+                        <td th:text="${prescription.prescriptionCode}" style="font-weight: 700; color: var(--neutral-dark);"></td>
+                        <td th:text="${prescription.patientName}" style="font-weight: 600;"></td>
+                        <td th:text="${prescription.prescriptionDate != null ? #temporals.format(prescription.prescriptionDate, 'dd/MM/yyyy') : '-'}"></td>
+                        <td th:text="${prescription.totalItems}" style="font-weight: 700;"></td>
+                        <td th:text="${prescription.pendingItems}" style="font-weight: 700; color: #b45309;"></td>
                         <td>
                             <span th:if="${prescription.isPending}" class="badge badge-warning">Chờ cấp phát</span>
                             <span th:if="!${prescription.isPending}" class="badge badge-success">Đã cấp phát</span>
                         </td>
-                        <td>
-                            <a th:href="@{/pharmacist/dispense-form/{id}(id=${prescription.detailId})}" 
-                               class="btn btn-sm btn-primary" th:if="${prescription.isPending}">
-                                <i class="fas fa-plus"></i> Cấp phát
-                            </a>
+                    </tr>
+                    <tr id="dispenseListEmptyRow" style="display: none;">
+                        <td colspan="6" style="text-align: center; color: var(--neutral-light); padding: 32px;">
+                            <i class="fas fa-filter" style="font-size: 2rem; margin-bottom: 8px; display: block;"></i>
+                            Không tìm thấy đơn thuốc phù hợp.
                         </td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(prescriptions.content)}">
-                        <td colspan="8" style="text-align: center; color: var(--neutral-light); padding: 32px;">
+                    <tr th:if="${prescriptions == null or #lists.isEmpty(prescriptions)}">
+                        <td colspan="6" style="text-align: center; color: var(--neutral-light); padding: 32px;">
                             <i class="fas fa-check-circle" style="font-size: 2rem; color: var(--success); display: block; margin-bottom: 8px;"></i>
                             Không có đơn thuốc nào đang chờ cấp phát.
                         </td>
@@ -52,24 +83,7 @@
             </table>
             </div>
         </section>
-
-        <!-- Pagination -->
-        <nav th:if="${totalPages > 1}" class="pagination">
-            <ul>
-                <li th:if="${currentPage > 0}">
-                    <a th:href="@{/pharmacist/dispense-list(page=${currentPage-1})}">Trước</a>
-                </li>
-                <li th:each="i : ${#numbers.sequence(0, totalPages-1)}" 
-                    th:classappend="${i == currentPage} ? 'active'">
-                    <a th:href="@{/pharmacist/dispense-list(page=${i})}" th:text="${i+1}">1</a>
-                </li>
-                <li th:if="${currentPage < totalPages-1}">
-                    <a th:href="@{/pharmacist/dispense-list(page=${currentPage+1})}">Sau</a>
-                </li>
-            </ul>
-        </nav>
     </div>
-
     <script th:src="@{/js/pharmacist/dispense-list.js}"></script>
 </main>
 </body>

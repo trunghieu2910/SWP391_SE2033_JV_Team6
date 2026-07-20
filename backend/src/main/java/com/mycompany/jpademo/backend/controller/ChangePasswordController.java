@@ -59,6 +59,8 @@ public class ChangePasswordController {
                 String role = authority.getAuthority();
                 if (role.equals("ROLE_ADMIN")) {
                     return "/admin/dashboard";
+                } else if (role.equals("ROLE_PHARMACIST")) {
+                    return "/pharmacist/profile";
                 } else if (role.equals("ROLE_DOCTOR")) {
                     return "/doctor/profile";
                 } else if (role.equals("ROLE_PATIENT")) {

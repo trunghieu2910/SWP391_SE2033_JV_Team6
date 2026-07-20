@@ -1,5 +1,7 @@
 /* Drug Detail Styles */
 
+@import url('/css/pharmacist/drug-form.css');
+
 .drug-info {
     background: white;
     padding: 30px;

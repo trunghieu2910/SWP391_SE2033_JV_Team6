@@ -15,12 +15,44 @@
 
         <!-- Search & Filter -->
         <section class="search-filter card" style="margin-bottom: 24px; padding: 20px;">
-            <form method="get" action="/pharmacist/drug-list" class="search-form">
+            <form method="get" action="/pharmacist/drug-list" class="search-form" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 <input type="text" name="search" class="form-control" style="flex: 1; min-width: 250px;" 
                        placeholder="Tìm kiếm theo mã thuốc, tên thuốc..." th:value="${search}">
+                
+                <select name="subCategoryId" class="form-control" style="flex: 1; min-width: 250px;" onchange="this.form.submit()">
+                    <option value="">-- Tất cả phân loại --</option>
+                    <optgroup label="1. THUỐC ĐIỀU TRỊ UNG THƯ">
+                        <option value="1" th:selected="${subCategoryId == 1}">Thuốc nội tiết</option>
+                        <option value="2" th:selected="${subCategoryId == 2}">Thuốc điều trị đích</option>
+                        <option value="3" th:selected="${subCategoryId == 3}">Thuốc hóa trị toàn thân</option>
+                        <option value="4" th:selected="${subCategoryId == 4}">Thuốc miễn dịch</option>
+                    </optgroup>
+                    <optgroup label="2. THUỐC HỖ TRỢ ĐIỀU TRỊ">
+                        <option value="5" th:selected="${subCategoryId == 5}">Thuốc giảm đau</option>
+                        <option value="6" th:selected="${subCategoryId == 6}">Thuốc chống nôn</option>
+                        <option value="7" th:selected="${subCategoryId == 7}">Thuốc bảo vệ dạ dày</option>
+                        <option value="8" th:selected="${subCategoryId == 8}">Thuốc kháng sinh</option>
+                        <option value="9" th:selected="${subCategoryId == 9}">Thuốc kháng nấm</option>
+                        <option value="10" th:selected="${subCategoryId == 10}">Vitamin và khoáng chất</option>
+                        <option value="11" th:selected="${subCategoryId == 11}">Thuốc nhuận tràng</option>
+                        <option value="12" th:selected="${subCategoryId == 12}">Thuốc chống tiêu chảy</option>
+                        <option value="13" th:selected="${subCategoryId == 13}">Thuốc chống dị ứng</option>
+                        <option value="14" th:selected="${subCategoryId == 14}">Thuốc chống viêm</option>
+                    </optgroup>
+                </select>
+
+                <select id="drugStatusFilter" class="form-control" style="flex: 1; min-width: 220px;">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="active">Đang dùng</option>
+                    <option value="inactive">Ngừng sử dụng</option>
+                </select>
+
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-search"></i> Tìm kiếm
                 </button>
+                <a th:if="${search != null || subCategoryId != null}" href="/pharmacist/drug-list" class="btn btn-secondary">
+                    Xóa bộ lọc
+                </a>
             </form>
         </section>
 
@@ -38,7 +70,7 @@
                         <th style="text-align:center">Trạng thái</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="drugListTableBody">
                     <tr th:each="drug : ${drugs}"
                         th:onclick="'window.location.href=\'/pharmacist/drug-detail/' + ${drug.drugId} + '\''"
                         style="cursor: pointer;">
@@ -56,7 +88,13 @@
                             <span th:if="${drug.status == 0}" class="badge badge-danger">Ngừng</span>
                         </td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(drugs.content)}">
+                    <tr id="drugListEmptyRow" style="display: none;">
+                        <td colspan="6" style="text-align: center; color: var(--neutral-light); padding: 32px;">
+                            <i class="fas fa-filter" style="font-size: 2rem; margin-bottom: 8px; display: block;"></i>
+                            Không có thuốc phù hợp với trạng thái đã chọn
+                        </td>
+                    </tr>
+                    <tr th:if="${drugs == null or #lists.isEmpty(drugs.content)}">
                         <td colspan="6" style="text-align: center; color: var(--neutral-light); padding: 32px;">
                             <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 8px; display: block;"></i>
                             Không tìm thấy thuốc nào
@@ -71,18 +109,19 @@
         <nav th:if="${totalPages > 1}" class="pagination">
             <ul>
                 <li th:if="${currentPage > 0}">
-                    <a th:href="@{/pharmacist/drug-list(page=${currentPage-1}, search=${search})}">Trước</a>
+                    <a th:href="@{/pharmacist/drug-list(page=${currentPage-1}, search=${search}, subCategoryId=${subCategoryId})}">Trước</a>
                 </li>
                 <li th:each="i : ${#numbers.sequence(0, totalPages-1)}" 
                     th:classappend="${i == currentPage} ? 'active'">
-                    <a th:href="@{/pharmacist/drug-list(page=${i}, search=${search})}" th:text="${i+1}">1</a>
+                    <a th:href="@{/pharmacist/drug-list(page=${i}, search=${search}, subCategoryId=${subCategoryId})}" th:text="${i+1}">1</a>
                 </li>
                 <li th:if="${currentPage < totalPages-1}">
-                    <a th:href="@{/pharmacist/drug-list(page=${currentPage+1}, search=${search})}">Sau</a>
+                    <a th:href="@{/pharmacist/drug-list(page=${currentPage+1}, search=${search}, subCategoryId=${subCategoryId})}">Sau</a>
                 </li>
             </ul>
         </nav>
     </div>
+    <script th:src="@{/js/pharmacist/drug-list.js}"></script>
 </main>
 </body>
 </html>

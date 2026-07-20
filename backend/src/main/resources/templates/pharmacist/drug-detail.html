@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Chi tiết thuốc', 'drugs')}">
 <body>
@@ -67,8 +67,31 @@
                     <strong th:text="${drug.totalQuantityInStock}" style="font-size: 1.1rem; color: var(--primary); font-weight: 800;">0</strong>
                 </div>
             </div>
-            
-            <div style="display: flex; gap: 12px; margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+
+            <!-- Audit Trail -->
+            <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color); display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                <div style="display: flex; align-items: flex-start; gap: 12px; background: #f8fafc; border-radius: var(--radius); padding: 14px 18px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-user" style="color: var(--primary); font-size: 0.85rem;"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light); display: block; margin-bottom: 2px;">Người tạo</span>
+                        <strong th:text="${drug.createdByName != null ? drug.createdByName : 'Không xác định'}" style="font-size: 0.95rem; color: var(--neutral-dark);">—</strong>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 12px; background: #f8fafc; border-radius: var(--radius); padding: 14px 18px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-clock" style="color: var(--primary); font-size: 0.85rem;"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light); display: block; margin-bottom: 2px;">Thời gian tạo</span>
+                        <strong th:text="${drug.createdAt != null ? drug.createdAt : 'Không xác định'}" style="font-size: 0.95rem; color: var(--neutral-dark);">—</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 24px;">
                 <button type="button" class="btn btn-warning" th:onclick="showEditForm()">
                     <i class="fas fa-edit"></i> Sửa thông tin thuốc
                 </button>
@@ -98,43 +121,141 @@
                     </div>
                     <div class="form-group">
                         <label for="editDosageForm">Dạng bào chế *</label>
-                        <input type="text" id="editDosageForm" name="dosageForm" th:value="${drug.dosageForm}" required>
+                        <select id="editDosageForm" name="dosageForm" required>
+                            <option value="">-- Chọn dạng bào chế --</option>
+                            <option value="Viên nén/nang" th:selected="${drug.dosageForm == 'Viên nén/nang'}">Viên nén/nang</option>
+                            <option value="Siro" th:selected="${drug.dosageForm == 'Siro'}">Siro</option>
+                            <option value="Kem bôi" th:selected="${drug.dosageForm == 'Kem bôi'}">Kem bôi</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="editRouteOfAdministration">Đường dùng *</label>
-                        <input type="text" id="editRouteOfAdministration" name="routeOfAdministration" th:value="${drug.routeOfAdministration}" required>
+                        <select id="editRouteOfAdministration" name="routeOfAdministration" required>
+                            <option value="">-- Chọn đường dùng --</option>
+                            <option value="Đường uống" th:selected="${drug.routeOfAdministration == 'Đường uống'}">Đường uống</option>
+                            <option value="Đường bôi ngoài da" th:selected="${drug.routeOfAdministration == 'Đường bôi ngoài da'}">Đường bôi ngoài da</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="editPackaging">Quy cách đóng gói</label>
-                        <input type="text" id="editPackaging" name="packaging" th:value="${drug.packaging}">
+                        <label for="editPackaging">Quy cách đóng gói *</label>
+                        <input type="text" id="editPackaging" name="packaging" th:value="${drug.packaging}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editBaseUnitId">Đơn vị gốc kê đơn *</label>
+                    <select id="editBaseUnitId" name="baseUnitId" class="base-unit-select" required>
+                        <option value="">-- Chọn đơn vị gốc --</option>
+                        <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}" th:selected="${u.unitId == drug.baseUnitId}"></option>
+                    </select>
+                </div>
+                <div class="form-group unit-conversion-builder" data-drug-name-input="editDrugName">
+                    <div class="unit-conversion-header">
+                        <div>
+                            <span class="unit-conversion-eyebrow">Cách hiển thị trực quan</span>
+                            <h3>Thiết lập quy đổi cho: <span class="unit-conversion-drug-name" th:text="${drug.drugName}">thuốc đang sửa</span></h3>
+                            <p>Đơn vị gốc kê đơn: <strong class="unit-conversion-base-unit">Đơn vị gốc</strong></p>
+                        </div>
+                        <button type="button" class="unit-conversion-add">
+                            <i class="fas fa-plus"></i> Thêm bước
+                        </button>
+                    </div>
+
+                    <div class="unit-conversion-steps">
+                        <div class="unit-conversion-step" th:each="conversion : ${conversions}">
+                            <span class="unit-conversion-one">1</span>
+                            <select name="conversionLargeUnitIds" class="unit-conversion-large-unit">
+                                <option value="">-- Đơn vị lớn --</option>
+                                <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}" th:selected="${u.unitId == conversion.largeUnitId}"></option>
+                            </select>
+                            <span class="unit-conversion-equals">=</span>
+                            <input type="number" name="conversionQuantities" class="unit-conversion-factor" min="1" placeholder="SL" th:value="${conversion.conversionQuantity}">
+                            <select name="conversionSmallUnitIds" class="unit-conversion-small-unit">
+                                <option value="">-- Đơn vị nhỏ --</option>
+                                <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}" th:selected="${u.unitId == conversion.smallUnitId}"></option>
+                            </select>
+                            <button type="button" class="unit-conversion-remove" title="Xóa bước quy đổi">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="unit-conversion-step" th:if="${conversions == null or #lists.isEmpty(conversions)}">
+                            <span class="unit-conversion-one">1</span>
+                            <select name="conversionLargeUnitIds" class="unit-conversion-large-unit">
+                                <option value="">-- Đơn vị lớn --</option>
+                                <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                            </select>
+                            <span class="unit-conversion-equals">=</span>
+                            <input type="number" name="conversionQuantities" class="unit-conversion-factor" min="1" placeholder="SL">
+                            <select name="conversionSmallUnitIds" class="unit-conversion-small-unit">
+                                <option value="">-- Đơn vị nhỏ --</option>
+                                <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                            </select>
+                            <button type="button" class="unit-conversion-remove" title="Xóa bước quy đổi">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="unit-conversion-summary">
+                        Nhập đủ các bước quy đổi để hệ thống tự tính tồn kho theo đơn vị nhỏ nhất.
+                    </div>
+
+                    <ul class="unit-conversion-notes">
+                        <li>Ô nhập đơn vị lớn và đơn vị nhỏ là dropdown chọn từ bảng Unit.</li>
+                        <li>Hệ thống tự động tính và hiển thị dòng tóm tắt ở phía dưới để người dùng kiểm tra lại với thực tế.</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="editSubCategoryId">Phân nhóm thuốc *</label>
+                    <select id="editSubCategoryId" name="subCategoryId" required>
+                        <option value="">-- Chọn phân nhóm --</option>
+                        <optgroup label="1. THUỐC ĐIỀU TRỊ UNG THƯ">
+                            <option value="1" th:selected="${drug.subCategoryId == 1}">Thuốc nội tiết</option>
+                            <option value="2" th:selected="${drug.subCategoryId == 2}">Thuốc điều trị đích</option>
+                            <option value="3" th:selected="${drug.subCategoryId == 3}">Thuốc hóa trị toàn thân</option>
+                            <option value="4" th:selected="${drug.subCategoryId == 4}">Thuốc miễn dịch</option>
+                        </optgroup>
+                        <optgroup label="2. THUỐC HỖ TRỢ ĐIỀU TRỊ">
+                            <option value="5" th:selected="${drug.subCategoryId == 5}">Thuốc giảm đau</option>
+                            <option value="6" th:selected="${drug.subCategoryId == 6}">Thuốc chống nôn</option>
+                            <option value="7" th:selected="${drug.subCategoryId == 7}">Thuốc bảo vệ dạ dày</option>
+                            <option value="8" th:selected="${drug.subCategoryId == 8}">Thuốc kháng sinh</option>
+                            <option value="9" th:selected="${drug.subCategoryId == 9}">Thuốc kháng nấm</option>
+                            <option value="10" th:selected="${drug.subCategoryId == 10}">Vitamin và khoáng chất</option>
+                            <option value="11" th:selected="${drug.subCategoryId == 11}">Thuốc nhuận tràng</option>
+                            <option value="12" th:selected="${drug.subCategoryId == 12}">Thuốc chống tiêu chảy</option>
+                            <option value="13" th:selected="${drug.subCategoryId == 13}">Thuốc chống dị ứng</option>
+                            <option value="14" th:selected="${drug.subCategoryId == 14}">Thuốc chống viêm</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editManufacturer">Nhà sản xuất *</label>
+                        <input type="text" id="editManufacturer" name="manufacturer" th:value="${drug.manufacturer}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCountryOfOrigin">Nước sản xuất *</label>
+                        <input type="text" id="editCountryOfOrigin" name="countryOfOrigin" th:value="${drug.countryOfOrigin}" required>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="editManufacturer">Nhà sản xuất</label>
-                        <input type="text" id="editManufacturer" name="manufacturer" th:value="${drug.manufacturer}">
+                        <label for="editShelfLifeMonths">Thời hạn sử dụng (tháng) *</label>
+                        <input type="number" id="editShelfLifeMonths" name="shelfLifeMonths" th:value="${drug.shelfLifeMonths}" min="1" required>
                     </div>
                     <div class="form-group">
-                        <label for="editCountryOfOrigin">Nước sản xuất</label>
-                        <input type="text" id="editCountryOfOrigin" name="countryOfOrigin" th:value="${drug.countryOfOrigin}">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="editShelfLifeMonths">Thời hạn sử dụng (tháng)</label>
-                        <input type="number" id="editShelfLifeMonths" name="shelfLifeMonths" th:value="${drug.shelfLifeMonths}" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="editStorageCondition">Điều kiện bảo quản</label>
-                        <input type="text" id="editStorageCondition" name="storageCondition" th:value="${drug.storageCondition}">
+                        <label for="editStorageCondition">Điều kiện bảo quản *</label>
+                        <input type="text" id="editStorageCondition" name="storageCondition" th:value="${drug.storageCondition}" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="editNotes">Ghi chú</label>
                     <textarea id="editNotes" name="notes" rows="3" th:text="${drug.notes}"></textarea>
                 </div>
+                <div id="editFormAlert" style="display:none; background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:12px 16px; color:#b91c1c; margin-top:16px; font-size:0.9rem;"><i class="fas fa-exclamation-circle"></i> <span id="editFormAlertMsg"></span></div>
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Lưu thay đổi
@@ -176,7 +297,7 @@
                             <span th:if="${batch.status == 0}" class="badge badge-danger">Hết hạn/Ngừng</span>
                         </td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(batches)}">
+                    <tr th:if="${batches == null or #lists.isEmpty(batches)}">
                         <td colspan="7" style="text-align: center; color: var(--neutral-light); padding: 32px;">
                             Chưa có lô hàng nào được nhập cho thuốc này.
                         </td>
@@ -187,6 +308,7 @@
     </div>
 
     <script th:src="@{/js/pharmacist/drug-detail.js}"></script>
+    <script th:src="@{/js/pharmacist/drug-form.js}"></script>
     <script>
         function showEditForm() {
             document.getElementById('editFormCard').style.display = 'block';
@@ -195,6 +317,38 @@
         function hideEditForm() {
             document.getElementById('editFormCard').style.display = 'none';
         }
+        // Validate edit form before submit
+        document.addEventListener('DOMContentLoaded', function() {
+            const editForm = document.querySelector('#editFormCard form');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    const required = ['editDrugName','editStrength','editStrengthUnit','editDosageForm',
+                        'editRouteOfAdministration','editPackaging','editSubCategoryId',
+                        'editManufacturer','editCountryOfOrigin','editShelfLifeMonths','editStorageCondition'];
+                    let missing = [];
+                    const labels = {
+                        editDrugName: 'Tên thuốc', editStrength: 'Hàm lượng',
+                        editStrengthUnit: 'Đơn vị hàm lượng', editDosageForm: 'Dạng bào chế',
+                        editRouteOfAdministration: 'Đường dùng', editPackaging: 'Quy cách đóng gói',
+                        editSubCategoryId: 'Phân nhóm thuốc', editManufacturer: 'Nhà sản xuất',
+                        editCountryOfOrigin: 'Nước sản xuất', editShelfLifeMonths: 'Thời hạn sử dụng',
+                        editStorageCondition: 'Điều kiện bảo quản'
+                    };
+                    required.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (!el || !el.value || el.value.trim() === '') missing.push(labels[id]);
+                    });
+                    if (missing.length > 0) {
+                        e.preventDefault();
+                        const alertBox = document.getElementById('editFormAlert');
+                        document.getElementById('editFormAlertMsg').textContent = 'Vui lòng điền đầy đủ: ' + missing.join(', ');
+                        alertBox.style.display = 'block';
+                        alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return false;
+                    }
+                });
+            }
+        });
     </script>
 </main>
 </body>

@@ -26,8 +26,8 @@ public class Drug {
     @Column(name = "drugName", nullable = false, length = 200)
     private String drugName;
 
-    @Column(name = "strength", nullable = false)
-    private java.math.BigDecimal strength;
+    @Column(name = "strength", length = 50)
+    private String strength;
 
     @Column(name = "strengthUnit", nullable = false, length = 10)
     private String strengthUnit;
@@ -41,6 +41,10 @@ public class Drug {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subCategoryID", nullable = false)
     private DrugSubCategory subCategory;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "baseUnitID", nullable = false)
+    private Unit baseUnit;
 
     @Column(name = "packaging", length = 100)
     private String packaging;

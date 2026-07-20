@@ -24,3 +24,49 @@
 .import-history-table .table tbody tr:hover {
     background-color: #f9f9f9;
 }
+
+.import-history-toolbar {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) minmax(220px, 280px);
+    gap: 12px;
+    align-items: center;
+}
+
+.import-history-search,
+.import-history-sort {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 12px;
+    background: #f8fafc;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+}
+
+.import-history-search i,
+.import-history-sort i {
+    color: #64748b;
+    flex: 0 0 auto;
+}
+
+.import-history-search input,
+.import-history-sort select {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #1f2937;
+    font: inherit;
+}
+
+.import-history-sort select {
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .import-history-toolbar {
+        grid-template-columns: 1fr;
+    }
+}

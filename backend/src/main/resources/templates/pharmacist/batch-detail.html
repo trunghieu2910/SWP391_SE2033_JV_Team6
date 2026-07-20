@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Chi tiết lô hàng', 'import')}">
+<body>
+<main>
+    <div class="container" style="max-width: 800px; margin: 0 auto;">
+        <header class="page-header" style="margin-bottom: 24px;">
+            <a href="/pharmacist/import-history" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách
+            </a>
+            <h1><i class="fas fa-box-open"></i> Chi tiết lô hàng: <span th:text="${batch.batchNumber}"></span></h1>
+        </header>
+
+        <!-- Messages -->
+        <div th:if="${success}" style="background: #ecfdf5; border: 1px solid #10b981; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-weight: 500;">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" style="background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-weight: 500;">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Info Card -->
+        <section class="card" style="margin-bottom: 32px; padding: 24px;">
+            <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                Thông tin lô hàng hiện tại
+            </h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Thuốc</span>
+                    <strong th:text="${batch.drugName}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã số lô</span>
+                    <strong th:text="${batch.batchNumber}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Ngày sản xuất</span>
+                    <strong th:text="${#temporals.format(batch.manufactureDate, 'dd/MM/yyyy')}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Hạn sử dụng</span>
+                    <strong th:text="${#temporals.format(batch.expiryDate, 'dd/MM/yyyy')}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Số lượng nhập ban đầu</span>
+                    <strong th:text="${batch.quantity} + ' ' + ${batch.unitName}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Tồn kho hiện tại (đơn vị nhỏ)</span>
+                    <strong th:text="${batch.quantityInStock}" style="font-size: 1.1rem; color: var(--primary); font-weight: 800;">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Đơn giá nhập</span>
+                    <strong th:text="${batch.importPrice != null ? #numbers.formatDecimal(batch.importPrice, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Nhà cung cấp</span>
+                    <strong th:text="${batch.supplier}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Người nhập</span>
+                    <strong th:text="${batch.importedBy}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Thời gian nhập</span>
+                    <strong th:text="${#temporals.format(batch.importDate, 'dd/MM/yyyy HH:mm')}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Ghi chú</span>
+                <p th:text="${#strings.isEmpty(batch.notes) ? 'Không có ghi chú' : batch.notes}" style="font-size: 0.95rem; color: var(--neutral-dark); margin: 0; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);"></p>
+            </div>
+
+            <div th:if="${batch.drugStatus == 0}" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <div style="background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
+                    <i class="fas fa-exclamation-circle"></i> không được chỉnh sửa: lô hàng có thuốc đã ngưng sử dụng
+                </div>
+            </div>
+            
+            <div th:if="${batch.drugStatus != 0}" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; gap: 12px;">
+                <button type="button" class="btn btn-warning" onclick="showEditForm()">
+                    <i class="fas fa-edit"></i> Chỉnh sửa thông tin lô hàng
+                </button>
+            </div>
+        </section>
+
+        <!-- Edit Form Card (Initially Hidden) -->
+        <section id="editBatchCard" class="card" style="display: none; margin-bottom: 32px; padding: 24px;">
+            <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--neutral-dark); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                Cập nhật thông tin lô hàng
+            </h2>
+            <form th:action="@{/pharmacist/batch-update/{id}(id=${batch.batchId})}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manufactureDate">Ngày sản xuất *</label>
+                        <input type="date" id="manufactureDate" name="manufactureDate"
+                               th:value="${updateForm.manufactureDate}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expiryDate">Hạn sử dụng *</label>
+                        <input type="date" id="expiryDate" name="expiryDate"
+                               th:value="${updateForm.expiryDate}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="unitId">Đơn vị nhập *</label>
+                    <select id="unitId" name="unitId" required>
+                        <option value="">-- Chọn đơn vị --</option>
+                        <option th:each="unit : ${units}"
+                                th:value="${unit.unitId}"
+                                th:text="${unit.unitName}"
+                                th:selected="${unit.unitId == updateForm.unitId}"></option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quantity">Số lượng nhập *</label>
+                        <input type="number" id="quantity" name="quantity" th:value="${updateForm.quantity}" min="1" required placeholder="Nhập số lượng lớn hơn 0">
+                    </div>
+                    <div class="form-group">
+                        <label for="importPrice">Đơn giá nhập (VNĐ) *</label>
+                        <input type="number" id="importPrice" name="importPrice" th:value="${updateForm.importPrice}" min="1" required placeholder="Ví dụ: 150000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="supplier">Nhà cung cấp (Supplier) *</label>
+                    <input type="text" id="supplier" name="supplier" th:value="${updateForm.supplier}" required placeholder="Tên nhà cung cấp">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Ghi chú</label>
+                    <textarea id="notes" name="notes" rows="3" th:text="${updateForm.notes}" placeholder="Thông tin bổ sung..."></textarea>
+                </div>
+
+                <div id="batchFormAlert" style="display:none; background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:12px 16px; color:#b91c1c; margin-top:16px; font-size:0.9rem;">
+                    <i class="fas fa-exclamation-circle"></i> <span id="batchFormAlertMsg"></span>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu thay đổi
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="hideEditForm()">
+                        Hủy bỏ
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        function showEditForm() {
+            document.getElementById('editBatchCard').style.display = 'block';
+            document.getElementById('editBatchCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideEditForm() {
+            document.getElementById('editBatchCard').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-open form if there was an error (so user sees filled values)
+            const hasError = document.querySelector('.has-error');
+            const errorMsg = document.querySelector('[th\\:if="${error}"]');
+            const errorDiv = document.querySelector('[style*="background: #fef2f2"]');
+            if (errorDiv && errorDiv.style.display !== 'none' && errorDiv.textContent.trim().length > 0) {
+                showEditForm();
+            }
+
+            const form = document.querySelector('#editBatchCard form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const manufactureDateVal = document.getElementById('manufactureDate').value;
+                    const expiryDateVal = document.getElementById('expiryDate').value;
+                    const unitId = document.getElementById('unitId').value;
+                    const quantityVal = document.getElementById('quantity').value;
+                    const importPriceVal = document.getElementById('importPrice').value;
+                    const supplier = document.getElementById('supplier').value;
+
+                    if (!manufactureDateVal || !expiryDateVal || !unitId || !quantityVal || !importPriceVal || !supplier || supplier.trim() === '') {
+                        e.preventDefault();
+                        showError('Vui lòng điền đầy đủ tất cả các trường bắt buộc (ngoại trừ ghi chú)');
+                        return false;
+                    }
+
+                    const today = new Date(); today.setHours(0,0,0,0);
+                    const mfgDate = new Date(manufactureDateVal);
+                    const expDate = new Date(expiryDateVal);
+
+                    if (mfgDate >= today) {
+                        e.preventDefault();
+                        showError('Ngày sản xuất phải là ngày trong quá khứ (trước hôm nay)');
+                        return false;
+                    }
+
+                    if (expDate <= today) {
+                        e.preventDefault();
+                        showError('Hạn sử dụng phải là ngày trong tương lai (sau hôm nay)');
+                        return false;
+                    }
+
+                    if (expDate <= mfgDate) {
+                        e.preventDefault();
+                        showError('Hạn sử dụng phải lớn hơn Ngày sản xuất');
+                        return false;
+                    }
+
+                    const quantity = parseInt(quantityVal, 10);
+                    const importPrice = parseFloat(importPriceVal);
+
+                    if (isNaN(quantity) || quantity <= 0 || !Number.isInteger(quantity)) {
+                        e.preventDefault();
+                        showError('Số lượng nhập phải là số nguyên dương lớn hơn 0');
+                        return false;
+                    }
+
+                    if (isNaN(importPrice) || importPrice <= 0 || !Number.isInteger(importPrice)) {
+                        e.preventDefault();
+                        showError('Đơn giá nhập phải là số nguyên dương lớn hơn 0');
+                        return false;
+                    }
+                });
+            }
+        });
+
+        function showError(msg) {
+            const alertBox = document.getElementById('batchFormAlert');
+            document.getElementById('batchFormAlertMsg').textContent = msg;
+            alertBox.style.display = 'block';
+            alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+</main>
+</body>
+</html>

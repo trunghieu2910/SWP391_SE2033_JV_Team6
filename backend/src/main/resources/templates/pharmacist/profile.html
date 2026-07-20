@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Hồ sơ cá nhân', 'profile')}">
 <body>
@@ -6,6 +6,14 @@
     <!-- We can reuse patient/profile.css for consistent visual layout or write our own, let's link the profile css -->
     <link rel="stylesheet" th:href="@{/css/patient/profile.css}"/>
     
+    <!-- Success / Error messages -->
+    <div th:if="${success}" style="background:#ecfdf5;border:1px solid #10b981;color:#065f46;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-weight:600;display:flex;align-items:center;gap:10px;">
+        <i class="fas fa-check-circle"></i> Thay đổi thông tin cá nhân thành công.
+    </div>
+    <div th:if="${error}" style="background:#fef2f2;border:1px solid #ef4444;color:#991b1b;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-weight:600;display:flex;align-items:center;gap:10px;">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+    </div>
+
     <div class="content-grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-top: 20px;">
         <section class="summary-card" style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; align-items: center; text-align: center;">
             <div class="avatar-large" style="width: 96px; height: 96px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; margin-bottom: 16px;" th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'P'}">P</div>

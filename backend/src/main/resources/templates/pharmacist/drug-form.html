@@ -1,8 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Thêm thuốc mới', 'drugs')}">
 <body>
 <main>
+    <link rel="stylesheet" th:href="@{/css/pharmacist/drug-form.css}">
     <div class="container">
         <header class="page-header" style="margin-bottom: 24px;">
             <h1><i class="fas fa-plus"></i> Thêm thuốc mới vào hệ thống</h1>
@@ -16,8 +17,8 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="drugCode">Mã thuốc *</label>
-                    <input type="text" id="drugCode" name="drugCode" required placeholder="Ví dụ: AMX-500">
+                    <label for="drugCode">Mã thuốc * (Tự động tạo)</label>
+                    <input type="text" id="drugCode" name="drugCode" th:value="${nextDrugCode}" readonly required style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
                 </div>
                 <div class="form-group">
                     <label for="drugName">Tên thuốc *</label>
@@ -41,21 +42,17 @@
                     <label for="dosageForm">Dạng bào chế *</label>
                     <select id="dosageForm" name="dosageForm" required>
                         <option value="">-- Chọn dạng bào chế --</option>
-                        <option value="Viên">Viên nén/nang</option>
-                        <option value="Ống">Ống tiêm</option>
+                        <option value="Viên nén/nang">Viên nén/nang</option>
                         <option value="Siro">Siro</option>
-                        <option value="Bột">Bột pha hỗn dịch</option>
-                        <option value="Kem">Kem bôi</option>
+                        <option value="Kem bôi">Kem bôi</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="routeOfAdministration">Đường dùng *</label>
                     <select id="routeOfAdministration" name="routeOfAdministration" required>
                         <option value="">-- Chọn đường dùng --</option>
-                        <option value="Uống">Đường uống</option>
-                        <option value="Tiêm">Đường tiêm</option>
-                        <option value="Bôi">Đường bôi ngoài da</option>
-                        <option value="Nhỏ">Đường nhỏ mắt/tai</option>
+                        <option value="Đường uống">Đường uống</option>
+                        <option value="Đường bôi ngoài da">Đường bôi ngoài da</option>
                     </select>
                 </div>
             </div>
@@ -64,40 +61,109 @@
                 <label for="subCategoryId">Phân nhóm thuốc *</label>
                 <select id="subCategoryId" name="subCategoryId" required>
                     <option value="">-- Chọn phân nhóm --</option>
+                    <optgroup label="1. THUỐC ĐIỀU TRỊ UNG THƯ">
+                        <option value="1">Thuốc nội tiết</option>
+                        <option value="2">Thuốc điều trị đích</option>
+                        <option value="3">Thuốc hóa trị toàn thân</option>
+                        <option value="4">Thuốc miễn dịch</option>
+                    </optgroup>
+                    <optgroup label="2. THUỐC HỖ TRỢ ĐIỀU TRỊ">
+                        <option value="5">Thuốc giảm đau</option>
+                        <option value="6">Thuốc chống nôn</option>
+                        <option value="7">Thuốc bảo vệ dạ dày</option>
+                        <option value="8">Thuốc kháng sinh</option>
+                        <option value="9">Thuốc kháng nấm</option>
+                        <option value="10">Vitamin và khoáng chất</option>
+                        <option value="11">Thuốc nhuận tràng</option>
+                        <option value="12">Thuốc chống tiêu chảy</option>
+                        <option value="13">Thuốc chống dị ứng</option>
+                        <option value="14">Thuốc chống viêm</option>
+                    </optgroup>
                 </select>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="manufacturer">Nhà sản xuất</label>
-                    <input type="text" id="manufacturer" name="manufacturer" placeholder="Tên nhà sản xuất">
+                    <label for="manufacturer">Nhà sản xuất *</label>
+                    <input type="text" id="manufacturer" name="manufacturer" placeholder="Tên nhà sản xuất" required>
                 </div>
                 <div class="form-group">
-                    <label for="countryOfOrigin">Nước sản xuất</label>
-                    <input type="text" id="countryOfOrigin" name="countryOfOrigin" placeholder="Quốc gia">
+                    <label for="countryOfOrigin">Nước sản xuất *</label>
+                    <input type="text" id="countryOfOrigin" name="countryOfOrigin" placeholder="Quốc gia" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="storageCondition">Điều kiện bảo quản</label>
-                <textarea id="storageCondition" name="storageCondition" rows="2" placeholder="Ví dụ: Bảo quản nơi khô ráo, nhiệt độ dưới 30 độ C"></textarea>
+                <label for="storageCondition">Điều kiện bảo quản *</label>
+                <textarea id="storageCondition" name="storageCondition" rows="2" placeholder="Ví dụ: Bảo quản nơi khô ráo, nhiệt độ dưới 30 độ C" required></textarea>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="shelfLifeMonths">Thời hạn sử dụng (tháng)</label>
-                    <input type="number" id="shelfLifeMonths" name="shelfLifeMonths" min="1" value="24">
+                    <label for="shelfLifeMonths">Thời hạn sử dụng (tháng) *</label>
+                    <input type="number" id="shelfLifeMonths" name="shelfLifeMonths" min="1" value="24" required>
                 </div>
                 <div class="form-group">
-                    <label for="packaging">Quy cách đóng gói</label>
-                    <input type="text" id="packaging" name="packaging" placeholder="Ví dụ: Hộp 3 vỉ x 10 viên">
+                    <label for="packaging">Quy cách đóng gói *</label>
+                    <input type="text" id="packaging" name="packaging" placeholder="Ví dụ: Hộp 3 vỉ x 10 viên" required>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label for="baseUnitId">Đơn vị gốc kê đơn *</label>
+                <select id="baseUnitId" name="baseUnitId" class="base-unit-select" required>
+                    <option value="">-- Chọn đơn vị gốc --</option>
+                    <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                </select>
+            </div>
+
+            <div class="form-group unit-conversion-builder" data-drug-name-input="drugName">
+                <div class="unit-conversion-header">
+                    <div>
+                        <span class="unit-conversion-eyebrow">Cách hiển thị trực quan</span>
+                        <h3>Thiết lập quy đổi cho: <span class="unit-conversion-drug-name">thuốc mới</span></h3>
+                        <p>Đơn vị gốc kê đơn: <strong class="unit-conversion-base-unit">Đơn vị gốc</strong></p>
+                    </div>
+                    <button type="button" class="unit-conversion-add">
+                        <i class="fas fa-plus"></i> Thêm bước
+                    </button>
+                </div>
+
+                <div class="unit-conversion-steps">
+                    <div class="unit-conversion-step">
+                        <span class="unit-conversion-one">1</span>
+                        <select name="conversionLargeUnitIds" class="unit-conversion-large-unit">
+                            <option value="">-- Đơn vị lớn --</option>
+                            <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                        </select>
+                        <span class="unit-conversion-equals">=</span>
+                        <input type="number" name="conversionQuantities" class="unit-conversion-factor" min="1" placeholder="SL">
+                        <select name="conversionSmallUnitIds" class="unit-conversion-small-unit">
+                            <option value="">-- Đơn vị nhỏ --</option>
+                            <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                        </select>
+                        <button type="button" class="unit-conversion-remove" title="Xóa bước quy đổi">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="unit-conversion-summary">
+                    Nhập đủ các bước quy đổi để hệ thống tự tính tồn kho theo đơn vị nhỏ nhất.
+                </div>
+
+                <ul class="unit-conversion-notes">
+                    <li>Ô nhập đơn vị lớn và đơn vị nhỏ là dropdown chọn từ bảng Unit.</li>
+                    <li>Hệ thống tự động tính và hiển thị dòng tóm tắt ở phía dưới để người dùng kiểm tra lại với thực tế.</li>
+                </ul>
             </div>
 
             <div class="form-group">
                 <label for="notes">Ghi chú</label>
                 <textarea id="notes" name="notes" rows="2" placeholder="Ghi chú thêm nếu có"></textarea>
             </div>
+
+            <div id="drugFormAlert" style="display:none; background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:12px 16px; color:#b91c1c; margin-top:8px; font-size:0.9rem;"><i class="fas fa-exclamation-circle"></i> <span id="drugFormAlertMsg"></span></div>
 
             <div class="form-actions" style="display: flex; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 24px;">
                 <button type="submit" class="btn btn-primary" style="flex: 1;">
@@ -109,6 +175,40 @@
             </div>
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const fields = [
+                        { id: 'drugName', label: 'Tên thuốc' },
+                        { id: 'strength', label: 'Hàm lượng' },
+                        { id: 'strengthUnit', label: 'Đơn vị hàm lượng' },
+                        { id: 'dosageForm', label: 'Dạng bào chế' },
+                        { id: 'routeOfAdministration', label: 'Đường dùng' },
+                        { id: 'subCategoryId', label: 'Phân nhóm thuốc' },
+                        { id: 'manufacturer', label: 'Nhà sản xuất' },
+                        { id: 'countryOfOrigin', label: 'Nước sản xuất' },
+                        { id: 'storageCondition', label: 'Điều kiện bảo quản' },
+                        { id: 'shelfLifeMonths', label: 'Thời hạn sử dụng' },
+                        { id: 'packaging', label: 'Quy cách đóng gói' }
+                    ];
+                    const missing = fields.filter(f => {
+                        const el = document.getElementById(f.id);
+                        return !el || !el.value || el.value.trim() === '';
+                    }).map(f => f.label);
+                    if (missing.length > 0) {
+                        e.preventDefault();
+                        const alertBox = document.getElementById('drugFormAlert');
+                        document.getElementById('drugFormAlertMsg').textContent = 'Vui lòng điền đầy đủ: ' + missing.join(', ');
+                        alertBox.style.display = 'block';
+                        alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return false;
+                    }
+                });
+            }
+        });
+    </script>
 
     <script th:src="@{/js/pharmacist/drug-form.js}"></script>
 </main>

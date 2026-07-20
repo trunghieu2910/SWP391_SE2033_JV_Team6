@@ -20,7 +20,9 @@ function toggleDrugStatus(drugId, currentStatus) {
         fetch(`/pharmacist/drug-status/${drugId}?status=${newStatus}`, {
             method: 'POST',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                [document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN']:
+                    document.querySelector('meta[name="_csrf"]')?.content || ''
             }
         })
         .then(response => response.json())

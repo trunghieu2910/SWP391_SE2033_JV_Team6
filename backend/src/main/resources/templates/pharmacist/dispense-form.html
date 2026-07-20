@@ -1,17 +1,24 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Cấp phát thuốc', 'dispense')}">
 <body>
 <main>
     <div class="container">
+        <!-- Error handling if detail is null -->
+        <div th:if="${detail == null}" style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 16px; border-radius: 4px; margin-bottom: 20px;">
+            <strong>Lỗi:</strong> Không tìm thấy thông tin chi tiết đơn thuốc. 
+            <a href="/pharmacist/dispense-list" class="btn btn-secondary" style="margin-top: 10px; display: inline-block;">Quay lại danh sách</a>
+        </div>
+
+        <th:block th:if="${detail != null}">
         <header class="page-header" style="margin-bottom: 24px;">
-            <a href="/pharmacist/dispense-list" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Quay lại danh sách
+            <a th:href="@{/pharmacist/dispense-prescription/{id}(id=${detail.prescriptionId})}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại chi tiết đơn thuốc
             </a>
         </header>
 
         <!-- Prescription Info Grid Card -->
-        <section class="prescription-info card" th:if="${detail}" style="margin-bottom: 24px;">
+        <section class="prescription-info card" style="margin-bottom: 24px;">
             <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px;">
                 <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--neutral-dark);">Chi tiết đơn thuốc kê đơn</h2>
             </div>
@@ -52,13 +59,17 @@
         <form th:action="@{/pharmacist/drug-dispense}" method="post" class="form-container" style="max-width: 600px; margin: 0 auto;">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <input type="hidden" name="detailId" th:value="${detail?.detailId}">
-            <input type="hidden" id="drugId" th:value="${detail?.drugId}">
+            <input type="hidden" id="drugId" name="drugIdField" th:value="${detail?.drugId}" th:data-drug-id="${detail?.drugId}">
+
+            <!-- Debug: Show drugId value -->
+            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px; margin-bottom: 16px; border-radius: 4px; display: none;" id="debugInfo">
+                <small>DEBUG: drugId = <span id="debugDrugId">loading...</span></small>
+            </div>
 
             <div class="form-group">
                 <label for="batchId">Chọn lô hàng còn hạn & còn hàng *</label>
                 <select id="batchId" name="batchId" required onchange="updateBatchInfo()">
-                    <option value="">-- Chọn lô hàng --</option>
-                    <!-- Options will be populated by JavaScript -->
+                    <option value="">-- Đang tải dữ liệu --</option>
                 </select>
             </div>
 
@@ -92,11 +103,12 @@
                 <button type="submit" class="btn btn-primary" style="flex: 1;">
                     <i class="fas fa-check-circle"></i> Xác nhận cấp phát
                 </button>
-                <a href="/pharmacist/dispense-list" class="btn btn-secondary" style="flex: 1; text-align: center;">
+                <a th:href="@{/pharmacist/dispense-prescription/{id}(id=${detail.prescriptionId})}" class="btn btn-secondary" style="flex: 1; text-align: center;">
                     Hủy bỏ
                 </a>
             </div>
         </form>
+        </th:block>
     </div>
 
     <script th:src="@{/js/pharmacist/dispense-form.js}"></script>
