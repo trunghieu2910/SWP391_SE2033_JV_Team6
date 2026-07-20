@@ -28,6 +28,14 @@
             <i class="fa-solid fa-user-plus"></i>
             <span>Tạo tài khoản bệnh nhân</span>
         </a>
+        <a th:href="@{/receptionist/doctor-workload}" class="nav-item" th:classappend="${currentTab == 'doctor-workload' ? 'active' : ''}">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>Theo dõi ca bác sĩ</span>
+        </a>
+        <a th:href="@{/receptionist/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
+            <i class="fa-solid fa-user-circle"></i>
+            <span>Hồ sơ cá nhân</span>
+        </a>
     </nav>
 
     <!-- User Profile & Logout -->

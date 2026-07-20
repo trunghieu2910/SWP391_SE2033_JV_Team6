@@ -201,5 +201,23 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     List<DiagnosisSession> findByStatusOrderByCreatedAtDesc(DiagnosisSessionStatus status);
     
     List<DiagnosisSession> findByStatusInOrderByCreatedAtDesc(List<DiagnosisSessionStatus> statuses);
+
+    // [Nguyen The Hieu]: Bước 1 - Repository: Đếm số ca khám của một bác sĩ dựa theo một trạng thái (status) cụ thể.
+    long countByUserUserIdAndStatus(Integer userId, DiagnosisSessionStatus status);
+
+    // [Nguyen The Hieu]: Bước 1 - Repository: Lấy danh sách ca khám của một bác sĩ.
+    // Hỗ trợ bộ lọc theo khoảng thời gian (startDate, endDate) và phân trang (Pageable) cho màn hình chi tiết.
+    @Query("SELECT ds FROM DiagnosisSession ds " +
+            "LEFT JOIN FETCH ds.patient p " +
+            "LEFT JOIN FETCH p.user pu " +
+            "WHERE ds.user.userId = :doctorId " +
+            "AND (:startDate IS NULL OR ds.createdAt >= :startDate) " +
+            "AND (:endDate IS NULL OR ds.createdAt <= :endDate) " +
+            "ORDER BY ds.createdAt DESC")
+    Page<DiagnosisSession> findByDoctorIdWithDateFilter(
+            @Param("doctorId") Integer doctorId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
 }
 
