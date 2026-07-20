@@ -7,7 +7,9 @@ import com.mycompany.jpademo.backend.dto.response.DoctorSessionDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.DoctorSessionResponse;
 import com.mycompany.jpademo.backend.dto.response.SymptomResponse;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
+import com.mycompany.jpademo.backend.repository.DiseaseTypeRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
+import com.mycompany.jpademo.backend.service.interfaces.DiseaseTypeService;
 import com.mycompany.jpademo.backend.service.interfaces.DoctorDiagnosisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import java.util.List;
 public class DoctorDiagnosisController {
 
     private final DoctorDiagnosisService doctorDiagnosisService;
+    private final DiseaseTypeService diseaseTypeService;
 
     @GetMapping
     public String getMySessions(
@@ -69,6 +72,7 @@ public class DoctorDiagnosisController {
         DoctorSessionDetailResponse sessionDetail = doctorDiagnosisService.getSessionDetail(sessionId, doctorId);
         model.addAttribute("sessionDetail", sessionDetail);
         model.addAttribute("statuses", DiagnosisSessionStatus.values());
+        model.addAttribute("diseaseTypes", diseaseTypeService.getAllDiseaseTypes());
         return "doctor/session-detail";
     }
 

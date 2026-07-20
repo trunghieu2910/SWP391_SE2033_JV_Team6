@@ -1,6 +1,7 @@
 package com.mycompany.jpademo.backend.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -10,8 +11,8 @@ import lombok.*;
 @NoArgsConstructor
 public class CreateReviewRequest {
 
-    @NotBlank(message = "Kết luận chẩn đoán không được để trống")
-    private String finalDiagnosis;
+    @NotNull(message = "Vui lòng chọn loại bệnh")
+    private Integer diseaseTypeId;
 
     @NotBlank(message = "Kế hoạch điều trị không được để trống")
     private String treatmentPlan;

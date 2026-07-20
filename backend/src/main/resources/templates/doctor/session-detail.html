@@ -159,15 +159,15 @@
                     <form th:action="@{/doctor/sessions/{id}/review(id=${sessionDetail.sessionId})}" method="post">
                         <div style="display: flex; flex-direction: column; gap: 18px;">
                             <div class="form-group">
-                                <label>
-                                    Kết luận chẩn đoán cuối cùng
-                                    <span class="required">*</span>
-                                    <span class="label-hint">(quan trọng nhất)</span>
-                                </label>
-                                <textarea name="finalDiagnosis" class="form-control" rows="3" required placeholder="Nhập chẩn đoán cuối cùng..."
-                                          th:if="${sessionDetail.review != null}" th:text="${sessionDetail.review.finalDiagnosis}"></textarea>
-                                <textarea name="finalDiagnosis" class="form-control" rows="3" required placeholder="Nhập chẩn đoán cuối cùng..."
-                                          th:if="${sessionDetail.review == null}"></textarea>
+                                <label class="form-label" for="diseaseTypeId">Loại bệnh <span class="required">*</span></label>
+                                <select id="diseaseTypeId" name="diseaseTypeId" class="form-input select-rounded" required>
+                                    <option value="" disabled th:selected="${sessionDetail.review == null}">Chọn loại bệnh</option>
+                                    <option th:each="dt : ${diseaseTypes}"
+                                            th:value="${dt.diseaseTypeId}"
+                                            th:text="${dt.name}"
+                                            th:selected="${sessionDetail.review != null and sessionDetail.review.diseaseTypeId == dt.diseaseTypeId}">
+                                    </option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>

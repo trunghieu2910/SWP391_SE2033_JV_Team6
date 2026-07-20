@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class ReviewResponse {
     private Integer reviewId;
     private Integer sessionId;
+    private Integer diseaseTypeId;
     private String finalDiagnosis;
     private String treatmentPlan;
     private String doctorAdvice;

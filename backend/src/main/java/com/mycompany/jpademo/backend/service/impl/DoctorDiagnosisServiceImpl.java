@@ -41,6 +41,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     private final MedicalImageRepository medicalImageRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final DiseaseTypeRepository diseaseTypeRepository;
 
     private static final String MESSAGE = "Ca chẩn đoán không tìm thấy với ID: ";
 
@@ -296,7 +297,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             review.setUser(doctor);
         }
 
-        review.setFinalDiagnosis(request.getFinalDiagnosis());
+        DiseaseType diseaseType = diseaseTypeRepository.findById(request.getDiseaseTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy loại bệnh"));
+        review.setDiseaseType(diseaseType);
         review.setTreatmentPlan(request.getTreatmentPlan());
         review.setDoctorAdvice(request.getDoctorAdvice());
         review.setNote(request.getNote());
@@ -350,7 +353,8 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             reviewResponse = ReviewResponse.builder()
                     .reviewId(review.getReviewId())
                     .sessionId(review.getDiagnosisSession().getSessionId())
-                    .finalDiagnosis(review.getFinalDiagnosis())
+                    .diseaseTypeId(review.getDiseaseType() != null ? review.getDiseaseType().getDiseaseTypeId() : null)
+                    .finalDiagnosis(review.getDiseaseType() != null ? review.getDiseaseType().getName() : null)
                     .treatmentPlan(review.getTreatmentPlan())
                     .doctorAdvice(review.getDoctorAdvice())
                     .note(review.getNote())

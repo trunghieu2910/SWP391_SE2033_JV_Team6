@@ -19,9 +19,6 @@ public class Review {
     @Column(name = "reviewID")
     private Integer reviewId;
 
-    @Column(name = "finalDiagnosis", nullable = false)
-    private String finalDiagnosis;
-
     @Column(name = "treatmentPlan", nullable = false)
     private String treatmentPlan;
 
@@ -42,4 +39,8 @@ public class Review {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID", nullable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "diseaseTypeID", nullable = false)
+    private DiseaseType diseaseType;
 }

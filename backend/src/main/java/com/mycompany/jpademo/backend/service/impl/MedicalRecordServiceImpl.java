@@ -240,7 +240,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             }
 
             if (canSeeDiagnosis) {
-                detail.setFinalDiagnosis(r.getFinalDiagnosis());
+                detail.setFinalDiagnosis(r.getDiseaseType() != null ? r.getDiseaseType().getName() : "Đang chờ bác sĩ công bố...");
             } else {
                 detail.setFinalDiagnosis("Đang chờ bác sĩ công bố...");
             }

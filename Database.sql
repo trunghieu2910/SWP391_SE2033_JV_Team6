@@ -168,18 +168,24 @@ CREATE TABLE MedicalImageDetails
 -- ==========================================
 -- 4. REVIEW BÁC SĨ
 -- ==========================================
+CREATE TABLE DiseaseType (
+    diseaseTypeID INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL
+);
+
 CREATE TABLE Review
 (
     reviewID       INT IDENTITY (1,1) PRIMARY KEY,
     sessionID      INT UNIQUE NOT NULL,
     userID         INT        NOT NULL, 
-    finalDiagnosis NVARCHAR(MAX),
+    diseaseTypeID  INT		  NULL,
     treatmentPlan  NVARCHAR(MAX),
     doctorAdvice   NVARCHAR(MAX),
     note           NVARCHAR(MAX),
     reviewedAt     DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (sessionID) REFERENCES DiagnosisSession (sessionID),
-    FOREIGN KEY (userID) REFERENCES [Users] (userID)
+    FOREIGN KEY (userID) REFERENCES [Users] (userID),
+	FOREIGN KEY (diseaseTypeID) REFERENCES DiseaseType(diseaseTypeID)
 );
 
 -- ==========================================
@@ -239,8 +245,8 @@ VALUES
 (4, 'patient_huong', N'Nguyễn Thu Hương', 'huong.nguyen@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0905556677', 'ACTIVE', GETDATE(), '056789012345'),
 (4, 'patient_lan', N'Trần Thị Lan', 'lan.tran@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0906667788', 'PENDING', GETDATE(), '067890123456'),
 (4, 'patient_my', N'Đỗ Thanh Mỹ', 'my.do@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907778899', 'BANNED', GETDATE(), '078901234567'),
-(5, 'rp_linh', N'Nguyễn Thị Huyền Linh', 'LinhNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887776', 'ACTIVE', GETDATE(), '098765432109');
-(5, 'rp_ly', N'Nguyễn Thị Ly', 'LyNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887676', 'ACTIVE', GETDATE(), '098765432009');
+(5, 'rp_linh', N'Nguyễn Thị Huyền Linh', 'LinhNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887776', 'ACTIVE', GETDATE(), '098765432109'),
+(5, 'rp_ly', N'Nguyễn Thị Ly', 'LyNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887676', 'ACTIVE', GETDATE(), '098765432009'),
 (5, 'rp_hong', N'Hong Hae In', 'HongHaeIn@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887775', 'ACTIVE', GETDATE(), '098765032109');
 
 -- PATIENT (Sửa lại trường liên kết userID cho đúng logic phân quyền)
@@ -321,10 +327,20 @@ INSERT INTO MedicalImageDetails (medicalImageID, imageUrl)
 VALUES
     (1, 'https://storage.hospital.com/xray/2026/session1_lung.jpg');
 
+INSERT INTO DiseaseType (name) VALUES
+(N'Bình thường / Không phát hiện bất thường'),
+(N'Viêm cổ tử cung'),
+(N'Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1)'),
+(N'Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3)'),
+(N'Ung thư biểu mô tại chỗ (CIS)'),
+(N'Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II)'),
+(N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)'),
+(N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận');
+
 -- Review
-INSERT INTO Review (sessionID, userID, finalDiagnosis, treatmentPlan, doctorAdvice, note)
+INSERT INTO Review (sessionID, userID, treatmentPlan, doctorAdvice, note)
 VALUES
-    (1, 3, N'Viêm phế quản cấp tính', N'Kê đơn kháng sinh 5 ngày, siro ho', N'Tránh nước đá, giữ ấm cổ họng', N'Bệnh nhân có tiền sử dị ứng thời tiết');
+    (1, 3, N'Kê đơn kháng sinh 5 ngày, siro ho', N'Tránh nước đá, giữ ấm cổ họng', N'Bệnh nhân có tiền sử dị ứng thời tiết');
 
 -- SystemLog
 INSERT INTO SystemLog (userID, targetType, targetID, action, description)
