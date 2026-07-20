@@ -13,17 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 4500);
     });
 
-    // ===== CERTIFICATE VIEWER =====
-    const certificateLinks = document.querySelectorAll('.btn-view');
-    certificateLinks.forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const url = this.getAttribute('href');
-            if (url) {
-                window.open(url, '_blank');
-            }
-        });
-    });
 
     // ===== TIMELINE ITEMS HOVER EFFECT =====
     const timelineItems = document.querySelectorAll('.timeline-item');

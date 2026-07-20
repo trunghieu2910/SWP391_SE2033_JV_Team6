@@ -11,10 +11,7 @@ import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
-import com.mycompany.jpademo.backend.exception.DuplicateResourceException;
-import com.mycompany.jpademo.backend.exception.InvalidOtpException;
-import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
-import com.mycompany.jpademo.backend.exception.UserNotFoundException;
+import com.mycompany.jpademo.backend.exception.*;
 import com.mycompany.jpademo.backend.repository.*;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
@@ -22,18 +19,24 @@ import com.mycompany.jpademo.backend.util.EmailUtil;
 import com.mycompany.jpademo.backend.util.OtpUtil;
 import com.mycompany.jpademo.backend.cache.PendingDoctorData;
 import com.mycompany.jpademo.backend.cache.PendingDoctorStore;
+import com.mycompany.jpademo.backend.util.SecureFileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -234,21 +237,15 @@ public class AdminServiceImpl implements AdminService {
         }
 
         String requestId = UUID.randomUUID().toString();
-        String certificateUrl = null;
+        String certificateStoredFileName = null;
         if (request.getCertificateFile() != null && !request.getCertificateFile().isEmpty()) {
             try {
-                String userDir = System.getProperty("user.dir");
-                String uploadDir = userDir + File.separator + "uploads" + File.separator + "certificates" + File.separator;
+                certificateStoredFileName = SecureFileUploadUtil.validateAndGenerateSafeFileName(request.getCertificateFile());
+                Path uploadDir = Paths.get(System.getProperty("user.dir"), "secure-uploads", "certificates");
+                Files.createDirectories(uploadDir);
 
-                File directory = new File(uploadDir);
-                if (!directory.exists()) {
-                    directory.mkdirs();
-                }
-
-                String fileName = System.currentTimeMillis() + "_" + request.getCertificateFile().getOriginalFilename();
-                String filePath = uploadDir + fileName;
-                request.getCertificateFile().transferTo(new File(filePath));
-                certificateUrl = "/uploads/certificates/" + fileName;
+                Path target = SecureFileUploadUtil.resolveSafely(uploadDir, certificateStoredFileName);
+                request.getCertificateFile().transferTo(target);
             } catch (IOException e) {
                 throw new RuntimeException("Không thể lưu file bằng cấp: " + e.getMessage());
             }
@@ -261,7 +258,7 @@ public class AdminServiceImpl implements AdminService {
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .nationalId(request.getNationalId())
-                .certificateUrl(certificateUrl)
+                .certificateUrl(certificateStoredFileName)
                 .build();
         PendingDoctorStore.savePending(adminEmail, pending);
 
@@ -455,6 +452,37 @@ public class AdminServiceImpl implements AdminService {
     public User getAdminUser() {
         return userRepository.findFirstByRoleRoleName(RoleName.ADMIN)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy admin trong hệ thống"));
+    }
+
+    @Override
+    public CertificateFileResponse getDoctorCertificate(Integer userId) {
+        User doctor = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng."));
+
+        if (!RoleName.DOCTOR.equals(doctor.getRole().getRoleName())) {
+            throw new BadRequestException("Người dùng này không có chứng chỉ hành nghề.");
+        }
+
+        String storedFileName = doctor.getCertificateUrl();
+        if (storedFileName == null) {
+            throw new ResourceNotFoundException("Người dùng này chưa có file chứng chỉ.");
+        }
+
+        Path certDir = Paths.get(System.getProperty("user.dir"), "secure-uploads", "certificates").normalize();
+        Path filePath = certDir.resolve(storedFileName).normalize();
+
+        if (!filePath.startsWith(certDir) || !Files.exists(filePath)) {
+            throw new ResourceNotFoundException("File không tồn tại.");
+        }
+
+        Resource resource = new FileSystemResource(filePath.toFile());
+
+        String ext = storedFileName.substring(storedFileName.lastIndexOf('.'));
+        return CertificateFileResponse.builder()
+                .resource(resource)
+                .mediaType(resolveSafeMediaType(storedFileName))
+                .displayName("certificate-" + userId + ext)
+                .build();
     }
 
     private List<MonthlyStats> getMonthlyUserRegistrations(LocalDate startDate, LocalDate endDate) {
@@ -699,5 +727,15 @@ public class AdminServiceImpl implements AdminService {
                 .userRegistrations(userRegistrations)
                 .diagnosisSessions(diagnosisSessions)
                 .build();
+    }
+
+    private MediaType resolveSafeMediaType(String storedFileName) {
+        String ext = storedFileName.substring(storedFileName.lastIndexOf('.')).toLowerCase();
+        return switch (ext) {
+            case ".png" -> MediaType.IMAGE_PNG;
+            case ".jpg", ".jpeg" -> MediaType.IMAGE_JPEG;
+            case ".pdf" -> MediaType.APPLICATION_PDF;
+            default -> MediaType.APPLICATION_OCTET_STREAM; // không xảy ra vì đã whitelist lúc upload
+        };
     }
 }

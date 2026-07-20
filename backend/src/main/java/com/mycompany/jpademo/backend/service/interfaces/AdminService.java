@@ -34,4 +34,6 @@ public interface AdminService {
     Map<String, Object> resendOtp(String adminEmail);
 
     User getAdminUser();
+
+    CertificateFileResponse getDoctorCertificate(Integer userId);
 }

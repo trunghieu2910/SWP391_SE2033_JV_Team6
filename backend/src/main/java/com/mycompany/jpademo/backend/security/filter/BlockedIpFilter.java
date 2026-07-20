@@ -2,6 +2,7 @@ package com.mycompany.jpademo.backend.security.filter;
 
 import com.mycompany.jpademo.backend.event.BlockedIpChangeEvent;
 import com.mycompany.jpademo.backend.repository.BlockedIPRepository;
+import com.mycompany.jpademo.backend.security.util.ClientIpResolver;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BlockedIpFilter extends OncePerRequestFilter {
     private final BlockedIPRepository blockedIPRepository;
+    private final ClientIpResolver clientIpResolver;
 
     private volatile Set<String> blockedIpCache = ConcurrentHashMap.newKeySet();
 
@@ -65,7 +67,7 @@ public class BlockedIpFilter extends OncePerRequestFilter {
             return;
         }
 
-        String ipAddress = getClientIp(request);
+        String ipAddress = clientIpResolver.resolve(request);
         if (blockedIpCache.contains(ipAddress)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json;charset=UTF-8");
@@ -73,17 +75,5 @@ public class BlockedIpFilter extends OncePerRequestFilter {
             return;
         }
         filterChain.doFilter(request, response);
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.split(",")[0].trim();
-        }
-        ip = request.getHeader("X-Real-IP");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip;
-        }
-        return request.getRemoteAddr();
     }
 }

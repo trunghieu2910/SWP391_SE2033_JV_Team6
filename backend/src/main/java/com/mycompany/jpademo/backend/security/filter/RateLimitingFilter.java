@@ -1,6 +1,7 @@
 package com.mycompany.jpademo.backend.security.filter;
 
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
+import com.mycompany.jpademo.backend.security.util.ClientIpResolver;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,13 +27,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RateLimitingFilter extends OncePerRequestFilter {
     private final Map<String, IpAddressCount> requestCache = new ConcurrentHashMap<>();
     private static final int MAX_REQUESTS_PER_MINUTE = 100;
+    private final ClientIpResolver clientIpResolver;
+
+    public RateLimitingFilter(ClientIpResolver clientIpResolver) {
+        this.clientIpResolver = clientIpResolver;
+    }
 
     @Scheduled(fixedRate = 60_000)
     public void cleanupExpiredEntries() {
         long currentMinute = System.currentTimeMillis() / 60000;
         requestCache.entrySet().removeIf(entry -> {
-           IpAddressCount value = entry.getValue();
-           return value != null && (currentMinute - value.minute) > 1;
+            IpAddressCount value = entry.getValue();
+            return value != null && (currentMinute - value.minute) > 1;
         });
     }
 
@@ -49,7 +55,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             return;
         }
 
-        String ipAddress = getClientIp(request);
+        String ipAddress = clientIpResolver.resolve(request);
         long currentMinute = System.currentTimeMillis() / 60000;
 
         IpAddressCount count = requestCache.compute(ipAddress, (k, v) -> {
@@ -100,18 +106,6 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             return;
         }
         filterChain.doFilter(request, response);
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.split(",")[0].trim();
-        }
-        ip = request.getHeader("X-Real-IP");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip;
-        }
-        return request.getRemoteAddr();
     }
 
     private static class IpAddressCount {

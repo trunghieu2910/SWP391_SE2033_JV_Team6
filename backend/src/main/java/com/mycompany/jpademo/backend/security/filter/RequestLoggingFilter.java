@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.security.filter;
 
+import com.mycompany.jpademo.backend.security.util.ClientIpResolver;
 import com.mycompany.jpademo.backend.service.interfaces.LogAsyncService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RequestLoggingFilter extends OncePerRequestFilter {
     private final LogAsyncService logAsyncService;
+    private final ClientIpResolver clientIpResolver;
 
     // Danh sách các extension static resource cần bỏ qua
     private static final List<String> STATIC_EXTENSIONS = Arrays.asList(
@@ -36,7 +38,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
         if (!isStaticResource(uri)) {
             logAsyncService.saveLogAsync(
-                    getClientIp(request),
+                    clientIpResolver.resolve(request),
                     uri,
                     request.getMethod(),
                     request.getHeader("User-Agent")
@@ -59,17 +61,5 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         }
 
         return false;
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.split(",")[0].trim();
-        }
-        ip = request.getHeader("X-Real-IP");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip;
-        }
-        return request.getRemoteAddr();
     }
 }

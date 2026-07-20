@@ -143,6 +143,15 @@
     flex-wrap: wrap;
 }
 
+.certificate-preview {
+    display: none;
+    margin-top: 12px;
+}
+
+.cert-toggle-checkbox:checked ~ .certificate-preview {
+    display: block;
+}
+
 /* Nút Xem */
 .btn-view {
     background: #e0f2fe;

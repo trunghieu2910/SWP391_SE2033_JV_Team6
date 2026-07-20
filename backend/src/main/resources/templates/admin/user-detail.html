@@ -24,14 +24,12 @@
         <div class="profile-main-info">
             <div class="profile-name-row">
                 <h1 class="profile-name-xl" th:text="${user.userResponse.fullName}">Nguyễn Văn A</h1>
-                <!-- VAI TRÒ - ĐÃ MAP -->
                 <span class="role-badge role-lg"
                       th:classappend="${user.userResponse.roleName != null ? 'role-' + user.userResponse.roleName.toString().toLowerCase() : ''}"
                       th:text="${user.userResponse.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
                                user.userResponse.roleName?.name() == 'DOCTOR' ? 'Bác sĩ' :
                                user.userResponse.roleName?.name() == 'PATIENT' ? 'Bệnh nhân' : user.userResponse.roleName}">
                 </span>
-                <!-- TRẠNG THÁI - ĐÃ MAP -->
                 <span class="status-badge status-lg"
                       th:classappend="${user.userResponse.status != null ? 'status-' + user.userResponse.status.toString().toLowerCase() : ''}">
                     <span class="status-dot"></span>
@@ -113,7 +111,6 @@
                 <div class="detail-item">
                     <span class="detail-label"><i class="fa-regular fa-circle-check"></i> Trạng thái</span>
                     <span class="detail-value">
-                        <!-- TRẠNG THÁI - ĐÃ MAP -->
                         <span class="status-badge"
                               th:classappend="${user.userResponse.status != null ? 'status-' + user.userResponse.status.toString().toLowerCase() : ''}">
                             <span class="status-dot"></span>
@@ -127,7 +124,6 @@
                 <div class="detail-item">
                     <span class="detail-label"><i class="fa-solid fa-user-tag"></i> Vai trò</span>
                     <span class="detail-value">
-                        <!-- VAI TRÒ - ĐÃ MAP -->
                         <span class="role-badge"
                               th:classappend="${user.userResponse.roleName != null ? 'role-' + user.userResponse.roleName.toString().toLowerCase() : ''}"
                               th:text="${user.userResponse.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
@@ -153,15 +149,43 @@
             <div class="certificate-info-lg">
                 <h4>Bằng cấp / Chứng chỉ y khoa</h4>
                 <p th:text="${user.userResponse.fullName} + ' - ' + ${user.userResponse.userName}"></p>
-                <div class="certificate-actions">
-                    <a th:href="${user.userResponse.certificateUrl}" target="_blank"
-                       class="btn-action btn-view">
-                        <i class="fa-solid fa-eye"></i> Xem
-                    </a>
-                    <a th:href="${user.userResponse.certificateUrl}" download
-                       class="btn-action btn-download">
-                        <i class="fa-solid fa-download"></i> Tải xuống
-                    </a>
+
+                <input type="checkbox" id="certToggle" class="cert-toggle-checkbox" hidden />
+                <label for="certToggle" class="btn-action btn-view">
+                    <i class="fa-solid fa-eye"></i> Xem
+                </label>
+
+                <div class="certificate-preview" style="margin-top: 16px;">
+                    <div th:if="${#strings.endsWith(user.userResponse.certificateUrl, '.pdf')}" 
+                         class="pdf-preview-container" 
+                         style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; text-align: center; max-width: 480px; margin: 0 auto;">
+                        <div style="font-size: 3rem; color: #ef4444; margin-bottom: 12px;">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </div>
+                        <h5 style="margin: 0 0 8px 0; font-size: 1rem; color: #1e293b; font-weight: 700;">Tệp chứng chỉ định dạng PDF</h5>
+                        <p style="margin: 0 0 18px 0; font-size: 0.85rem; color: #64748b;">Vui lòng mở liên kết dưới đây để xem chi tiết chứng chỉ trong tab mới.</p>
+                        <a th:href="@{'/admin/users/' + ${user.userResponse.userId} + '/certificate'}"
+                           target="_blank"
+                           class="btn-action btn-primary"
+                           style="background-color: #ef4444; border-color: #ef4444; color: #ffffff; text-decoration: none; display: inline-flex; justify-content: center; width: auto; padding: 10px 24px; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);">
+                            <i class="fa-solid fa-up-right-from-square"></i> Xem chi tiết file PDF
+                        </a>
+                    </div>
+
+                    <div th:if="${!#strings.endsWith(user.userResponse.certificateUrl, '.pdf')}" 
+                         class="image-preview-container" 
+                         style="text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; display: inline-block; width: 100%; box-sizing: border-box;">
+                        <a th:href="@{'/admin/users/' + ${user.userResponse.userId} + '/certificate'}" target="_blank" title="Click để phóng to ảnh trong tab mới" style="cursor: zoom-in; display: inline-block;">
+                            <img th:src="@{'/admin/users/' + ${user.userResponse.userId} + '/certificate'}"
+                                 alt="Chứng chỉ hành nghề"
+                                 style="max-width: 100%; max-height: 480px; object-fit: contain; border-radius: 10px; border: 1px solid #cbd5e1; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;"
+                                 onmouseover="this.style.transform='scale(1.01)'; this.style.boxShadow='0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';"
+                                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';" />
+                        </a>
+                        <div style="margin-top: 10px; font-size: 0.8rem; color: #64748b;">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> Click vào ảnh để mở xem ảnh gốc kích thước lớn
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

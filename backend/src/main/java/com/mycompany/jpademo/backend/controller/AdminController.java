@@ -11,8 +11,10 @@ import com.mycompany.jpademo.backend.util.OtpUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -253,5 +255,16 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("error", "Không thể tải chi tiết nhật kí này");
             return "redirect:/admin/logs";
         }
+    }
+
+    @GetMapping("/users/{id}/certificate")
+    public ResponseEntity<Resource> viewDoctorCertificate(@PathVariable Integer id) {
+        CertificateFileResponse certificate = adminService.getDoctorCertificate(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + certificate.getDisplayName() + "\"")
+                .contentType(certificate.getMediaType())
+                .body(certificate.getResource());
     }
 }
