@@ -59,7 +59,7 @@
         <form th:action="@{/pharmacist/drug-dispense}" method="post" class="form-container" style="max-width: 600px; margin: 0 auto;">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <input type="hidden" name="detailId" th:value="${detail?.detailId}">
-            <input type="hidden" id="drugId" name="drugIdField" th:value="${detail?.drugId}" data-drug-id="${detail?.drugId}">
+            <input type="hidden" id="drugId" name="drugIdField" th:value="${detail?.drugId}" th:data-drug-id="${detail?.drugId}">
 
             <!-- Debug: Show drugId value -->
             <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px; margin-bottom: 16px; border-radius: 4px; display: none;" id="debugInfo">

@@ -14,6 +14,52 @@ function initializeDrugList() {
             }
         });
     }
+
+    initializeDrugStatusFilter();
+}
+
+function initializeDrugStatusFilter() {
+    const statusFilter = document.getElementById('drugStatusFilter');
+    if (!statusFilter) return;
+
+    statusFilter.addEventListener('change', applyDrugStatusFilter);
+    applyDrugStatusFilter();
+}
+
+function applyDrugStatusFilter() {
+    const statusFilter = document.getElementById('drugStatusFilter');
+    const tableBody = document.getElementById('drugListTableBody');
+    const emptyRow = document.getElementById('drugListEmptyRow');
+    if (!statusFilter || !tableBody) return;
+
+    const selectedStatus = statusFilter.value;
+    const rows = Array.from(tableBody.querySelectorAll('tr'))
+        .filter(row => row.id !== 'drugListEmptyRow' && row.querySelectorAll('td').length === 6);
+
+    let visibleCount = 0;
+    rows.forEach(row => {
+        const statusText = normalizeDrugListText(row.querySelector('td:last-child')?.textContent || '');
+        const isInactive = statusText.includes('ngung');
+        const isActive = statusText.includes('dang dung');
+        const visible = !selectedStatus ||
+            (selectedStatus === 'active' && isActive) ||
+            (selectedStatus === 'inactive' && isInactive);
+
+        row.style.display = visible ? '' : 'none';
+        if (visible) visibleCount++;
+    });
+
+    if (emptyRow) {
+        emptyRow.style.display = rows.length > 0 && visibleCount === 0 ? '' : 'none';
+    }
+}
+
+function normalizeDrugListText(value) {
+    return value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
 }
 
 function editDrug(drugId) {

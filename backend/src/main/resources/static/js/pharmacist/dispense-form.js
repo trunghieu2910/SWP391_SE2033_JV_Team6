@@ -49,20 +49,28 @@ function loadBatches() {
 
     let drugId = null;
     
-    // Try multiple ways to get drugId
+    // Try multiple ways to get drugId - in order of preference
     if (drugIdInput) {
-        // Try value attribute
-        drugId = drugIdInput.value || drugIdInput.getAttribute('value');
-        console.log('drugId from value:', drugId);
+        // Try value attribute first (from Thymeleaf th:value)
+        if (drugIdInput.value) {
+            drugId = drugIdInput.value;
+            console.log('drugId from value attribute:', drugId);
+        }
         
-        // Try data attribute
-        if (!drugId || drugId === '') {
+        // Try data attribute (from Thymeleaf th:data-drug-id)
+        if (!drugId || drugId === '' || drugId === 'null') {
             drugId = drugIdInput.getAttribute('data-drug-id');
-            console.log('drugId from data attribute:', drugId);
+            console.log('drugId from data-drug-id attribute:', drugId);
+        }
+        
+        // Last resort - try direct attribute
+        if (!drugId || drugId === '' || drugId === 'null') {
+            drugId = drugIdInput.getAttribute('value');
+            console.log('drugId from getAttribute(value):', drugId);
         }
     }
     
-    drugId = drugId ? drugId.trim() : null;
+    drugId = drugId ? String(drugId).trim() : null;
     
     console.log('Final drugId extracted:', drugId);
     console.log('drugId type:', typeof drugId);
@@ -108,10 +116,25 @@ function loadBatches() {
 
             if (!batches || !Array.isArray(batches) || batches.length === 0) {
                 console.info('No batches available for this drug');
-                const opt = document.createElement('option');
-                opt.disabled = true;
-                opt.textContent = 'Không có lô hàng khả dụng';
-                batchSelect.appendChild(opt);
+                batchSelect.innerHTML = '';
+                const opt1 = document.createElement('option');
+                opt1.value = '';
+                opt1.disabled = true;
+                opt1.selected = true;
+                opt1.textContent = 'Không có lô hàng khả dụng (hết hàng hoặc hết hạn)';
+                batchSelect.appendChild(opt1);
+                
+                const opt2 = document.createElement('option');
+                opt2.disabled = true;
+                opt2.textContent = '─────────────────────────────';
+                batchSelect.appendChild(opt2);
+                
+                const opt3 = document.createElement('option');
+                opt3.disabled = true;
+                opt3.textContent = 'Vui lòng kiểm tra lịch sử nhập kho';
+                batchSelect.appendChild(opt3);
+                
+                console.warn('No active batches found for drugId=' + drugId + '. Check: 1) quantityInStock > 0, 2) batch.status = 1, 3) expiryDate >= TODAY');
                 return;
             }
 

@@ -73,7 +73,13 @@
                 <p th:text="${#strings.isEmpty(batch.notes) ? 'Không có ghi chú' : batch.notes}" style="font-size: 0.95rem; color: var(--neutral-dark); margin: 0; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);"></p>
             </div>
 
-            <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; gap: 12px;">
+            <div th:if="${batch.drugStatus == 0}" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <div style="background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
+                    <i class="fas fa-exclamation-circle"></i> không được chỉnh sửa: lô hàng có thuốc đã ngưng sử dụng
+                </div>
+            </div>
+            
+            <div th:if="${batch.drugStatus != 0}" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; gap: 12px;">
                 <button type="button" class="btn btn-warning" onclick="showEditForm()">
                     <i class="fas fa-edit"></i> Chỉnh sửa thông tin lô hàng
                 </button>
