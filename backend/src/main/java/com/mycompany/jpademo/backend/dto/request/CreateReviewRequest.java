@@ -11,8 +11,10 @@ import lombok.*;
 @NoArgsConstructor
 public class CreateReviewRequest {
 
-    @NotNull(message = "Vui lòng chọn loại bệnh")
-    private Integer diseaseTypeId;
+    @NotBlank(message = "Vui lòng chọn loại bệnh")
+    private String diseaseTypeSelection; // giá trị là ID (dạng chuỗi số) hoặc "NEW"
+
+    private String newDiseaseTypeName; // chỉ dùng khi diseaseTypeSelection == "NEW"
 
     @NotBlank(message = "Kế hoạch điều trị không được để trống")
     private String treatmentPlan;

@@ -287,18 +287,39 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             throw new UnauthorizedActionException("Bạn không có quyền cập nhật ca chẩn đoán này.");
         }
 
-        Review review = session.getReview();
-        if (review == null) {
-            User doctor = userRepository.findById(doctorId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ"));
-
-            review = new Review();
-            review.setDiagnosisSession(session);
-            review.setUser(doctor);
+        if (session.getReview() != null) {
+            throw new IllegalStateException("Ca chẩn đoán này đã có kết luận và không thể chỉnh sửa lại.");
         }
 
-        DiseaseType diseaseType = diseaseTypeRepository.findById(request.getDiseaseTypeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy loại bệnh"));
+        User doctor = userRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ"));
+
+        Review review = new Review();
+        review.setDiagnosisSession(session);
+        review.setUser(doctor);
+
+        DiseaseType diseaseType;
+        if ("NEW".equals(request.getDiseaseTypeSelection())) {
+            String newName = request.getNewDiseaseTypeName();
+            if (newName == null || newName.isBlank()) {
+                throw new IllegalArgumentException("Vui lòng nhập tên loại bệnh mới");
+            }
+            String trimmedName = newName.trim();
+            diseaseType = diseaseTypeRepository.findByNameIgnoreCase(trimmedName)
+                    .orElseGet(() -> diseaseTypeRepository.save(
+                            DiseaseType.builder().name(trimmedName).build()
+                    ));
+        } else {
+            Integer diseaseTypeId;
+            try {
+                diseaseTypeId = Integer.parseInt(request.getDiseaseTypeSelection());
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Loại bệnh không hợp lệ");
+            }
+            diseaseType = diseaseTypeRepository.findById(diseaseTypeId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy loại bệnh"));
+        }
+
         review.setDiseaseType(diseaseType);
         review.setTreatmentPlan(request.getTreatmentPlan());
         review.setDoctorAdvice(request.getDoctorAdvice());

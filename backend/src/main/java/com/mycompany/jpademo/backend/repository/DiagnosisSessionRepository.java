@@ -91,12 +91,18 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%')) " +
             "  AND (:status IS NULL OR s.status = :status) " +
             "  AND (:isShared IS NULL OR s.isShared = :isShared) " +
+            "  AND (:diseaseType IS NULL OR dt.name = :diseaseType) " +
+            "  AND (:startDate IS NULL OR r.reviewedAt >= :startDate) " +
+            "  AND (:endDate IS NULL OR r.reviewedAt <= :endDate) " +
             "ORDER BY s.createdAt DESC",
             nativeQuery = true)
     List<Map<String, Object>> getMedicalRecords(
             @Param("keyword") String keyword,
             @Param("status") String status,
-            @Param("isShared") Boolean isShared);
+            @Param("isShared") Boolean isShared,
+            @Param("diseaseType") String diseaseType,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);       
 
     @Query(value = """
     SELECT ds.* FROM DiagnosisSession ds

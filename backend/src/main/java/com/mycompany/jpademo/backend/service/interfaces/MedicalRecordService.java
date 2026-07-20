@@ -4,6 +4,8 @@ import com.mycompany.jpademo.backend.dto.response.MedicalRecordDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.MedicalRecordResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface MedicalRecordService {
@@ -11,6 +13,9 @@ public interface MedicalRecordService {
             String keyword,
             String status,
             Boolean isShared,
+            String diseaseType,
+            LocalDateTime startDate,   
+            LocalDateTime endDate,
             Pageable pageable);
 
 

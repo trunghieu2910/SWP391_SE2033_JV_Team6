@@ -51,6 +51,9 @@
         <form method="get" th:action="@{/doctor/medical-records}" class="search-row">
             <!-- giữ lại selectedStatus khi submit tìm kiếm -->
             <input type="hidden" name="status" th:value="${selectedStatus}"/>
+            <input type="hidden" name="diseaseType" th:value="${selectedDiseaseType}"/>
+            <input type="hidden" name="startDate" th:value="${selectedStartDate}"/>
+            <input type="hidden" name="endDate" th:value="${selectedEndDate}"/>
             <div class="search-field">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
                 <input id="searchInput"
@@ -62,6 +65,21 @@
             </div>
             <button type="submit" class="btn-search"><i class="fa-solid fa-search"></i> Tìm kiếm</button>
         </form>
+
+        <div th:if="${selectedDiseaseType != null and !selectedDiseaseType.isEmpty()}" class="disease-filter-bar">
+            <div class="disease-filter-info">
+                <span>Đang lọc theo loại chẩn đoán:</span>
+                <span class="disease-filter-tag" th:text="${selectedDiseaseType}"></span>
+                <span th:if="${selectedStartDate != null}" class="disease-filter-tag disease-filter-date">
+                    <span th:text="${#temporals.format(selectedStartDate, 'dd/MM/yyyy')}"></span>
+                    —
+                    <span th:text="${#temporals.format(selectedEndDate, 'dd/MM/yyyy')}"></span>
+                </span>
+            </div>
+            <a th:href="@{/doctor/medical-records}" class="disease-filter-clear">
+                Xoá lọc
+            </a>
+        </div>
 
         <div class="filter-row">
             <!-- Filter buttons -->

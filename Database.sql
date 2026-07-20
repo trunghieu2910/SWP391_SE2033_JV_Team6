@@ -170,7 +170,9 @@ CREATE TABLE MedicalImageDetails
 -- ==========================================
 CREATE TABLE DiseaseType (
     diseaseTypeID INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(255) NOT NULL
+    name NVARCHAR(255) NOT NULL,
+
+    CONSTRAINT UQ_DiseaseType_Name UNIQUE (name)
 );
 
 CREATE TABLE Review

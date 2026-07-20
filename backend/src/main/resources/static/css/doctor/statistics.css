@@ -215,3 +215,11 @@
     opacity: 1;
     color: #100357;
 }
+
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+.clickable-row:hover {
+    background-color: #f8f9ff;
+}

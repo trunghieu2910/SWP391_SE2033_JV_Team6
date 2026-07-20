@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Controller
 @RequestMapping("/doctor/medical-records")
@@ -46,16 +51,24 @@ public class DoctorMedicalRecordViewController {
     public String listMedicalRecords(
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(required = false, defaultValue = "") String status,
+            @RequestParam(required = false, defaultValue = "") String diseaseType,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,  // ← THÊM
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,    // ← THÊM
             @RequestParam(defaultValue = "0") int page,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
-        String keywordParam = keyword.isBlank() ? null : keyword.trim();
-        String statusParam  = status.isBlank()  ? null : status.trim();
+        String keywordParam     = keyword.isBlank() ? null : keyword.trim();
+        String statusParam      = status.isBlank()  ? null : status.trim();
+        String diseaseTypeParam = diseaseType.isBlank() ? null : diseaseType.trim();
+
+        // Chuyển LocalDate -> LocalDateTime giống hệt cách DoctorStatisticsController đang làm
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime   = endDate   != null ? endDate.atTime(LocalTime.MAX) : null;
 
         Pageable pageable = PageRequest.of(page, DEFAULT_PAGE_SIZE, Sort.by("createdAt").descending());
-        Page<MedicalRecordResponse> recordPage =
-                medicalRecordService.getMedicalRecords(keywordParam, statusParam, null, pageable);
+        Page<MedicalRecordResponse> recordPage = medicalRecordService.getMedicalRecords(
+                keywordParam, statusParam, null, diseaseTypeParam, startDateTime, endDateTime, pageable);
 
         long completedCount = recordPage.getContent().stream()
                 .filter(r -> r.getStatus() != null && "COMPLETED".equals(r.getStatus().name()))
@@ -77,6 +90,9 @@ public class DoctorMedicalRecordViewController {
         model.addAttribute("completedCount",     completedCount);
         model.addAttribute("pendingCount",       pendingCount);
         model.addAttribute("withDiagnosisCount", withDiagnosisCount);
+        model.addAttribute("selectedDiseaseType", diseaseType);
+        model.addAttribute("selectedStartDate", startDate);
+        model.addAttribute("selectedEndDate", endDate);
         
         if (userDetails != null && userDetails.getUser() != null) {
             model.addAttribute("doctorName", userDetails.getUser().getFullName());

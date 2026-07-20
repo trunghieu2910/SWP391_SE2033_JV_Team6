@@ -130,6 +130,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================
+    // REVIEW FORM - CONFIRM WITH SHARED MODAL
+    // ============================================
+    const reviewForm = document.getElementById('reviewForm');
+    const reviewSubmitBtn = document.getElementById('reviewSubmitBtn');
+
+    if (reviewForm && reviewSubmitBtn) {
+        reviewSubmitBtn.addEventListener('click', function() {
+            if (!reviewForm.reportValidity()) return; // để trình duyệt tự báo thiếu trường required
+
+            confirmModalTitle.textContent = 'Xác nhận lưu kết luận';
+            confirmModalMessage.textContent =
+                'Sau khi lưu, kết luận này sẽ KHÔNG THỂ chỉnh sửa lại. Bạn có chắc chắn muốn lưu?';
+
+            confirmModalOkBtn.onclick = function() {
+                const csrf = getCsrfToken();
+                let csrfInput = reviewForm.querySelector('input[name="_csrf"]');
+                if (!csrfInput) {
+                    csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_csrf';
+                    reviewForm.appendChild(csrfInput);
+                }
+                csrfInput.value = csrf.token;
+
+                reviewForm.submit();
+                closeConfirmModal();
+            };
+
+            openConfirmModal();
+        });
+    }
+
+    // ============================================
     // CONFIRM MODAL FUNCTIONS
     // ============================================
     function openConfirmModal() {
@@ -505,3 +538,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('🚀 Doctor Session Detail page loaded');
 });
+
+function toggleNewDiseaseTypeInput(selectEl) {
+    const group = document.getElementById('newDiseaseTypeNameGroup');
+    const input = document.getElementById('newDiseaseTypeName');
+    if (selectEl.value === 'NEW') {
+        group.style.display = 'block';
+        input.required = true;
+        selectEl.setAttribute('data-selected-new', 'true');
+    } else {
+        group.style.display = 'none';
+        input.required = false;
+        input.value = '';
+        selectEl.removeAttribute('data-selected-new');
+    }
+}

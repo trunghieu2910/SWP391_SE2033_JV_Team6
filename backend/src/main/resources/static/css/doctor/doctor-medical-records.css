@@ -738,3 +738,82 @@ a { text-decoration: none; color: inherit; }
     font-weight: 700;
     color: var(--primary);
 }
+
+.disease-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: var(--primary-light);
+    border: 1px solid var(--primary-ring);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    margin: 14px 0;
+    animation: fadeInUp .3s ease both;
+}
+
+.disease-filter-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--text-secondary);
+}
+
+.disease-filter-info i {
+    color: var(--primary);
+    font-size: 13px;
+}
+
+.disease-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--surface);
+    color: var(--primary);
+    border: 1px solid var(--primary-ring);
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.disease-filter-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid var(--red-border);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+
+.disease-filter-clear i {
+    font-size: 11px;
+}
+
+.disease-filter-clear:hover {
+    background: var(--red);
+    color: #fff;
+    border-color: var(--red);
+}
+
+.disease-filter-clear:active {
+    transform: scale(0.96);
+}
+
+.disease-filter-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.disease-filter-date i {
+    font-size: 11px;
+    color: var(--primary);
+}

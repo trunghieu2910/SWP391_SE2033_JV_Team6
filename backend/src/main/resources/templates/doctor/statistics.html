@@ -103,7 +103,7 @@
             <thead>
             <tr>
                 <th class="sortable" data-sort="name">
-                    Loại bệnh <i class="fa-solid fa-arrow-down-a-z sort-icon"></i>
+                    Loại chuẩn đoán <i class="fa-solid fa-arrow-down-a-z sort-icon"></i>
                 </th>
                 <th class="sortable text-right" data-sort="total">
                     Số ca <i class="fa-solid fa-sort sort-icon"></i>
@@ -114,10 +114,12 @@
             </tr>
             </thead>
             <tbody id="statsTableBody">
-            <tr th:each="s : ${stats}">
-                <td th:text="${s.diseaseName}"></td>
-                <td class="text-right" th:text="${s.total}"></td>
-                <td class="text-right" th:text="${#numbers.formatDecimal((s.total * 100.0) / totalAll, 1, 1)} + '%'"></td>
+            <tr th:each="stat : ${stats}"
+                class="clickable-row"
+                th:onclick="|window.location.href='@{/doctor/medical-records(diseaseType=${stat.diseaseName}, startDate=${startDate}, endDate=${endDate})}'|">
+                <td th:text="${stat.diseaseName}">Bình thường</td>
+                <td class="text-right" th:text="${stat.total}">36</td>
+                <td class="text-right" th:text="${#numbers.formatDecimal((stat.total * 100.0) / totalAll, 1, 1)} + '%'">24,0%</td>
             </tr>
             <tr th:if="${#lists.isEmpty(stats)}">
                 <td colspan="3" class="stats-empty">Không có dữ liệu trong khoảng thời gian này</td>
@@ -230,7 +232,7 @@
             if (!labels.length) return;
             const total = data.reduce((a, b) => a + b, 0);
 
-            let csv = 'Loại bệnh,Số ca,Tỷ lệ\n';
+            let csv = 'Loại chuẩn đoán,Số ca,Tỷ lệ\n';
             labels.forEach((label, i) => {
                 const pct = total > 0 ? ((data[i] / total) * 100).toFixed(1) : '0.0';
                 csv += `"${label}",${data[i]},${pct}%\n`;
