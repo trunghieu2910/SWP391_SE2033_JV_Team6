@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{receptionist/layout :: main-layout(~{::main}, 'Tạo ca chẩn đoán', 'create-session')}">
+      th:replace="~{receptionist/layout :: main-layout(~{::main}, 'Tạo ca khám', 'create-session')}">
 <body>
 <main>
     <link rel="stylesheet" th:href="@{/css/receptionist/create-session.css}">
     <!-- Microdata for SEO/AI Context -->
     <div itemscope itemtype="http://schema.org/MedicalWebPage" style="display: none;">
-        <meta itemprop="name" content="Tạo ca chẩn đoán mới">
-        <meta itemprop="description" content="Giao diện dành cho Lễ tân để tạo ca chẩn đoán mới và phân công Bác sĩ.">
+        <meta itemprop="name" content="Tạo ca khám mới">
+        <meta itemprop="description" content="Giao diện dành cho Lễ tân để tạo ca khám mới và phân công Bác sĩ.">
     </div>
 
     <!-- Header Section -->
     <header class="page-header">
         <div class="page-header-info">
-            <h2><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Tạo ca chẩn đoán mới</h2>
-            <p>Tìm kiếm bệnh nhân, chọn bác sĩ và tạo phiên chẩn đoán mới trên hệ thống.</p>
+            <h2><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Tạo ca khám mới</h2>
+            <p>Tìm kiếm bệnh nhân, chọn bác sĩ và tạo phiên khám mới trên hệ thống.</p>
         </div>
     </header>
 
@@ -50,9 +50,9 @@
                 <div class="success-icon" aria-hidden="true">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
-                <h3 id="step3Title">Tạo phiên chẩn đoán thành công!</h3>
+                <h3 id="step3Title">Tạo phiên khám thành công!</h3>
                 <p class="success-session-id">Mã phiên: #<span th:text="${createdSessionId}"></span></p>
-                <p class="success-desc">Phiên chẩn đoán đã được tạo và lưu vào hệ thống.</p>
+                <p class="success-desc">Phiên khám đã được tạo và lưu vào hệ thống.</p>
                 <footer class="success-actions">
                     <a th:href="@{/receptionist/create-session}" class="btn-action btn-outline" style="text-decoration: none;">
                         <i class="fa-solid fa-plus" aria-hidden="true"></i> Tạo phiên mới
@@ -127,7 +127,7 @@
         <section th:if="${createdSessionId == null && selectedPatient != null}" class="create-card" aria-labelledby="step2Title">
             <header class="card-header">
                 <i class="fa-solid fa-user-check" aria-hidden="true"></i>
-                <h3 id="step2Title">Thông tin phiên chẩn đoán</h3>
+                <h3 id="step2Title">Thông tin phiên khám</h3>
             </header>
             <div class="card-body">
                 <!-- Selected Patient Info -->
@@ -209,7 +209,7 @@
                             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Quay lại
                         </a>
                         <button type="submit" class="btn-action btn-primary" onclick="return confirm('Bạn có chắc chắn muốn tạo phiên khám?');" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <i class="fa-solid fa-check" aria-hidden="true"></i> Tạo phiên chẩn đoán
+                            <i class="fa-solid fa-check" aria-hidden="true"></i> Tạo phiên khám
                         </button>
                     </footer>
                 </form>

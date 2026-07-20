@@ -22,7 +22,7 @@
     <nav class="sidebar-nav">
         <a th:href="@{/receptionist/create-session}" class="nav-item" th:classappend="${currentTab == 'create-session' ? 'active' : ''}">
             <i class="fa-solid fa-calendar-plus"></i>
-            <span>Tạo ca chẩn đoán</span>
+            <span>Tạo ca khám</span>
         </a>
         <a th:href="@{/receptionist/patients/create}" class="nav-item" th:classappend="${currentTab == 'create-patient' ? 'active' : ''}">
             <i class="fa-solid fa-user-plus"></i>
@@ -53,7 +53,7 @@
     <!-- Topbar -->
     <header class="topbar">
         <div class="topbar-left">
-            <h1 th:text="${title}">Tạo ca chẩn đoán</h1>
+            <h1 th:text="${title}">Tạo ca khám</h1>
         </div>
         <div class="topbar-right">
         </div>

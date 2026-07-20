@@ -106,7 +106,7 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
 
         return mapToResponse(savedSession);
     }
-
+// The Hieu
     @Override
     @Transactional
     public DiagnosisSessionResponse addPatientToSession(CreateDiagnosisSessionRequest request, Integer creatorId) {

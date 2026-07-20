@@ -37,8 +37,7 @@
                 </div>
 
                 <fieldset>
-                    <legend>Thông Tin Cá Nhân</legend>
-                    <div class="form-grid">
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="fullName">Họ và Tên <span aria-hidden="true" style="color: red;">*</span></label>
                             <input type="text" id="fullName" th:field="*{fullName}" required aria-required="true" placeholder="Nguyễn Văn A">
@@ -68,7 +67,7 @@
                             <span class="error-message" role="alert" th:if="${#fields.hasErrors('nationalID')}" th:errors="*{nationalID}"></span>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" style="grid-column: span 2;">
                             <label for="phoneNumber">Số điện thoại <span aria-hidden="true" style="color: red;">*</span></label>
                             <input type="tel" id="phoneNumber" th:field="*{phoneNumber}" required aria-required="true" pattern="\d{10}" title="Gồm 10 chữ số" placeholder="0912345678">
                             <span class="error-message" role="alert" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></span>
@@ -83,8 +82,7 @@
                 </fieldset>
 
                 <fieldset>
-                    <legend>Thông Tin Tài Khoản Đăng Nhập</legend>
-                    <div class="form-grid">
+                    <div class="form-row">
                         <div class="form-group" style="grid-column: span 2;">
                             <label for="email">Địa chỉ Email <span aria-hidden="true" style="color: red;">*</span></label>
                             <input type="email" id="email" th:field="*{email}" required aria-required="true" placeholder="email@example.com">
