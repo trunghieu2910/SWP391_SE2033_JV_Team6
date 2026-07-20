@@ -288,7 +288,7 @@
                                       th:text="${d.uploadedAt != null}
                                                ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
                                                : '—'">—</span>
-                                <a th:href="@{/ai-result.html(imageId=${d.imageID})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-robot"></i> Xem chi tiết</a>
+                                <a th:href="@{/ai-result(imageId=${d.imageID})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-robot"></i> Xem chi tiết</a>
                             </div>
                         </div>
                     </div>

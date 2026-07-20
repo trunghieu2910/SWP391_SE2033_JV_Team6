@@ -188,6 +188,22 @@ public class DoctorDiagnosisController {
         return "redirect:/doctor/sessions/" + sessionId;
     }
 
+    @PostMapping("/{sessionId}/medical-images")
+    public String createMedicalImage(
+            @PathVariable Integer sessionId,
+            @RequestParam String imageType,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Integer doctorId = userDetails.getUser().getUserId();
+            doctorDiagnosisService.createMedicalImage(doctorId, sessionId, imageType);
+            redirectAttributes.addFlashAttribute("success", "Đã tạo chỉ định hình ảnh y tế thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/doctor/sessions/" + sessionId;
+    }
+
     @PostMapping("/{sessionId}/medical-images/{imageId}/delete")
     public String deleteMedicalImage(
             @PathVariable Integer sessionId,

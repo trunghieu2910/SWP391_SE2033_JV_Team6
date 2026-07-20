@@ -46,6 +46,36 @@ async function fetchImageDetails(id) {
                 document.getElementById('ai-status').textContent = 'CHƯA PHÂN TÍCH';
                 document.querySelector('.status-pill').className = 'status-pill pending';
             }
+            
+            if (data.technicalConclusion) {
+                // For Technical Role input
+                const ta = document.getElementById('technical-conclusion');
+                if (ta) ta.value = data.technicalConclusion;
+                
+                // For Doctor/Patient/Technical view (read-only mode)
+                const tcView = document.getElementById('technical-conclusion-view');
+                const tcText = document.getElementById('technical-conclusion-text');
+                if (tcView && tcText) {
+                    tcView.style.display = 'block';
+                    tcText.textContent = data.technicalConclusion;
+                }
+                
+                // Hide input controls if already concluded
+                const techControls = document.querySelector('.technical-controls');
+                if (techControls) {
+                    techControls.style.display = 'none';
+                }
+            }
+            
+            if (data.manualAiImageUrl) {
+                const manualImgBox = document.getElementById('manual-img-box');
+                const manualImg = document.getElementById('manual-img');
+                if (manualImgBox && manualImg) {
+                    manualImgBox.style.display = 'block';
+                    manualImg.src = data.manualAiImageUrl;
+                    manualImg.classList.remove('placeholder');
+                }
+            }
         } else {
             console.error("Lỗi khi lấy dữ liệu ảnh");
         }
@@ -95,5 +125,143 @@ async function processAI() {
         loadingAi.style.display = 'none';
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-robot"></i> Chạy Phân Tích AI';
+    }
+}
+
+// ================= MANUAL DRAWING LOGIC =================
+let isDrawingMode = false;
+let isDrawing = false;
+let startX = 0, startY = 0;
+let drawCanvas = null, ctx = null;
+let hasDrawn = false;
+let drawnRects = []; // Store drawn rectangles to redraw on clear/resize
+
+function initCanvas() {
+    const img = document.getElementById('original-img');
+    drawCanvas = document.getElementById('draw-canvas');
+    if (!drawCanvas) return;
+    
+    // Resize canvas to match image display size
+    drawCanvas.width = img.clientWidth;
+    drawCanvas.height = img.clientHeight;
+    ctx = drawCanvas.getContext('2d');
+    
+    // Set styles
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 3;
+    
+    // Events
+    drawCanvas.onmousedown = (e) => {
+        isDrawing = true;
+        const rect = drawCanvas.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+    };
+    
+    drawCanvas.onmousemove = (e) => {
+        if (!isDrawing) return;
+        const rect = drawCanvas.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+        
+        ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        
+        // Redraw old rects
+        drawnRects.forEach(r => {
+            ctx.strokeRect(r.x, r.y, r.w, r.h);
+        });
+        
+        // Draw current
+        ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+    };
+    
+    drawCanvas.onmouseup = (e) => {
+        if (!isDrawing) return;
+        isDrawing = false;
+        hasDrawn = true;
+        
+        const rect = drawCanvas.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+        drawnRects.push({
+            x: startX, y: startY, w: currentX - startX, h: currentY - startY
+        });
+    };
+}
+
+function toggleManualDraw() {
+    const btn = document.getElementById('btn-manual-draw');
+    drawCanvas = document.getElementById('draw-canvas');
+    if (!drawCanvas) return;
+    
+    isDrawingMode = !isDrawingMode;
+    if (isDrawingMode) {
+        initCanvas();
+        drawCanvas.style.display = 'block';
+        btn.style.background = '#dc2626';
+        btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Hủy vẽ tay';
+    } else {
+        drawCanvas.style.display = 'none';
+        btn.style.background = '#f59e0b';
+        btn.innerHTML = '<i class="fa-solid fa-pen"></i> Khoanh vùng thủ công';
+        // Reset
+        if (ctx) ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        drawnRects = [];
+        hasDrawn = false;
+    }
+}
+
+async function saveTechnicalConclusion() {
+    const conclusion = document.getElementById('technical-conclusion')?.value || '';
+    const btn = document.getElementById('btn-save-conclusion');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+    
+    let manualImageBase64 = '';
+    
+    if (hasDrawn && isDrawingMode) {
+        // Create a temporary canvas to combine image and drawing
+        const img = document.getElementById('original-img');
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = img.naturalWidth;
+        tempCanvas.height = img.naturalHeight;
+        const tCtx = tempCanvas.getContext('2d');
+        
+        // Draw original image
+        tCtx.drawImage(img, 0, 0);
+        
+        // Scale and draw rects to match natural width
+        const scaleX = img.naturalWidth / drawCanvas.width;
+        const scaleY = img.naturalHeight / drawCanvas.height;
+        
+        tCtx.strokeStyle = 'red';
+        tCtx.lineWidth = 3 * Math.max(scaleX, scaleY);
+        drawnRects.forEach(r => {
+            tCtx.strokeRect(r.x * scaleX, r.y * scaleY, r.w * scaleX, r.h * scaleY);
+        });
+        
+        manualImageBase64 = tempCanvas.toDataURL('image/jpeg', 0.9);
+    }
+    
+    try {
+        const payload = { conclusion, manualImageBase64 };
+        const response = await fetch(`/api/ultrasound/save-conclusion/${imageId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            alert('Lưu kết luận thành công!');
+            window.location.href = '/technical/dashboard';
+        } else {
+            alert('Lỗi: ' + await response.text());
+        }
+    } catch (e) {
+        alert('Lỗi kết nối máy chủ');
+        console.error(e);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-save"></i> Lưu Kết Luận';
     }
 }

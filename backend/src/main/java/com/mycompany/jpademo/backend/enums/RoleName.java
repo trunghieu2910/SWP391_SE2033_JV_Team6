@@ -5,5 +5,6 @@ public enum RoleName {
     DOCTOR,
     PATIENT,
     RECEPTIONIST,
-    PHARMACIST
+    PHARMACIST,
+    TECHNICAL
 }

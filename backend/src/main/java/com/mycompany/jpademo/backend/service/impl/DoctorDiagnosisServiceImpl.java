@@ -442,4 +442,27 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
         medicalImageRepository.delete(image);
     }
+
+    @Override
+    @Transactional
+    public void createMedicalImage(Integer doctorId, Integer sessionId, String imageType) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
+
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("Bạn không có quyền thao tác trên ca chẩn đoán này.");
+        }
+
+        if (imageType == null || imageType.trim().isEmpty()) {
+            throw new BadRequestException("Loại hình ảnh y tế không được để trống.");
+        }
+
+        MedicalImage image = MedicalImage.builder()
+                .diagnosisSession(session)
+                .imageType(imageType.trim())
+                .status(com.mycompany.jpademo.backend.enums.MedicalImageStatus.PENDING)
+                .build();
+        
+        medicalImageRepository.save(image);
+    }
 }

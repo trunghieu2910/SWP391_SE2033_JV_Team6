@@ -4,7 +4,6 @@ import com.mycompany.jpademo.backend.dto.request.CreateDiagnosisSessionRequest;
 import com.mycompany.jpademo.backend.dto.response.DiagnosisSessionResponse;
 import com.mycompany.jpademo.backend.dto.response.PatientSearchResponse;
 import com.mycompany.jpademo.backend.entity.Patient;
-import com.mycompany.jpademo.backend.repository.PatientRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.DiagnosisSessionService;
 import com.mycompany.jpademo.backend.service.interfaces.PatientSearchService;
@@ -32,7 +31,6 @@ public class ReceptionistCreateSessionController {
     private final PatientSearchService patientSearchService;
     private final UserService userService;
     private final DiagnosisSessionService diagnosisSessionService;
-    private final PatientRepository patientRepository;
 
     @GetMapping("/create-session")
     public String createSessionPage(
@@ -41,7 +39,7 @@ public class ReceptionistCreateSessionController {
             Model model) {
         
         if (patientId != null) {
-            Patient patient = patientRepository.findById(patientId).orElse(null);
+            Patient patient = patientSearchService.getPatientEntityById(patientId);
             if (patient != null) {
                 model.addAttribute("selectedPatient", patient);
                 model.addAttribute("doctors", userService.getActiveDoctors());
@@ -76,7 +74,7 @@ public class ReceptionistCreateSessionController {
             RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("selectedPatient", patientRepository.findById(request.getPatientId()).orElse(null));
+            model.addAttribute("selectedPatient", patientSearchService.getPatientEntityById(request.getPatientId()));
             model.addAttribute("doctors", userService.getActiveDoctors());
             return "receptionist/create-session";
         }
@@ -95,7 +93,7 @@ public class ReceptionistCreateSessionController {
         } catch (Exception e) {
             log.error("Error creating session", e);
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("selectedPatient", patientRepository.findById(request.getPatientId()).orElse(null));
+            model.addAttribute("selectedPatient", patientSearchService.getPatientEntityById(request.getPatientId()));
             model.addAttribute("doctors", userService.getActiveDoctors());
             return "receptionist/create-session";
         }

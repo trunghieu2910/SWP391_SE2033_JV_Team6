@@ -55,9 +55,9 @@
             <div class="form-group">
                 <label><i class="fa-solid fa-image"></i> Hình Ảnh Siêu Âm</label>
                 <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <p id="upload-text">Bấm vào đây hoặc kéo thả ảnh để tải lên</p>
-                    <input type="file" id="file-input" accept="image/*" required>
+                    <i class="fa-solid fa-camera" style="font-size: 3rem; color: #64748b; margin-bottom: 1rem;"></i>
+                    <p id="upload-text" style="font-size: 1.25rem; font-weight: bold;">CHỤP ẢNH</p>
+                    <input type="file" id="file-input" accept="image/*" capture="environment" required>
                 </div>
                 
                 <div class="preview-container" id="preview-container">
@@ -84,6 +84,18 @@
         const resultMessage = document.getElementById('result-message');
         
         let selectedFile = null;
+
+        // Tự động điền Session ID từ URL nếu có
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSessionId = urlParams.get('sessionId');
+        if (urlSessionId) {
+            const sessionIdInput = document.getElementById('sessionId');
+            sessionIdInput.value = urlSessionId;
+            sessionIdInput.readOnly = true;
+            sessionIdInput.style.backgroundColor = '#334155';
+            sessionIdInput.style.color = '#94a3b8';
+            sessionIdInput.style.cursor = 'not-allowed';
+        }
 
         fileInput.addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
@@ -135,7 +147,7 @@
                     
                     // Nút xem thử
                     const btnLink = document.createElement('a');
-                    btnLink.href = `/ai-result.html?imageId=${data.imageId}`;
+                    btnLink.href = `/ai-result?imageId=${data.imageId}`;
                     btnLink.textContent = "Mở xem ảnh AI ngay";
                     btnLink.style = "display:block; margin-top:10px; color:#38bdf8; text-decoration:underline; font-weight:bold;";
                     resultMessage.appendChild(btnLink);

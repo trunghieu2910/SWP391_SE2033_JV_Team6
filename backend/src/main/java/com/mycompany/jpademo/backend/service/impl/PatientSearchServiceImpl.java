@@ -33,6 +33,11 @@ public class PatientSearchServiceImpl implements PatientSearchService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Patient getPatientEntityById(Integer id) {
+        return patientRepository.findById(id).orElse(null);
+    }
+
     private PatientSearchResponse mapToResponse(Patient patient) {
         return PatientSearchResponse.builder()
                 .patientId(patient.getPatientId())

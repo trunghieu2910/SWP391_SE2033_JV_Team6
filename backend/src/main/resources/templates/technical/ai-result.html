@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,8 +54,9 @@
                 <div class="image-comparison-container">
                     <div class="image-box">
                         <h4>Ảnh Gốc</h4>
-                        <div class="img-wrapper">
+                        <div class="img-wrapper" id="orig-wrapper" style="position: relative;">
                             <img id="original-img" src="" alt="Ảnh Gốc" class="placeholder">
+                            <canvas id="draw-canvas" style="position: absolute; top: 0; left: 0; z-index: 10; display: none; cursor: crosshair;"></canvas>
                             <div class="loading-overlay" id="loading-orig" style="display: none;">
                                 <i class="fa-solid fa-spinner fa-spin"></i>
                             </div>
@@ -73,10 +74,34 @@
                         </div>
                         <p class="img-name ai-name">Kết quả khoanh vùng U xơ</p>
                     </div>
+
+                    <div class="image-box" id="manual-img-box" style="display: none;">
+                        <h4>Ảnh Kỹ Thuật Viên Vẽ</h4>
+                        <div class="img-wrapper">
+                            <img id="manual-img" src="" alt="Ảnh Vẽ Tay" class="placeholder">
+                        </div>
+                        <p class="img-name">Đã khoanh vùng thủ công</p>
+                    </div>
+                </div>
+
+                <div id="technical-conclusion-view" style="display: none; margin-top: 1.5rem; background: #1e293b; padding: 1rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #cbd5e1;"><i class="fa-solid fa-user-doctor"></i> Kết luận của Kỹ thuật viên:</h4>
+                    <p id="technical-conclusion-text" style="margin: 0; color: #f8fafc; font-style: italic; white-space: pre-wrap;"></p>
                 </div>
                 
                 <div class="action-buttons">
                     <button id="btn-process-ai" class="btn-primary" onclick="processAI()"><i class="fa-solid fa-robot"></i> Chạy Phân Tích AI</button>
+                </div>
+
+                <div sec:authorize="hasRole('TECHNICAL')" class="technical-controls" style="margin-top: 2rem; border-top: 1px solid #334155; padding-top: 1rem;">
+                    <h3><i class="fa-solid fa-user-doctor"></i> Nhận định của Kỹ thuật viên</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <textarea id="technical-conclusion" rows="3" placeholder="Nhập kết luận hoặc ghi chú về kết quả siêu âm..." style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #1e293b; color: white; resize: vertical; font-family: inherit; font-size: 1rem;"></textarea>
+                    </div>
+                    <div class="action-buttons" style="justify-content: flex-start; gap: 1rem;">
+                        <button id="btn-manual-draw" style="background: #f59e0b; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;" onclick="toggleManualDraw()"><i class="fa-solid fa-pen"></i> Khoanh vùng thủ công</button>
+                        <button id="btn-save-conclusion" style="background: #10b981; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;" onclick="saveTechnicalConclusion()"><i class="fa-solid fa-save"></i> Lưu Kết Luận</button>
+                    </div>
                 </div>
             </div>
         </div>

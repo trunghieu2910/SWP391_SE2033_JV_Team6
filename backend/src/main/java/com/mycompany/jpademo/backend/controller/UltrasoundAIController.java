@@ -199,7 +199,9 @@ public class UltrasoundAIController {
                     "Siêu âm bụng",
                     detail.getImageUrl(),
                     detail.getAiImageUrl(),
-                    detail.getConfidenceScore()
+                    detail.getConfidenceScore(),
+                    detail.getTechnicalConclusion(),
+                    detail.getManualAiImageUrl()
             ));
 
         } catch (Exception e) {
@@ -219,7 +221,9 @@ public class UltrasoundAIController {
             detail.getMedicalImage() != null ? detail.getMedicalImage().getImageType() : "Hình Ảnh Y Khoa",
             detail.getImageUrl(),
             detail.getAiImageUrl(),
-            detail.getConfidenceScore()
+            detail.getConfidenceScore(),
+            detail.getTechnicalConclusion(),
+            detail.getManualAiImageUrl()
         ));
     }
 
@@ -349,7 +353,9 @@ public class UltrasoundAIController {
                     detail.getMedicalImage() != null ? detail.getMedicalImage().getImageType() : "Hình Ảnh Y Khoa",
                     detail.getImageUrl(),
                     detail.getAiImageUrl(),
-                    detail.getConfidenceScore()
+                    detail.getConfidenceScore(),
+                    detail.getTechnicalConclusion(),
+                    detail.getManualAiImageUrl()
                 ));
             } else {
                 return ResponseEntity.status(500).body("AI Service trả về lỗi");
@@ -361,19 +367,62 @@ public class UltrasoundAIController {
         }
     }
 
+    @PostMapping("/ultrasound/save-conclusion/{imageId}")
+    public ResponseEntity<?> saveConclusion(@PathVariable Integer imageId, @RequestBody TechnicalConclusionRequest request) {
+        Optional<MedicalImageDetails> opt = repository.findById(imageId);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        MedicalImageDetails detail = opt.get();
+        
+        try {
+            if (request.conclusion != null) {
+                detail.setTechnicalConclusion(request.conclusion);
+            }
+            
+            if (request.manualImageBase64 != null && !request.manualImageBase64.isEmpty()) {
+                // Decode base64
+                String base64Image = request.manualImageBase64.split(",")[1];
+                byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Image);
+                
+                String newFileName = "manual_" + UUID.randomUUID().toString() + ".jpg";
+                Path aiPath = Paths.get("uploads", newFileName);
+                if (!Files.exists(aiPath.getParent())) {
+                    Files.createDirectories(aiPath.getParent());
+                }
+                Files.write(aiPath, imageBytes);
+                
+                detail.setManualAiImageUrl("/uploads/" + newFileName);
+            }
+            
+            repository.save(detail);
+            return ResponseEntity.ok("Đã lưu kết luận thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Lỗi khi lưu kết luận: " + e.getMessage());
+        }
+    }
+
+    public static class TechnicalConclusionRequest {
+        public String conclusion;
+        public String manualImageBase64;
+    }
+
     public static class ImageDetailDto {
         public Integer imageId;
         public String imageType;
         public String imageUrl;
         public String aiImageUrl;
         public Double confidenceScore;
+        public String technicalConclusion;
+        public String manualAiImageUrl;
 
-        public ImageDetailDto(Integer imageId, String imageType, String imageUrl, String aiImageUrl, Double confidenceScore) {
+        public ImageDetailDto(Integer imageId, String imageType, String imageUrl, String aiImageUrl, Double confidenceScore, String technicalConclusion, String manualAiImageUrl) {
             this.imageId = imageId;
             this.imageType = imageType;
             this.imageUrl = imageUrl;
             this.aiImageUrl = aiImageUrl;
             this.confidenceScore = confidenceScore;
+            this.technicalConclusion = technicalConclusion;
+            this.manualAiImageUrl = manualAiImageUrl;
         }
     }
 }

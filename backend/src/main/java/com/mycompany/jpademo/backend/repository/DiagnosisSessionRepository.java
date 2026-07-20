@@ -188,5 +188,9 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "ORDER BY month ASC")
     List<Object[]> getMonthlyDiagnosisSessions(@Param("start") LocalDateTime start,
                                                @Param("end") LocalDateTime end);
+
+    List<DiagnosisSession> findByStatusOrderByCreatedAtDesc(DiagnosisSessionStatus status);
+    
+    List<DiagnosisSession> findByStatusInOrderByCreatedAtDesc(List<DiagnosisSessionStatus> statuses);
 }
 

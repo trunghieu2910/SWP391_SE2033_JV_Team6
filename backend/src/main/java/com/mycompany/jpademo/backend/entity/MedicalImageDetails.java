@@ -26,6 +26,12 @@ public class MedicalImageDetails {
     @Column(name = "confidenceScore")
     private Double confidenceScore;
 
+    @Column(name = "technicalConclusion", columnDefinition = "NVARCHAR(MAX)")
+    private String technicalConclusion;
+
+    @Column(name = "manualAiImageUrl")
+    private String manualAiImageUrl;
+
     @CreationTimestamp
     @Column(name = "uploadedAt", nullable = false, updatable = false)
     private java.time.LocalDateTime uploadedAt;
