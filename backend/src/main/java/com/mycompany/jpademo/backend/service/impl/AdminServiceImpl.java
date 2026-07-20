@@ -11,10 +11,7 @@ import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
-import com.mycompany.jpademo.backend.exception.DuplicateResourceException;
-import com.mycompany.jpademo.backend.exception.InvalidOtpException;
-import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
-import com.mycompany.jpademo.backend.exception.UserNotFoundException;
+import com.mycompany.jpademo.backend.exception.*;
 import com.mycompany.jpademo.backend.repository.*;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
@@ -22,16 +19,24 @@ import com.mycompany.jpademo.backend.util.EmailUtil;
 import com.mycompany.jpademo.backend.util.OtpUtil;
 import com.mycompany.jpademo.backend.cache.PendingDoctorData;
 import com.mycompany.jpademo.backend.cache.PendingDoctorStore;
+import com.mycompany.jpademo.backend.util.SecureFileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -147,13 +152,18 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin) {
         String otp = request.getOtp();
         String adminEmail = admin.getEmail();
 
-        PendingDoctorData pending = PendingDoctorStore.getPendingByAdminEmail(adminEmail);
+        PendingDoctorData pending = PendingDoctorStore.getPending(request.getRequestId());
         if (pending == null) {
             throw new IllegalArgumentException("Không tìm thấy yêu cầu tạo bác sĩ hoặc đã hết hạn.");
+        }
+
+        if (!pending.getAdminEmail().equals(adminEmail)) {
+            throw new UnauthorizedActionException("Yêu cầu này không thuộc quyền quản lý của tài khoản của bạn.");
         }
 
         boolean isOtpValid = OtpUtil.verifyOtp(adminEmail, otp);
@@ -227,21 +237,15 @@ public class AdminServiceImpl implements AdminService {
         }
 
         String requestId = UUID.randomUUID().toString();
-        String certificateUrl = null;
+        String certificateStoredFileName = null;
         if (request.getCertificateFile() != null && !request.getCertificateFile().isEmpty()) {
             try {
-                String userDir = System.getProperty("user.dir");
-                String uploadDir = userDir + File.separator + "uploads" + File.separator + "certificates" + File.separator;
+                certificateStoredFileName = SecureFileUploadUtil.validateAndGenerateSafeFileName(request.getCertificateFile());
+                Path uploadDir = Paths.get(System.getProperty("user.dir"), "secure-uploads", "certificates");
+                Files.createDirectories(uploadDir);
 
-                File directory = new File(uploadDir);
-                if (!directory.exists()) {
-                    directory.mkdirs();
-                }
-
-                String fileName = System.currentTimeMillis() + "_" + request.getCertificateFile().getOriginalFilename();
-                String filePath = uploadDir + fileName;
-                request.getCertificateFile().transferTo(new File(filePath));
-                certificateUrl = "/uploads/certificates/" + fileName;
+                Path target = SecureFileUploadUtil.resolveSafely(uploadDir, certificateStoredFileName);
+                request.getCertificateFile().transferTo(target);
             } catch (IOException e) {
                 throw new RuntimeException("Không thể lưu file bằng cấp: " + e.getMessage());
             }
@@ -254,7 +258,7 @@ public class AdminServiceImpl implements AdminService {
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .nationalId(request.getNationalId())
-                .certificateUrl(certificateUrl)
+                .certificateUrl(certificateStoredFileName)
                 .build();
         PendingDoctorStore.savePending(adminEmail, pending);
 
@@ -274,17 +278,45 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public DashboardStatsResponse getDashboardStats(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+    public DashboardPageResponse getDashboardPageData(LocalDate startDate, LocalDate endDate) {
+        LocalDate[] range = resolveDateRange(startDate, endDate);
+        LocalDate resolvedStart = range[0];
+        LocalDate resolvedEnd = range[1];
 
-        return DashboardStatsResponse.builder()
-                .totalUsers(userRepository.countUsersWithDateFilter(start, end))
-                .totalDoctors(userRepository.countUsersByRoleWithDateFilter(RoleName.DOCTOR, start, end))
-                .totalPatients(userRepository.countUsersByRoleWithDateFilter(RoleName.PATIENT, start, end))
-                .blockedUsers(userRepository.countUsersByStatusWithDateFilter(UserStatus.BANNED, start, end))
-                .totalDiagnosisSessions(diagnosisSessionRepository.countSessionsWithDateFilter(start, end))
-                .build();
+        try {
+            DashboardStatsResponse stats = ensureStatsNotNull(getDashboardStats(resolvedStart, resolvedEnd));
+            ChartStatsResponse charts = ensureChartsNotNull(getChartStats(resolvedStart, resolvedEnd));
+
+            LocalDateTime startLogs = resolvedStart.atStartOfDay();
+            LocalDateTime endLogs = resolvedEnd.atTime(java.time.LocalTime.MAX);
+
+            Page<SystemLog> recentLogsPage = systemLogRepository.filterLogs(
+                    null, null, startLogs, endLogs,
+                    PageRequest.of(0, 10, Sort.by("performedAt").descending())
+            );
+            List<SystemLog> logList = recentLogsPage != null
+                    ? recentLogsPage.getContent()
+                    : new ArrayList<>();
+
+            return DashboardPageResponse.builder()
+                    .stats(stats)
+                    .charts(charts)
+                    .recentLogs(mapToSystemLogResponse(logList))
+                    .startDate(resolvedStart)
+                    .endDate(resolvedEnd)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("ERROR loading dashboard: ", e);
+            return DashboardPageResponse.builder()
+                    .stats(ensureStatsNotNull(null))
+                    .charts(ensureChartsNotNull(null))
+                    .recentLogs(new ArrayList<>())
+                    .startDate(resolvedStart)
+                    .endDate(resolvedEnd)
+                    .errorMessage("Không thể tải dữ liệu dashboard. Vui lòng thử lại.")
+                    .build();
+        }
     }
 
     @Override
@@ -420,6 +452,37 @@ public class AdminServiceImpl implements AdminService {
     public User getAdminUser() {
         return userRepository.findFirstByRoleRoleName(RoleName.ADMIN)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy admin trong hệ thống"));
+    }
+
+    @Override
+    public CertificateFileResponse getDoctorCertificate(Integer userId) {
+        User doctor = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng."));
+
+        if (!RoleName.DOCTOR.equals(doctor.getRole().getRoleName())) {
+            throw new BadRequestException("Người dùng này không có chứng chỉ hành nghề.");
+        }
+
+        String storedFileName = doctor.getCertificateUrl();
+        if (storedFileName == null) {
+            throw new ResourceNotFoundException("Người dùng này chưa có file chứng chỉ.");
+        }
+
+        Path certDir = Paths.get(System.getProperty("user.dir"), "secure-uploads", "certificates").normalize();
+        Path filePath = certDir.resolve(storedFileName).normalize();
+
+        if (!filePath.startsWith(certDir) || !Files.exists(filePath)) {
+            throw new ResourceNotFoundException("File không tồn tại.");
+        }
+
+        Resource resource = new FileSystemResource(filePath.toFile());
+
+        String ext = storedFileName.substring(storedFileName.lastIndexOf('.'));
+        return CertificateFileResponse.builder()
+                .resource(resource)
+                .mediaType(resolveSafeMediaType(storedFileName))
+                .displayName("certificate-" + userId + ext)
+                .build();
     }
 
     private List<MonthlyStats> getMonthlyUserRegistrations(LocalDate startDate, LocalDate endDate) {
@@ -590,5 +653,89 @@ public class AdminServiceImpl implements AdminService {
             default:
                 throw new IllegalArgumentException("Unsupported user status: " + userStatus);
         }
+    }
+
+    private DashboardStatsResponse getDashboardStats(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+
+        return DashboardStatsResponse.builder()
+                .totalUsers(userRepository.countUsersWithDateFilter(start, end))
+                .totalDoctors(userRepository.countUsersByRoleWithDateFilter(RoleName.DOCTOR, start, end))
+                .totalPatients(userRepository.countUsersByRoleWithDateFilter(RoleName.PATIENT, start, end))
+                .blockedUsers(userRepository.countUsersByStatusWithDateFilter(UserStatus.BANNED, start, end))
+                .totalDiagnosisSessions(diagnosisSessionRepository.countSessionsWithDateFilter(start, end))
+                .build();
+    }
+
+    private List<SystemLogResponse> mapToSystemLogResponse(List<SystemLog> systemLog) {
+        List<SystemLogResponse> list = new ArrayList<>();
+        for (SystemLog s: systemLog) {
+            SystemLogResponse systemLogResponse = new SystemLogResponse();
+            systemLogResponse.setLogId(s.getLogId());
+            systemLogResponse.setActionDisplay(mapActionToVietnamese(s.getAction()));
+            systemLogResponse.setAction(s.getAction());
+            systemLogResponse.setDescription(s.getDescription());
+            systemLogResponse.setTargetId(s.getTargetId());
+            systemLogResponse.setTargetType(s.getTargetType());
+            systemLogResponse.setUserName(s.getUser().getUserName());
+            systemLogResponse.setPerformedAt(s.getPerformedAt());
+            list.add(systemLogResponse);
+        }
+        return list;
+    }
+
+    private LocalDate[] resolveDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null && endDate == null) {
+            LocalDate now = LocalDate.now();
+            startDate = now;
+            endDate = now;
+        } else if (startDate != null && endDate == null) {
+            endDate = startDate.plusMonths(1);
+        } else if (endDate != null && startDate == null) {
+            startDate = endDate.minusMonths(6);
+        }
+
+        if (startDate.isAfter(endDate)) {
+            LocalDate temp = startDate;
+            startDate = endDate;
+            endDate = temp;
+        }
+
+        return new LocalDate[]{startDate, endDate};
+    }
+
+    private DashboardStatsResponse ensureStatsNotNull(DashboardStatsResponse stats) {
+        if (stats != null) {
+            return stats;
+        }
+        return DashboardStatsResponse.builder()
+                .totalUsers(0L)
+                .totalDoctors(0L)
+                .totalPatients(0L)
+                .blockedUsers(0L)
+                .totalDiagnosisSessions(0L)
+                .build();
+    }
+
+    private ChartStatsResponse ensureChartsNotNull(ChartStatsResponse charts) {
+        List<MonthlyStats> userRegistrations = (charts != null && charts.getUserRegistrations() != null)
+                ? charts.getUserRegistrations() : new ArrayList<>();
+        List<MonthlyStats> diagnosisSessions = (charts != null && charts.getDiagnosisSessions() != null)
+                ? charts.getDiagnosisSessions() : new ArrayList<>();
+        return ChartStatsResponse.builder()
+                .userRegistrations(userRegistrations)
+                .diagnosisSessions(diagnosisSessions)
+                .build();
+    }
+
+    private MediaType resolveSafeMediaType(String storedFileName) {
+        String ext = storedFileName.substring(storedFileName.lastIndexOf('.')).toLowerCase();
+        return switch (ext) {
+            case ".png" -> MediaType.IMAGE_PNG;
+            case ".jpg", ".jpeg" -> MediaType.IMAGE_JPEG;
+            case ".pdf" -> MediaType.APPLICATION_PDF;
+            default -> MediaType.APPLICATION_OCTET_STREAM; // không xảy ra vì đã whitelist lúc upload
+        };
     }
 }

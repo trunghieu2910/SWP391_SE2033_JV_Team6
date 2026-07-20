@@ -23,7 +23,7 @@ public interface AdminService {
 
     InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin);
 
-    DashboardStatsResponse getDashboardStats(LocalDate startDate, LocalDate endDate);
+    DashboardPageResponse getDashboardPageData(LocalDate startDate, LocalDate endDate);
 
     UserDetailResponse getUserDetail(Integer userId);
 
@@ -34,4 +34,6 @@ public interface AdminService {
     Map<String, Object> resendOtp(String adminEmail);
 
     User getAdminUser();
+
+    CertificateFileResponse getDoctorCertificate(Integer userId);
 }

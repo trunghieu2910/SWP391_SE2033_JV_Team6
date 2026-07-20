@@ -14,6 +14,11 @@ public class OtpUtil {
 
     private static final int OTP_EXPIRE_MINUTES = 2;
 
+    public static void cleanupExpired() {
+        LocalDateTime now = LocalDateTime.now();
+        otpStorage.entrySet().removeIf(e -> now.isAfter(e.getValue().getExpireTime()));
+    }
+
     public static String generateOtp(){
         Random random = new Random();
         int otp = 100000 + random.nextInt(900000);

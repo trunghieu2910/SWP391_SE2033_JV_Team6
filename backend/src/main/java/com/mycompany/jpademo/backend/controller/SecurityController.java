@@ -6,9 +6,13 @@ import com.mycompany.jpademo.backend.dto.response.EndpointRequestStats;
 import com.mycompany.jpademo.backend.dto.response.IpRequestStats;
 import com.mycompany.jpademo.backend.dto.response.SecurityStatsResponse;
 import com.mycompany.jpademo.backend.entity.BlockedIP;
+import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.SecurityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,6 +27,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/security")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class SecurityController {
     private final SecurityService securityService;
@@ -60,7 +65,7 @@ public class SecurityController {
             @Valid @ModelAttribute("blockIpRequest") BlockIpRequest blockIpRequest,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
-            Model model) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("error",
                     bindingResult.getFieldError("ipAddress") != null
@@ -70,8 +75,8 @@ public class SecurityController {
             return "redirect:/admin/security";
         }
         try {
-            String adminUsername = "admin";
-            securityService.blockIp(blockIpRequest, adminUsername);
+            User admin = userDetails.getUser();
+            securityService.blockIp(blockIpRequest, admin);
             redirectAttributes.addFlashAttribute("success",
                     "Đã chặn IP " + blockIpRequest.getIpAddress() + " thành công.");
         } catch (Exception e) {
@@ -84,7 +89,8 @@ public class SecurityController {
     public String unlockIp(
             @Valid @ModelAttribute UnblockIpRequest unblockIpRequest,
             BindingResult bindingResult,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("error",
                     bindingResult.getFieldError("ipAddress") != null
@@ -93,7 +99,8 @@ public class SecurityController {
             return "redirect:/admin/security";
         }
         try {
-            securityService.unblockIp(unblockIpRequest);
+            User admin = userDetails.getUser();
+            securityService.unblockIp(unblockIpRequest, admin);
             redirectAttributes.addFlashAttribute("success",
                     "Đã bỏ chặn IP: " + unblockIpRequest.getIpAddress());
         } catch (Exception e) {

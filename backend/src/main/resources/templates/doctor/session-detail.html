@@ -7,7 +7,7 @@
 
     <!-- Breadcrumb -->
     <nav class="breadcrumb">
-        <a href="#" onclick="event.preventDefault(); window.history.back();">
+        <a href="#" id="backToSessionsBtn">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
         <span class="separator">/</span>
@@ -165,6 +165,7 @@
                 <div class="accordion-body review-section" id="reviewAccordion" style="display: block; padding: 24px;">
                     <form id="reviewForm"
                           th:action="@{/doctor/sessions/{id}/review(id=${sessionDetail.sessionId})}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <div style="display: flex; flex-direction: column; gap: 18px;">
 
                             <div class="form-group">
@@ -359,6 +360,16 @@
             </form>
         </div>
     </div>
+
+    <form id="statusForm" method="post" style="display:none;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="status" id="statusFormInput">
+    </form>
+
+    <form id="shareForm" method="post" style="display:none;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="isShared" id="shareFormInput">
+    </form>
 
     <script th:src="@{/js/doctor/session-detail.js}"></script>
 </main>

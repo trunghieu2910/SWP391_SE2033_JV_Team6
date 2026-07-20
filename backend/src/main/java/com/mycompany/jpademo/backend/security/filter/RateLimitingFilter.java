@@ -1,6 +1,7 @@
 package com.mycompany.jpademo.backend.security.filter;
 
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
+import com.mycompany.jpademo.backend.security.util.ClientIpResolver;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RateLimitingFilter extends OncePerRequestFilter {
     private final Map<String, IpAddressCount> requestCache = new ConcurrentHashMap<>();
     private static final int MAX_REQUESTS_PER_MINUTE = 100;
+    private final ClientIpResolver clientIpResolver;
+
+    public RateLimitingFilter(ClientIpResolver clientIpResolver) {
+        this.clientIpResolver = clientIpResolver;
+    }
+
+    @Scheduled(fixedRate = 60_000)
+    public void cleanupExpiredEntries() {
+        long currentMinute = System.currentTimeMillis() / 60000;
+        requestCache.entrySet().removeIf(entry -> {
+            IpAddressCount value = entry.getValue();
+            return value != null && (currentMinute - value.minute) > 1;
+        });
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -39,14 +55,14 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             return;
         }
 
-        String ipAddress = getClientIp(request);
+        String ipAddress = clientIpResolver.resolve(request);
         long currentMinute = System.currentTimeMillis() / 60000;
 
         IpAddressCount count = requestCache.compute(ipAddress, (k, v) -> {
             if (v == null || v.minute != currentMinute) {
                 return new IpAddressCount(currentMinute, new AtomicInteger(1));
             }
-            int newCount = v.count.incrementAndGet();
+            v.count.incrementAndGet();
             return v;
         });
 
@@ -90,18 +106,6 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             return;
         }
         filterChain.doFilter(request, response);
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.split(",")[0].trim();
-        }
-        ip = request.getHeader("X-Real-IP");
-        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip;
-        }
-        return request.getRemoteAddr();
     }
 
     private static class IpAddressCount {

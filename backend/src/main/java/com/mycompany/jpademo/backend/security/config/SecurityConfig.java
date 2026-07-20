@@ -130,7 +130,9 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/patient/css/**",
                                 "/patient/js/**",
-                                "/patient/images/**"
+                                "/patient/images/**",
+                                "/favicon.ico",
+                                "/assets/**"
                         ).permitAll()
 
                         .anyRequest().authenticated())

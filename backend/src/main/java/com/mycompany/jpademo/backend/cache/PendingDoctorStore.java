@@ -1,6 +1,7 @@
 package com.mycompany.jpademo.backend.cache;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,6 +10,19 @@ import java.util.Optional;
 public class PendingDoctorStore {
     private static final Map<String, PendingDoctorData> STORE = new ConcurrentHashMap<>();
     private static final int PENDING_EXPIRE_MINUTES = 10;
+
+    public static List<String> cleanupExpiredAndGetOrphanFiles() {
+        LocalDateTime now = LocalDateTime.now();
+        java.util.List<String> orphanFiles = new java.util.ArrayList<>();
+        STORE.entrySet().removeIf(e -> {
+            boolean expired = now.isAfter(e.getValue().getExpireAt());
+            if (expired && e.getValue().getCertificateUrl() != null) {
+                orphanFiles.add(e.getValue().getCertificateUrl());
+            }
+            return expired;
+        });
+        return orphanFiles;
+    }
 
     public static String savePending(String adminEmail, PendingDoctorData data) {
         String id = data.getRequestId();

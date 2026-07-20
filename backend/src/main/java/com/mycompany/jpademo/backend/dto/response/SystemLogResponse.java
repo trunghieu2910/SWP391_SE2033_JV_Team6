@@ -1,12 +1,14 @@
 package com.mycompany.jpademo.backend.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SystemLogResponse {
     private String userName;
 

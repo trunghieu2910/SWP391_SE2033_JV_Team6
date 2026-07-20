@@ -1,17 +1,13 @@
-// session-detail.js
-
 // ============================================
-// TOAST: tự động tắt sau 5 giây (chỉ trang session-detail)
+// TOAST: tự động tắt sau 5 giây
 // ============================================
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.wrapper .alert').forEach(function (alertEl) {
         setTimeout(function () {
-            // Dùng lại đúng animation "toastSlideOut" rồi ẩn hẳn,
-            // tái sử dụng cách closeAlert() trong layout.html đang làm (opacity + display:none)
             alertEl.classList.add('toast-hide');
             setTimeout(function () {
                 alertEl.style.display = 'none';
-            }, 300); // khớp với thời lượng animation toastSlideOut
+            }, 300);
         }, 5000);
     });
 });
@@ -19,15 +15,15 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function() {
 
     // ============================================
-    // CSRF TOKEN UTILITY
+    // Lưu URL khi có bộ lọc được áp dụng
     // ============================================
-    function getCsrfToken() {
-        const token = document.querySelector('meta[name="_csrf"]');
-        const header = document.querySelector('meta[name="_csrf_header"]');
-        return {
-            token: token ? token.getAttribute('content') : '',
-            header: header ? header.getAttribute('content') : 'X-CSRF-TOKEN'
-        };
+    const backBtn = document.getElementById('backToSessionsBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const listUrl = sessionStorage.getItem('doctorSessionsListUrl') || '/doctor/sessions';
+            window.location.href = listUrl;
+        });
     }
 
     // ============================================
@@ -110,17 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmModalMessage.textContent = 'Bạn có chắc chắn muốn lưu các thay đổi về triệu chứng lâm sàng?';
 
             confirmModalOkBtn.onclick = function() {
-                // Thêm CSRF token vào form trước khi submit
-                const csrf = getCsrfToken();
-                let csrfInput = symptomForm.querySelector('input[name="_csrf"]');
-                if (!csrfInput) {
-                    csrfInput = document.createElement('input');
-                    csrfInput.type = 'hidden';
-                    csrfInput.name = '_csrf';
-                    symptomForm.appendChild(csrfInput);
-                }
-                csrfInput.value = csrf.token;
-
+                // symptomForm đã có sẵn CSRF token do Thymeleaf render trong HTML
                 symptomForm.submit();
                 closeConfirmModal();
             };
@@ -237,26 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Tạo form và submit với CSRF token
-        const form = document.createElement('form');
-        form.method = 'POST';
+        const form = document.getElementById('statusForm');
         form.action = '/doctor/sessions/' + selectedStatusSessionId + '/status';
-
-        // Thêm CSRF token
-        const csrf = getCsrfToken();
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_csrf';
-        csrfInput.value = csrf.token;
-        form.appendChild(csrfInput);
-
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'status';
-        input.value = newStatus;
-
-        form.appendChild(input);
-        document.body.appendChild(form);
+        document.getElementById('statusFormInput').value = newStatus;
         form.submit();
 
         closeStatusModal();
@@ -320,26 +289,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.confirmShareUpdate = function() {
         const isShared = !selectedShareCurrent;
 
-        // Tạo form và submit với CSRF token
-        const form = document.createElement('form');
-        form.method = 'POST';
+        const form = document.getElementById('shareForm');
         form.action = '/doctor/sessions/' + selectedShareSessionId + '/share';
-
-        // Thêm CSRF token
-        const csrf = getCsrfToken();
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_csrf';
-        csrfInput.value = csrf.token;
-        form.appendChild(csrfInput);
-
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'isShared';
-        input.value = isShared;
-
-        form.appendChild(input);
-        document.body.appendChild(form);
+        document.getElementById('shareFormInput').value = isShared;
         form.submit();
 
         closeShareModal();
@@ -395,17 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Vui lòng chọn loại xét nghiệm.');
                 return;
             }
-
-            // Thêm CSRF token vào form nếu chưa có
-            const csrf = getCsrfToken();
-            let csrfInput = addLabForm.querySelector('input[name="_csrf"]');
-            if (!csrfInput) {
-                csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_csrf';
-                addLabForm.appendChild(csrfInput);
-            }
-            csrfInput.value = csrf.token;
         });
     }
 
@@ -500,41 +441,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }
     };
-
-    // ============================================
-    // INITIALIZE: Kiểm tra và thêm CSRF token cho các form có sẵn
-    // ============================================
-    const allForms = document.querySelectorAll('form');
-    allForms.forEach(function(form) {
-        // Chỉ thêm CSRF cho các form POST chưa có
-        if (form.method.toLowerCase() === 'post') {
-            let csrfInput = form.querySelector('input[name="_csrf"]');
-            if (!csrfInput) {
-                const csrf = getCsrfToken();
-                csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_csrf';
-                csrfInput.value = csrf.token;
-                form.appendChild(csrfInput);
-            }
-        }
-    });
-
-    // ============================================
-    // FIX: Đảm bảo form addLab có CSRF token
-    // ============================================
-    const addLabFormFix = document.getElementById('addLabForm');
-    if (addLabFormFix) {
-        let csrfInput = addLabFormFix.querySelector('input[name="_csrf"]');
-        if (!csrfInput) {
-            const csrf = getCsrfToken();
-            csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_csrf';
-            csrfInput.value = csrf.token;
-            addLabFormFix.appendChild(csrfInput);
-        }
-    }
 
     console.log('🚀 Doctor Session Detail page loaded');
 });

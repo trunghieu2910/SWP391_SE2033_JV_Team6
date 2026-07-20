@@ -120,8 +120,10 @@ public class DoctorDiagnosisController {
 
     @GetMapping("/{sessionId}/symptoms")
     @ResponseBody
-    public List<SymptomResponse> getSessionSymptoms(@PathVariable Integer sessionId) {
-        return doctorDiagnosisService.getSessionSymptoms(sessionId);
+    public List<SymptomResponse> getSessionSymptoms(@PathVariable Integer sessionId,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Integer doctorId = userDetails.getUser().getUserId();
+        return doctorDiagnosisService.getSessionSymptoms(sessionId, doctorId);
     }
 
     @PostMapping("/{sessionId}/symptoms")
