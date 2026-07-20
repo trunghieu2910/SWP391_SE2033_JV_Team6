@@ -41,8 +41,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
     @Query("SELECT i FROM Inventory i WHERE i.batch.drug.drugId = :drugId " +
            "AND i.quantityInStock > 0 " +
            "AND i.batch.expiryDate >= CURRENT_DATE " +
-           "AND (i.batch.drug.status IS NULL OR i.batch.drug.status != 0) " +
-           "AND (i.batch.status IS NULL OR i.batch.status != 0) " +
            "ORDER BY i.batch.expiryDate ASC")
     List<Inventory> findActiveBatchesByDrugId(@Param("drugId") Integer drugId);
 }

@@ -39,14 +39,6 @@
                     <strong th:text="${details != null and !#lists.isEmpty(details) and details[0].patientId != null ? details[0].patientId : '-'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Ngày sinh</span>
-                    <strong th:text="${patientDob != null ? patientDob : '-'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">CCCD/CMND</span>
-                    <strong th:text="${patientCccd != null ? patientCccd : '-'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 4px;">
                     <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã đơn thuốc</span>
                     <strong th:text="${prescriptionCode}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
                 </div>
