@@ -28,6 +28,7 @@ public interface PharmacistService {
     String generateNextDrugCode();
     String generateNextBatchStt();
     List<Unit> getAllUnits();
+    List<DrugConversionDTO> getDrugConversions(Integer drugId);
 
     // Drug Batch Management
     Page<DrugBatchDTO> getDrugBatches(Pageable pageable);

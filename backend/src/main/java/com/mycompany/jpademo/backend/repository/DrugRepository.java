@@ -21,9 +21,8 @@ public interface DrugRepository extends JpaRepository<Drug, Integer> {
     Page<Drug> findByStatus(Byte status, Pageable pageable);
     java.util.List<Drug> findByStatus(Byte status);
     
-    @Query("SELECT d FROM Drug d WHERE d.status = 1 AND " +
-           "(d.drugName LIKE %:search% OR d.drugCode LIKE %:search%)")
-    Page<Drug> searchActiveDrugs(@Param("search") String search, Pageable pageable);
+    @Query("SELECT d FROM Drug d WHERE d.drugName LIKE %:search% OR d.drugCode LIKE %:search%")
+    Page<Drug> searchDrugs(@Param("search") String search, Pageable pageable);
 
     @Query("SELECT d.drugCode FROM Drug d")
     java.util.List<String> findAllDrugCodes();

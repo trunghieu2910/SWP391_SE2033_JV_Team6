@@ -17,6 +17,8 @@ public class DrugDTO {
     private String routeOfAdministration;
     private String subCategoryName;
     private Integer subCategoryId;
+    private Integer baseUnitId;
+    private String baseUnitName;
     private String packaging;
     private String manufacturer;
     private String countryOfOrigin;

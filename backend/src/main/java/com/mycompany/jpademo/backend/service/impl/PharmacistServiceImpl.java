@@ -70,13 +70,13 @@ public class PharmacistServiceImpl implements PharmacistService {
 
     @Override
     public Page<DrugDTO> getDrugList(Pageable pageable) {
-        Page<Drug> drugs = drugRepository.findByStatus((byte) 1, pageable);
+        Page<Drug> drugs = drugRepository.findAll(pageable);
         return drugs.map(this::convertToDrugDTO);
     }
 
     @Override
     public Page<DrugDTO> searchDrugs(String search, Pageable pageable) {
-        Page<Drug> drugs = drugRepository.searchActiveDrugs(search, pageable);
+        Page<Drug> drugs = drugRepository.searchDrugs(search, pageable);
         return drugs.map(this::convertToDrugDTO);
     }
 
@@ -84,6 +84,16 @@ public class PharmacistServiceImpl implements PharmacistService {
     public List<DrugDTO> getAllActiveDrugs() {
         List<Drug> drugs = drugRepository.findByStatus((byte) 1);
         return drugs.stream().map(this::convertToDrugDTO).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public List<DrugConversionDTO> getDrugConversions(Integer drugId) {
+        if (drugId == null) {
+            return List.of();
+        }
+        return unitConversionRepository.findByDrugId(drugId).stream()
+            .map(this::convertToDrugConversionDTO)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -107,6 +117,7 @@ public class PharmacistServiceImpl implements PharmacistService {
 
         DrugSubCategory subCategory = drugSubCategoryRepository.findById(request.getSubCategoryId())
             .orElseThrow(() -> new RuntimeException("SubCategory not found: " + request.getSubCategoryId()));
+        Unit baseUnit = resolveBaseUnit(request);
 
         Drug drug = Drug.builder()
             .drugCode(request.getDrugCode())
@@ -116,6 +127,7 @@ public class PharmacistServiceImpl implements PharmacistService {
             .dosageForm(request.getDosageForm())
             .routeOfAdministration(request.getRouteOfAdministration())
             .subCategory(subCategory)
+            .baseUnit(baseUnit)
             .packaging(request.getPackaging())
             .manufacturer(request.getManufacturer())
             .countryOfOrigin(request.getCountryOfOrigin())
@@ -127,6 +139,7 @@ public class PharmacistServiceImpl implements PharmacistService {
             .build();
 
         Drug savedDrug = drugRepository.save(drug);
+        saveDrugConversions(savedDrug, request);
         log.info("Drug created: {}", savedDrug.getDrugCode());
         return convertToDrugDTO(savedDrug);
     }
@@ -144,6 +157,7 @@ public class PharmacistServiceImpl implements PharmacistService {
 
         DrugSubCategory subCategory = drugSubCategoryRepository.findById(request.getSubCategoryId())
             .orElseThrow(() -> new RuntimeException("SubCategory not found: " + request.getSubCategoryId()));
+        Unit baseUnit = resolveBaseUnit(request);
 
         drug.setDrugName(request.getDrugName());
         drug.setStrength(request.getStrength());
@@ -151,6 +165,7 @@ public class PharmacistServiceImpl implements PharmacistService {
         drug.setDosageForm(request.getDosageForm());
         drug.setRouteOfAdministration(request.getRouteOfAdministration());
         drug.setSubCategory(subCategory);
+        drug.setBaseUnit(baseUnit);
         drug.setPackaging(request.getPackaging());
         drug.setManufacturer(request.getManufacturer());
         drug.setCountryOfOrigin(request.getCountryOfOrigin());
@@ -159,8 +174,70 @@ public class PharmacistServiceImpl implements PharmacistService {
         drug.setNotes(request.getNotes());
 
         Drug updatedDrug = drugRepository.save(drug);
+        saveDrugConversions(updatedDrug, request);
         log.info("Drug updated: {}", updatedDrug.getDrugCode());
         return convertToDrugDTO(updatedDrug);
+    }
+
+    private Unit resolveBaseUnit(CreateDrugRequest request) {
+        Integer baseUnitId = request.getBaseUnitId();
+        if (baseUnitId == null && request.getConversionSmallUnitIds() != null) {
+            for (int i = request.getConversionSmallUnitIds().size() - 1; i >= 0; i--) {
+                Integer candidate = request.getConversionSmallUnitIds().get(i);
+                if (candidate != null) {
+                    baseUnitId = candidate;
+                    break;
+                }
+            }
+        }
+
+        if (baseUnitId == null) {
+            throw new RuntimeException("Vui lòng chọn đơn vị gốc kê đơn.");
+        }
+
+        final Integer resolvedBaseUnitId = baseUnitId;
+        return unitRepository.findById(resolvedBaseUnitId)
+            .orElseThrow(() -> new RuntimeException("Unit not found: " + resolvedBaseUnitId));
+    }
+
+    private void saveDrugConversions(Drug drug, CreateDrugRequest request) {
+        List<UnitConversion> oldConversions = unitConversionRepository.findByDrugId(drug.getDrugId());
+        if (!oldConversions.isEmpty()) {
+            unitConversionRepository.deleteAll(oldConversions);
+        }
+
+        List<Integer> largeUnitIds = request.getConversionLargeUnitIds();
+        List<Integer> smallUnitIds = request.getConversionSmallUnitIds();
+        List<Integer> quantities = request.getConversionQuantities();
+        if (largeUnitIds == null || smallUnitIds == null || quantities == null) {
+            return;
+        }
+
+        int rowCount = Math.min(largeUnitIds.size(), Math.min(smallUnitIds.size(), quantities.size()));
+        for (int i = 0; i < rowCount; i++) {
+            Integer largeUnitId = largeUnitIds.get(i);
+            Integer smallUnitId = smallUnitIds.get(i);
+            Integer quantity = quantities.get(i);
+
+            if (largeUnitId == null || smallUnitId == null || quantity == null || quantity <= 0) {
+                continue;
+            }
+            if (largeUnitId.equals(smallUnitId)) {
+                throw new RuntimeException("Đơn vị lớn và đơn vị nhỏ trong quy đổi không được trùng nhau.");
+            }
+
+            Unit largeUnit = unitRepository.findById(largeUnitId)
+                .orElseThrow(() -> new RuntimeException("Unit not found: " + largeUnitId));
+            Unit smallUnit = unitRepository.findById(smallUnitId)
+                .orElseThrow(() -> new RuntimeException("Unit not found: " + smallUnitId));
+
+            unitConversionRepository.save(UnitConversion.builder()
+                .drug(drug)
+                .largeUnit(largeUnit)
+                .smallUnit(smallUnit)
+                .conversionQuantity(quantity)
+                .build());
+        }
     }
 
     @Override
@@ -308,6 +385,8 @@ public class PharmacistServiceImpl implements PharmacistService {
         Unit unit = unitRepository.findById(request.getUnitId())
             .orElseThrow(() -> new RuntimeException("Unit not found: " + request.getUnitId()));
 
+        int quantityInSmallUnit = calculateSmallUnitQuantityFromRequest(drug, unit, request.getQuantity(), request.getPackagingChain());
+
         User pharmacist = userRepository.findById(pharmacistId)
             .orElseThrow(() -> new RuntimeException("User not found: " + pharmacistId));
 
@@ -326,9 +405,6 @@ public class PharmacistServiceImpl implements PharmacistService {
             .build();
 
         DrugBatch savedBatch = drugBatchRepository.save(batch);
-
-        // FIX: Tinh so luong ton kho theo don vi nho nhat dua vao UnitConversion
-        int quantityInSmallUnit = calculateSmallUnitQuantity(drug.getDrugId(), unit.getUnitId(), request.getQuantity());
 
         Inventory inventory = Inventory.builder()
             .batch(savedBatch)
@@ -470,7 +546,7 @@ public class PharmacistServiceImpl implements PharmacistService {
     private int getConversionFactor(Integer drugId, Integer largeUnitId) {
         List<UnitConversion> conversions = unitConversionRepository.findByDrugId(drugId);
         return conversions.stream()
-            .filter(c -> c.getLargeUnit().getUnitId().equals(largeUnitId))
+            .filter(c -> c.getLargeUnit() != null && c.getLargeUnit().getUnitId().equals(largeUnitId))
             .map(UnitConversion::getConversionQuantity)
             .findFirst()
             .orElse(1);
@@ -482,18 +558,80 @@ public class PharmacistServiceImpl implements PharmacistService {
      */
     private int calculateSmallUnitQuantity(Integer drugId, Integer largeUnitId, int quantity) {
         List<UnitConversion> conversions = unitConversionRepository.findByDrugId(drugId);
-        Optional<UnitConversion> matchedConversion = conversions.stream()
-            .filter(c -> c.getLargeUnit().getUnitId().equals(largeUnitId))
-            .findFirst();
-
-        if (matchedConversion.isPresent()) {
-            int factor = matchedConversion.get().getConversionQuantity();
-            log.debug("Quy doi: {} * {} = {} don vi nho", quantity, factor, quantity * factor);
-            return quantity * factor;
+        int convertedQuantity = calculateSmallUnitQuantityFromConversions(conversions, largeUnitId, quantity);
+        if (convertedQuantity != quantity) {
+            log.debug("Quy doi: {} -> {} don vi nho", quantity, convertedQuantity);
         } else {
             log.warn("Khong tim thay quy doi don vi cho drugId={}, unitId={}. Dung nguyen so luong.", drugId, largeUnitId);
+        }
+        return convertedQuantity;
+    }
+
+    public static int calculateSmallUnitQuantityFromConversions(List<UnitConversion> conversions, Integer largeUnitId, int quantity) {
+        if (conversions == null || conversions.isEmpty() || largeUnitId == null || quantity <= 0) {
             return quantity;
         }
+
+        java.util.Map<Integer, List<UnitConversion>> conversionsByLargeUnit = conversions.stream()
+            .filter(c -> c.getLargeUnit() != null && c.getSmallUnit() != null)
+            .collect(Collectors.groupingBy(c -> c.getLargeUnit().getUnitId()));
+
+        return calculateSmallUnitQuantityByUnit(conversionsByLargeUnit, largeUnitId, quantity);
+    }
+
+    public static int calculateSmallUnitQuantityFromChain(String packagingChain, int quantity) {
+        if (quantity <= 0 || packagingChain == null || packagingChain.trim().isEmpty()) {
+            return quantity;
+        }
+
+        String normalized = packagingChain.replace(" ", "").trim();
+        String[] parts = normalized.split(",");
+        int result = quantity;
+
+        for (String part : parts) {
+            if (part == null || part.trim().isEmpty()) {
+                continue;
+            }
+            try {
+                result *= Integer.parseInt(part.trim());
+            } catch (NumberFormatException e) {
+                return quantity;
+            }
+        }
+
+        return result;
+    }
+
+    private int calculateSmallUnitQuantityFromRequest(Drug drug, Unit unit, Integer quantity, String packagingChain) {
+        if (quantity == null || quantity <= 0) {
+            return 0;
+        }
+
+        if (packagingChain != null && !packagingChain.trim().isEmpty()) {
+            return calculateSmallUnitQuantityFromChain(packagingChain, quantity);
+        }
+
+        return calculateSmallUnitQuantity(drug.getDrugId(), unit.getUnitId(), quantity);
+    }
+
+    private static int calculateSmallUnitQuantityByUnit(java.util.Map<Integer, List<UnitConversion>> conversionsByLargeUnit,
+                                                        Integer currentUnitId, int quantity) {
+        if (currentUnitId == null) {
+            return quantity;
+        }
+
+        List<UnitConversion> nextSteps = conversionsByLargeUnit.get(currentUnitId);
+        if (nextSteps == null || nextSteps.isEmpty()) {
+            return quantity;
+        }
+
+        UnitConversion nextStep = nextSteps.stream().findFirst().orElse(null);
+        if (nextStep == null || nextStep.getConversionQuantity() == null) {
+            return quantity;
+        }
+
+        int nextQuantity = quantity * nextStep.getConversionQuantity();
+        return calculateSmallUnitQuantityByUnit(conversionsByLargeUnit, nextStep.getSmallUnit() != null ? nextStep.getSmallUnit().getUnitId() : null, nextQuantity);
     }
 
     @Override
@@ -788,6 +926,8 @@ public class PharmacistServiceImpl implements PharmacistService {
             .routeOfAdministration(drug.getRouteOfAdministration())
             .subCategoryName(drug.getSubCategory().getSubCategoryName())
             .subCategoryId(drug.getSubCategory().getSubCategoryId())
+            .baseUnitId(drug.getBaseUnit() != null ? drug.getBaseUnit().getUnitId() : null)
+            .baseUnitName(drug.getBaseUnit() != null ? getSanitizedUnitName(drug.getBaseUnit()) : null)
             .packaging(drug.getPackaging())
             .manufacturer(drug.getManufacturer())
             .countryOfOrigin(drug.getCountryOfOrigin())
@@ -874,6 +1014,16 @@ public class PharmacistServiceImpl implements PharmacistService {
             u.setUnitName(getSanitizedUnitName(u));
         }
         return units;
+    }
+
+    private DrugConversionDTO convertToDrugConversionDTO(UnitConversion conversion) {
+        return DrugConversionDTO.builder()
+            .largeUnitId(conversion.getLargeUnit() != null ? conversion.getLargeUnit().getUnitId() : null)
+            .largeUnitName(conversion.getLargeUnit() != null ? getSanitizedUnitName(conversion.getLargeUnit()) : "Đơn vị")
+            .smallUnitId(conversion.getSmallUnit() != null ? conversion.getSmallUnit().getUnitId() : null)
+            .smallUnitName(conversion.getSmallUnit() != null ? getSanitizedUnitName(conversion.getSmallUnit()) : "Đơn vị")
+            .conversionQuantity(conversion.getConversionQuantity())
+            .build();
     }
 
     private String getSanitizedUnitName(Unit unit) {

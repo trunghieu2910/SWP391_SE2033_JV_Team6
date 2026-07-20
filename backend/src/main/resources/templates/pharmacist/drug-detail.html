@@ -144,6 +144,70 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="editBaseUnitId">Đơn vị gốc kê đơn *</label>
+                    <select id="editBaseUnitId" name="baseUnitId" class="base-unit-select" required>
+                        <option value="">-- Chọn đơn vị gốc --</option>
+                        <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}" th:selected="${u.unitId == drug.baseUnitId}"></option>
+                    </select>
+                </div>
+                <div class="form-group unit-conversion-builder" data-drug-name-input="editDrugName">
+                    <div class="unit-conversion-header">
+                        <div>
+                            <span class="unit-conversion-eyebrow">Cách hiển thị trực quan</span>
+                            <h3>Thiết lập quy đổi cho: <span class="unit-conversion-drug-name" th:text="${drug.drugName}">thuốc đang sửa</span></h3>
+                            <p>Đơn vị gốc kê đơn: <strong class="unit-conversion-base-unit">Đơn vị gốc</strong></p>
+                        </div>
+                        <button type="button" class="unit-conversion-add">
+                            <i class="fas fa-plus"></i> Thêm bước
+                        </button>
+                    </div>
+
+                    <div class="unit-conversion-steps">
+                        <div class="unit-conversion-step" th:each="conversion : ${conversions}">
+                            <span class="unit-conversion-one">1</span>
+                            <select name="conversionLargeUnitIds" class="unit-conversion-large-unit">
+                                <option value="">-- Đơn vị lớn --</option>
+                                <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}" th:selected="${u.unitId == conversion.largeUnitId}"></option>
+                            </select>
+                            <span class="unit-conversion-equals">=</span>
+                            <input type="number" name="conversionQuantities" class="unit-conversion-factor" min="1" placeholder="SL" th:value="${conversion.conversionQuantity}">
+                            <select name="conversionSmallUnitIds" class="unit-conversion-small-unit">
+                                <option value="">-- Đơn vị nhỏ --</option>
+                                <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}" th:selected="${u.unitId == conversion.smallUnitId}"></option>
+                            </select>
+                            <button type="button" class="unit-conversion-remove" title="Xóa bước quy đổi">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="unit-conversion-step" th:if="${conversions == null or #lists.isEmpty(conversions)}">
+                            <span class="unit-conversion-one">1</span>
+                            <select name="conversionLargeUnitIds" class="unit-conversion-large-unit">
+                                <option value="">-- Đơn vị lớn --</option>
+                                <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                            </select>
+                            <span class="unit-conversion-equals">=</span>
+                            <input type="number" name="conversionQuantities" class="unit-conversion-factor" min="1" placeholder="SL">
+                            <select name="conversionSmallUnitIds" class="unit-conversion-small-unit">
+                                <option value="">-- Đơn vị nhỏ --</option>
+                                <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}"></option>
+                            </select>
+                            <button type="button" class="unit-conversion-remove" title="Xóa bước quy đổi">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="unit-conversion-summary">
+                        Nhập đủ các bước quy đổi để hệ thống tự tính tồn kho theo đơn vị nhỏ nhất.
+                    </div>
+
+                    <ul class="unit-conversion-notes">
+                        <li>Ô nhập đơn vị lớn và đơn vị nhỏ là dropdown chọn từ bảng Unit.</li>
+                        <li>Hệ thống tự động tính và hiển thị dòng tóm tắt ở phía dưới để người dùng kiểm tra lại với thực tế.</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
                     <label for="editSubCategoryId">Phân nhóm thuốc *</label>
                     <select id="editSubCategoryId" name="subCategoryId" required>
                         <option value="">-- Chọn phân nhóm --</option>
@@ -244,6 +308,7 @@
     </div>
 
     <script th:src="@{/js/pharmacist/drug-detail.js}"></script>
+    <script th:src="@{/js/pharmacist/drug-form.js}"></script>
     <script>
         function showEditForm() {
             document.getElementById('editFormCard').style.display = 'block';

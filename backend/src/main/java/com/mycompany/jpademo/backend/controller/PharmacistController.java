@@ -134,6 +134,8 @@ public class PharmacistController {
             List<DrugBatchDTO> batches = pharmacistService.getBatchesByDrug(drugId);
             model.addAttribute("drug", drug);
             model.addAttribute("batches", batches);
+            model.addAttribute("units", pharmacistService.getAllUnits());
+            model.addAttribute("conversions", pharmacistService.getDrugConversions(drugId));
             return "pharmacist/drug-detail";
         } catch (Exception e) {
             log.error("Error loading drug detail", e);
@@ -146,6 +148,7 @@ public class PharmacistController {
     public String showAddDrugForm(Model model) {
         String nextDrugCode = pharmacistService.generateNextDrugCode();
         model.addAttribute("nextDrugCode", nextDrugCode);
+        model.addAttribute("units", pharmacistService.getAllUnits());
         model.addAttribute("drugForm", new CreateDrugRequest());
         return "pharmacist/drug-form";
     }
@@ -223,6 +226,17 @@ public class PharmacistController {
         model.addAttribute("units", pharmacistService.getAllUnits());
         model.addAttribute("importForm", new ImportDrugBatchRequest());
         return "pharmacist/drug-import";
+    }
+
+    @GetMapping("/drug-conversions/{drugId}")
+    @ResponseBody
+    public ResponseEntity<List<DrugConversionDTO>> getDrugConversions(@PathVariable Integer drugId) {
+        try {
+            return ResponseEntity.ok(pharmacistService.getDrugConversions(drugId));
+        } catch (Exception e) {
+            log.error("Error loading drug conversions", e);
+            return ResponseEntity.status(500).body(List.of());
+        }
     }
 
     @PostMapping("/drug-import")

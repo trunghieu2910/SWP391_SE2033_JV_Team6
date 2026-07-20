@@ -3,13 +3,15 @@
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Chi tiết cấp phát đơn thuốc', 'dispense')}">
 <body>
 <main>
-    <div class="container" style="max-width: 900px; margin: 0 auto;">
-        <header class="page-header" style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 12px;">
+    <link rel="stylesheet" th:href="@{/css/pharmacist/dispense-prescription-detail.css}">
+
+    <div class="container dispense-prescription-page">
+        <header class="page-header dispense-prescription-header">
+            <div class="dispense-prescription-title">
                 <a href="/pharmacist/dispense-list" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Quay lại danh sách
                 </a>
-                <h1 style="margin: 0;"><i class="fas fa-receipt"></i> Đơn thuốc: <span th:text="${prescriptionCode}"></span></h1>
+                <h1><i class="fas fa-receipt"></i> Đơn thuốc: <span th:text="${prescriptionCode}"></span></h1>
             </div>
         </header>
 
@@ -33,19 +35,44 @@
                     <strong th:text="${patientName}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã bệnh nhân</span>
+                    <strong th:text="${details != null and !#lists.isEmpty(details) and details[0].patientId != null ? details[0].patientId : '-'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
                     <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã đơn thuốc</span>
                     <strong th:text="${prescriptionCode}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Tổng số thuốc</span>
+                    <strong id="prescriptionTotalItems" th:text="${details != null ? #lists.size(details) : 0}" style="font-size: 1rem; color: var(--neutral-dark);">0</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Còn chờ cấp phát</span>
+                    <strong id="prescriptionPendingItems" style="font-size: 1rem; color: #b45309;">0</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Trạng thái đơn</span>
+                    <strong id="prescriptionStatusSummary" style="font-size: 1rem;">-</strong>
                 </div>
             </div>
         </section>
 
         <!-- Prescription Details Table -->
-        <section class="card" style="padding: 0; overflow: hidden;">
-            <div style="padding: 20px 24px;">
-                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--neutral-dark);">Danh sách thuốc cần phát</h3>
+        <section class="card dispense-detail-card">
+            <div class="dispense-detail-card-header">
+                <h3>Danh sách thuốc cần phát</h3>
             </div>
-            <div class="table-responsive" style="margin-top: 0;">
-                <table class="table">
+            <div class="table-responsive dispense-detail-table-wrap">
+                <table class="table dispense-detail-table">
+                    <colgroup>
+                        <col class="col-drug">
+                        <col class="col-dose">
+                        <col class="col-duration">
+                        <col class="col-quantity">
+                        <col class="col-dispensed">
+                        <col class="col-status">
+                        <col class="col-action">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Tên thuốc</th>
@@ -58,22 +85,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="item : ${details}">
-                            <td th:text="${item.drugName}" style="font-weight: 700; color: var(--primary);"></td>
+                        <tr th:each="item : ${details}" th:data-pending="${item.isPending}">
+                            <td class="drug-name-cell" th:text="${item.drugName}"></td>
                             <td th:text="${item.dosePerTime} + ' mg, ' + ${item.timesPerDay} + ' lần/ngày'"></td>
                             <td th:text="${item.daysOfTreatment} + ' ngày'"></td>
-                            <td th:text="${item.quantityPrescribed}" style="font-weight: 700;"></td>
-                            <td th:text="${item.quantityDispensed != null ? item.quantityDispensed : 0}" style="font-weight: 700;"></td>
-                            <td>
-                                <span th:if="${item.isPending}" class="badge badge-warning">Chờ cấp phát</span>
-                                <span th:if="!${item.isPending}" class="badge badge-success">Đã cấp phát</span>
+                            <td class="number-cell" th:text="${item.quantityPrescribed}"></td>
+                            <td class="number-cell" th:text="${item.quantityDispensed != null ? item.quantityDispensed : 0}"></td>
+                            <td class="status-cell">
+                                <span th:if="${item.isPending}" class="badge badge-warning dispense-status-badge">Chờ cấp phát</span>
+                                <span th:if="!${item.isPending}" class="badge badge-success dispense-status-badge">Đã cấp phát</span>
                             </td>
-                            <td>
+                            <td class="action-cell">
                                 <a th:href="@{/pharmacist/dispense-form/{id}(id=${item.detailId})}"
-                                   class="btn btn-sm btn-primary" th:if="${item.isPending}">
+                                   class="btn btn-sm btn-primary dispense-action-btn" th:if="${item.isPending}">
                                     <i class="fas fa-hand-holding-medical"></i> Cấp phát
                                 </a>
-                                <span th:unless="${item.isPending}" style="color: var(--success); font-weight: 600;">
+                                <span th:unless="${item.isPending}" class="dispense-completed-text">
                                     <i class="fas fa-check"></i> Hoàn thành
                                 </span>
                             </td>
@@ -83,6 +110,24 @@
             </div>
         </section>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = Array.from(document.querySelectorAll('.dispense-detail-table tbody tr[data-pending]'));
+            const pendingCount = rows.filter(row => row.dataset.pending === 'true').length;
+            const pendingEl = document.getElementById('prescriptionPendingItems');
+            const statusEl = document.getElementById('prescriptionStatusSummary');
+
+            if (pendingEl) {
+                pendingEl.textContent = pendingCount;
+            }
+
+            if (statusEl) {
+                statusEl.innerHTML = pendingCount > 0
+                    ? '<span class="badge badge-warning">Chờ cấp phát</span>'
+                    : '<span class="badge badge-success">Đã cấp phát</span>';
+            }
+        });
+    </script>
 </main>
 </body>
 </html>
