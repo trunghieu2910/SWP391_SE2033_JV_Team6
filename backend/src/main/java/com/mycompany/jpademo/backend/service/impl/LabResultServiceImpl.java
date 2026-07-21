@@ -1,6 +1,5 @@
 package com.mycompany.jpademo.backend.service.impl;
 
-import com.mycompany.jpademo.backend.aop.annotation.LogActivity;
 import com.mycompany.jpademo.backend.dto.request.CreateLabResultRequest;
 import com.mycompany.jpademo.backend.dto.response.LabResultResponse;
 import com.mycompany.jpademo.backend.entity.DiagnosisSession;
@@ -16,6 +15,7 @@ import com.mycompany.jpademo.backend.repository.LabResultParameterRepository;
 import com.mycompany.jpademo.backend.repository.LabResultRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.LabResultService;
+import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,6 +35,8 @@ public class LabResultServiceImpl implements LabResultService {
     private final LabResultRepository labResultRepository;
 
     private final LabResultParameterRepository labResultParameterRepository;
+
+    private final SystemLogService systemLogService;
 
     @Override
     public LabResultResponse createLabResult(CreateLabResultRequest request) {
@@ -72,6 +74,10 @@ public class LabResultServiceImpl implements LabResultService {
                 .build();
 
         labResult = labResultRepository.save(labResult);
+
+        systemLogService.logActivity("LabResult", labResult.getLabResultId(), "CREATE",
+                "Bác sĩ tạo chỉ định xét nghiệm \"" + labResult.getTestType()
+                        + "\" cho phiên khám #" + session.getSessionId());
 
         return mapToLabResultResponse(labResult, Collections.emptyList());
     }
@@ -190,5 +196,9 @@ public class LabResultServiceImpl implements LabResultService {
         }
 
         labResultRepository.delete(labResult);
+
+        systemLogService.logActivity("LabResult", labResult.getLabResultId(), "DELETE",
+                "Bác sĩ xóa chỉ định xét nghiệm \"" + labResult.getTestType()
+                        + "\" cho phiên khám #" + session.getSessionId());
     }
 }

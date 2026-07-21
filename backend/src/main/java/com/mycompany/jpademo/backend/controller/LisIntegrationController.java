@@ -53,7 +53,7 @@ public class LisIntegrationController {
                             .build());
         }
 
-        LabResultResponse data = lisIntegrationService.receiveLabResults(request);
+        LabResultResponse data = lisIntegrationService.receiveLabResults(request, "REAL_LIS");
 
         return ResponseEntity.ok(
                 ApiResponse.<LabResultResponse>builder()
@@ -90,7 +90,7 @@ public class LisIntegrationController {
         lisRequest.setTestResults(mockResults);
 
         try {
-            lisIntegrationService.receiveLabResults(lisRequest); // TÁI SỬ DỤNG y nguyên service cũ
+            lisIntegrationService.receiveLabResults(lisRequest, "UI_SIMULATE"); // TÁI SỬ DỤNG y nguyên service cũ
             httpRequest.getSession().setAttribute("flashSuccess", "Đã nhận kết quả xét nghiệm thành công!");
         } catch (ResourceNotFoundException e) {
             httpRequest.getSession().setAttribute("flashError", e.getMessage());

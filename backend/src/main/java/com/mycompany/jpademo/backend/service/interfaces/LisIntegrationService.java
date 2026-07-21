@@ -9,6 +9,6 @@ public interface LisIntegrationService {
      * Nhận dữ liệu kết quả xét nghiệm mô phỏng từ LIS, ghi vào LabResult
      * chỉ định bởi labResultId (phải đang PENDING) và đánh dấu COMPLETED.
      */
-    LabResultResponse receiveLabResults(LisResultRequest request);
+    LabResultResponse receiveLabResults(LisResultRequest request, String source);
 }
 

@@ -1,7 +1,12 @@
 package com.mycompany.jpademo.backend.security.handler;
 
+import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.repository.UserRepository;
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
+import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,7 +18,11 @@ import java.util.Map;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
+
+    private final SystemLogService systemLogService;
+    private final UserRepository userRepository;
 
     private static final String DEFAULT_HOME = "/patient/home";
 
@@ -33,19 +42,17 @@ public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
         String target = DEFAULT_HOME;
 
         try {
-            if (authentication != null && authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
+            if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+                User user = userDetails.getUser();
+
+                systemLogService.logActivity("Users", user.getUserId(), "LOGIN",
+                        "Đăng nhập thành công (" + user.getUserName() + ")");
+
                 GrantedAuthority authority = authentication.getAuthorities().stream().findFirst().orElse(null);
                 if (authority != null) {
                     String role = authority.getAuthority();
                     target = ROLE_HOME.getOrDefault(role, DEFAULT_HOME);
-                    log.info("Login successful for user: {}, role: {}, redirecting to: {}",
-                            authentication.getName(), role, target);
-                } else {
-                    log.warn("No authorities found for user: {}", authentication.getName());
                 }
-            } else {
-                log.warn("Authentication or authorities is null/empty for user: {}",
-                        authentication != null ? authentication.getName() : "unknown");
             }
         } catch (Exception e) {
             log.error("Error in RoleBasedSuccessHandler: ", e);

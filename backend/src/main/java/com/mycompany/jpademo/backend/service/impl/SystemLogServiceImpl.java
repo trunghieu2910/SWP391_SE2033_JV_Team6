@@ -37,15 +37,16 @@ public class SystemLogServiceImpl implements SystemLogService {
     public void logActivity(String targetType, Integer targetId, String action, String description) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails)) {
-                return;
+            User currentUser = null;
+            if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
+                currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
             }
-            User currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
 
             SystemLog systemLog = SystemLog.builder()
                     .action(action)
                     .targetType(targetType != null ? targetType : "SYSTEM")
-                    .targetId(targetId != null ? targetId : currentUser.getUserId())
+                    .targetId(targetId != null ? targetId
+                            : (currentUser != null ? currentUser.getUserId() : 0))
                     .description(description)
                     .user(currentUser)
                     .build();
@@ -89,6 +90,11 @@ public class SystemLogServiceImpl implements SystemLogService {
             case "UPDATE_SESSION_STATUS": return "Cập nhật";
             case "UPDATE_SESSION_SHARE": return "Cập nhật";
             case "UPDATE_CLINICAL_SYMPTOMS": return "Cập nhật";
+            case "FORGOT_PASSWORD": return "Yêu cầu quên mật khẩu";
+            case "VERIFY_OTP": return "Xác minh OTP";
+            case "UPDATE_PASSWORD": return "Đặt lại mật khẩu";
+            case "LIS_RECEIVE": return "Nhận kết quả LIS (thật)";
+            case "LIS_SIMULATE": return "Mô phỏng kết quả LIS";
             default: return action;
         }
     }

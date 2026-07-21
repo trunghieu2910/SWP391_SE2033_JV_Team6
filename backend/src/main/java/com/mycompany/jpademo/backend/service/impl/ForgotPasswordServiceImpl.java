@@ -12,6 +12,7 @@ import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.security.jwt.ResetPasswordJwtService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
 import com.mycompany.jpademo.backend.service.interfaces.ForgotPasswordService;
+import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import com.mycompany.jpademo.backend.util.OtpUtil;
 import com.mycompany.jpademo.backend.util.PasswordPolicyUtil;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final ResetPasswordJwtService resetPasswordJwtService;
+    private final SystemLogService systemLogService;
 
     @Override
-    @LogActivity(action = "FORGOT_PASSWORD", targetType = "Users", description = "Người dùng gửi yêu cầu quên mật khẩu")
     public ResponseEntity<ApiResponse> forgotPassword(ForgotPasswordRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
@@ -42,6 +43,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
 
         emailService.sendOtpEmail(user.getEmail(),user.getFullName(), otp);
 
+        systemLogService.logActivity("Users", user.getUserId(), "FORGOT_PASSWORD",
+                "Người dùng gửi yêu cầu quên mật khẩu (" + user.getEmail() + ")");
+
         return ResponseEntity.ok(ApiResponse.builder()
                         .success(true)
                         .message("OTP đã được gửi đến email của bạn")
@@ -49,7 +53,6 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     }
 
     @Override
-    @LogActivity(action = "VERIFY_OTP", targetType = "Users", description = "Người dùng xác minh OTP")
     public ResponseEntity<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request) {
         boolean valid = OtpUtil.verifyOtp(request.getEmail(), request.getOtp());
         if (!valid) {
@@ -62,13 +65,15 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                 orElseThrow(() -> new UserNotFoundException("Thông tin email không hợp lệ"));
         String token = resetPasswordJwtService.generateResetToken(user);
 
+        systemLogService.logActivity("Users", user.getUserId(), "VERIFY_OTP",
+                "Người dùng xác minh OTP thành công (" + user.getEmail() + ")");
+
         return ResponseEntity.ok(VerifyOtpResponse.builder()
                         .resetToken(token)
                         .build());
     }
 
     @Override
-    @LogActivity(action = "UPDATE_PASSWORD", targetType = "Users", description = "Người dùng đặt lại mật khẩu")
     public ResponseEntity<ApiResponse> resetPassword(ResetPasswordRequest request) {
         if (!resetPasswordJwtService.isValid(request.getResetToken())){
             throw new InvalidResetTokenException();
@@ -96,6 +101,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         user.setLastChangePassTime(LocalDateTime.now());
 
         userRepository.save(user);
+
+        systemLogService.logActivity("Users", user.getUserId(), "UPDATE_PASSWORD",
+                "Người dùng đặt lại mật khẩu thành công (" + user.getEmail() + ")");
 
         return ResponseEntity.ok(ApiResponse.builder()
                         .success(true)

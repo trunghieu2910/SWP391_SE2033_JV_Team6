@@ -11,6 +11,7 @@ import com.mycompany.jpademo.backend.repository.LabResultParameterRepository;
 import com.mycompany.jpademo.backend.repository.LabResultRepository;
 import com.mycompany.jpademo.backend.repository.ParameterRepository;
 import com.mycompany.jpademo.backend.service.interfaces.LisIntegrationService;
+import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +30,11 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
     private final LabResultRepository labResultRepository;
     private final LabResultParameterRepository labResultParameterRepository;
     private final ParameterRepository parameterRepository;
+    private final SystemLogService systemLogService;
 
     @Override
     @Transactional
-    public LabResultResponse receiveLabResults(LisResultRequest request) {
+    public LabResultResponse receiveLabResults(LisResultRequest request, String source) {
 
         LabResult labResult = labResultRepository
                 .findByLabResultIdAndStatus(request.getLabResultId(), LabResultStatus.PENDING)
@@ -66,6 +68,13 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
 
         labResult.setStatus(LabResultStatus.COMPLETED);
         labResultRepository.save(labResult);
+
+        String action = "UI_SIMULATE".equals(source) ? "LIS_SIMULATE" : "LIS_RECEIVE";
+        String description = "UI_SIMULATE".equals(source)
+                ? "Bác sĩ mô phỏng lấy kết quả LIS cho xét nghiệm \"" + labResult.getTestType() + "\""
+                : "Hệ thống LIS gửi kết quả thật cho xét nghiệm \"" + labResult.getTestType() + "\"";
+
+        systemLogService.logActivity("LabResult", labResult.getLabResultId(), action, description);
 
         return mapToLabResultResponse(labResult, savedParameters);
     }
