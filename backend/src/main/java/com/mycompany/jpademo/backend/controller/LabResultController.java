@@ -9,6 +9,7 @@ import com.mycompany.jpademo.backend.repository.DiagnosisSessionRepository;
 import com.mycompany.jpademo.backend.service.interfaces.LabResultService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,6 +29,7 @@ public class LabResultController {
     //  TẠO XÉT NGHIỆM (đã làm ở phần trước — giữ nguyên)
     // ══════════════════════════════════════════════
 
+    @PreAuthorize("hasRole('DOCTOR')")
     @GetMapping("/doctor/lab-results/create")
     public String showCreateForm(@RequestParam("sessionId") Integer sessionId, Model model) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
@@ -42,6 +44,7 @@ public class LabResultController {
         return "doctor/lab-result";
     }
 
+    @PreAuthorize("hasRole('DOCTOR')")
     @PostMapping("/doctor/lab-results/create")
     public String createLabResult(
             @Valid @ModelAttribute("labResultForm") CreateLabResultRequest form,
@@ -71,6 +74,7 @@ public class LabResultController {
     // ══════════════════════════════════════════════
 
     // ---- Bác sĩ xem ----
+    @PreAuthorize("hasRole('DOCTOR')")
     @GetMapping("/doctor/lab-results/session/{sessionId}")
     public String viewByDoctorSession(
             @PathVariable Integer sessionId,
@@ -98,6 +102,7 @@ public class LabResultController {
     }
 
     // ---- Bệnh nhân xem ----
+    @PreAuthorize("hasRole('PATIENT')")
     @GetMapping("/patient/lab-results/session/{sessionId}")
     public String viewByPatientSession(
             @PathVariable Integer sessionId,
@@ -129,6 +134,7 @@ public class LabResultController {
     //  XÓA XÉT NGHIỆM (chỉ khi đang PENDING)
     // ══════════════════════════════════════════════
 
+    @PreAuthorize("hasRole('DOCTOR')")
     @PostMapping("/doctor/lab-results/{labResultId}/delete")
     public String deleteLabResult(
             @PathVariable Integer labResultId,

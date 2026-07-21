@@ -50,6 +50,7 @@ import java.time.LocalDate;
 @RequestMapping("/patient")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@PreAuthorize("hasRole('PATIENT')")
 public class PatientController {
 
     private final ProfileService profileService;
