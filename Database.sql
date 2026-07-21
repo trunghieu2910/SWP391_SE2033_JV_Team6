@@ -876,7 +876,300 @@ VALUES
 GO
 
 
+------------------------------------------------------------
+-- BƯỚC 0: Đảm bảo đủ 12 loại chẩn đoán (bỏ qua nếu tên đã tồn tại)
+------------------------------------------------------------
+INSERT INTO DiseaseType (name)
+SELECT v.name FROM (VALUES
+    (N'Bình thường'),
+    (N'Bình thường / Không phát hiện bất thường'),
+    (N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận'),
+    (N'fbgfdbfd'),
+    (N'Loạn sản cổ tử cung nặng (CIN 2/3)'),
+    (N'Loạn sản cổ tử cung nhẹ (CIN 1)'),
+    (N'Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3)'),
+    (N'Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1)'),
+    (N'Ung thư biểu mô tại chỗ (CIS)'),
+    (N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)'),
+    (N'Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II)'),
+    (N'Viêm cổ tử cung')
+) AS v(name)
+WHERE NOT EXISTS (SELECT 1 FROM DiseaseType d WHERE d.name = v.name);
 
+
+------------------------------------------------------------
+-- 1. Bình thường — 37 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19),(20),(21),(22),(23),(24),(25),(26),(27),(28),(29),(30),(31),(32),(33),(34),(35),(36),(37)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (37)
+    N'Không phát hiện bất thường, tái khám định kỳ theo lịch tầm soát',
+    N'Duy trì tầm soát định kỳ 1-3 năm/lần',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Bình thường') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 2. Bình thường / Không phát hiện bất thường — 14 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (14)
+    N'Không cần điều trị, tái khám định kỳ theo lịch tầm soát',
+    N'Duy trì tầm soát định kỳ 1-3 năm/lần',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Bình thường / Không phát hiện bất thường') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 3. Cần theo dõi thêm / Chưa đủ dữ liệu kết luận — 9 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (9)
+    N'Cần bổ sung xét nghiệm, hẹn tái khám sớm để có kết luận rõ ràng',
+    N'Thực hiện thêm xét nghiệm theo chỉ định của bác sĩ',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 4. fbgfdbfd — 1 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (1)
+    N'Dữ liệu test', N'Dữ liệu test',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'fbgfdbfd') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 5. Loạn sản cổ tử cung nặng (CIN 2/3) — 7 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (7)
+    N'Chỉ định soi cổ tử cung, cân nhắc khoét chóp (LEEP)',
+    N'Cần tái khám đúng hẹn, không tự ý bỏ điều trị',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Loạn sản cổ tử cung nặng (CIN 2/3)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 6. Loạn sản cổ tử cung nhẹ (CIN 1) — 21 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19),(20),(21)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (21)
+    N'Theo dõi, làm lại xét nghiệm tế bào sau 6-12 tháng',
+    N'Tăng cường theo dõi, tránh yếu tố nguy cơ (thuốc lá, HPV)',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Loạn sản cổ tử cung nhẹ (CIN 1)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 7. Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3) — 10 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (10)
+    N'Soi cổ tử cung, sinh thiết xác định, cân nhắc LEEP/khoét chóp',
+    N'Cần điều trị sớm, tái khám đúng hẹn',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 8. Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1) — 14 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (14)
+    N'Theo dõi định kỳ, xét nghiệm lại sau 6-12 tháng',
+    N'Duy trì theo dõi, tái khám đúng hẹn',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 9. Ung thư biểu mô tại chỗ (CIS) — 3 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (3)
+    N'Chuyển tuyến chuyên khoa ung bướu, hội chẩn đa chuyên khoa',
+    N'Cần điều trị sớm, tuân thủ lịch hẹn chuyên khoa',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Ung thư biểu mô tại chỗ (CIS)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 10. Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV) — 12 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (12)
+    N'Hội chẩn đa chuyên khoa, phác đồ hóa-xạ trị kết hợp',
+    N'Cần nhập viện điều trị chuyên sâu, theo dõi sát',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 11. Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II) — 8 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (8)
+    N'Phẫu thuật triệt căn hoặc xạ trị theo giai đoạn',
+    N'Tuân thủ phác đồ điều trị, tái khám định kỳ',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 12. Viêm cổ tử cung — 17 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17)) AS t(n)
+CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (17)
+    N'Kháng sinh đường âm đạo 7-10 ngày, tái khám sau 2 tuần',
+    N'Giữ vệ sinh, tránh quan hệ trong thời gian điều trị',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Viêm cổ tử cung') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
 
 
 
