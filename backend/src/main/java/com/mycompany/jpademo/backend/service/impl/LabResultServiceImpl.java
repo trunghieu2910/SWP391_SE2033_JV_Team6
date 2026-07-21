@@ -75,7 +75,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         labResult = labResultRepository.save(labResult);
 
-        systemLogService.logActivity("LabResult", labResult.getLabResultId(), "CREATE",
+        systemLogService.logActivity("LabResult", labResult.getLabResultId(), "CREATE_LAB_RESULT",
                 "Bác sĩ tạo chỉ định xét nghiệm \"" + labResult.getTestType()
                         + "\" cho phiên khám #" + session.getSessionId());
 
@@ -197,7 +197,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         labResultRepository.delete(labResult);
 
-        systemLogService.logActivity("LabResult", labResult.getLabResultId(), "DELETE",
+        systemLogService.logActivity("LabResult", labResult.getLabResultId(), "DELETE_LAB_RESULT",
                 "Bác sĩ xóa chỉ định xét nghiệm \"" + labResult.getTestType()
                         + "\" cho phiên khám #" + session.getSessionId());
     }

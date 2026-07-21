@@ -13,6 +13,7 @@ import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
 import com.mycompany.jpademo.backend.service.interfaces.FirebaseService;
+import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -43,6 +44,7 @@ public class WebGoogleAuthController {
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final SystemLogService systemLogService;
 
     @PostMapping("/session")
     public ResponseEntity<Map<String, String>> googleSession(
@@ -72,6 +74,10 @@ public class WebGoogleAuthController {
         }
 
         establishSession(user, request, response);
+
+        systemLogService.logActivity("Users", user.getUserId(), "GOOGLE_LOGIN",
+                "Người dùng đăng nhập bằng Google (" + user.getEmail() + ")");
+
         return ResponseEntity.ok(Map.of(
                 "status", "OK",
                 "redirect", redirectByRole(user)
@@ -112,6 +118,10 @@ public class WebGoogleAuthController {
         emailService.sendPasswordEmail(email, decoded.getName(), rawPassword);
 
         establishSession(user, request, response);
+
+        systemLogService.logActivity("Users", user.getUserId(), "GOOGLE_LOGIN_FIRST_TIME",
+                "Người dùng đăng nhập bằng Google lần đầu tiên, tài khoản mới được tạo (" + user.getEmail() + ")");
+
         return ResponseEntity.ok(Map.of("status", "OK", "redirect", redirectByRole(user)));
     }
 
