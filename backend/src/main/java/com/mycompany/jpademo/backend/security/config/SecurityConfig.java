@@ -65,7 +65,7 @@ public class SecurityConfig {
                 
                 .csrf(csrf -> csrf
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/**", "/auth/login", "/auth/logout"))
+                        .ignoringRequestMatchers("/api/**"))
 
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {

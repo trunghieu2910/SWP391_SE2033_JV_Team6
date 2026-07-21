@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setPhoneNumber(request.getPhoneNumber());
         user.setNationalID(request.getNationalID());
-        user.setStatus(UserStatus.PENDING);
+        user.setStatus(UserStatus.INACTIVE);
         user.setCreatedAt(LocalDateTime.now());
         user.setRole(patientRole);
 
@@ -145,7 +145,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUserName(request.getUserName())
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
 
-        if (user.getStatus() != UserStatus.PENDING) {
+        if (user.getStatus() != UserStatus.INACTIVE) {
             throw new InvalidOtpException("no");
         }
 
@@ -164,7 +164,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUserName(request.getUserName())
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
 
-        if (user.getStatus() != UserStatus.PENDING) {
+        if (user.getStatus() != UserStatus.INACTIVE) {
             throw new InvalidOtpException("no");
         }
 

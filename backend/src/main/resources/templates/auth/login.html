@@ -61,20 +61,17 @@
             </button>
 
             <!-- Thông báo lỗi — đọc trực tiếp từ query param, không cần Controller -->
-            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'invalid'}">
-                <span>Thông tin đăng nhập không chính xác. Vui lòng thử lại.</span>
-            </div>
-            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'pending'}">
-                <span>Tài khoản của bạn chưa được kích hoạt. Vui lòng liên hệ quản trị viên.</span>
-            </div>
-            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'banned'}">
-                <span>Tài khoản của bạn đã bị tạm ngưng. Vui lòng liên hệ quản trị viên.</span>
-            </div>
             <div class="alert alert-success" th:if="${param.logout != null}">
                 <span>Bạn đã đăng xuất thành công.</span>
             </div>
             <div class="alert alert-success" th:if="${param.resetSuccess != null}">
                 <span>✓ Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.</span>
+            </div>
+            <div class="alert alert-error" th:if="${param.error != null and param.error[0] != 'locked'}">
+                <span>Thông tin đăng nhập không chính xác hoặc tài khoản không thể đăng nhập lúc này. Vui lòng thử lại hoặc liên hệ quản trị viên nếu vấn đề tiếp diễn.</span>
+            </div>
+            <div class="alert alert-error" th:if="${param.error != null and param.error[0] == 'locked'}">
+                <span>Tài khoản đã bị khóa tạm thời do nhập sai nhiều lần. Vui lòng thử lại sau 15 phút hoặc chọn "Quên mật khẩu".</span>
             </div>
         </div>
     </div>

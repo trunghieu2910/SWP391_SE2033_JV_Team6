@@ -53,6 +53,13 @@ public class User {
     @Column(name = "nationalID", length = 12)
     private String nationalID;
 
+    @Column(name = "failedLoginAttempts", nullable = false)
+    @Builder.Default
+    private Integer failedLoginAttempts = 0;
+
+    @Column(name = "lockedUntil")
+    private LocalDateTime lockedUntil;
+
     @Column(name = "certificateUrl")
     private String certificateUrl;
 

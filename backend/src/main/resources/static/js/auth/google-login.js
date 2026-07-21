@@ -46,6 +46,8 @@ document.getElementById("googleLoginBtn").addEventListener("click", async () => 
             window.location.href = "/auth/google-complete";
         } else if (data.status === "BANNED") {
             window.location.href = "/auth/login?error=banned";
+        } else if (data.status === "LOCKED") {
+            window.location.href = "/auth/login?error=locked";
         }
     } catch (err) {
         if (err.code === "auth/popup-closed-by-user") return;

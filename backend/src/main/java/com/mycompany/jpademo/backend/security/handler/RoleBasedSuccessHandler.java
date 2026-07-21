@@ -3,6 +3,7 @@ package com.mycompany.jpademo.backend.security.handler;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
+import com.mycompany.jpademo.backend.service.interfaces.AccountLockoutService;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
 
     private final SystemLogService systemLogService;
     private final UserRepository userRepository;
+    private final AccountLockoutService accountLockoutService;
 
     private static final String DEFAULT_HOME = "/patient/home";
 
@@ -44,6 +46,8 @@ public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
         try {
             if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
                 User user = userDetails.getUser();
+
+                accountLockoutService.resetFailedAttempts(user);
 
                 systemLogService.logActivity("Users", user.getUserId(), "LOGIN",
                         "Đăng nhập thành công (" + user.getUserName() + ")");

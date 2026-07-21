@@ -67,6 +67,10 @@ public class WebGoogleAuthController {
             return ResponseEntity.status(401).body(Map.of("status", "BANNED"));
         }
 
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
+            return ResponseEntity.status(401).body(Map.of("status", "LOCKED"));  
+        }
+
         establishSession(user, request, response);
         return ResponseEntity.ok(Map.of(
                 "status", "OK",
