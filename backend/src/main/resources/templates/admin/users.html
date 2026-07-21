@@ -34,7 +34,6 @@
                     <select name="status">
                         <option value="" th:selected="${status == null}">Tất cả trạng thái</option>
                         <option value="ACTIVE" th:selected="${status != null && status.name() == 'ACTIVE'}">Hoạt động</option>
-                        <option value="INACTIVE" th:selected="${status != null && status.name() == 'INACTIVE'}">Không hoạt động</option>
                         <option value="BANNED" th:selected="${status != null && status.name() == 'BANNED'}">Đang bị khóa</option>
                     </select>
                 </div>
@@ -104,7 +103,6 @@
                               th:classappend="${user.status != null ? 'status-' + user.status.toString().toLowerCase() : ''}">
                             <span class="status-dot"></span>
                             <span th:text="${user.status?.name() == 'ACTIVE' ? 'Hoạt động' :
-                                           user.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
                                            user.status?.name() == 'BANNED' ? 'Đã khóa' : user.status}">
                             </span>
                         </span>
@@ -191,7 +189,6 @@
                     <select name="status" id="statusSelect" required>
                         <option value="ACTIVE">Mở khoá tài khoản</option>
                         <option value="BANNED">Khoá tài khoản</option>
-                        <option value="INACTIVE">Không hoạt động</option>
                     </select>
                 </div>
 

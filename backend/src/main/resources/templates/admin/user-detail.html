@@ -37,7 +37,6 @@
                       th:classappend="${user.userResponse.status != null ? 'status-' + user.userResponse.status.toString().toLowerCase() : ''}">
                     <span class="status-dot"></span>
                     <span th:text="${user.userResponse.status?.name() == 'ACTIVE' ? 'Hoạt động' :
-                                   user.userResponse.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
                                    user.userResponse.status?.name() == 'BANNED' ? 'Đã khóa' : user.userResponse.status}">
                     </span>
                 </span>
@@ -56,9 +55,6 @@
                     onclick="openStatusModal()">
                 <i class="fa-solid fa-user-gear"></i> Cập nhật trạng thái
             </button>
-            <a th:href="@{/admin/users}" class="btn-action btn-outline">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
-            </a>
         </div>
     </div>
 
@@ -118,7 +114,6 @@
                               th:classappend="${user.userResponse.status != null ? 'status-' + user.userResponse.status.toString().toLowerCase() : ''}">
                             <span class="status-dot"></span>
                             <span th:text="${user.userResponse.status?.name() == 'ACTIVE' ? 'Hoạt động' :
-                                           user.userResponse.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
                                            user.userResponse.status?.name() == 'BANNED' ? 'Đã khóa' : user.userResponse.status}">
                             </span>
                         </span>
@@ -220,7 +215,9 @@
         </div>
 
         <div th:if="${!#lists.isEmpty(user.systemLogResponses)}" class="activity-timeline">
-            <div th:each="log : ${user.systemLogResponses}" class="timeline-item">
+            <a th:each="log : ${user.systemLogResponses}"
+                 th:href="@{/admin/logs/{id}(id=${log.logId})}"
+                 class="timeline-item">
                 <div class="timeline-icon"
                      th:classappend="${log.action == 'LOGIN' ? 'timeline-login' :
                                     log.action == 'LOGOUT' ? 'timeline-logout' :
@@ -248,7 +245,7 @@
                         <span th:text="${log.targetType} + ' #' + ${log.targetId}">User #10</span>
                     </span>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -277,7 +274,6 @@
                     <select name="status" id="statusSelect" required>
                         <option value="ACTIVE" th:selected="${user.userResponse.status?.name() == 'ACTIVE'}">Mở khoá tài khoản</option>
                         <option value="BANNED" th:selected="${user.userResponse.status?.name() == 'BANNED'}">Khoá tài khoản</option>
-                        <option value="INACTIVE" th:selected="${user.userResponse.status?.name() == 'INACTIVE'}">Không hoạt động</option>
                     </select>
                 </div>
 

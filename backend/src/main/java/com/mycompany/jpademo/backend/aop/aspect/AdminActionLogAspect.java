@@ -44,9 +44,6 @@ public class AdminActionLogAspect {
                 } else if (req.getStatus() == UserStatus.ACTIVE) {
                     action = "UNBAN_USER";
                     description = "ADMIN: Mở khóa/Kích hoạt người dùng. Lý do: " + req.getReason();
-                } else if (req.getStatus() == UserStatus.INACTIVE) {
-                    action = "SET_INACTIVE";
-                    description = "ADMIN: Chuyển sang không hoạt động. Lý do: " + req.getReason();
                 }
             }
             if (arg instanceof VerifyPendingDoctorRequest request) {

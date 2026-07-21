@@ -446,6 +446,9 @@
     background: #f8fafc;
     border-radius: 10px;
     transition: var(--transition);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
 }
 
 .timeline-item:hover {

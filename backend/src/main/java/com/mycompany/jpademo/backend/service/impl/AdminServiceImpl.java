@@ -61,6 +61,8 @@ public class AdminServiceImpl implements AdminService {
 
     private final BlockedIPRepository blockedIPRepository;
 
+    private static final int SEARCH_MIN_KEYWORD_LENGTH = 2;
+
     @Override
     public Page<UserResponse> getUser(String keyword, String role, UserStatus status,
                                       LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
@@ -143,8 +145,6 @@ public class AdminServiceImpl implements AdminService {
             user.setStatus(UserStatus.BANNED);
         } else if (request.getStatus() == UserStatus.ACTIVE){
             user.setStatus(UserStatus.ACTIVE);
-        } else {
-            user.setStatus(UserStatus.INACTIVE);
         }
         userRepository.save(user);
         sendStatusEmail(user, request.getStatus(), request.getReason(), admin);
@@ -385,7 +385,8 @@ public class AdminServiceImpl implements AdminService {
     public GlobalSearchResponse searchGlobal(String keyword) {
         Pageable limit = PageRequest.of(0, 5);
 
-        if (keyword == null || keyword.isEmpty()) {
+        String trimmedKeyword = keyword == null ? null : keyword.trim();
+        if (trimmedKeyword == null || trimmedKeyword.length() < SEARCH_MIN_KEYWORD_LENGTH) {
             return GlobalSearchResponse.builder()
                     .users(new ArrayList<>())
                     .logs(new ArrayList<>())

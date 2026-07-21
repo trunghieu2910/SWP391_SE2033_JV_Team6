@@ -703,7 +703,8 @@ INSERT INTO UnitConversion (drugID, largeUnitID, smallUnitID, conversionQuantity
 INSERT INTO [Users] (roleID, userName, fullName, email, passwordHash, phoneNumber, status, lastChangePassTime, nationalID)
 VALUES
 (6, 'pharmacist', N'Dược sĩ Nguyễn Hoàng Anh', 'anh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0908889999', 'ACTIVE', GETDATE(), '089012345678'),
-(6, 'pharmacist_linh', N'Dược sĩ Trần Thị Linh', 'linh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907776666', 'ACTIVE', GETDATE(), '090123456789');
+(6, 'pharmacist_linh', N'Dược sĩ Trần Thị Linh', 'linh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907776666', 'ACTIVE', GETDATE(), '090123456789'),
+(3, 'technical', N'Kỹ thuật viên AI', 'technical@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0911111111', 'ACTIVE', GETDATE(), '111111111111');
 
 -- ============================================================================
 -- 3.7. Nhập kho mẫu (Sử dụng mã lô dạng LOT-DRUG-XXX-MMYY)
@@ -1193,8 +1194,3 @@ select * from Users order by createdAt desc
 
 
 SELECT drugID, drugCode FROM Drug ORDER BY drugID;
-
-ALTER TABLE MedicalImageDetails ADD 
-ALTER TABLE MedicalImageDetails ADD 
-
-select * from MedicalImageDetails
