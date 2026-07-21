@@ -136,7 +136,7 @@ public class AdminServiceImpl implements AdminService {
             throw new UnauthorizedActionException("Không thể thay đổi trạng thái của Admin");
         }
         if (user.getStatus() == request.getStatus()) {
-            return false;
+            throw new BadRequestException("Không thể cập nhật vì người dùng đã ở trạng thái này.");
         }
         user.setStatus(request.getStatus());
         if (request.getStatus() == UserStatus.BANNED) {
@@ -483,6 +483,28 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    @Override
+    public List<String> getRoleName() {
+        List<RoleName> roleNames = List.of(RoleName.values());
+        List<String> roles = new ArrayList<>();
+        for (RoleName s: roleNames) {
+            roles.add(String.valueOf(s));
+        }
+        return roles;
+    }
+
+    @Override
+    public List<String> getUserStatus() {
+        List<UserStatus> userStatuses = List.of(UserStatus.values());
+        List<String> status = new ArrayList<>();
+        for (UserStatus u: userStatuses) {
+            if (!UserStatus.PENDING.equals(u)) {
+                status.add(String.valueOf(u));
+            }
+        }
+        return status;
+    }
+
     private List<MonthlyStats> getMonthlyUserRegistrations(LocalDate startDate, LocalDate endDate) {
         try {
             LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
@@ -680,6 +702,9 @@ public class AdminServiceImpl implements AdminService {
                 .totalUsers(userRepository.countUsersWithDateFilter(start, end))
                 .totalDoctors(userRepository.countUsersByRoleWithDateFilter(RoleName.DOCTOR, start, end))
                 .totalPatients(userRepository.countUsersByRoleWithDateFilter(RoleName.PATIENT, start, end))
+                .totalPharmacist(userRepository.countUsersByRoleWithDateFilter(RoleName.PHARMACIST, start, end))
+                .totalTechnical(userRepository.countUsersByRoleWithDateFilter(RoleName.TECHNICAL, start, end))
+                .totalReceptionist(userRepository.countUsersByRoleWithDateFilter(RoleName.RECEPTIONIST, start, end))
                 .blockedUsers(userRepository.countUsersByStatusWithDateFilter(UserStatus.BANNED, start, end))
                 .totalDiagnosisSessions(diagnosisSessionRepository.countSessionsWithDateFilter(start, end))
                 .build();

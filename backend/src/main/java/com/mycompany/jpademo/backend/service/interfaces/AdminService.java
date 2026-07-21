@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 public interface AdminService {
@@ -36,4 +37,8 @@ public interface AdminService {
     User getAdminUser();
 
     CertificateFileResponse getDoctorCertificate(Integer userId);
+
+    List<String> getRoleName();
+
+    List<String> getUserStatus();
 }

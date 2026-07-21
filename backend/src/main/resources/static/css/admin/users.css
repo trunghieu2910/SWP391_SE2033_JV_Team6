@@ -216,6 +216,17 @@ th {
     color: var(--neutral-dark);
 }
 
+.email-cell {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.date-cell {
+    white-space: nowrap;
+}
+
 /* ===== BADGES ===== */
 .role-badge {
     padding: 4px 12px;
@@ -228,6 +239,9 @@ th {
 .role-admin { background: #fee2e2; color: #991b1b; }
 .role-doctor { background: #e0f2fe; color: #0369a1; }
 .role-patient { background: #f3e8ff; color: #6b21a8; }
+.role-technical { background: #dcfce7; color: #166534; }
+.role-pharmacist { background: #fef3c7; color: #92400e; }
+.role-receptionist { background: #e0e7ff; color: #3730a3; }
 
 .status-badge {
     display: inline-flex;

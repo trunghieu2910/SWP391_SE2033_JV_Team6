@@ -4,6 +4,7 @@ import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
+import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
@@ -28,6 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -79,12 +81,14 @@ public class AdminController {
         LocalDateTime endDateTime = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
 
         Page<UserResponse> users = adminService.getUser(keyword, role, status, startDateTime, endDateTime, pageable);
+        List<String> roles = adminService.getRoleName();
+        List<String> userStatus = adminService.getUserStatus();
         model.addAttribute("users", users);
         model.addAttribute("keyword", keyword);
         model.addAttribute("role", role);
         model.addAttribute("status", status);
-        model.addAttribute("roles", new String[]{"", "ADMIN", "DOCTOR", "PATIENT"});
-        model.addAttribute("statuses", new String[]{"", "ACTIVE", "INACTIVE", "BANNED"});
+        model.addAttribute("roles", roles);
+        model.addAttribute("statuses", userStatus);
         return "admin/users";
     }
 
