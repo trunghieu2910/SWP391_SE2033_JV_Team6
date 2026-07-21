@@ -287,8 +287,8 @@ public class AdminServiceImpl implements AdminService {
             DashboardStatsResponse stats = ensureStatsNotNull(getDashboardStats(resolvedStart, resolvedEnd));
             ChartStatsResponse charts = ensureChartsNotNull(getChartStats(resolvedStart, resolvedEnd));
 
-            LocalDateTime startLogs = resolvedStart.atStartOfDay();
-            LocalDateTime endLogs = resolvedEnd.atTime(java.time.LocalTime.MAX);
+            LocalDateTime startLogs = resolvedStart != null ? resolvedStart.atStartOfDay() : null;
+            LocalDateTime endLogs = resolvedEnd != null ? resolvedEnd.atTime(java.time.LocalTime.MAX) : null;
 
             Page<SystemLog> recentLogsPage = systemLogRepository.filterLogs(
                     null, null, startLogs, endLogs,
@@ -346,27 +346,25 @@ public class AdminServiceImpl implements AdminService {
             List<Object[]> userResults = userRepository.getMonthlyUserRegistrations(start, end);
             List<MonthlyStats> userRegistrations = new ArrayList<>();
             if (userResults != null && !userResults.isEmpty()) {
-                int maxSize = Math.min(userResults.size(), 6);
                 userRegistrations = userResults.stream()
-                        .limit(maxSize)
                         .map(row -> MonthlyStats.builder()
                                 .month(row[0].toString())
                                 .count(((Number) row[1]).longValue())
                                 .build())
                         .collect(Collectors.toList());
+                sortMonthlyStats(userRegistrations);
             }
 
             List<Object[]> sessionResults = diagnosisSessionRepository.getMonthlyDiagnosisSessions(start, end);
             List<MonthlyStats> diagnosisSessions = new ArrayList<>();
             if (sessionResults != null && !sessionResults.isEmpty()) {
-                int maxSize = Math.min(sessionResults.size(), 6);
                 diagnosisSessions = sessionResults.stream()
-                        .limit(maxSize)
                         .map(row -> MonthlyStats.builder()
                                 .month(row[0].toString())
                                 .count(((Number) row[1]).longValue())
                                 .build())
                         .collect(Collectors.toList());
+                sortMonthlyStats(diagnosisSessions);
             }
 
             return ChartStatsResponse.builder()
@@ -526,9 +524,28 @@ public class AdminServiceImpl implements AdminService {
                 .action(log.getAction())
                 .actionDisplay(mapActionToVietnamese(log.getAction()))
                 .description(log.getDescription())
-                .username(log.getUser().getUserName())
+                .username(log.getUser() != null ? log.getUser().getUserName() : "Hệ thống")
                 .performedAt(log.getPerformedAt())
                 .build();
+    }
+
+    private void sortMonthlyStats(List<MonthlyStats> stats) {
+        stats.sort((a, b) -> {
+            try {
+                String[] partsA = a.getMonth().split("/");
+                String[] partsB = b.getMonth().split("/");
+                int monthA = Integer.parseInt(partsA[0]);
+                int yearA = Integer.parseInt(partsA[1]);
+                int monthB = Integer.parseInt(partsB[0]);
+                int yearB = Integer.parseInt(partsB[1]);
+                if (yearA != yearB) {
+                    return Integer.compare(yearA, yearB);
+                }
+                return Integer.compare(monthA, monthB);
+            } catch (Exception e) {
+                return 0;
+            }
+        });
     }
 
     private List<MonthlyStats> mapToMonthlyStats(List<Object[]> stats) {
@@ -687,16 +704,14 @@ public class AdminServiceImpl implements AdminService {
 
     private LocalDate[] resolveDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate == null && endDate == null) {
-            LocalDate now = LocalDate.now();
-            startDate = now;
-            endDate = now;
+            return new LocalDate[]{null, null};
         } else if (startDate != null && endDate == null) {
             endDate = startDate.plusMonths(1);
         } else if (endDate != null && startDate == null) {
             startDate = endDate.minusMonths(6);
         }
 
-        if (startDate.isAfter(endDate)) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             LocalDate temp = startDate;
             startDate = endDate;
             endDate = temp;

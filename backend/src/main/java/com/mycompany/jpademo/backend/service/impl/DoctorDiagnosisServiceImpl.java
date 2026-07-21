@@ -123,6 +123,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
 
+        if (session.getReview() == null && DiagnosisSessionStatus.COMPLETED.equals(newStatus)) {
+            throw new BadRequestException("Không thể chuyển sang trạng thái hoàn thành khi chưa có kết luận cuối cùng.");
+        }
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền cập nhật trạng thái ca chẩn đoán này.");
         }
@@ -151,6 +154,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền cập nhật trạng thái ca chẩn đoán này.");
+        }
+        if (session.getReview() == null) {
+            throw new BadRequestException("Không thể công bố ca chẩn đoán chưa có kết luận cuối cùng.");
         }
         if (!DiagnosisSessionStatus.COMPLETED.equals(session.getStatus())) {
             throw new BadRequestException("Không thể công bố ca chẩn đoán chưa hoàn thành.");

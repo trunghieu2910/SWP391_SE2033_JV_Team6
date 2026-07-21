@@ -14,7 +14,9 @@ import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.repository.BlockedIPRepository;
 import com.mycompany.jpademo.backend.repository.RequestLogRepository;
+import com.mycompany.jpademo.backend.security.util.ClientIpResolver;
 import com.mycompany.jpademo.backend.service.interfaces.SecurityService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +36,8 @@ public class SecurityServiceImpl implements SecurityService {
     private final BlockedIPRepository blockedIPRepository;
     private final RequestLogRepository requestLogRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final HttpServletRequest httpServletRequest;
+    private final ClientIpResolver clientIpResolver;
 
     @Override
     public SecurityStatsResponse getStats(LocalDateTime startDate, LocalDateTime endDate) {
@@ -90,6 +94,14 @@ public class SecurityServiceImpl implements SecurityService {
     public void blockIp(BlockIpRequest request, User admin) {
         if (!RoleName.ADMIN.equals(admin.getRole().getRoleName())) {
             throw new UnauthorizedActionException("Bạn không có quyền thực hiện hành động này");
+        }
+        String currentIp = clientIpResolver.resolve(httpServletRequest);
+        if (request.getIpAddress().equals(currentIp)) {
+            throw new BadRequestException("Không thể tự chặn địa chỉ IP hiện tại của chính bạn.");
+        }
+        List<String> sensitiveIps = List.of("127.0.0.1", "0.0.0.0", "0:0:0:0:0:0:0:1", "localhost");
+        if (sensitiveIps.contains(request.getIpAddress().trim())) {
+            throw new BadRequestException("Không thể chặn các địa chỉ IP nội bộ hoặc nhạy cảm của hệ thống.");
         }
         if (blockedIPRepository.existsById(request.getIpAddress())) {
             throw new BadRequestException("IP " + request.getIpAddress() + " đã bị chặn trước đó.");

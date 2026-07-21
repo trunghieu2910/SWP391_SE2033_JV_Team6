@@ -14,6 +14,7 @@ import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -71,6 +72,50 @@ public class AdminActionLogAspect {
                 .targetId(targetId)
                 .description(description)
                 .build();
+        systemLogRepository.save(systemLog);
+    }
+
+    @AfterThrowing(pointcut = "@annotation(adminActionLog)", throwing = "exception")
+    public void logAdminActionFailure(JoinPoint joinPoint,
+                                      AdminActionLog adminActionLog,
+                                      Throwable exception) {
+        Object[] args = joinPoint.getArgs();
+        Integer targetId = null;
+        if (args.length > 0 && args[0] instanceof LoggableTarget target) {
+            targetId = target.getTargetId();
+        }
+
+        String action = "FAILED_" + adminActionLog.action();
+        String description = "Thao tác thất bại. Lý do: " + exception.getMessage();
+        for (Object arg : args) {
+            if (arg instanceof UpdateUserStatusRequest req) {
+                description = "ADMIN: Đổi trạng thái user THẤT BẠI. Trạng thái yêu cầu: "
+                        + req.getStatus() + ". Lý do: " + exception.getMessage();
+            }
+            if (arg instanceof VerifyPendingDoctorRequest request) {
+                description = "ADMIN: Tạo tài khoản bác sĩ THẤT BẠI. Lý do: " + exception.getMessage();
+            }
+            if (arg instanceof BlockIpRequest request) {
+                description = "ADMIN: Chặn IP " + request.getIpAddress() + " THẤT BẠI. Lý do: " + exception.getMessage();
+            }
+            if (arg instanceof UnblockIpRequest request) {
+                description = "ADMIN: Mở chặn IP " + request.getIpAddress() + " THẤT BẠI. Lý do: " + exception.getMessage();
+            }
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = null;
+        if (authentication != null && authentication.getPrincipal()
+                instanceof CustomUserDetails customUserDetails) {
+            currentUser = customUserDetails.getUser();
+        }
+        SystemLog systemLog = SystemLog.builder()
+                .user(currentUser)
+                .action(action)
+                .targetType(adminActionLog.targetType())
+                .targetId(targetId)
+                .description(description)
+                .build();
+
         systemLogRepository.save(systemLog);
     }
 }
