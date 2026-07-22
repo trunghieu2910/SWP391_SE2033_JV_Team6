@@ -26,8 +26,8 @@ public class MedicalImageDetails {
     @Column(name = "confidenceScore")
     private Double confidenceScore;
 
-    @Column(name = "technicalConclusion", columnDefinition = "NVARCHAR(MAX)")
-    private String technicalConclusion;
+    @Column(name = "ultrasoundConclusion", columnDefinition = "NVARCHAR(MAX)")
+    private String ultrasoundConclusion;
 
     @Column(name = "imgResultConclusion")
     private String imgResultConclusion;

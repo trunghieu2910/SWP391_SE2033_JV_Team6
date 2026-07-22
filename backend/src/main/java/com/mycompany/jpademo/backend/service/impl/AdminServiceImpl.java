@@ -724,7 +724,7 @@ public class AdminServiceImpl implements AdminService {
                 .totalDoctors(userRepository.countUsersByRoleWithDateFilter(RoleName.DOCTOR, start, end))
                 .totalPatients(userRepository.countUsersByRoleWithDateFilter(RoleName.PATIENT, start, end))
                 .totalPharmacist(userRepository.countUsersByRoleWithDateFilter(RoleName.PHARMACIST, start, end))
-                .totalTechnical(userRepository.countUsersByRoleWithDateFilter(RoleName.TECHNICAL, start, end))
+                .totalUltrasoundDoctor(userRepository.countUsersByRoleWithDateFilter(RoleName.ULTRASOUND_DOCTOR, start, end))
                 .totalReceptionist(userRepository.countUsersByRoleWithDateFilter(RoleName.RECEPTIONIST, start, end))
                 .blockedUsers(userRepository.countUsersByStatusWithDateFilter(UserStatus.BANNED, start, end))
                 .totalDiagnosisSessions(diagnosisSessionRepository.countSessionsWithDateFilter(start, end))

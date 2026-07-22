@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} + ' | Technical Panel'">Technical Panel</title>
+    <title th:text="${title} + ' | Ultrasound Doctor Panel'">Ultrasound Doctor Panel</title>
     <meta th:name="${_csrf.parameterName}" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <!-- Google Fonts & FontAwesome -->
@@ -20,31 +20,27 @@
         <h2>Cervical Dx</h2>
     </div>
     <nav class="sidebar-nav">
-        <a th:href="@{/technical/dashboard}" class="nav-item" th:classappend="${currentTab == 'dashboard' ? 'active' : ''}">
+        <a th:href="@{/ultrasound-doctor/dashboard}" class="nav-item" th:classappend="${currentTab == 'dashboard' ? 'active' : ''}">
             <i class="fa-solid fa-list"></i>
             <span>Danh sách siêu âm</span>
         </a>
-        <a th:href="@{/technical/history}" class="nav-item" th:classappend="${currentTab == 'history' ? 'active' : ''}">
+        <a th:href="@{/ultrasound-doctor/history}" class="nav-item" th:classappend="${currentTab == 'history' ? 'active' : ''}">
             <i class="fa-solid fa-clock-rotate-left"></i>
             <span>Lịch sử siêu âm</span>
-        </a>
-        <a th:href="@{/technical/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
-            <i class="fa-regular fa-user"></i>
-            <span>Hồ sơ cá nhân</span>
         </a>
     </nav>
 
     <!-- User Profile & Logout -->
     <div class="sidebar-bottom">
-        <div class="sidebar-user-profile">
+        <a th:href="@{/ultrasound-doctor/profile}" class="sidebar-user-profile" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; transition: background-color 0.2s; cursor: pointer;">
             <div class="sidebar-user-avatar">
                 <span th:text="${#strings.substring(userFullName != null ? userFullName : 'T', 0, 1)}">T</span>
             </div>
             <div class="sidebar-user-info">
-                <h4 th:text="${userFullName != null ? userFullName : 'Kỹ thuật viên hình ảnh'}">Kỹ thuật viên hình ảnh</h4>
-                <span>Kỹ thuật viên hình ảnh</span>
+                <h4 th:text="${userFullName != null ? userFullName : 'Bác sĩ siêu âm'}">Bác sĩ siêu âm</h4>
+                <span>Bác sĩ siêu âm</span>
             </div>
-        </div>
+        </a>
         <a href="#" class="logout-btn" onclick="confirmLogout(event)">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Đăng xuất</span>

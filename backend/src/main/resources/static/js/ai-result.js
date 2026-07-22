@@ -58,23 +58,23 @@ async function fetchImageDetails(id) {
                 document.querySelector('.status-pill').className = 'status-pill pending';
             }
             
-            if (data.technicalConclusion) {
-                // For Technical Role input (if it's not hidden, but we will hide the whole block)
-                const ta = document.getElementById('technical-conclusion');
-                if (ta) ta.value = data.technicalConclusion;
+            if (data.ultrasoundConclusion) {
+                // For Ultrasound Doctor Role input (if it's not hidden, but we will hide the whole block)
+                const ta = document.getElementById('ultrasound-conclusion');
+                if (ta) ta.value = data.ultrasoundConclusion;
                 
                 // Hide the editing controls since it's already saved
-                const techControls = document.querySelector('.technical-controls');
+                const techControls = document.querySelector('.ultrasound-controls');
                 if (techControls) {
                     techControls.style.display = 'none';
                 }
                 
                 // For Doctor/Patient/History view (show static text)
-                const tcView = document.getElementById('technical-conclusion-view');
-                const tcText = document.getElementById('technical-conclusion-text');
+                const tcView = document.getElementById('ultrasound-conclusion-view');
+                const tcText = document.getElementById('ultrasound-conclusion-text');
                 if (tcView && tcText) {
                     tcView.style.display = 'block';
-                    tcText.textContent = data.technicalConclusion;
+                    tcText.textContent = data.ultrasoundConclusion;
                 }
             }
             
@@ -222,8 +222,8 @@ function toggleManualDraw() {
     }
 }
 
-async function saveTechnicalConclusion() {
-    const conclusion = document.getElementById('technical-conclusion')?.value || '';
+async function saveUltrasoundConclusion() {
+    const conclusion = document.getElementById('ultrasound-conclusion')?.value || '';
     
     const btn = document.getElementById('btn-save-conclusion');
     btn.disabled = true;
@@ -267,7 +267,7 @@ async function saveTechnicalConclusion() {
         });
         
         if (response.ok) {
-            window.location.href = '/technical/dashboard';
+            window.location.href = '/ultrasound-doctor/dashboard';
         } else {
             const errorMsg = await response.text();
             if (errorDiv) {

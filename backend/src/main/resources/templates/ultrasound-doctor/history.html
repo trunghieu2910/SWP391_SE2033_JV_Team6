@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{technical/layout :: main-layout(~{::.content-wrapper}, 'Danh sách chờ siêu âm', 'dashboard')}">
+      th:replace="~{ultrasound-doctor/layout :: main-layout(~{::.content-wrapper}, 'Lịch sử siêu âm', 'history')}">
 <body>
 <div class="content-wrapper">
     <div class="dashboard-stats" style="margin-bottom: 2rem;">
         <div class="stat-card" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-            <div class="stat-icon" style="color: #3b82f6; font-size: 2rem; margin-bottom: 1rem;">
-                <i class="fa-solid fa-hourglass-half"></i>
+            <div class="stat-icon" style="color: #10b981; font-size: 2rem; margin-bottom: 1rem;">
+                <i class="fa-solid fa-check-circle"></i>
             </div>
-            <h3 style="color: #64748b; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Đang chờ siêu âm</h3>
+            <h3 style="color: #64748b; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Đã siêu âm xong</h3>
             <p class="stat-value" style="font-size: 2rem; font-weight: 700; color: #0f172a; margin: 0;" th:text="${sessions.size()}">0</p>
         </div>
     </div>
 
     <div class="table-container" style="background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: #1e293b;">Danh sách bệnh nhân</h2>
+        <h2 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: #1e293b;">Lịch sử bệnh nhân đã siêu âm</h2>
         
         <div th:if="${sessions.empty}" class="empty-state" style="text-align: center; padding: 3rem; color: #64748b;">
-            <i class="fa-solid fa-check-circle" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;"></i>
-            <p>Hiện không có yêu cầu siêu âm nào đang chờ.</p>
+            <i class="fa-solid fa-inbox" style="font-size: 3rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+            <p>Chưa có ca siêu âm nào được thực hiện.</p>
         </div>
 
         <table th:unless="${sessions.empty}" class="data-table" style="width: 100%; border-collapse: collapse;">
@@ -26,7 +26,7 @@
                 <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
                     <th style="padding: 1rem; color: #64748b; font-weight: 600;">Mã PK</th>
                     <th style="padding: 1rem; color: #64748b; font-weight: 600;">Bệnh nhân</th>
-                    <th style="padding: 1rem; color: #64748b; font-weight: 600;">CCCD</th>
+                    <th style="padding: 1rem; color: #64748b; font-weight: 600;">Số CCCD</th>
                     <th style="padding: 1rem; color: #64748b; font-weight: 600;">Thời gian tạo</th>
                     <th style="padding: 1rem; color: #64748b; font-weight: 600;">Loại siêu âm</th>
                     <th style="padding: 1rem; color: #64748b; font-weight: 600;">Trạng thái</th>
@@ -40,22 +40,22 @@
                         <div style="font-weight: 500; color: #0f172a;" th:text="${diagSession.patientName}"></div>
                         <div style="font-size: 0.875rem; color: #64748b;" th:text="${'BN-' + diagSession.patientId}"></div>
                     </td>
-                    <td style="padding: 1rem; color: #475569;" th:text="${diagSession.patientCccd != null ? diagSession.patientCccd : 'N/A'}"></td>
-                    <td style="padding: 1rem;" th:text="${#temporals.format(diagSession.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td style="padding: 1rem; font-weight: 500; color: #475569;" th:text="${diagSession.patientCccd != null ? diagSession.patientCccd : '—'}"></td>
+                    <td style="padding: 1rem;" th:text="${diagSession.createdAt != null ? #temporals.format(diagSession.createdAt, 'dd/MM/yyyy HH:mm') : '—'}"></td>
                     <td style="padding: 1rem; font-weight: 500; color: #3b82f6;" th:text="${diagSession.imageType != null and diagSession.imageType != '' ? diagSession.imageType : 'Siêu âm'}"></td>
                     <td style="padding: 1rem;">
-                        <span style="background: #fef3c7; color: #d97706; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
-                            Chờ siêu âm
+                        <span style="background: #d1fae5; color: #047857; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
+                            Đã siêu âm
                         </span>
                     </td>
-                    <td style="padding: 1rem; text-align: right;">
-                        <a th:href="@{/technical/ultrasound-simulator(sessionId=${diagSession.sessionId})}" 
+                    <td style="padding: 1rem; text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
+                        <a th:if="${diagSession.medicalImageDetailsId != null}"
+                           th:href="@{/ai-result(imageId=${diagSession.medicalImageDetailsId})}" 
                            class="btn-action" 
-                           style="background: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: background-color 0.2s;"
-                           onmouseover="this.style.backgroundColor='#2563eb'"
-                           onmouseout="this.style.backgroundColor='#3b82f6'">
-                            <i class="fa-solid fa-upload"></i>
-                            Thực hiện
+                           style="background: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: background-color 0.2s;"
+                           onmouseover="this.style.backgroundColor='#059669'"
+                           onmouseout="this.style.backgroundColor='#10b981'">
+                            Xem chi tiết
                         </a>
                     </td>
                 </tr>

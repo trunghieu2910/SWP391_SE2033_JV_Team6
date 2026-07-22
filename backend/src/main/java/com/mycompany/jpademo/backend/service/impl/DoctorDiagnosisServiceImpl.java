@@ -357,36 +357,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             throw new IllegalStateException("Ca chẩn đoán này đã có kết luận và không thể chỉnh sửa lại.");
         }
 
-        // ===== VALIDATE ĐIỀU KIỆN TIÊN QUYẾT TRƯỚC KHI KẾT LUẬN =====
-        if (session.getSymptomResult() == null
-                || session.getSymptomResult().getStatus() != SymptomResultStatus.COMPLETED) {
-            throw new BadRequestException(
-                    "Chưa thể lưu kết luận: triệu chứng lâm sàng chưa được cung cấp hoặc chưa hoàn tất.");
-        }
 
-        List<LabResult> labResults = session.getLabResults();
-        if (labResults == null || labResults.isEmpty()) {
-            throw new BadRequestException(
-                    "Chưa thể lưu kết luận: cần có ít nhất 1 xét nghiệm chỉ số.");
-        }
-        boolean allLabCompleted = labResults.stream()
-                .allMatch(lr -> lr.getStatus() == LabResultStatus.COMPLETED);
-        if (!allLabCompleted) {
-            throw new BadRequestException(
-                    "Chưa thể lưu kết luận: còn xét nghiệm chỉ số chưa ở trạng thái hoàn tất.");
-        }
-
-        List<MedicalImage> medicalImages = session.getMedicalImages();
-        if (medicalImages == null || medicalImages.isEmpty()) {
-            throw new BadRequestException(
-                    "Chưa thể lưu kết luận: cần có ít nhất 1 xét nghiệm hình ảnh.");
-        }
-        boolean allImageCompleted = medicalImages.stream()
-                .allMatch(mi -> mi.getStatus() == MedicalImageStatus.COMPLETED);
-        if (!allImageCompleted) {
-            throw new BadRequestException(
-                    "Chưa thể lưu kết luận: còn xét nghiệm hình ảnh chưa ở trạng thái hoàn tất.");
-        }
 
         User doctor = userRepository.findById(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ"));
@@ -527,7 +498,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                         .imageUrl(detail.getImageUrl())
                         .aiImageUrl(detail.getAiImageUrl())
                         .confidenceScore(detail.getConfidenceScore())
-                        .technicalConclusion(detail.getTechnicalConclusion())
+                        .ultrasoundConclusion(detail.getUltrasoundConclusion())
                         .imgResultConclusion(detail.getImgResultConclusion())
                         .aiImageUrl(detail.getAiImageUrl())
                         .imgResultConclusion(detail.getImgResultConclusion())

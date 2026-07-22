@@ -36,9 +36,9 @@ Thành phần này dùng để chạy mô hình nhận diện ảnh YOLOv8. Đ�
 
 ## 🧪 Hướng dẫn Test Luồng (Quy trình thực tế)
 
-Hệ thống được thiết kế theo đúng quy trình thực tế của bệnh viện: Kỹ thuật viên siêu âm đẩy ảnh lên hệ thống -> AI tự động phân tích -> Bác sĩ xem kết quả ở trang bệnh án.
+Hệ thống được thiết kế theo đúng quy trình thực tế của bệnh viện: Bác sĩ siêu âm đẩy ảnh lên hệ thống -> AI tự động phân tích -> Bác sĩ xem kết quả ở trang bệnh án.
 
-### Bước 1: Kỹ thuật viên (Upload ảnh)
+### Bước 1: Bác sĩ siêu âm (Upload ảnh)
 Màn hình này giả lập màn hình của một chiếc máy siêu âm. 
 - **Link truy cập:** 👉 [http://localhost:8080/ultrasound-simulator.html](http://localhost:8080/ultrasound-simulator.html)
 - **Cách test:**
@@ -48,12 +48,12 @@ Màn hình này giả lập màn hình của một chiếc máy siêu âm.
   4. Hệ thống sẽ tự động gửi ảnh này qua cho Python (AI). Nếu bạn mở Terminal của Python lên sẽ thấy log hệ thống đang vẽ khung đỏ báo hiệu u xơ. Cuối cùng, Java nhận kết quả và lưu toàn bộ vào Database.
 
 ### Bước 2: Bác sĩ (Xem kết quả Bệnh án)
-Sau khi kỹ thuật viên upload xong, bác sĩ sẽ xem ảnh và độ tin cậy của AI đưa ra.
+Sau khi bác sĩ siêu âm upload xong, bác sĩ sẽ xem ảnh và độ tin cậy của AI đưa ra.
 - **Link truy cập:** 👉 `http://localhost:8080/doctor/medical-records/{id}` (Thay `{id}` bằng Session ID, ví dụ: [http://localhost:8080/doctor/medical-records/1](http://localhost:8080/doctor/medical-records/1))
 - *(Lưu ý: Bác sĩ cần phải Login trước nếu hệ thống yêu cầu)*.
 - **Cách test:**
   1. Cuộn trang xuống phần **"Hình Ảnh Y Khoa"**.
-  2. Bác sĩ sẽ thấy bức ảnh mà kỹ thuật viên vừa đẩy lên.
+  2. Bác sĩ sẽ thấy bức ảnh mà bác sĩ siêu âm vừa đẩy lên.
   3. Bấm vào nút màu xanh **"Phân tích AI"** nằm dưới bức ảnh.
   4. Bác sĩ sẽ được chuyển sang giao diện HTML mới chia đôi màn hình: Một bên là ảnh siêu âm gốc, một bên là ảnh AI đã khoanh đỏ vùng u xơ kèm theo tỷ lệ chính xác (Confidence Score).
   5. Nếu muốn truy cập thẳng trang chia đôi ảnh AI, có thể dùng link: 👉 `http://localhost:8080/ai-result.html?imageId={imageId}` (Thay `{imageId}` bằng ID của tấm ảnh đó trong DB).

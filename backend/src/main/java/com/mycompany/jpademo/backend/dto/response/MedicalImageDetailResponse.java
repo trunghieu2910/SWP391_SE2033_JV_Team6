@@ -18,7 +18,7 @@ public class MedicalImageDetailResponse {
 
     private Double confidenceScore;
 
-    private String technicalConclusion;
+    private String ultrasoundConclusion;
 
     private String imgResultConclusion;
 

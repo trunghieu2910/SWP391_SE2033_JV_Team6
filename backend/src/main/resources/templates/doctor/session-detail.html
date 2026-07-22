@@ -162,11 +162,7 @@
                     </div>
                     <i class="fa-solid fa-chevron-down accordion-icon" id="reviewIcon"></i>
                 </div>
-                <div class="accordion-body review-section" id="reviewAccordion" style="display: block; padding: 24px;"
-                     th:with="symptomOk=${sessionDetail.symptomResult != null and sessionDetail.symptomResult.status != null and sessionDetail.symptomResult.status.name() == 'COMPLETED'},
-                           labOk=${sessionDetail.labResults != null and !sessionDetail.labResults.isEmpty() and sessionDetail.labResults.?[status == null or status.name() != 'COMPLETED'].isEmpty()},
-                           imageOk=${sessionDetail.medicalImages != null and !sessionDetail.medicalImages.isEmpty() and sessionDetail.medicalImages.?[status == null or status.name() != 'COMPLETED'].isEmpty()},
-                           canReview=${symptomOk and labOk and imageOk}">
+                <div class="accordion-body review-section" id="reviewAccordion" style="display: block; padding: 24px;">
                     <form id="reviewForm"
                           th:action="@{/doctor/sessions/{id}/review(id=${sessionDetail.sessionId})}" method="post">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -224,17 +220,7 @@
 
                             <div class="form-actions" style="flex-direction: column; align-items: stretch; gap: 12px;">
 
-                                <div th:if="${sessionDetail.review == null and !canReview}" class="review-requirements-hint">
-                                    <i class="fa-solid fa-circle-info"></i>
-                                    <div>
-                                        <strong>Chưa đủ điều kiện để lưu kết luận:</strong>
-                                        <ul>
-                                            <li th:if="${!symptomOk}">Triệu chứng lâm sàng chưa được cung cấp / chưa hoàn tất</li>
-                                            <li th:if="${!labOk}">Cần ít nhất 1 xét nghiệm chỉ số, tất cả phải ở trạng thái Hoàn tất</li>
-                                            <li th:if="${!imageOk}">Cần ít nhất 1 xét nghiệm hình ảnh, tất cả phải ở trạng thái Hoàn tất</li>
-                                        </ul>
-                                    </div>
-                                </div>
+
 
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <span class="last-updated" th:if="${sessionDetail.review != null}">
@@ -244,8 +230,7 @@
                                     </span>
 
                                     <button type="button" id="reviewSubmitBtn" class="btn-save-review"
-                                            th:if="${sessionDetail.review == null}"
-                                            th:disabled="${!canReview}">
+                                            th:if="${sessionDetail.review == null}">
                                         <i class="fa-solid fa-save"></i>
                                         <span>Lưu kết luận</span>
                                     </button>

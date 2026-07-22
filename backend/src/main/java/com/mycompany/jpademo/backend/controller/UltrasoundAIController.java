@@ -29,7 +29,7 @@ import java.nio.file.StandardCopyOption;
 
 @RestController
 @RequestMapping("/api")
-@PreAuthorize("hasRole('TECHNICAL')")
+@PreAuthorize("hasRole('ULTRASOUND_DOCTOR')")
 public class UltrasoundAIController {
 
     private final MedicalImageDetailsRepository repository;
@@ -212,7 +212,7 @@ public class UltrasoundAIController {
                     detail.getImageUrl(),
                     detail.getAiImageUrl(),
                     detail.getConfidenceScore(),
-                    detail.getTechnicalConclusion(),
+                    detail.getUltrasoundConclusion(),
                     detail.getImgResultConclusion()
             ));
 
@@ -234,7 +234,7 @@ public class UltrasoundAIController {
             detail.getImageUrl(),
             detail.getAiImageUrl(),
             detail.getConfidenceScore(),
-            detail.getTechnicalConclusion(),
+            detail.getUltrasoundConclusion(),
             detail.getImgResultConclusion()
         ));
     }
@@ -366,7 +366,7 @@ public class UltrasoundAIController {
                     detail.getImageUrl(),
                     detail.getAiImageUrl(),
                     detail.getConfidenceScore(),
-                    detail.getTechnicalConclusion(),
+                    detail.getUltrasoundConclusion(),
                     detail.getImgResultConclusion()
                 ));
             } else {
@@ -380,16 +380,16 @@ public class UltrasoundAIController {
     }
 
     @PostMapping("/ultrasound/save-conclusion/{imageId}")
-    public ResponseEntity<?> saveConclusion(@PathVariable Integer imageId, @RequestBody TechnicalConclusionRequest request) {
+    public ResponseEntity<?> saveConclusion(@PathVariable Integer imageId, @RequestBody UltrasoundConclusionRequest request) {
         Optional<MedicalImageDetails> opt = repository.findById(imageId);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
         MedicalImageDetails detail = opt.get();
         
         try {
             if (request.conclusion == null || request.conclusion.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Vui lòng nhập kết luận của kỹ thuật viên!");
+                return ResponseEntity.badRequest().body("Vui lòng nhập kết luận của bác sĩ siêu âm!");
             }
-            detail.setTechnicalConclusion(request.conclusion);
+            detail.setUltrasoundConclusion(request.conclusion);
             
             if (request.manualImageBase64 != null && !request.manualImageBase64.isEmpty()) {
                 // Decode base64
@@ -432,7 +432,7 @@ public class UltrasoundAIController {
         }
     }
 
-    public static class TechnicalConclusionRequest {
+    public static class UltrasoundConclusionRequest {
         public String conclusion;
         public String manualImageBase64;
     }
@@ -443,16 +443,16 @@ public class UltrasoundAIController {
         public String imageUrl;
         public String aiImageUrl;
         public Double confidenceScore;
-        public String technicalConclusion;
+        public String ultrasoundConclusion;
         public String imgResultConclusion;
 
-        public ImageDetailDto(Integer imageId, String imageType, String imageUrl, String aiImageUrl, Double confidenceScore, String technicalConclusion, String imgResultConclusion) {
+        public ImageDetailDto(Integer imageId, String imageType, String imageUrl, String aiImageUrl, Double confidenceScore, String ultrasoundConclusion, String imgResultConclusion) {
             this.imageId = imageId;
             this.imageType = imageType;
             this.imageUrl = imageUrl;
             this.aiImageUrl = aiImageUrl;
             this.confidenceScore = confidenceScore;
-            this.technicalConclusion = technicalConclusion;
+            this.ultrasoundConclusion = ultrasoundConclusion;
             this.imgResultConclusion = imgResultConclusion;
         }
     }

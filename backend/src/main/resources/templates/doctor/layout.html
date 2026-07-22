@@ -29,14 +29,7 @@
             <i class="fa-solid fa-file-medical"></i>
             <span>Xem hồ sơ bệnh án</span>
         </a>
-        <a th:href="@{/doctor/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
-            <i class="fa-solid fa-user-md"></i>
-            <span>Hồ sơ cá nhân</span>
-        </a>
-        <a th:href="@{/doctor/ai-assistant}" class="nav-item" th:classappend="${currentTab == 'ai-assistant' ? 'active' : ''}">
-            <i class="fa-solid fa-robot"></i>
-            <span>Trợ lý AI</span>
-        </a>
+
         <a th:href="@{/doctor/statistics}" class="nav-item" th:classappend="${currentTab == 'statistics' ? 'active' : ''}">
             <i class="fa-solid fa-chart-bar"></i>
             <span>Thống kê chẩn đoán</span>
@@ -45,7 +38,7 @@
 
     <!-- User Profile & Logout -->
     <div class="sidebar-bottom">
-        <div class="sidebar-user-profile">
+        <a th:href="@{/doctor/profile}" class="sidebar-user-profile" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; transition: background-color 0.2s; cursor: pointer;">
             <div class="sidebar-user-avatar">
                 <span th:text="${#strings.substring(userFullName, 0, 1)}">B</span>
             </div>
@@ -53,7 +46,7 @@
                 <h4 th:text="${userFullName}">Bác sĩ Nguyễn Văn Tùng</h4>
                 <span>Bác sĩ</span>
             </div>
-        </div>
+        </a>
         <a href="#" class="logout-btn" onclick="confirmLogout(event)">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Đăng xuất</span>

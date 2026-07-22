@@ -51,6 +51,15 @@ public class GlobalExceptionHandler {
         if (path.startsWith("/admin/")) {
             return "redirect:/admin/dashboard";
         }
+        if (path.startsWith("/ultrasound-doctor/")) {
+            return "redirect:/ultrasound-doctor/dashboard";
+        }
+        if (path.startsWith("/receptionist/")) {
+            return "redirect:/receptionist/create-session";
+        }
+        if (path.startsWith("/pharmacist/")) {
+            return "redirect:/pharmacist/";
+        }
         if (path.startsWith("/auth/") || path.startsWith("/forgot-password/")) {
             return "redirect:/auth/login";
         }
@@ -181,11 +190,11 @@ public class GlobalExceptionHandler {
             Map<String, Object> response = new HashMap<>();
             response.put("timestamp", LocalDateTime.now());
             response.put("status", HttpStatus.BAD_REQUEST.value());
-            response.put("message", "Yêu cầu không hợp lệ, vui lòng kiểm tra lại dữ liệu.");
+            response.put("message", "Yêu cầu không hợp lệ: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
 
-        redirectAttributes.addFlashAttribute("error", "Yêu cầu không hợp lệ, vui lòng kiểm tra lại dữ liệu.");
+        redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.toString());
         return getFallbackRedirect(request);
     }
 

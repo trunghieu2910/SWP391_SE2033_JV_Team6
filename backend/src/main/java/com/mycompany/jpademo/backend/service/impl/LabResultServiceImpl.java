@@ -138,7 +138,7 @@ public class LabResultServiceImpl implements LabResultService {
         } else if (!role.equals("DOCTOR")) {
             // DOCTOR được phép xem chéo (hội chẩn/bàn giao ca) — chỉ chặn
             // các role không liên quan đến chuyên môn y tế: ADMIN, PHARMACIST,
-            // RECEPTIONIST, TECHNICAL
+            // RECEPTIONIST, ULTRASOUND_DOCTOR
             throw new UnauthorizedActionException(
                     "Vai trò của bạn không được phép xem xét nghiệm y tế của bệnh nhân");
         }

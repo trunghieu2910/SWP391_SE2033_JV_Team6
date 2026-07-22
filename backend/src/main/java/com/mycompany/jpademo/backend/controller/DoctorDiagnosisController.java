@@ -241,7 +241,7 @@ public class DoctorDiagnosisController {
                 newImageType += " - Lý do: " + retakeReason.trim();
             }
             doctorDiagnosisService.createMedicalImage(doctorId, sessionId, newImageType);
-            redirectAttributes.addFlashAttribute("success", "Đã gửi yêu cầu siêu âm lại đến kỹ thuật viên!");
+            redirectAttributes.addFlashAttribute("success", "Đã gửi yêu cầu siêu âm lại đến bác sĩ siêu âm!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }

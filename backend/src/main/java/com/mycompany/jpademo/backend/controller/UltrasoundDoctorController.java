@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 @Controller
-@RequestMapping("/technical")
-@PreAuthorize("hasRole('TECHNICAL')")
+@RequestMapping("/ultrasound-doctor")
+@PreAuthorize("hasRole('ULTRASOUND_DOCTOR')")
 @RequiredArgsConstructor
-public class TechnicalController {
+public class UltrasoundDoctorController {
 
     private final DiagnosisSessionService diagnosisSessionService;
 
@@ -23,18 +23,18 @@ public class TechnicalController {
     public String getDashboard(Model model) {
         List<DiagnosisSessionResponse> pendingSessions = diagnosisSessionService.getPendingUltrasoundSessions();
         model.addAttribute("sessions", pendingSessions);
-        return "technical/dashboard";
+        return "ultrasound-doctor/dashboard";
     }
 
     @GetMapping("/history")
     public String getHistory(Model model) {
         List<DiagnosisSessionResponse> completedSessions = diagnosisSessionService.getCompletedUltrasoundSessions();
         model.addAttribute("sessions", completedSessions);
-        return "technical/history";
+        return "ultrasound-doctor/history";
     }
 
     @GetMapping("/ultrasound-simulator")
     public String getUltrasoundSimulator() {
-        return "technical/ultrasound-simulator";
+        return "ultrasound-doctor/ultrasound-simulator";
     }
 }

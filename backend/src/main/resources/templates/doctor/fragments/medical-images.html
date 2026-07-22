@@ -63,9 +63,9 @@
                 </div>
 
                 <!-- Kết luận của KTV -->
-                <div th:if="${d.technicalConclusion}" style="background: #f8fafc; padding: 12px 15px; border-left: 4px solid #10b981; border-radius: 6px;">
-                    <h6 style="margin: 0 0 5px 0; font-size: 0.9rem; color: #0f172a;"><i class="fa-solid fa-user-doctor"></i> Kỹ thuật viên kết luận:</h6>
-                    <p style="margin: 0; font-size: 0.95rem; color: #334155; white-space: pre-wrap;" th:text="${d.technicalConclusion}"></p>
+                <div th:if="${d.ultrasoundConclusion}" style="background: #f8fafc; padding: 12px 15px; border-left: 4px solid #10b981; border-radius: 6px;">
+                    <h6 style="margin: 0 0 5px 0; font-size: 0.9rem; color: #0f172a;"><i class="fa-solid fa-user-doctor"></i> Bác sĩ siêu âm kết luận:</h6>
+                    <p style="margin: 0; font-size: 0.95rem; color: #334155; white-space: pre-wrap;" th:text="${d.ultrasoundConclusion}"></p>
                 </div>
             </div>
           </div>
@@ -83,7 +83,7 @@
             th:disabled="${hasReview
                           or not #lists.isEmpty(medicalImages.?[status.name() == 'PENDING'])
                           or not #lists.isEmpty(medicalImages.?[status.name() == 'COMPLETED'])}"
-            th:title="${not #lists.isEmpty(medicalImages.?[status.name() == 'PENDING']) ? 'Đang chờ kỹ thuật viên xử lý siêu âm' : ''}">
+            th:title="${not #lists.isEmpty(medicalImages.?[status.name() == 'PENDING']) ? 'Đang chờ bác sĩ siêu âm xử lý siêu âm' : ''}">
       <i class="fa-solid fa-plus"></i> Thêm hình ảnh y tế
     </button>
 
@@ -153,7 +153,7 @@
             <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start;">
               <i class="fa-solid fa-circle-exclamation" style="color: #f59e0b; margin-top: 2px;"></i>
               <p style="margin: 0; font-size: 0.9rem; color: #92400e;">
-                Hệ thống sẽ gửi yêu cầu chụp lại đến kỹ thuật viên. Ảnh cũ sẽ vẫn được lưu lại trong lịch sử.
+                Hệ thống sẽ gửi yêu cầu siêu âm lại đến bác sĩ siêu âm. Ảnh cũ sẽ vẫn được lưu lại trong lịch sử.
               </p>
             </div>
             <div class="form-group">

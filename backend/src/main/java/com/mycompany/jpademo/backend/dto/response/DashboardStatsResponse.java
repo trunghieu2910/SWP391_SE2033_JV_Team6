@@ -16,7 +16,7 @@ public class DashboardStatsResponse {
 
     private Long totalDiagnosisSessions;
 
-    private Long totalTechnical;
+    private Long totalUltrasoundDoctor;
 
     private Long totalReceptionist;
 

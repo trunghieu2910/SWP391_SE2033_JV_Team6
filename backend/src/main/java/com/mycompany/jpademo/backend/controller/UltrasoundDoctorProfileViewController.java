@@ -17,10 +17,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 
 @Controller
-@RequestMapping("/technical/profile")
-@PreAuthorize("hasRole('TECHNICAL')")
+@RequestMapping("/ultrasound-doctor/profile")
+@PreAuthorize("hasRole('ULTRASOUND_DOCTOR')")
 @RequiredArgsConstructor
-public class TechnicalProfileViewController {
+public class UltrasoundDoctorProfileViewController {
 
     private final ProfileService profileService;
 
@@ -44,7 +44,7 @@ public class TechnicalProfileViewController {
         model.addAttribute("success", success);
         model.addAttribute("today", LocalDate.now());
 
-        return "technical/profile";
+        return "ultrasound-doctor/profile";
     }
 
     @PostMapping
@@ -57,11 +57,11 @@ public class TechnicalProfileViewController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("profile", profile);
             model.addAttribute("profileForm", profileForm);
-            return "technical/profile";
+            return "ultrasound-doctor/profile";
         }
 
         profileService.updateProfile(userDetails.getUsername(), profileForm);
         redirectAttributes.addFlashAttribute("success", "Cập nhật hồ sơ thành công.");
-        return "redirect:/technical/profile?success=true";
+        return "redirect:/ultrasound-doctor/profile?success=true";
     }
 }

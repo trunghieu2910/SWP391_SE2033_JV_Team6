@@ -35,11 +35,11 @@ public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
     private static final Map<String, String> ROLE_HOME = Map.of(
             "ROLE_ADMIN",    "/admin/dashboard",
             "ROLE_DOCTOR",   "/doctor/sessions",
+            "ROLE_ULTRASOUND_DOCTOR", "/ultrasound-doctor/dashboard",
             "ROLE_RECEPTIONIST", "/receptionist/create-session",
             "ROLE_PHARMACIST", "/pharmacist/",
             "ROLE_PATIENT",  "/patient/home",
-            "ROLE_AITRAINER", "/patient/home",
-            "ROLE_TECHNICAL", "/technical/dashboard"
+            "ROLE_AITRAINER", "/patient/home"
     );
 
     /**
