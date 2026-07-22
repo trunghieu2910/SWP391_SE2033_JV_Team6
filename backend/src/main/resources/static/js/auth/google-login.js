@@ -48,9 +48,7 @@ document.getElementById("googleLoginBtn").addEventListener("click", async () => 
             window.location.href = "/auth/login?error=banned";
         } else if (data.status === "LOCKED") {
             window.location.href = "/auth/login?error=locked";
-        } else if (data.status === "INACTIVE") {
-            window.location.href = "/auth/login?error=inactive";
-        } else {
+        }  else {
             window.location.href = "/auth/login?error=invalid";
         }
     } catch (err) {

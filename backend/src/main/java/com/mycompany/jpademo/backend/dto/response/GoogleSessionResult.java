@@ -15,8 +15,7 @@ import lombok.Getter;
 public class GoogleSessionResult {
 
     /** Possible outcomes of a Google sign-in attempt. */
-    public enum Status { OK, NEED_MORE_INFO, BANNED, INACTIVE, LOCKED }
-
+    public enum Status { OK, NEED_MORE_INFO, BANNED, LOCKED }
     /** The outcome of this sign-in attempt. */
     private final Status status;
 
@@ -41,7 +40,7 @@ public class GoogleSessionResult {
     }
 
     /** Builds a rejection result for an existing account that is not
-     *  currently allowed to log in (BANNED, INACTIVE, or LOCKED). */
+     *  currently allowed to log in (BANNED, or temporarily LOCKED). */
     public static GoogleSessionResult rejected(Status status) {
         return new GoogleSessionResult(status, null, null, null);
     }

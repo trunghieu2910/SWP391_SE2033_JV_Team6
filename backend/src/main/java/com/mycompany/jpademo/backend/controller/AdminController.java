@@ -111,7 +111,7 @@ public class AdminController {
         }
     }
 
-    /** Updates the status (active/inactive/etc.) of a user. */
+    /** Updates a user's status — either ACTIVE (unban) or BANNED (ban). */
     @PostMapping("/users/{id}/status")
     public String updateUserStatus(
             @PathVariable Integer id,

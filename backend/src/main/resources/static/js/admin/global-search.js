@@ -15,7 +15,6 @@
 
     const statusMap = {
         'ACTIVE': 'Hoạt động',
-        'INACTIVE': 'Không hoạt động',
         'BANNED': 'Đã khóa'
     };
 
@@ -73,7 +72,6 @@
         if (!status) return '';
         const statusMap = {
             'ACTIVE': 'status-active',
-            'INACTIVE': 'status-inactive',
             'BANNED': 'status-banned'
         };
         return `<span class="search-badge ${statusMap[status] || ''}">${getStatusDisplay(status)}</span>`;

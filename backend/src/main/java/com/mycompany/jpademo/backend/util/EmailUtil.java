@@ -67,40 +67,6 @@ public class EmailUtil {
             """.formatted(name, reason);
     }
 
-    public static String buildInactiveAccountTemplate(String name, String reason) {
-        return """
-            <html>
-            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
-            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
-                <h2 style="color: #ff9800;">
-                    Tài khoản đã được chuyển sang trạng thái không hoạt động
-                </h2>
-                <p>Xin chào <b>%s</b>,</p>
-                <p>
-                    Tài khoản của bạn đã được quản trị viên chuyển sang trạng thái <strong>KHÔNG HOẠT ĐỘNG</strong>.
-                </p>
-                <div style="margin-top: 20px; padding: 15px; background-color: #fff3e0; border-radius: 5px;">
-                    <strong>Lý do:</strong>
-                    <p>%s</p>
-                </div>
-                <br>
-                <p>
-                    Ở trạng thái này, bạn sẽ không thể đăng nhập và sử dụng hệ thống.
-                </p>
-                <p>
-                    Nếu có thắc mắc, vui lòng liên hệ quản trị viên để được hỗ trợ.
-                </p>
-                <br>
-                <p>
-                    Trân trọng,<br>
-                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
-                </p>
-            </div>
-            </body>
-            </html>
-            """.formatted(name, reason);
-    }
-
     public static String buildOtpEmailTemplate(String name, String otp) {
         return """
                 <html>

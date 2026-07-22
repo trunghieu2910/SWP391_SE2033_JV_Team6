@@ -709,12 +709,6 @@ public class AdminServiceImpl implements AdminService {
                         "Tài khoản của bạn đã được mở khoá",
                         EmailUtil.buildUnbanAccountTemplate(user.getFullName(), reason));
                 break;
-            case INACTIVE:
-                emailService.sendEmail(
-                        user.getEmail(),
-                        "Tài khoản của bạn đã được mở khoá",
-                        EmailUtil.buildInactiveAccountTemplate(user.getFullName(), reason));
-                break;
             default:
                 throw new IllegalArgumentException("Unsupported user status: " + userStatus);
         }

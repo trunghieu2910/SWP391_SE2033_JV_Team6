@@ -49,7 +49,7 @@ public class WebGoogleAuthController {
      *     (this is the FIRST-EVER Google login) -> NO session is created at
      *     this step; email/fullName are returned so the frontend can open
      *     the "complete your profile" form (see completeSession() below).
-     *   - BANNED / INACTIVE / LOCKED: the account exists but isn't allowed
+     *   - BANNED / LOCKED: the account exists but isn't allowed
      *     to log in -> returns 401 with the corresponding status.
      */
     @PostMapping("/session")
@@ -66,7 +66,6 @@ public class WebGoogleAuthController {
                     "fullName", result.getFullName()
             ));
             case BANNED -> ResponseEntity.status(401).body(Map.of("status", "BANNED"));
-            case INACTIVE -> ResponseEntity.status(401).body(Map.of("status", "INACTIVE"));
             case LOCKED -> ResponseEntity.status(401).body(Map.of("status", "LOCKED"));
             case OK -> {
                 establishSession(result.getUser(), request, response);

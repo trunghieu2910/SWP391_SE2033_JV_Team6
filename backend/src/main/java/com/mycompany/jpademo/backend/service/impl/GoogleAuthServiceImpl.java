@@ -47,7 +47,7 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
      * Looks the verified email up in the database:
      * <ul>
      *   <li>no matching user -> {@code NEED_MORE_INFO} (first-time sign-in)</li>
-     *   <li>user exists but BANNED / INACTIVE / temporarily LOCKED -> rejected</li>
+     *   <li>user exists but BANNED, or temporarily LOCKED -> rejected</li>
      *   <li>otherwise -> {@code OK}, wrapping the existing user</li>
      * </ul>
      */
@@ -65,9 +65,6 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
         User user = userOpt.get();
         if (user.getStatus() == UserStatus.BANNED) {
             return GoogleSessionResult.rejected(GoogleSessionResult.Status.BANNED);
-        }
-        if (user.getStatus() == UserStatus.INACTIVE) {
-            return GoogleSessionResult.rejected(GoogleSessionResult.Status.INACTIVE);
         }
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
             return GoogleSessionResult.rejected(GoogleSessionResult.Status.LOCKED);
