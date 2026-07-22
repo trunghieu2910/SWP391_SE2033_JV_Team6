@@ -1,8 +1,8 @@
 package com.mycompany.jpademo.backend.service.interfaces;
 
-import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.InitiateCreateStaffRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
-import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.VerifyPendingStaffRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
@@ -26,11 +26,9 @@ public interface AdminService {
     /** Updates the status of a specific user. */
     boolean updateUserStatus(UpdateUserStatusRequest request, User admin);
 
-    /** Verifies the OTP and finalized doctor creation. */
-    void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin);
+    void verifyAndCreateStaff(VerifyPendingStaffRequest request, User admin);
 
-    /** Initiates the creation of a doctor account by sending an OTP. */
-    InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin);
+    InitiateCreateStaffResponse initiateCreateStaff(InitiateCreateStaffRequest request, User admin);
 
     /** Retrieves page data for the admin dashboard. */
     DashboardPageResponse getDashboardPageData(LocalDate startDate, LocalDate endDate);

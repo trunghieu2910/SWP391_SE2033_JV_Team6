@@ -129,7 +129,7 @@ public class EmailUtil {
                 """.formatted(name, otp);
     }
 
-    public static String buildCreateDoctorAccountTemplate(String name, String username, String password) {
+    public static String buildCreateStaffAccountTemplate(String name, String username, String password) {
         return """
                 <html>
                 <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
@@ -161,7 +161,7 @@ public class EmailUtil {
                 """.formatted(name, username, password);
     }
 
-    public static String buildCreateDoctorOtpForAdmin(String adminName, String otp) {
+    public static String buildCreateStaffOtpForAdmin(String adminName, String otp) {
         return """
             <html>
             <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">

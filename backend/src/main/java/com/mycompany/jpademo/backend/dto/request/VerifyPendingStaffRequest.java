@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VerifyPendingDoctorRequest {
+public class VerifyPendingStaffRequest {
     @NotBlank(message = "Mã yêu cầu không được để trống")
     private String requestId;
 

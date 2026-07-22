@@ -118,6 +118,25 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 4000);
         }
 
+        // === ROLE CHANGE LOGIC ===
+        const roleSelect = document.getElementById('roleName');
+        const fileGroup = document.querySelector('.file-group');
+        
+        if (roleSelect && fileGroup && fileInput) {
+            roleSelect.addEventListener('change', function() {
+                if (this.value === 'DOCTOR') {
+                    fileGroup.style.display = 'block';
+                    fileInput.setAttribute('required', 'required');
+                } else {
+                    fileGroup.style.display = 'none';
+                    fileInput.removeAttribute('required');
+                    removeFile();
+                }
+            });
+            // Trigger change on load to set initial state
+            roleSelect.dispatchEvent(new Event('change'));
+        }
+
         // === Resend OTP ===
         document.getElementById('resendOtpBtn')?.addEventListener('click', function() {
             if (isResending) return;
@@ -125,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.disabled = true;
             this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
 
-            fetch('/admin/create-doctor/resend-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+            fetch('/admin/create-staff/resend-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {

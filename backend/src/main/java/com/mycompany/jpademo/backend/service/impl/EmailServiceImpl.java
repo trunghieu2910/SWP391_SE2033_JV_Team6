@@ -31,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendCreateDoctorAccountEmail(String to, String subject, String fullName, String username, String password) {
-        String body = EmailUtil.buildCreateDoctorAccountTemplate(fullName, username, password);
+        String body = EmailUtil.buildCreateStaffAccountTemplate(fullName, username, password);
         buildAndSendEmail(to, subject, body);
     }
 

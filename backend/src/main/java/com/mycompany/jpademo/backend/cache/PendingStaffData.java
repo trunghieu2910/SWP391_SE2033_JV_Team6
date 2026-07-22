@@ -8,9 +8,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PendingDoctorData {
+public class PendingStaffData {
     private String requestId;
     private String adminEmail;
+    private String roleName;
     private String userName;
     private String fullName;
     private String email;

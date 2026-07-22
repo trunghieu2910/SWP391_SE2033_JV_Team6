@@ -28,6 +28,10 @@
             <i class="fa-solid fa-clock-rotate-left"></i>
             <span>Lịch sử siêu âm</span>
         </a>
+        <a th:href="@{/technical/profile}" class="nav-item" th:classappend="${currentTab == 'profile' ? 'active' : ''}">
+            <i class="fa-regular fa-user"></i>
+            <span>Hồ sơ cá nhân</span>
+        </a>
     </nav>
 
     <!-- User Profile & Logout -->

@@ -568,6 +568,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     /** Deletes an imaging order from a diagnosis session. */
     @Override
     @Transactional
+    @DoctorActionLog(action = "DELETE_MEDICAL_IMAGE", targetType = "MedicalImage")
     public void deleteMedicalImage(Integer doctorId, Integer sessionId, Integer imageId) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
@@ -593,6 +594,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     /** Generates a new medical imaging order for a session. */
     @Override
     @Transactional
+    @DoctorActionLog(action = "REQUEST_MEDICAL_IMAGE", targetType = "MedicalImage")
     public void createMedicalImage(Integer doctorId, Integer sessionId, String imageType) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
