@@ -36,12 +36,15 @@ public class ForgotPasswordViewController {
                               Model model, HttpSession session) {
         try {
             forgotPasswordService.forgotPassword(form);
-            session.setAttribute(SESSION_EMAIL, form.getEmail());
-            return "redirect:/forgot-password/verify-otp";
         } catch (RuntimeException ex) {
-            model.addAttribute("error", ex.getMessage());
+            // Chỉ còn bắt lỗi hệ thống thật sự (VD: SMTP server lỗi) — không còn
+            // trường hợp "email không tồn tại" nữa vì service không throw cho case đó.
+            model.addAttribute("error", "Có lỗi xảy ra, vui lòng thử lại sau.");
             return "auth/forgot-password-step1";
         }
+
+        session.setAttribute(SESSION_EMAIL, form.getEmail());
+        return "redirect:/forgot-password/verify-otp";
     }
 
     // ── Bước 2: Xác minh OTP ─────────────────────────────────────
@@ -82,21 +85,18 @@ public class ForgotPasswordViewController {
 
     // Gửi lại OTP — dùng lại chính bước 1 với email đã lưu trong session
     @PostMapping("/resend-otp")
-    public String resendOtp(Model model, HttpSession session,
-                            RedirectAttributes redirectAttributes) {
+    public String resendOtp(HttpSession session, RedirectAttributes redirectAttributes) {
         String email = (String) session.getAttribute(SESSION_EMAIL);
         if (email == null) {
             return "redirect:/forgot-password";
         }
 
-        try {
-            ForgotPasswordRequest request = new ForgotPasswordRequest();
-            request.setEmail(email);
-            forgotPasswordService.forgotPassword(request);
-            redirectAttributes.addFlashAttribute("resent", true);
-        } catch (RuntimeException ex) {
-            redirectAttributes.addFlashAttribute("error", ex.getMessage());
-        }
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail(email);
+
+        forgotPasswordService.forgotPassword(request); // cooldown được xử lý ngầm bên trong service
+
+        redirectAttributes.addFlashAttribute("resent", true);
         return "redirect:/forgot-password/verify-otp";
     }
 

@@ -38,6 +38,8 @@ public class LabResultServiceImpl implements LabResultService {
 
     private final SystemLogService systemLogService;
 
+    private final LisMockDataProvider lisMockDataProvider;
+
     @Override
     public LabResultResponse createLabResult(CreateLabResultRequest request) {
 
@@ -52,6 +54,12 @@ public class LabResultServiceImpl implements LabResultService {
         if (!session.getUser().getUserId().equals(currentDoctorId)) {
             throw new UnauthorizedActionException(
                     "Bạn không có quyền tạo xét nghiệm cho phiên khám này");
+        }
+
+        // chặn testType rác không nằm trong danh sách hỗ trợ
+        if (!lisMockDataProvider.getSupportedTestTypes().contains(request.getTestType())) {
+            throw new BadRequestException(
+                    "Loại xét nghiệm không hợp lệ: \"" + request.getTestType() + "\"");
         }
 
         if (session.getStatus() == DiagnosisSessionStatus.COMPLETED) {
@@ -107,6 +115,12 @@ public class LabResultServiceImpl implements LabResultService {
                 throw new UnauthorizedActionException(
                         "Phiên khám này chưa được chia sẻ với bệnh nhân");
             }
+        } else if (!role.equals("DOCTOR")) {
+            // DOCTOR được phép xem chéo (hội chẩn/bàn giao ca) — chỉ chặn
+            // các role không liên quan đến chuyên môn y tế: ADMIN, PHARMACIST,
+            // RECEPTIONIST, TECHNICAL
+            throw new UnauthorizedActionException(
+                    "Vai trò của bạn không được phép xem xét nghiệm y tế của bệnh nhân");
         }
 
         List<LabResult> labResults = labResultRepository.findByDiagnosisSessionSessionId(sessionId);

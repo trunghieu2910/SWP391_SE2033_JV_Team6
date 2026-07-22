@@ -4,7 +4,10 @@ import com.mycompany.jpademo.backend.dto.request.LisResultRequest;
 import com.mycompany.jpademo.backend.dto.response.ApiResponse;
 import com.mycompany.jpademo.backend.dto.response.LabResultResponse;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
+import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.impl.LisMockDataProvider;
+import com.mycompany.jpademo.backend.service.interfaces.DoctorDiagnosisService;
 import com.mycompany.jpademo.backend.service.interfaces.LisIntegrationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,9 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 
 /**
@@ -31,6 +37,7 @@ public class LisIntegrationController {
 
     private final LisIntegrationService lisIntegrationService;
     private final LisMockDataProvider lisMockDataProvider;
+    private final DoctorDiagnosisService doctorDiagnosisService;
 
     @Value("${lis.integration.api-key}")
     private String configuredApiKey;
@@ -44,7 +51,9 @@ public class LisIntegrationController {
             @RequestHeader(value = "X-API-Key", required = false) String apiKey,
             @Valid @RequestBody LisResultRequest request) {
 
-        if (apiKey == null || !apiKey.equals(configuredApiKey)) {
+        if (apiKey == null || !MessageDigest.isEqual(
+                apiKey.getBytes(StandardCharsets.UTF_8),
+                configuredApiKey.getBytes(StandardCharsets.UTF_8))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ApiResponse.<LabResultResponse>builder()
                             .code(401)
@@ -73,8 +82,19 @@ public class LisIntegrationController {
     public void simulateFromUi(@PathVariable Integer sessionId,
                                @PathVariable Integer labResultId,
                                @RequestParam String testType,
+                               @AuthenticationPrincipal CustomUserDetails userDetails,
                                HttpServletRequest httpRequest,
                                HttpServletResponse httpResponse) throws IOException {
+
+        Integer doctorId = userDetails.getUser().getUserId();
+
+        try {
+            doctorDiagnosisService.verifyDoctorOwnsSession(doctorId, sessionId);
+        } catch (UnauthorizedActionException | ResourceNotFoundException e) {
+            httpRequest.getSession().setAttribute("flashError", e.getMessage());
+            httpResponse.sendRedirect("/doctor/sessions");
+            return;
+        }
 
         List<LisResultRequest.TestResultItem> mockResults = lisMockDataProvider.getMockResults(testType);
 

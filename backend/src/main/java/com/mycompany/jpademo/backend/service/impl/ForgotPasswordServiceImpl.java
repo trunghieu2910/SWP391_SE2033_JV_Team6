@@ -35,21 +35,37 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     @Override
     public ResponseEntity<ApiResponse> forgotPassword(ForgotPasswordRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserNotFoundException("Thông tin email không hợp lệ"));
+        String email = request.getEmail();
 
+        // ── Fix #2: Cooldown — nếu email này vừa có OTP còn hiệu lực thì không gửi lại ──
+        // Áp dụng TRƯỚC khi kiểm tra email có tồn tại hay không, để hành vi
+        // giống hệt nhau dù email thật hay giả (tránh lộ thông tin qua timing).
+        if (OtpUtil.getRemainingTime(email) > 0) {
+            return ResponseEntity.ok(genericOtpSentResponse());
+        }
+
+        // ── Fix #1: Luôn sinh & lưu OTP, bất kể email có tồn tại hay không ──
+        // Việc lưu "OTP ma" cho email không tồn tại đảm bảo cooldown/đồng hồ đếm ngược
+        // ở Bước 2 hoạt động giống hệt nhau ở cả 2 trường hợp → không thể phân biệt được.
         String otp = OtpUtil.generateOtp();
-        OtpUtil.saveOtp(user.getEmail(), otp);
+        OtpUtil.saveOtp(email, otp);
 
-        emailService.sendOtpEmail(user.getEmail(),user.getFullName(), otp);
+        userRepository.findByEmail(email).ifPresent(user -> {
+            emailService.sendOtpEmail(user.getEmail(), user.getFullName(), otp);
+            systemLogService.logActivity("Users", user.getUserId(), "FORGOT_PASSWORD",
+                    "Người dùng gửi yêu cầu quên mật khẩu (" + user.getEmail() + ")");
+        });
+        // Nếu email không tồn tại: KHÔNG gửi mail, KHÔNG ghi log — nhưng response
+        // và trạng thái OTP nội bộ vẫn giống hệt trường hợp thành công.
 
-        systemLogService.logActivity("Users", user.getUserId(), "FORGOT_PASSWORD",
-                "Người dùng gửi yêu cầu quên mật khẩu (" + user.getEmail() + ")");
+        return ResponseEntity.ok(genericOtpSentResponse());
+    }
 
-        return ResponseEntity.ok(ApiResponse.builder()
-                        .success(true)
-                        .message("OTP đã được gửi đến email của bạn")
-                        .build());
+    private ApiResponse genericOtpSentResponse() {
+        return ApiResponse.builder()
+                .success(true)
+                .message("Nếu email tồn tại trong hệ thống, mã OTP đã được gửi")
+                .build();
     }
 
     @Override

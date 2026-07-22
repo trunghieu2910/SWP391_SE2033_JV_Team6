@@ -573,4 +573,13 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         
         medicalImageRepository.save(image);
     }
+
+    @Override
+    public void verifyDoctorOwnsSession(Integer doctorId, Integer sessionId) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán với: " + sessionId));
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("Bạn không có quyền thao tác trên ca chẩn đoán này.");
+        }
+    }
 }

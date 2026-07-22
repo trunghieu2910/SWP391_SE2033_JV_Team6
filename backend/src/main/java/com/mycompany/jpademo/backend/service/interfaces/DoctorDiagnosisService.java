@@ -36,4 +36,6 @@ public interface DoctorDiagnosisService {
     void deleteMedicalImage(Integer doctorId, Integer sessionId, Integer imageId);
 
     void createMedicalImage(Integer doctorId, Integer sessionId, String imageType);
+
+    void verifyDoctorOwnsSession(Integer doctorId, Integer sessionId);
 }

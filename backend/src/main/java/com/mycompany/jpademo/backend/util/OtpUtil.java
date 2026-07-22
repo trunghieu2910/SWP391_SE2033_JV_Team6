@@ -14,6 +14,8 @@ public class OtpUtil {
 
     private static final int OTP_EXPIRE_MINUTES = 2;
 
+    private static final int MAX_OTP_ATTEMPTS = 5;
+
     public static void cleanupExpired() {
         LocalDateTime now = LocalDateTime.now();
         otpStorage.entrySet().removeIf(e -> now.isAfter(e.getValue().getExpireTime()));
@@ -46,7 +48,20 @@ public class OtpUtil {
             return false;
         }
 
-        return otpData.getOtp().equals(otp);
+        // ── MỚI: nếu đã sai quá số lần cho phép, khóa OTP này luôn,
+        //          buộc người dùng phải bấm "Gửi lại" để lấy mã mới ──
+        if (otpData.getFailedAttempts() >= MAX_OTP_ATTEMPTS) {
+            otpStorage.remove(email);
+            return false;
+        }
+
+        boolean matched = otpData.getOtp().equals(otp);
+
+        if (!matched) {
+            otpData.setFailedAttempts(otpData.getFailedAttempts() + 1);
+        }
+
+        return matched;
     }
 
     public static void  removeOtp(String email){

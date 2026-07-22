@@ -228,6 +228,13 @@
             });
         }
 
+        function csvSafe(value) {
+            const str = String(value);
+            // Nếu ô bắt đầu bằng ký tự có thể bị Excel/Sheets hiểu là công thức
+            // (=, +, -, @, tab, xuống dòng) thì thêm dấu nháy đơn phía trước để vô hiệu hóa.
+            return /^[=+\-@\t\r]/.test(str) ? "'" + str : str;
+        }
+
         document.getElementById('exportCsvBtn').addEventListener('click', () => {
             if (!labels.length) return;
             const total = data.reduce((a, b) => a + b, 0);
@@ -235,7 +242,7 @@
             let csv = 'Loại chuẩn đoán,Số ca,Tỷ lệ\n';
             labels.forEach((label, i) => {
                 const pct = total > 0 ? ((data[i] / total) * 100).toFixed(1) : '0.0';
-                csv += `"${label}",${data[i]},${pct}%\n`;
+                csv += `"${csvSafe(label)}",${data[i]},${pct}%\n`;
             });
             csv += `"Tổng",${total},100.0%\n`;
 

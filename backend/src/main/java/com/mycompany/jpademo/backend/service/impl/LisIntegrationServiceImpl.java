@@ -7,12 +7,16 @@ import com.mycompany.jpademo.backend.entity.LabResultParameter;
 import com.mycompany.jpademo.backend.entity.Parameter;
 import com.mycompany.jpademo.backend.enums.LabResultStatus;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
+import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.repository.LabResultParameterRepository;
 import com.mycompany.jpademo.backend.repository.LabResultRepository;
 import com.mycompany.jpademo.backend.repository.ParameterRepository;
+import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.LisIntegrationService;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +46,19 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
                         "Không tìm thấy xét nghiệm đang chờ kết quả (PENDING) với labResultId: "
                                 + request.getLabResultId()
                                 + ". Có thể đã được xử lý hoặc labResultId không tồn tại."));
+
+        // chỉ bác sĩ phụ trách ca mới được bấm "Lấy kết quả giả lập"
+        // (webhook thật REAL_LIS không có phiên đăng nhập nên bỏ qua check này)
+        if ("UI_SIMULATE".equals(source)) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
+            Integer currentDoctorId = currentUser.getUser().getUserId();
+            Integer ownerDoctorId = labResult.getDiagnosisSession().getUser().getUserId();
+            if (!ownerDoctorId.equals(currentDoctorId)) {
+                throw new UnauthorizedActionException(
+                        "Bạn không có quyền thao tác trên xét nghiệm của phiên khám này");
+            }
+        }
 
         List<LabResultParameter> savedParameters = new ArrayList<>();
 
