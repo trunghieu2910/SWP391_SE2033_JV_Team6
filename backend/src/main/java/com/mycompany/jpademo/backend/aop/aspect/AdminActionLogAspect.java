@@ -89,7 +89,7 @@ public class AdminActionLogAspect {
                 description = "ADMIN: Đổi trạng thái user THẤT BẠI. Trạng thái yêu cầu: "
                         + req.getStatus() + ". Lý do: " + exception.getMessage();
             }
-            if (arg instanceof VerifyPendingDoctorRequest request) {
+            if (arg instanceof VerifyPendingStaffRequest request) {
                 description = "ADMIN: Tạo tài khoản bác sĩ THẤT BẠI. Lý do: " + exception.getMessage();
             }
             if (arg instanceof BlockIpRequest request) {

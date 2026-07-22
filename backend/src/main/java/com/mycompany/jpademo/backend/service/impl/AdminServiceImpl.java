@@ -512,9 +512,7 @@ public class AdminServiceImpl implements AdminService {
         List<UserStatus> userStatuses = List.of(UserStatus.values());
         List<String> status = new ArrayList<>();
         for (UserStatus u: userStatuses) {
-            if (!UserStatus.PENDING.equals(u)) {
-                status.add(String.valueOf(u));
-            }
+            status.add(String.valueOf(u));
         }
         return status;
     }
