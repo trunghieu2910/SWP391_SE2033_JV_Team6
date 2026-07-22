@@ -57,6 +57,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus() != UserStatus.PENDING;
+        return user.getStatus() == UserStatus.ACTIVE;
     }
 }

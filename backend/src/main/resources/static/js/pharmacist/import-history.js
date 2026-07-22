@@ -17,7 +17,7 @@ function initializeImportHistorySearchAndSort() {
     if (!tableBody) return;
 
     const rows = Array.from(tableBody.querySelectorAll('tr'))
-        .filter(row => row.id !== 'importHistoryEmptyRow' && row.querySelectorAll('td').length === 8);
+        .filter(row => row.id !== 'importHistoryEmptyRow' && row.querySelectorAll('td').length === 7);
 
     rows.forEach((row, index) => {
         const cells = row.querySelectorAll('td');
@@ -25,7 +25,6 @@ function initializeImportHistorySearchAndSort() {
         row.dataset.drugName = normalizeImportHistoryText(cells[0]?.textContent || '');
         row.dataset.batchNumber = normalizeImportHistoryText(cells[1]?.textContent || '');
         row.dataset.expiryTime = String(parseImportHistoryDate(cells[3]?.textContent || ''));
-        row.dataset.stock = String(parseImportHistoryNumber(cells[7]?.textContent || ''));
     });
 
     if (searchInput) {
@@ -78,12 +77,6 @@ function compareImportHistoryRows(a, b, sortMode) {
     }
     if (sortMode === 'expiry-desc') {
         return Number(b.dataset.expiryTime) - Number(a.dataset.expiryTime);
-    }
-    if (sortMode === 'stock-asc') {
-        return Number(a.dataset.stock) - Number(b.dataset.stock);
-    }
-    if (sortMode === 'stock-desc') {
-        return Number(b.dataset.stock) - Number(a.dataset.stock);
     }
 
     return Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex);

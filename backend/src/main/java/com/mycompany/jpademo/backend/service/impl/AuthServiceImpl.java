@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.mycompany.jpademo.backend.cache.PendingRegistrationStore;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -71,30 +73,11 @@ public class AuthServiceImpl implements AuthService {
         Role patientRole = roleRepository.findByRoleName(RoleName.PATIENT)
                 .orElseThrow(() -> new ResourceNotFoundException("Role PATIENT không tồn tại."));
 
-        User user = new User();
-        user.setUserName(request.getUserName());
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setNationalID(request.getNationalID());
-        user.setStatus(UserStatus.PENDING);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setRole(patientRole);
-
-        userRepository.save(user);
-
-        Patient patient = new Patient();
-        patient.setGender(request.getGender());
-        patient.setDob(request.getDob());
-        patient.setAddress(request.getAddress());
-        patient.setUser(user);
-        
-        patientRepository.save(patient);
+        PendingRegistrationStore.savePending(request.getUserName(), request);
 
         String otp = OtpUtil.generateOtp();
-        OtpUtil.saveOtp(user.getEmail(), otp);
-        emailService.sendOtpEmail(user.getEmail(), user.getFullName(), otp);
+        OtpUtil.saveOtp(request.getEmail(), otp);
+        emailService.sendOtpEmail(request.getEmail(), request.getFullName(), otp);
     }
 
     @Override
@@ -141,36 +124,54 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void verifyRegistrationOtp(OtpVerificationRequest request) {
-        User user = userRepository.findByUserName(request.getUserName())
-                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
-
-        if (user.getStatus() != UserStatus.PENDING) {
-            throw new InvalidOtpException("no");
+        RegisterRequest registerRequest = PendingRegistrationStore.getPending(request.getUserName());
+        if (registerRequest == null) {
+            throw new ResourceNotFoundException("Thông tin đăng ký không tồn tại hoặc đã hết hạn.");
         }
 
-        boolean valid = OtpUtil.verifyOtp(user.getEmail(), request.getOtp());
+        boolean valid = OtpUtil.verifyOtp(registerRequest.getEmail(), request.getOtp());
         if (!valid) {
             throw new InvalidOtpException("no");
         }
 
-        OtpUtil.removeOtp(user.getEmail());
+        Role patientRole = roleRepository.findByRoleName(RoleName.PATIENT)
+                .orElseThrow(() -> new ResourceNotFoundException("Role PATIENT không tồn tại."));
+
+        User user = new User();
+        user.setUserName(registerRequest.getUserName());
+        user.setFullName(registerRequest.getFullName());
+        user.setEmail(registerRequest.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setPhoneNumber(registerRequest.getPhoneNumber());
+        user.setNationalID(registerRequest.getNationalID());
         user.setStatus(UserStatus.ACTIVE);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setRole(patientRole);
         userRepository.save(user);
+
+        Patient patient = new Patient();
+        patient.setGender(registerRequest.getGender());
+        patient.setDob(registerRequest.getDob());
+        patient.setAddress(registerRequest.getAddress());
+        patient.setUser(user);
+        patientRepository.save(patient);
+
+        OtpUtil.removeOtp(registerRequest.getEmail());
+        PendingRegistrationStore.removePending(request.getUserName());
     }
 
     @Override
     public void resendRegistrationOtp(ResendOtpRequest request) {
-        User user = userRepository.findByUserName(request.getUserName())
-                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
-
-        if (user.getStatus() != UserStatus.PENDING) {
-            throw new InvalidOtpException("no");
+        RegisterRequest registerRequest = PendingRegistrationStore.getPending(request.getUserName());
+        if (registerRequest == null) {
+            throw new ResourceNotFoundException("Thông tin đăng ký không tồn tại hoặc đã hết hạn.");
         }
 
         String otp = OtpUtil.generateOtp();
-        OtpUtil.saveOtp(user.getEmail(), otp);
-        emailService.sendOtpEmail(user.getEmail(), user.getFullName(), otp);
+        OtpUtil.saveOtp(registerRequest.getEmail(), otp);
+        emailService.sendOtpEmail(registerRequest.getEmail(), registerRequest.getFullName(), otp);
     }
 
 }

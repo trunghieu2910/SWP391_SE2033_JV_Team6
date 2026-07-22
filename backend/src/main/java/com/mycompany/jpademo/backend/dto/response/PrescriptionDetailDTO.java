@@ -30,6 +30,7 @@ public class PrescriptionDetailDTO {
     private String instruction;
     private LocalDateTime dispensedAt;
     private String dispensedByUser;
+    private Integer dispensedByUserId;
     private String notes;
     private Integer patientId;
     private String patientName;
