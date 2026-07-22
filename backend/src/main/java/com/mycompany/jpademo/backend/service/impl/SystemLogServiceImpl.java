@@ -77,8 +77,8 @@ public class SystemLogServiceImpl implements SystemLogService {
     private String mapActionToVietnamese(String action) {
         switch (action) {
             case "LOGIN": return "Đăng nhập";
-            case "GOOGLE_LOGIN_FIRST_TIME": return "Đăng nhập lần đầu bằng Google";
-            case "GOOGLE_LOGIN": return "Đăng nhập bằng Google";
+            case "GOOGLE_LOGIN_FIRST_TIME": return "Đăng nhập";
+            case "GOOGLE_LOGIN": return "Đăng nhập";
             case "LOGOUT": return "Đăng xuất";
             case "BAN_USER": return "Khóa User";
             case "UNBAN_USER": return "Mở khóa";
@@ -92,13 +92,13 @@ public class SystemLogServiceImpl implements SystemLogService {
             case "UPDATE_SESSION_STATUS": return "Cập nhật";
             case "UPDATE_SESSION_SHARE": return "Cập nhật";
             case "UPDATE_CLINICAL_SYMPTOMS": return "Cập nhật";
-            case "FORGOT_PASSWORD": return "Yêu cầu quên mật khẩu";
+            case "FORGOT_PASSWORD": return "Quên mật khẩu";
             case "VERIFY_OTP": return "Xác minh OTP";
-            case "UPDATE_PASSWORD": return "Đặt lại mật khẩu";
-            case "CREATE_LAB_RESULT": return "Tạo chỉ định xét nghiệm";
-            case "DELETE_LAB_RESULT": return "Xóa chỉ định xét nghiệm";
-            case "LIS_RECEIVE": return "Nhận kết quả LIS (thật)";
-            case "LIS_SIMULATE": return "Mô phỏng kết quả LIS";
+            case "UPDATE_PASSWORD": return "Cập nhật";
+            case "CREATE_LAB_RESULT": return "Tạo";
+            case "DELETE_LAB_RESULT": return "Xóa";
+            case "LIS_RECEIVE": return "Nhận kết quả";
+            case "LIS_SIMULATE": return "Nhận kết quả";
             default: return action;
         }
     }
