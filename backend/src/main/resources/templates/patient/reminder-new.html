@@ -27,10 +27,21 @@
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="scheduledTime">
-                            <i class="fa-regular fa-clock"></i> Giờ nhắc
+                        <label>
+                            <i class="fa-regular fa-clock"></i> Khung giờ nhắc trong ngày <span class="required" style="color:#ef4444;">*</span>
                         </label>
-                        <input id="scheduledTime" type="time" class="form-input" th:field="*{scheduledTime}"/>
+                        <div id="timeSlotsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                            <div class="time-slot-item" style="display: flex; align-items: center; gap: 8px;">
+                                <input type="time" class="form-input" name="scheduledTimes" th:value="${reminderRequest.scheduledTime}" required style="flex: 1;"/>
+                                <button type="button" class="btn-remove-time" onclick="removeTimeSlot(this)" style="display: none; background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; width: 38px; height: 38px; cursor: pointer; align-items: center; justify-content: center;" title="Xóa giờ này">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" id="addTimeBtn" onclick="addTimeSlot()" style="margin-top: 10px; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 8px; padding: 8px 14px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>Thêm giờ nhắc (nếu uống 2, 3 lần/ngày)</span>
+                        </button>
                         <p class="error" th:if="${#fields.hasErrors('scheduledTime')}" th:errors="*{scheduledTime}"></p>
                     </div>
 
@@ -44,6 +55,41 @@
                         </a>
                     </div>
                 </form>
+
+                <script>
+                function addTimeSlot() {
+                    const container = document.getElementById('timeSlotsContainer');
+                    if (!container) return;
+                    const items = container.querySelectorAll('.time-slot-item');
+                    const newItem = items[0].cloneNode(true);
+                    const input = newItem.querySelector('input');
+                    if (input) input.value = '';
+                    container.appendChild(newItem);
+                    updateRemoveButtons();
+                }
+
+                function removeTimeSlot(btn) {
+                    const container = document.getElementById('timeSlotsContainer');
+                    if (!container) return;
+                    const items = container.querySelectorAll('.time-slot-item');
+                    if (items.length > 1) {
+                        btn.closest('.time-slot-item').remove();
+                        updateRemoveButtons();
+                    }
+                }
+
+                function updateRemoveButtons() {
+                    const container = document.getElementById('timeSlotsContainer');
+                    if (!container) return;
+                    const items = container.querySelectorAll('.time-slot-item');
+                    items.forEach((item, idx) => {
+                        const btn = item.querySelector('.btn-remove-time');
+                        if (btn) {
+                            btn.style.display = (items.length > 1) ? 'inline-flex' : 'none';
+                        }
+                    });
+                }
+                </script>
 
                 <div th:if="${successMessage}" class="success-box">
                     <span th:text="${successMessage}"></span>
@@ -79,7 +125,7 @@
                             <a th:href="@{/patient/reminders/{id}/edit(id=${reminder.reminderId})}" class="btn-edit-icon" title="Sửa nhắc">
                                 <i class="fa-regular fa-pen-to-square"></i>
                             </a>
-                            <form th:action="@{/patient/reminders/{id}/delete(id=${reminder.reminderId})}" method="post" class="reminder-action-form">
+                            <form th:action="@{/patient/reminders/{id}/delete(id=${reminder.reminderId})}" method="post" class="reminder-action-form" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lời nhắc uống thuốc này không?');">
                                 <button type="submit" class="btn-delete-icon" title="Xóa nhắc nhở">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>

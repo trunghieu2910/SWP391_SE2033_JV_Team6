@@ -22,4 +22,7 @@ public interface PrescriptionDetailRepository extends JpaRepository<Prescription
 
     @Query("SELECT pd FROM PrescriptionDetail pd WHERE pd.quantityDispensed > 0 ORDER BY pd.dispensedAt DESC")
     List<PrescriptionDetail> findDispensedDetails();
+
+    @Query("SELECT pd FROM PrescriptionDetail pd WHERE pd.prescription.status IN (0, 1) ORDER BY pd.prescription.prescriptionDate DESC")
+    List<PrescriptionDetail> findAllDispensePrescriptions();
 }

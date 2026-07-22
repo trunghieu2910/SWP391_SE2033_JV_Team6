@@ -45,9 +45,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================
     window.toggleAccordion = function(id) {
         const body = document.getElementById(id);
+        if (!body) return;
         const icon = document.getElementById(id.replace('Accordion', 'Icon'));
 
-        if (body.style.display === 'none') {
+        const computedDisplay = window.getComputedStyle(body).display;
+        const isHidden = (body.style.display === 'none' || computedDisplay === 'none');
+
+        if (isHidden) {
             body.style.display = 'block';
             if (icon) icon.className = 'fa-solid fa-chevron-up accordion-icon';
         } else {
@@ -488,4 +492,246 @@ function toggleNewDiseaseTypeInput(selectEl) {
         input.value = '';
         selectEl.removeAttribute('data-selected-new');
     }
+}
+
+// ============================================
+// PRESCRIPTION FORM LOGIC (KÊ ĐƠN THUỐC)
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Tự động mở khung kê đơn thuốc nếu URL chứa ?openPrescription=true
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('openPrescription') === 'true') {
+        const body = document.getElementById('prescriptionAccordion');
+        const icon = document.getElementById('prescriptionIcon');
+        if (body) {
+            body.style.display = 'block';
+            if (icon) icon.className = 'fa-solid fa-chevron-up accordion-icon';
+            body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+    }
+
+    // Đóng tất cả dropdown menu khi click ra ngoài
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-drug-dropdown-wrapper')) {
+            document.querySelectorAll('.drug-dropdown-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
+
+    // Validate form kê đơn trước khi submit
+    const prescriptionForm = document.getElementById('prescriptionForm');
+    if (prescriptionForm) {
+        prescriptionForm.addEventListener('submit', function(e) {
+            const rows = document.querySelectorAll('#prescriptionTableBody .prescription-row');
+            if (rows.length === 0) {
+                e.preventDefault();
+                alert('Vui lòng thêm ít nhất một loại thuốc vào đơn!');
+                return;
+            }
+
+            let isValid = true;
+            rows.forEach(function(row, idx) {
+                const idInput = row.querySelector('.drug-id-input');
+                const searchInput = row.querySelector('.drug-search-input');
+                const quantityInput = row.querySelector('.quantity-input');
+                const instructionInput = row.querySelector('.instruction-input');
+
+                if (!idInput || !idInput.value) {
+                    alert(`Dòng ${idx + 1}: Vui lòng chọn thuốc từ danh sách!`);
+                    if (searchInput) searchInput.focus();
+                    isValid = false;
+                    return;
+                }
+
+                const qty = parseInt(quantityInput.value);
+                if (isNaN(qty) || qty <= 0) {
+                    alert(`Dòng ${idx + 1}: Số lượng thuốc phải lớn hơn 0!`);
+                    if (quantityInput) quantityInput.focus();
+                    isValid = false;
+                    return;
+                }
+
+                if (!instructionInput || !instructionInput.value.trim()) {
+                    alert(`Dòng ${idx + 1}: Vui lòng nhập cách sử dụng thuốc!`);
+                    if (instructionInput) instructionInput.focus();
+                    isValid = false;
+                    return;
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+
+// Hiển thị danh sách dropdown khi click hoặc focus vào ô tìm kiếm thuốc
+function showDrugDropdown(inputEl) {
+    const wrapper = inputEl.closest('.custom-drug-dropdown-wrapper');
+    if (!wrapper) return;
+    const currentMenu = wrapper.querySelector('.drug-dropdown-menu');
+
+    // Đóng tất cả các menu khác
+    document.querySelectorAll('.drug-dropdown-menu').forEach(menu => {
+        if (menu !== currentMenu) {
+            menu.style.display = 'none';
+        }
+    });
+
+    if (currentMenu) {
+        currentMenu.style.display = 'block';
+        filterCustomDrugList(inputEl);
+    }
+}
+
+// Lọc danh sách thuốc trong custom dropdown theo Mã hoặc Tên thuốc
+function filterCustomDrugList(inputEl) {
+    const filter = inputEl.value.toLowerCase().trim();
+    const wrapper = inputEl.closest('.custom-drug-dropdown-wrapper');
+    if (!wrapper) return;
+    const menu = wrapper.querySelector('.drug-dropdown-menu');
+    if (!menu) return;
+
+    const items = menu.querySelectorAll('.drug-option-item');
+    const noFound = menu.querySelector('.no-drug-found');
+    let hasMatch = false;
+
+    items.forEach(function(item) {
+        const code = (item.getAttribute('data-code') || '').toLowerCase();
+        const name = (item.getAttribute('data-name') || '').toLowerCase();
+
+        if (code.includes(filter) || name.includes(filter)) {
+            item.style.display = 'block';
+            hasMatch = true;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+    if (noFound) {
+        noFound.style.display = hasMatch ? 'none' : 'block';
+    }
+}
+
+// Chọn một loại thuốc trong dropdown
+function selectDrugOption(itemEl) {
+    const wrapper = itemEl.closest('.custom-drug-dropdown-wrapper');
+    if (!wrapper) return;
+    const row = itemEl.closest('.prescription-row');
+    if (!row) return;
+
+    const drugId = itemEl.getAttribute('data-id');
+    const drugCode = itemEl.getAttribute('data-code');
+    const drugName = itemEl.getAttribute('data-name');
+    const unitName = itemEl.getAttribute('data-unit') || 'Đơn vị';
+    const strength = itemEl.getAttribute('data-strength') || '';
+
+    // Set hidden input value
+    const idInput = wrapper.querySelector('.drug-id-input');
+    if (idInput) idInput.value = drugId;
+
+    // Set display search input value
+    const searchInput = wrapper.querySelector('.drug-search-input');
+    if (searchInput) {
+        searchInput.value = `[${drugCode}] ${drugName}` + (strength ? ` - ${strength}` : '');
+    }
+
+    // Set unit badge
+    const unitBadge = row.querySelector('.unit-badge');
+    if (unitBadge) {
+        unitBadge.textContent = unitName;
+    }
+
+    // Đóng menu
+    const menu = wrapper.querySelector('.drug-dropdown-menu');
+    if (menu) menu.style.display = 'none';
+}
+
+// Thêm một dòng thuốc mới vào bảng kê đơn
+function addPrescriptionRow() {
+    const tbody = document.getElementById('prescriptionTableBody');
+    if (!tbody) return;
+
+    const firstRow = tbody.querySelector('.prescription-row');
+    if (!firstRow) return;
+
+    const newRow = firstRow.cloneNode(true);
+
+    // Reset thông tin trong dòng mới
+    const idInput = newRow.querySelector('.drug-id-input');
+    if (idInput) idInput.value = '';
+
+    const searchInput = newRow.querySelector('.drug-search-input');
+    if (searchInput) searchInput.value = '';
+
+    const menu = newRow.querySelector('.drug-dropdown-menu');
+    if (menu) {
+        menu.style.display = 'none';
+        menu.querySelectorAll('.drug-option-item').forEach(item => item.style.display = 'block');
+        const noFound = menu.querySelector('.no-drug-found');
+        if (noFound) noFound.style.display = 'none';
+    }
+
+    const qtyInput = newRow.querySelector('.quantity-input');
+    if (qtyInput) qtyInput.value = '';
+
+    const unitBadge = newRow.querySelector('.unit-badge');
+    if (unitBadge) unitBadge.textContent = '-';
+
+    const instructionInput = newRow.querySelector('.instruction-input');
+    if (instructionInput) instructionInput.value = '';
+
+    tbody.appendChild(newRow);
+    reindexPrescriptionRows();
+}
+
+// Xóa dòng thuốc
+function removePrescriptionRow(buttonEl) {
+    const tbody = document.getElementById('prescriptionTableBody');
+    if (!tbody) return;
+    const rows = tbody.querySelectorAll('.prescription-row');
+
+    if (rows.length <= 1) {
+        const row = rows[0];
+        const idInput = row.querySelector('.drug-id-input');
+        if (idInput) idInput.value = '';
+        const searchInput = row.querySelector('.drug-search-input');
+        if (searchInput) searchInput.value = '';
+        const qtyInput = row.querySelector('.quantity-input');
+        if (qtyInput) qtyInput.value = '';
+        const unitBadge = row.querySelector('.unit-badge');
+        if (unitBadge) unitBadge.textContent = '-';
+        const instructionInput = row.querySelector('.instruction-input');
+        if (instructionInput) instructionInput.value = '';
+        return;
+    }
+
+    const row = buttonEl.closest('.prescription-row');
+    if (row) {
+        row.remove();
+        reindexPrescriptionRows();
+    }
+}
+
+// Đánh lại số thứ tự và attribute name của từng trường theo items[index]
+function reindexPrescriptionRows() {
+    const rows = document.querySelectorAll('#prescriptionTableBody .prescription-row');
+    rows.forEach(function(row, index) {
+        const indexTd = row.querySelector('.row-index');
+        if (indexTd) indexTd.textContent = index + 1;
+
+        const idInput = row.querySelector('.drug-id-input');
+        if (idInput) idInput.setAttribute('name', `items[${index}].drugId`);
+
+        const qtyInput = row.querySelector('.quantity-input');
+        if (qtyInput) qtyInput.setAttribute('name', `items[${index}].quantityPrescribed`);
+
+        const instructionInput = row.querySelector('.instruction-input');
+        if (instructionInput) instructionInput.setAttribute('name', `items[${index}].instruction`);
+    });
 }

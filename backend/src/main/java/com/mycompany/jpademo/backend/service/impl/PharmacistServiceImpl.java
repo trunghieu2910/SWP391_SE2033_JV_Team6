@@ -497,8 +497,6 @@ public class PharmacistServiceImpl implements PharmacistService {
         inventory.setQuantityInStock(newStock);
         if (drug.getStatus() != null && drug.getStatus() == 0) {
             inventory.setStatus((byte) 0);
-        } else {
-            inventory.setStatus(resolveInventoryStatus(newStock));
         }
         inventoryRepository.save(inventory);
 
@@ -637,7 +635,7 @@ public class PharmacistServiceImpl implements PharmacistService {
 
     @Override
     @Transactional
-    public Page<InventoryDTO> getInventory(Pageable pageable) {
+    public Page<InventoryDTO> getInventory(String keyword, String unit, Pageable pageable) {
         // Auto update expired batches and inventories (status = 2) when viewing inventory
         LocalDate today = LocalDate.now();
         List<DrugBatch> expiredBatches = drugBatchRepository.findExpiredBatches(today);
@@ -653,7 +651,11 @@ public class PharmacistServiceImpl implements PharmacistService {
             }
         }
 
-        Page<Inventory> inventories = inventoryRepository.findAll(pageable);
+        Page<Inventory> inventories = inventoryRepository.searchInventory(
+            keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null,
+            unit != null && !unit.trim().isEmpty() ? unit.trim() : null,
+            pageable
+        );
         return inventories.map(this::convertToInventoryDTO);
     }
 
@@ -667,7 +669,8 @@ public class PharmacistServiceImpl implements PharmacistService {
 
     @Override
     public List<InventoryDTO> getExpiringInventory() {
-        List<Inventory> inventories = inventoryRepository.findExpiringInventory();
+        java.time.LocalDate threshold = java.time.LocalDate.now().plusDays(7);
+        List<Inventory> inventories = inventoryRepository.findExpiringInventory(threshold);
         return inventories.stream()
             .map(this::convertToInventoryDTO)
             .collect(Collectors.toList());
@@ -695,8 +698,6 @@ public class PharmacistServiceImpl implements PharmacistService {
             throw new RuntimeException("So luong ton kho khong du sau khi dieu chinh");
         }
         inventory.setQuantityInStock(newQuantity);
-        // FIX: Cap nhat trang thai inventory sau khi dieu chinh
-        inventory.setStatus(resolveInventoryStatus(newQuantity));
         inventoryRepository.save(inventory);
 
         InventoryLog logEntry = InventoryLog.builder()
@@ -731,7 +732,7 @@ public class PharmacistServiceImpl implements PharmacistService {
 
     @Override
     public List<PrescriptionSummaryDTO> getPendingPrescriptionsSummary() {
-        List<PrescriptionDetail> details = prescriptionDetailRepository.findPendingDispenses();
+        List<PrescriptionDetail> details = prescriptionDetailRepository.findAllDispensePrescriptions();
         // Group by prescriptionId
         java.util.Map<Integer, List<PrescriptionDetail>> grouped = details.stream()
             .collect(java.util.stream.Collectors.groupingBy(
@@ -834,8 +835,6 @@ public class PharmacistServiceImpl implements PharmacistService {
         int oldQuantity = inventory.getQuantityInStock();
         int newQuantity = oldQuantity - dispensedQuantityInSmallUnit;
         inventory.setQuantityInStock(newQuantity);
-        // FIX: Cap nhat trang thai inventory sau khi xuat thuoc
-        inventory.setStatus(resolveInventoryStatus(newQuantity));
         inventoryRepository.save(inventory);
 
         // Ghi log xuat kho
@@ -905,15 +904,6 @@ public class PharmacistServiceImpl implements PharmacistService {
 
     // ========================== PRIVATE HELPERS ==========================
 
-    /**
-     * Xac dinh trang thai inventory dua theo so luong ton kho.
-     * 0 = Het hang, 2 = Sap het (< 50 don vi), 1 = Binh thuong
-     */
-    private Byte resolveInventoryStatus(int quantity) {
-        if (quantity <= 0) return (byte) 0;
-        if (quantity < 50) return (byte) 2;
-        return (byte) 1;
-    }
 
     private DrugDTO convertToDrugDTO(Drug drug) {
         List<Inventory> inventories = inventoryRepository.findByDrugId(drug.getDrugId());
@@ -1059,6 +1049,7 @@ public class PharmacistServiceImpl implements PharmacistService {
             .instruction(detail.getInstruction())
             .dispensedAt(detail.getDispensedAt())
             .dispensedByUser(detail.getDispensedByUser() != null ? detail.getDispensedByUser().getFullName() : null)
+            .dispensedByUserId(detail.getDispensedByUser() != null ? detail.getDispensedByUser().getUserId() : null)
             .notes(detail.getNotes())
             .patientId(detail.getPrescription().getPatient().getPatientId())
             .patientName(detail.getPrescription().getPatient().getUser().getFullName())

@@ -40,7 +40,7 @@ public interface PharmacistService {
     List<DrugBatchDTO> getExpiredBatches();
 
     // Inventory Management
-    Page<InventoryDTO> getInventory(Pageable pageable);
+    Page<InventoryDTO> getInventory(String keyword, String unit, Pageable pageable);
     List<InventoryDTO> getLowStockInventory();
     List<InventoryDTO> getExpiringInventory();
     InventoryDTO getInventoryByBatch(Integer batchId);

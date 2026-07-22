@@ -38,13 +38,18 @@ public class MedicationReminderController {
     private final PatientRepository patientRepository;
 
     @GetMapping("/new")
-    public String newReminder(Model model,
+    public String newReminder(@org.springframework.web.bind.annotation.RequestParam(required = false) String note,
+                              Model model,
                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
         Patient patient = getPatient(userDetails);
 
         if (!model.containsAttribute("reminderRequest")) {
-            model.addAttribute("reminderRequest", new MedicationReminderRequest());
+            MedicationReminderRequest req = new MedicationReminderRequest();
+            if (note != null && !note.isBlank()) {
+                req.setNote(note.trim());
+            }
+            model.addAttribute("reminderRequest", req);
         }
 
         List<MedicationReminderResponse> reminders = reminderService.getAllReminders(patient.getPatientId());
@@ -87,14 +92,38 @@ public class MedicationReminderController {
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
         Patient patient = getPatient(userDetails);
 
+        // Lấy danh sách tất cả các mốc giờ người dùng chọn
+        java.util.List<java.time.LocalTime> timesList = new java.util.ArrayList<>();
+        if (reminderRequest.getScheduledTimes() != null && !reminderRequest.getScheduledTimes().isEmpty()) {
+            for (java.time.LocalTime t : reminderRequest.getScheduledTimes()) {
+                if (t != null) timesList.add(t);
+            }
+        }
+        if (timesList.isEmpty() && reminderRequest.getScheduledTime() != null) {
+            timesList.add(reminderRequest.getScheduledTime());
+        }
+
+        if (timesList.isEmpty()) {
+            bindingResult.rejectValue("scheduledTime", "error.scheduledTime", "Vui lòng chọn ít nhất một khung giờ nhắc");
+        }
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("profile", profile);
             model.addAttribute("reminders", reminderService.getAllReminders(patient.getPatientId()));
             return "patient/reminder-new";
         }
 
-        reminderService.createReminder(patient.getPatientId(), reminderRequest);
-        redirectAttributes.addFlashAttribute("successMessage", "Đã tạo nhắc uống thuốc. Email sẽ được gửi tại giờ đã chọn mỗi ngày.");
+        int count = 0;
+        for (java.time.LocalTime time : timesList) {
+            MedicationReminderRequest singleReq = MedicationReminderRequest.builder()
+                    .note(reminderRequest.getNote())
+                    .scheduledTime(time)
+                    .build();
+            reminderService.createReminder(patient.getPatientId(), singleReq);
+            count++;
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage", "Đã tạo " + count + " lời nhắc uống thuốc thành công!");
         return "redirect:/patient/reminders/new";
     }
 
@@ -109,6 +138,20 @@ public class MedicationReminderController {
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
         Patient patient = getPatient(userDetails);
 
+        java.util.List<java.time.LocalTime> timesList = new java.util.ArrayList<>();
+        if (reminderRequest.getScheduledTimes() != null && !reminderRequest.getScheduledTimes().isEmpty()) {
+            for (java.time.LocalTime t : reminderRequest.getScheduledTimes()) {
+                if (t != null) timesList.add(t);
+            }
+        }
+        if (timesList.isEmpty() && reminderRequest.getScheduledTime() != null) {
+            timesList.add(reminderRequest.getScheduledTime());
+        }
+
+        if (timesList.isEmpty()) {
+            bindingResult.rejectValue("scheduledTime", "error.scheduledTime", "Vui lòng chọn ít nhất một khung giờ nhắc");
+        }
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("profile", profile);
             model.addAttribute("reminders", reminderService.getAllReminders(patient.getPatientId()));
@@ -116,8 +159,23 @@ public class MedicationReminderController {
             return "patient/reminder-new";
         }
 
-        reminderService.updateReminder(patient.getPatientId(), reminderId, reminderRequest);
-        redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật nhắc uống thuốc.");
+        // Mốc giờ đầu tiên -> cập nhật bản ghi nhắc hiện tại
+        MedicationReminderRequest firstReq = MedicationReminderRequest.builder()
+                .note(reminderRequest.getNote())
+                .scheduledTime(timesList.get(0))
+                .build();
+        reminderService.updateReminder(patient.getPatientId(), reminderId, firstReq);
+
+        // Nếu có các mốc giờ bổ sung -> tạo mới lời nhắc cho từng mốc giờ
+        for (int i = 1; i < timesList.size(); i++) {
+            MedicationReminderRequest addReq = MedicationReminderRequest.builder()
+                    .note(reminderRequest.getNote())
+                    .scheduledTime(timesList.get(i))
+                    .build();
+            reminderService.createReminder(patient.getPatientId(), addReq);
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật lời nhắc uống thuốc thành công!");
         return "redirect:/patient/reminders/new";
     }
 

@@ -48,11 +48,8 @@ function initializeInventorySearchAndSort() {
         row.dataset.batchNumber = normalizeInventoryText(cells[2]?.textContent || '');
         row.dataset.expiryTime = String(parseInventoryDate(cells[3]?.textContent || ''));
         row.dataset.stock = String(parseInventoryNumber(cells[5]?.textContent || ''));
+        row.dataset.smallUnit = normalizeInventoryText(row.getAttribute('data-small-unit') || '');
     });
-
-    if (searchInput) {
-        searchInput.addEventListener('input', applyInventorySearchAndSort);
-    }
 
     if (sortSelect) {
         sortSelect.addEventListener('change', applyInventorySearchAndSort);
@@ -69,16 +66,13 @@ function applyInventorySearchAndSort() {
 
     if (!tableBody) return;
 
-    const keyword = normalizeInventoryText(searchInput?.value || '');
     const sortMode = sortSelect?.value || '';
+    
     const rows = Array.from(tableBody.querySelectorAll('tr'))
         .filter(row => row.id !== 'inventoryEmptyRow');
 
     rows.forEach(row => {
-        const matched = !keyword ||
-            row.dataset.drugName.includes(keyword) ||
-            row.dataset.batchNumber.includes(keyword);
-        row.dataset.visible = matched ? 'true' : 'false';
+        row.dataset.visible = 'true';
     });
 
     rows.sort((a, b) => compareInventoryRows(a, b, sortMode));

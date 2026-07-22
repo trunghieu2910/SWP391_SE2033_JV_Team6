@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.service.impl;
 
+import com.mycompany.jpademo.backend.aop.annotation.LogActivity;
 import com.mycompany.jpademo.backend.dto.request.*;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.repository.UserRepository;
@@ -7,7 +8,6 @@ import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.AuthService;
 import com.mycompany.jpademo.backend.repository.RoleRepository;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
-import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.mycompany.jpademo.backend.exception.ResourceAlreadyExistsException;
@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.mycompany.jpademo.backend.cache.PendingRegistrationStore;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -36,9 +38,9 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final PatientRepository patientRepository;
-    private final SystemLogService systemLogService;
 
     @Override
+    @LogActivity(action = "LOGOUT", targetType = "Users", description = "Người dùng đăng xuất")
     public void logout() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -71,30 +73,11 @@ public class AuthServiceImpl implements AuthService {
         Role patientRole = roleRepository.findByRoleName(RoleName.PATIENT)
                 .orElseThrow(() -> new ResourceNotFoundException("Role PATIENT không tồn tại."));
 
-        User user = new User();
-        user.setUserName(request.getUserName());
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setNationalID(request.getNationalID());
-        user.setStatus(UserStatus.INACTIVE);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setRole(patientRole);
-
-        userRepository.save(user);
-
-        Patient patient = new Patient();
-        patient.setGender(request.getGender());
-        patient.setDob(request.getDob());
-        patient.setAddress(request.getAddress());
-        patient.setUser(user);
-        
-        patientRepository.save(patient);
+        PendingRegistrationStore.savePending(request.getUserName(), request);
 
         String otp = OtpUtil.generateOtp();
-        OtpUtil.saveOtp(user.getEmail(), otp);
-        emailService.sendOtpEmail(user.getEmail(), user.getFullName(), otp);
+        OtpUtil.saveOtp(request.getEmail(), otp);
+        emailService.sendOtpEmail(request.getEmail(), request.getFullName(), otp);
     }
 
     @Override
@@ -141,36 +124,54 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void verifyRegistrationOtp(OtpVerificationRequest request) {
-        User user = userRepository.findByUserName(request.getUserName())
-                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
-
-        if (user.getStatus() != UserStatus.INACTIVE) {
-            throw new InvalidOtpException("no");
+        RegisterRequest registerRequest = PendingRegistrationStore.getPending(request.getUserName());
+        if (registerRequest == null) {
+            throw new ResourceNotFoundException("Thông tin đăng ký không tồn tại hoặc đã hết hạn.");
         }
 
-        boolean valid = OtpUtil.verifyOtp(user.getEmail(), request.getOtp());
+        boolean valid = OtpUtil.verifyOtp(registerRequest.getEmail(), request.getOtp());
         if (!valid) {
             throw new InvalidOtpException("no");
         }
 
-        OtpUtil.removeOtp(user.getEmail());
+        Role patientRole = roleRepository.findByRoleName(RoleName.PATIENT)
+                .orElseThrow(() -> new ResourceNotFoundException("Role PATIENT không tồn tại."));
+
+        User user = new User();
+        user.setUserName(registerRequest.getUserName());
+        user.setFullName(registerRequest.getFullName());
+        user.setEmail(registerRequest.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setPhoneNumber(registerRequest.getPhoneNumber());
+        user.setNationalID(registerRequest.getNationalID());
         user.setStatus(UserStatus.ACTIVE);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setRole(patientRole);
         userRepository.save(user);
+
+        Patient patient = new Patient();
+        patient.setGender(registerRequest.getGender());
+        patient.setDob(registerRequest.getDob());
+        patient.setAddress(registerRequest.getAddress());
+        patient.setUser(user);
+        patientRepository.save(patient);
+
+        OtpUtil.removeOtp(registerRequest.getEmail());
+        PendingRegistrationStore.removePending(request.getUserName());
     }
 
     @Override
     public void resendRegistrationOtp(ResendOtpRequest request) {
-        User user = userRepository.findByUserName(request.getUserName())
-                .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
-
-        if (user.getStatus() != UserStatus.INACTIVE) {
-            throw new InvalidOtpException("no");
+        RegisterRequest registerRequest = PendingRegistrationStore.getPending(request.getUserName());
+        if (registerRequest == null) {
+            throw new ResourceNotFoundException("Thông tin đăng ký không tồn tại hoặc đã hết hạn.");
         }
 
         String otp = OtpUtil.generateOtp();
-        OtpUtil.saveOtp(user.getEmail(), otp);
-        emailService.sendOtpEmail(user.getEmail(), user.getFullName(), otp);
+        OtpUtil.saveOtp(registerRequest.getEmail(), otp);
+        emailService.sendOtpEmail(registerRequest.getEmail(), registerRequest.getFullName(), otp);
     }
 
 }

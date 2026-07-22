@@ -13,6 +13,11 @@ import java.util.Optional;
 
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
+    @Query("SELECT i FROM Inventory i WHERE " +
+           "(:keyword IS NULL OR LOWER(i.batch.drug.drugName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(i.batch.batchNumber) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(:unit IS NULL OR LOWER(i.batch.drug.baseUnit.unitName) LIKE LOWER(CONCAT('%', :unit, '%')))")
+    Page<Inventory> searchInventory(@Param("keyword") String keyword, @Param("unit") String unit, Pageable pageable);
+
     Optional<Inventory> findByBatch_BatchId(Integer batchId);
 
     // Tìm inventory theo batchId (alias cho findByBatch_BatchId)
@@ -26,8 +31,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
     @Query("SELECT i FROM Inventory i WHERE i.quantityInStock < 50 AND i.status = 1 ORDER BY i.batch.expiryDate ASC")
     Page<Inventory> findLowStockInventory(Pageable pageable);
 
-    @Query("SELECT i FROM Inventory i WHERE i.batch.expiryDate <= CURRENT_DATE AND i.status IN (1, 2) AND i.quantityInStock > 0")
-    List<Inventory> findExpiringInventory();
+    @Query("SELECT i FROM Inventory i WHERE i.batch.expiryDate <= :expiryThreshold AND i.status IN (1, 2) AND i.quantityInStock > 0")
+    List<Inventory> findExpiringInventory(@Param("expiryThreshold") java.time.LocalDate expiryThreshold);
 
     // Đếm số lượng inventory theo trạng thái
     long countByStatus(Byte status);

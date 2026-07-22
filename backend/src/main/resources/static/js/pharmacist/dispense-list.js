@@ -13,7 +13,6 @@ function initializeDispenseFilters() {
     const controls = [
         'dispenseSearchInput',
         'dispenseStatusFilter',
-        'dispenseExactDate',
         'dispenseDateFrom',
         'dispenseDateTo'
     ];
@@ -51,7 +50,6 @@ function initializeDispenseFilters() {
 function applyDispenseFilters() {
     const keyword = normalizeDispenseText(document.getElementById('dispenseSearchInput')?.value || '');
     const status = document.getElementById('dispenseStatusFilter')?.value || '';
-    const exactDate = parseDispenseInputDate(document.getElementById('dispenseExactDate')?.value || '');
     const fromDate = parseDispenseInputDate(document.getElementById('dispenseDateFrom')?.value || '');
     const toDate = parseDispenseInputDate(document.getElementById('dispenseDateTo')?.value || '');
     const tableBody = document.getElementById('dispenseListTableBody');
@@ -67,10 +65,9 @@ function applyDispenseFilters() {
         const rowDate = Number(row.dataset.prescriptionDate);
         const matchKeyword = !keyword || row.dataset.patientSearch.includes(keyword);
         const matchStatus = !status || row.dataset.status === status;
-        const matchExactDate = !exactDate || rowDate === exactDate;
         const matchFrom = !fromDate || rowDate >= fromDate;
         const matchTo = !toDate || rowDate <= toDate;
-        const visible = matchKeyword && matchStatus && matchExactDate && matchFrom && matchTo;
+        const visible = matchKeyword && matchStatus && matchFrom && matchTo;
 
         row.style.display = visible ? '' : 'none';
         if (visible) visibleCount++;
@@ -82,7 +79,7 @@ function applyDispenseFilters() {
 }
 
 function clearDispenseFilters() {
-    ['dispenseSearchInput', 'dispenseStatusFilter', 'dispenseExactDate', 'dispenseDateFrom', 'dispenseDateTo']
+    ['dispenseSearchInput', 'dispenseStatusFilter', 'dispenseDateFrom', 'dispenseDateTo']
         .forEach(id => {
             const control = document.getElementById(id);
             if (control) control.value = '';
