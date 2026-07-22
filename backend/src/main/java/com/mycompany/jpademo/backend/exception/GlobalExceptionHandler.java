@@ -32,7 +32,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     private boolean isApiRequest(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/");
+        return path.startsWith("/api/") || path.startsWith("/auth/google/");
     }
 
     private String getFallbackRedirect(HttpServletRequest request) {

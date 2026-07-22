@@ -18,7 +18,7 @@ public class FirebaseServiceImpl implements FirebaseService {
 
         try {
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-            return firebaseAuth.verifyIdToken(idToken);
+            return firebaseAuth.verifyIdToken(idToken, true);
         } catch (FirebaseAuthException e) {
             throw new UnauthorizedException("Invalid Firebase token");
         }
