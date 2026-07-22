@@ -15,6 +15,7 @@ public class DiagnosisSessionResponse {
     private Integer sessionId;
     private Integer patientId;
     private String patientName;
+    private String patientCccd;
     private Double weight;
     private Double height;
     private DiagnosisSessionStatus status;
@@ -22,4 +23,6 @@ public class DiagnosisSessionResponse {
     private ClinicalInputMode clinicalInputMode;
     private LocalDateTime createdAt;
     private SymptomResultResponse symptomResult;
+    private Integer medicalImageDetailsId;
+    private String imageType;
 }

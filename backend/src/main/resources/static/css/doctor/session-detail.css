@@ -1101,9 +1101,9 @@
 }
 
 .image-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .image-item {
@@ -1264,12 +1264,21 @@
     flex: 1;
     justify-content: center;
 }
+
+.btn-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #e2e8f0;
+    color: #94a3b8;
+    border-color: #cbd5e1;
+}
+
 .confirm-modal-actions .btn-outline {
     background: #f1f5f9;
     color: var(--neutral-dark);
     border: 1px solid var(--border-color);
 }
-.confirm-modal-actions .btn-outline:hover {
+.confirm-modal-actions .btn-outline:hover:not(:disabled) {
     background: #e2e8f0;
     border-color: var(--primary);
     color: var(--primary);
@@ -1566,7 +1575,6 @@
     .symptom-form .form-actions { flex-direction: column; }
     .mode-header { flex-direction: column; align-items: flex-start; }
     .mode-chip { flex-wrap: wrap; }
-    .image-grid { grid-template-columns: 1fr 1fr; }
     .session-header { flex-direction: column; }
     .session-actions { width: 100%; }
     .inline-form {
@@ -1624,7 +1632,6 @@
         padding: 3px 10px;
     }
     .symptom-form .checkbox-group label { font-size: 0.8rem; }
-    .image-grid { grid-template-columns: 1fr; }
     .session-title h1 { font-size: 1rem; }
     .session-meta { gap: 8px; }
     .detail-container { gap: 16px; }

@@ -193,6 +193,13 @@ public class UltrasoundAIController {
             detail.setAiImageUrl(aiUrlPath);
             detail.setConfidenceScore(confidenceScore);
             detail = repository.save(detail);
+
+            // 6. Cập nhật trạng thái session: AI đã xử lý xong → chuyển sang PENDING (chờ bác sĩ kết luận)
+            DiagnosisSession session = sessionOpt.get();
+            if (session.getStatus() == com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.PROCESSING) {
+                session.setStatus(com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.PENDING);
+                diagnosisSessionRepository.save(session);
+            }
             
             return ResponseEntity.ok(new ImageDetailDto(
                     detail.getImageId(),
@@ -201,7 +208,7 @@ public class UltrasoundAIController {
                     detail.getAiImageUrl(),
                     detail.getConfidenceScore(),
                     detail.getTechnicalConclusion(),
-                    detail.getManualAiImageUrl()
+                    detail.getImgResultConclusion()
             ));
 
         } catch (Exception e) {
@@ -223,7 +230,7 @@ public class UltrasoundAIController {
             detail.getAiImageUrl(),
             detail.getConfidenceScore(),
             detail.getTechnicalConclusion(),
-            detail.getManualAiImageUrl()
+            detail.getImgResultConclusion()
         ));
     }
 
@@ -355,7 +362,7 @@ public class UltrasoundAIController {
                     detail.getAiImageUrl(),
                     detail.getConfidenceScore(),
                     detail.getTechnicalConclusion(),
-                    detail.getManualAiImageUrl()
+                    detail.getImgResultConclusion()
                 ));
             } else {
                 return ResponseEntity.status(500).body("AI Service trả về lỗi");
@@ -374,9 +381,10 @@ public class UltrasoundAIController {
         MedicalImageDetails detail = opt.get();
         
         try {
-            if (request.conclusion != null) {
-                detail.setTechnicalConclusion(request.conclusion);
+            if (request.conclusion == null || request.conclusion.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Vui lòng nhập kết luận của kỹ thuật viên!");
             }
+            detail.setTechnicalConclusion(request.conclusion);
             
             if (request.manualImageBase64 != null && !request.manualImageBase64.isEmpty()) {
                 // Decode base64
@@ -390,7 +398,10 @@ public class UltrasoundAIController {
                 }
                 Files.write(aiPath, imageBytes);
                 
-                detail.setManualAiImageUrl("/uploads/" + newFileName);
+                detail.setImgResultConclusion("/uploads/" + newFileName);
+            } else {
+                // If technician did not draw, fallback to saving the AI result image directly
+                detail.setImgResultConclusion(detail.getAiImageUrl());
             }
             
             repository.save(detail);
@@ -413,16 +424,16 @@ public class UltrasoundAIController {
         public String aiImageUrl;
         public Double confidenceScore;
         public String technicalConclusion;
-        public String manualAiImageUrl;
+        public String imgResultConclusion;
 
-        public ImageDetailDto(Integer imageId, String imageType, String imageUrl, String aiImageUrl, Double confidenceScore, String technicalConclusion, String manualAiImageUrl) {
+        public ImageDetailDto(Integer imageId, String imageType, String imageUrl, String aiImageUrl, Double confidenceScore, String technicalConclusion, String imgResultConclusion) {
             this.imageId = imageId;
             this.imageType = imageType;
             this.imageUrl = imageUrl;
             this.aiImageUrl = aiImageUrl;
             this.confidenceScore = confidenceScore;
             this.technicalConclusion = technicalConclusion;
-            this.manualAiImageUrl = manualAiImageUrl;
+            this.imgResultConclusion = imgResultConclusion;
         }
     }
 }

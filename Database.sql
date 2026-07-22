@@ -163,14 +163,15 @@ CREATE TABLE MedicalImage
 ALTER TABLE MedicalImage
 ADD price DECIMAL(18,2) NOT NULL DEFAULT 0;
 
-CREATE TABLE MedicalImageDetails
-(
-    imageID        INT IDENTITY (1,1) PRIMARY KEY,
-    medicalImageID INT           NOT NULL,
-    imageUrl       NVARCHAR(255) NOT NULL,
-    aiImageUrl     NVARCHAR(255) NULL,
-    confidenceScore FLOAT NULL,
-    uploadedAt     DATETIME DEFAULT GETDATE(),
+CREATE TABLE MedicalImageDetails (
+    imageID INT PRIMARY KEY IDENTITY(1,1),
+    medicalImageID INT NOT NULL,
+    imageUrl NVARCHAR(255) NOT NULL,
+    aiImageUrl NVARCHAR(255),
+    confidenceScore FLOAT,
+    technicalConclusion NVARCHAR(MAX),
+    imgResultConclusion NVARCHAR(255),
+    uploadedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (medicalImageID) REFERENCES MedicalImage (medicalImageID)
 );
 
@@ -241,7 +242,7 @@ GO
 
 -- ROLE
 INSERT INTO [Role] (roleName)
-VALUES (N'ADMIN'), (N'DOCTOR'), (N'AITRAINER'), (N'PATIENT'), (N'RECEPTIONIST'),(N'PHARMACIST');
+VALUES (N'ADMIN'), (N'DOCTOR'), (N'AITRAINER'), (N'PATIENT'), (N'RECEPTIONIST'),(N'PHARMACIST'),(N'TECHNICAL');
 
 -- USERS
 INSERT INTO [Users]
@@ -702,6 +703,11 @@ INSERT INTO [Users] (roleID, userName, fullName, email, passwordHash, phoneNumbe
 VALUES
 (6, 'pharmacist', N'Dược sĩ Nguyễn Hoàng Anh', 'anh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0908889999', 'ACTIVE', GETDATE(), '089012345678'),
 (6, 'pharmacist_linh', N'Dược sĩ Trần Thị Linh', 'linh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907776666', 'ACTIVE', GETDATE(), '090123456789');
+
+-- Thêm tài khoản Kỹ thuật viên (Technical)
+INSERT INTO [Users] (roleID, userName, fullName, email, passwordHash, phoneNumber, status, lastChangePassTime, nationalID)
+VALUES
+(7, 'technical', N'Kỹ thuật viên AI', 'technical@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0911111111', 'ACTIVE', GETDATE(), '111111111111');
 
 -- ============================================================================
 -- 3.7. Nhập kho mẫu (Sử dụng mã lô dạng LOT-DRUG-XXX-MMYY)

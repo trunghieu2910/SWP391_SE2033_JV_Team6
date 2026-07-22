@@ -130,16 +130,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Sau khi lưu, kết luận này sẽ KHÔNG THỂ chỉnh sửa lại. Bạn có chắc chắn muốn lưu?';
 
             confirmModalOkBtn.onclick = function() {
-                const csrf = getCsrfToken();
-                let csrfInput = reviewForm.querySelector('input[name="_csrf"]');
-                if (!csrfInput) {
-                    csrfInput = document.createElement('input');
-                    csrfInput.type = 'hidden';
-                    csrfInput.name = '_csrf';
-                    reviewForm.appendChild(csrfInput);
-                }
-                csrfInput.value = csrf.token;
-
                 reviewForm.submit();
                 closeConfirmModal();
             };
@@ -304,6 +294,46 @@ document.addEventListener('DOMContentLoaded', function() {
             closeShareModal();
         }
     });
+
+    // ============================================
+    // ADD MEDICAL IMAGE MODAL FUNCTIONS
+    // ============================================
+    window.openAddMedicalImageModal = function() {
+        const modal = document.getElementById('addMedicalImageModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    window.closeAddMedicalImageModal = function() {
+        const modal = document.getElementById('addMedicalImageModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    };
+
+    // ============================================
+    // RETAKE ULTRASOUND MODAL FUNCTIONS
+    // ============================================
+    window.openRetakeModal = function() {
+        const modal = document.getElementById('retakeModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    window.closeRetakeModal = function() {
+        const modal = document.getElementById('retakeModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            const textarea = document.getElementById('retakeReason');
+            if (textarea) textarea.value = '';
+        }
+    };
 
     // ============================================
     // ADD LAB MODAL FUNCTIONS

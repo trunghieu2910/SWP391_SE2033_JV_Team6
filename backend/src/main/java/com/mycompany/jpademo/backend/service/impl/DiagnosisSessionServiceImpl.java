@@ -340,65 +340,93 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DiagnosisSessionResponse> getPendingUltrasoundSessions() {
         var sessions = diagnosisSessionRepository.findByStatusInOrderByCreatedAtDesc(
             List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING)
         );
-        // Lọc những session chưa có hình ảnh siêu âm (hoặc có nhưng chưa COMPLETED)
+        // Lọc những session có ít nhất 1 hình ảnh siêu âm đang chờ xử lý (PENDING)
         var filteredSessions = sessions.stream().filter(s -> {
-            boolean hasCompletedUltrasound = false;
             if (s.getMedicalImages() != null) {
                 for (var image : s.getMedicalImages()) {
-                    if ("Siêu âm bụng".equals(image.getImageType()) && 
-                        image.getStatus() == MedicalImageStatus.COMPLETED) {
-                        hasCompletedUltrasound = true;
-                        break;
+                    if (image.getStatus() == MedicalImageStatus.PENDING) {
+                        return true;
                     }
                 }
             }
-            return !hasCompletedUltrasound;
+            return false;
         }).collect(Collectors.toList());
         
-        return filteredSessions.stream().map(s -> DiagnosisSessionResponse.builder()
+        return filteredSessions.stream().map(s -> {
+            String types = "";
+            if (s.getMedicalImages() != null) {
+                types = s.getMedicalImages().stream()
+                        .filter(img -> img.getStatus() == MedicalImageStatus.PENDING)
+                        .map(MedicalImage::getImageType)
+                        .filter(java.util.Objects::nonNull)
+                        .collect(Collectors.joining(", "));
+            }
+            return DiagnosisSessionResponse.builder()
                 .sessionId(s.getSessionId())
                 .patientId(s.getPatient().getPatientId())
                 .patientName(s.getPatient().getUser().getFullName())
+                .patientCccd(s.getPatient().getUser().getNationalID())
                 .status(s.getStatus())
                 .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
                 .clinicalInputMode(s.getClinicalInputMode())
                 .createdAt(s.getCreatedAt())
-                .build()).toList();
+                .imageType(types)
+                .build();
+        }).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DiagnosisSessionResponse> getCompletedUltrasoundSessions() {
         var sessions = diagnosisSessionRepository.findByStatusInOrderByCreatedAtDesc(
             List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING, DiagnosisSessionStatus.COMPLETED)
         );
         
-        var filteredSessions = sessions.stream().filter(s -> {
-            boolean hasCompletedUltrasound = false;
+        return sessions.stream().filter(s -> {
             if (s.getMedicalImages() != null) {
                 for (var image : s.getMedicalImages()) {
-                    if ("Siêu âm bụng".equals(image.getImageType()) && 
-                        image.getStatus() == MedicalImageStatus.COMPLETED) {
-                        hasCompletedUltrasound = true;
-                        break;
+                    if (image.getStatus() == MedicalImageStatus.COMPLETED) {
+                        return true;
                     }
                 }
             }
-            return hasCompletedUltrasound;
-        }).collect(Collectors.toList());
-        
-        return filteredSessions.stream().map(s -> DiagnosisSessionResponse.builder()
+            return false;
+        }).map(s -> {
+            Integer imageId = null;
+            String types = "";
+            if (s.getMedicalImages() != null) {
+                for (var image : s.getMedicalImages()) {
+                    if (image.getStatus() == MedicalImageStatus.COMPLETED) {
+                        if (image.getMedicalImageDetailsList() != null && !image.getMedicalImageDetailsList().isEmpty()) {
+                            imageId = image.getMedicalImageDetailsList().get(0).getImageId();
+                        }
+                    }
+                }
+                
+                types = s.getMedicalImages().stream()
+                        .filter(img -> img.getStatus() == MedicalImageStatus.COMPLETED)
+                        .map(MedicalImage::getImageType)
+                        .filter(java.util.Objects::nonNull)
+                        .collect(Collectors.joining(", "));
+            }
+            return DiagnosisSessionResponse.builder()
                 .sessionId(s.getSessionId())
                 .patientId(s.getPatient().getPatientId())
                 .patientName(s.getPatient().getUser().getFullName())
+                .patientCccd(s.getPatient().getUser().getNationalID())
                 .status(s.getStatus())
                 .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
                 .clinicalInputMode(s.getClinicalInputMode())
                 .createdAt(s.getCreatedAt())
-                .build()).toList();
+                .medicalImageDetailsId(imageId)
+                .imageType(types)
+                .build();
+        }).collect(Collectors.toList());
     }
 
     // Inner event classes

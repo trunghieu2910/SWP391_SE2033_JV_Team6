@@ -14,5 +14,13 @@ public class MedicalImageDetailResponse {
 
     private String imageUrl;
 
+    private String aiImageUrl;
+
+    private Double confidenceScore;
+
+    private String technicalConclusion;
+
+    private String imgResultConclusion;
+
     private LocalDateTime uploadedAt;
 }
