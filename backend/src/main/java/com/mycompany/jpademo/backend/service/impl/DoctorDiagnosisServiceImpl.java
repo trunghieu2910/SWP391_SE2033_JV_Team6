@@ -299,7 +299,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public DoctorSessionDetailResponse getSessionDetail(Integer sessionId, Integer doctorId) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán với: " + sessionId));
@@ -313,8 +313,16 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .orElse(null);
         List<LabResult> labResults = labResultRepository.findByDiagnosisSessionSessionId(sessionId);
         List<MedicalImage> medicalImages = medicalImageRepository.findByDiagnosisSession_SessionId(sessionId);
-
         Review review = reviewRepository.findByDiagnosisSessionSessionId(sessionId).orElse(null);
+
+        // Tự động sửa trạng thái: nếu session đang PROCESSING nhưng đã có kết quả hình ảnh AI
+        // thì chuyển sang PENDING (chờ bác sĩ kết luận)
+        if (session.getStatus() == DiagnosisSessionStatus.PROCESSING && !medicalImages.isEmpty()) {
+            session.setStatus(DiagnosisSessionStatus.PENDING);
+            sessionRepository.save(session);
+            log.info("Auto-fixed session {} status: PROCESSING -> PENDING (has {} medical images)",
+                    sessionId, medicalImages.size());
+        }
 
         return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages, review);
     }
@@ -369,6 +377,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         review.setReviewedAt(LocalDateTime.now());
 
         reviewRepository.save(review);
+
+        session.setStatus(DiagnosisSessionStatus.COMPLETED);
+        sessionRepository.save(session);
     }
 
     private void collectSelectedSymptomNames(Map<String, Boolean> source,
@@ -418,10 +429,6 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .map(this::mapToLabResultResponse)
                 .collect(Collectors.toList());
 
-        List<MedicalImageResponse> medicalImageResponses = medicalImages.stream()
-                .map(this::mapToMedicalImageResponse)
-                .collect(Collectors.toList());
-
         ReviewResponse reviewResponse = null;
         if (review != null) {
             reviewResponse = ReviewResponse.builder()
@@ -435,6 +442,10 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                     .reviewedAt(review.getReviewedAt())
                     .build();
         }
+
+        List<MedicalImageResponse> medicalImageResponses = medicalImages.stream()
+                .map(this::mapToMedicalImageResponse)
+                .collect(Collectors.toList());
 
         return DoctorSessionDetailResponse.builder()
                 .sessionId(session.getSessionId())
@@ -459,15 +470,20 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     }
 
     private MedicalImageResponse mapToMedicalImageResponse(MedicalImage medicalImage) {
-        List<MedicalImageDetailResponse> details = medicalImage.getMedicalImageDetailsList().stream()
+        List<MedicalImageDetailResponse> details = medicalImage.getMedicalImageDetailsList() != null ?
+            medicalImage.getMedicalImageDetailsList().stream()
                 .map(detail -> MedicalImageDetailResponse.builder()
                         .imageId(detail.getImageId())
                         .imageUrl(detail.getImageUrl())
                         .aiImageUrl(detail.getAiImageUrl())
+                        .confidenceScore(detail.getConfidenceScore())
+                        .technicalConclusion(detail.getTechnicalConclusion())
+                        .imgResultConclusion(detail.getImgResultConclusion())
+                        .aiImageUrl(detail.getAiImageUrl())
                         .imgResultConclusion(detail.getImgResultConclusion())
                         .uploadedAt(detail.getUploadedAt())
                         .build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : List.of();
 
         return MedicalImageResponse.builder()
                 .medicalImageId(medicalImage.getMedicalImageId())
@@ -502,6 +518,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     @Override
     @Transactional
+    @DoctorActionLog(action = "DELETE_MEDICAL_IMAGE", targetType = "MedicalImage")
     public void deleteMedicalImage(Integer doctorId, Integer sessionId, Integer imageId) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
@@ -526,6 +543,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     @Override
     @Transactional
+    @DoctorActionLog(action = "REQUEST_MEDICAL_IMAGE", targetType = "MedicalImage")
     public void createMedicalImage(Integer doctorId, Integer sessionId, String imageType) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));

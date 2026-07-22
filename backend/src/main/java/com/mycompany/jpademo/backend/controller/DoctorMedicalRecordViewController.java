@@ -70,16 +70,13 @@ public class DoctorMedicalRecordViewController {
         Page<MedicalRecordResponse> recordPage = medicalRecordService.getMedicalRecords(
                 keywordParam, statusParam, null, diseaseTypeParam, startDateTime, endDateTime, pageable);
 
-        long completedCount = recordPage.getContent().stream()
-                .filter(r -> r.getStatus() != null && "COMPLETED".equals(r.getStatus().name()))
-                .count();
-        long pendingCount = recordPage.getContent().stream()
-                .filter(r -> r.getStatus() != null && "PENDING".equals(r.getStatus().name()))
-                .count();
-        long withDiagnosisCount = recordPage.getContent().stream()
-                .filter(r -> r.getDiagnosis() != null && !r.getDiagnosis().isEmpty()
-                          && !"Chưa có chẩn đoán".equals(r.getDiagnosis()))
-                .count();
+        // Gọi thẳng xuống DB để lấy số liệu chính xác — không phụ thuộc trang hiện tại
+        long completedCount = medicalRecordService.countByStatus(
+                keywordParam, "COMPLETED", diseaseTypeParam, startDateTime, endDateTime);
+        long pendingCount = medicalRecordService.countByStatus(
+                keywordParam, "PENDING", diseaseTypeParam, startDateTime, endDateTime);
+        long withDiagnosisCount = medicalRecordService.countWithDiagnosis(
+                keywordParam, diseaseTypeParam, startDateTime, endDateTime);
 
         model.addAttribute("records",        recordPage.getContent());
         model.addAttribute("currentPage",    page);

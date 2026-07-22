@@ -260,4 +260,18 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
         return detail;
     }
+
+    // ===== ĐẾM SỐ LƯỢNG TỪ DB — CHÍNH XÁC, KHÔNG PHỤ THUỘC PHÂN TRANG =====
+
+    @Override
+    public long countByStatus(String keyword, String status, String diseaseType,
+                              LocalDateTime startDate, LocalDateTime endDate) {
+        return sessionRepository.countMedicalRecordsByStatus(keyword, status, diseaseType, startDate, endDate);
+    }
+
+    @Override
+    public long countWithDiagnosis(String keyword, String diseaseType,
+                                   LocalDateTime startDate, LocalDateTime endDate) {
+        return sessionRepository.countMedicalRecordsWithDiagnosis(keyword, diseaseType, startDate, endDate);
+    }
 }

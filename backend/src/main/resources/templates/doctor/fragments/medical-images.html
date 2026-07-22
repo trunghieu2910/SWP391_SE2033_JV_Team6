@@ -7,47 +7,67 @@
 <!-- ========================================== -->
 <!-- FRAGMENT: DANH SÁCH HÌNH ẢNH Y TẾ         -->
 <!-- ========================================== -->
-<div th:fragment="list(medicalImages, sessionId)">
+<div th:fragment="list(medicalImages, sessionId, hasReview)">
   <div class="image-container">
     <div th:if="${not #lists.isEmpty(medicalImages)}">
       <div class="image-grid">
-        <div th:each="img : ${medicalImages}" class="image-item">
+        <!-- Hiển thị ảnh PENDING chỉ khi CHƯA CÓ ảnh COMPLETED nào (tránh hiện song song) -->
+        <div th:each="img : ${medicalImages}"
+             th:if="${img.status.name() == 'PENDING' and #lists.isEmpty(medicalImages.?[status.name() == 'COMPLETED'])}"
+             class="image-item"
+             style="border: 1px dashed #f59e0b; border-radius: 10px; padding: 16px; background: #fffbeb;">
+          <div class="image-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span th:text="${img.imageType}" style="font-weight: 600; color: #92400e;">MRI</span>
+              <span style="color: #f59e0b; font-size: 0.85em; display: flex; align-items: center; gap: 5px;">
+                <i class="fa-solid fa-clock fa-spin"></i> Đang chờ siêu âm...
+              </span>
+            </div>
+            <span style="background: #fef3c7; color: #b45309; font-size: 0.75rem; font-weight: 600;
+                          padding: 3px 10px; border-radius: 20px; border: 1px solid #fcd34d;">PENDING</span>
+          </div>
+          <div class="image-time" style="margin-top: 8px; color: #92400e;"
+               th:text="${#temporals.format(img.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</div>
+        </div>
+
+
+        <!-- Hiển thị những ảnh đã có kết quả AI (COMPLETED) -->
+        <div th:each="img : ${medicalImages}" th:if="${img.status.name() == 'COMPLETED'}" class="image-item">
           <div class="image-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div style="display: flex; flex-direction: column; gap: 4px;">
               <span th:text="${img.imageType}" style="font-weight: 600;">MRI</span>
-              <span th:text="${img.status.name() == 'PENDING' ? 'Chờ xử lý' :
-                                           img.status.name() == 'COMPLETED' ? 'Hoàn thành' :
-                                           img.status.name() == 'CANCELED' ? 'Đã hủy' : img.status}"
-                    th:style="${img.status.name() == 'PENDING' ? 'color: #f59e0b; font-size: 0.85em;' : 'color: #10b981; font-size: 0.85em;'}">COMPLETED</span>
+              <span style="color: #10b981; font-size: 0.85em;">Hoàn thành</span>
             </div>
-            
-            <form th:if="${img.status.name() == 'PENDING'}" 
-                  th:action="@{/doctor/sessions/{sessionId}/medical-images/{imageId}/delete(sessionId=${sessionId}, imageId=${img.medicalImageId})}" 
-                  method="post" style="margin: 0;"
-                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa chỉ định hình ảnh này?');">
-                <button type="submit" class="btn btn-sm btn-outline-danger" style="padding: 2px 8px; font-size: 12px; border-radius: 4px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" title="Xóa chỉ định">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </form>
           </div>
-          <div class="image-thumbs">
-            <th:block th:each="d : ${img.images}">
-              <div class="thumb" th:if="${!#strings.isEmpty(d.imageUrl)}">
-                <a th:href="${d.imageUrl}" target="_blank" style="display: block; text-decoration: none;">
-                  <img th:src="${d.imageUrl}" alt="Ảnh gốc" title="Ảnh gốc">
-                </a>
-              </div>
-              <div class="thumb" th:if="${!#strings.isEmpty(d.aiImageUrl)}">
-                <a th:href="${d.aiImageUrl}" target="_blank" style="display: block; text-decoration: none;">
-                  <img th:src="${d.aiImageUrl}" alt="Ảnh AI" title="Ảnh AI">
-                </a>
-              </div>
-              <div class="thumb" th:if="${!#strings.isEmpty(d.imgResultConclusion)}">
-                <a th:href="${d.imgResultConclusion}" target="_blank" style="display: block; text-decoration: none;">
-                  <img th:src="${d.imgResultConclusion}" alt="Ảnh KTV khoanh" title="Ảnh KTV khoanh">
-                </a>
-              </div>
-            </th:block>
+
+          <!-- Hiện 3 ảnh và kết luận -->
+          <div class="completed-result-view" style="margin-top: 15px;">
+            <div th:each="d : ${img.images}" style="display: flex; flex-direction: column; gap: 15px; border-top: 1px dashed #e2e8f0; padding-top: 15px;">
+
+                <!-- Hiển thị 3 ảnh -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="text-align: center;">
+                        <span style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 8px;">Ảnh Gốc</span>
+                        <img th:src="${d.imageUrl}" alt="Ảnh gốc" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    </div>
+
+                    <div th:if="${d.aiImageUrl}" style="text-align: center;">
+                        <span style="display: block; font-size: 0.85rem; font-weight: 600; color: #3b82f6; margin-bottom: 8px;">Phân Tích AI</span>
+                        <img th:src="${d.aiImageUrl}" alt="AI Image" style="width: 100%; border-radius: 8px; border: 1px solid #bfdbfe; box-shadow: 0 2px 4px rgba(59,130,246,0.15);">
+                    </div>
+
+                    <div th:if="${d.imgResultConclusion}" style="text-align: center;">
+                        <span style="display: block; font-size: 0.85rem; font-weight: 600; color: #10b981; margin-bottom: 8px;">KTV Kết Luận</span>
+                        <img th:src="${d.imgResultConclusion}" alt="Kết quả KTV" style="width: 100%; border-radius: 8px; border: 2px solid #34d399; box-shadow: 0 2px 4px rgba(16,185,129,0.15);">
+                    </div>
+                </div>
+
+                <!-- Kết luận của KTV -->
+                <div th:if="${d.technicalConclusion}" style="background: #f8fafc; padding: 12px 15px; border-left: 4px solid #10b981; border-radius: 6px;">
+                    <h6 style="margin: 0 0 5px 0; font-size: 0.9rem; color: #0f172a;"><i class="fa-solid fa-user-doctor"></i> Kỹ thuật viên kết luận:</h6>
+                    <p style="margin: 0; font-size: 0.95rem; color: #334155; white-space: pre-wrap;" th:text="${d.technicalConclusion}"></p>
+                </div>
+            </div>
           </div>
           <div class="image-time" th:text="${#temporals.format(img.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</div>
         </div>
@@ -56,37 +76,108 @@
     <div th:if="${#lists.isEmpty(medicalImages)}">
       <p class="empty-text">Chưa có hình ảnh y tế</p>
     </div>
-    <button type="button" class="btn-action btn-outline btn-add" data-bs-toggle="modal" th:data-bs-target="'#addMedicalImageModal-' + ${sessionId}">
+
+    <!-- Nút thêm: disable khi đang có PENDING hoặc đã có COMPLETED, hoặc đã có review -->
+    <button type="button" class="btn-action btn-outline btn-add"
+            onclick="openAddMedicalImageModal()"
+            th:disabled="${hasReview
+                          or not #lists.isEmpty(medicalImages.?[status.name() == 'PENDING'])
+                          or not #lists.isEmpty(medicalImages.?[status.name() == 'COMPLETED'])}"
+            th:title="${not #lists.isEmpty(medicalImages.?[status.name() == 'PENDING']) ? 'Đang chờ kỹ thuật viên xử lý siêu âm' : ''}">
       <i class="fa-solid fa-plus"></i> Thêm hình ảnh y tế
     </button>
 
+    <!-- Nút yêu cầu siêu âm lại -->
+    <button type="button"
+            th:if="${not hasReview
+                    and not #lists.isEmpty(medicalImages)
+                    and not #lists.isEmpty(medicalImages.?[status.name() == 'COMPLETED'])}"
+            onclick="openRetakeModal()"
+            style="width: 100%; margin-top: 10px; padding: 12px; border: 2px dashed #f59e0b;
+                   border-radius: 10px; background: #fffbeb; color: #b45309; font-weight: 600;
+                   font-size: 0.95rem; cursor: pointer; display: flex; align-items: center;
+                   justify-content: center; gap: 8px; transition: all 0.2s;"
+            onmouseover="this.style.background='#fef3c7'; this.style.borderColor='#d97706';"
+            onmouseout="this.style.background='#fffbeb'; this.style.borderColor='#f59e0b';">
+      <i class="fa-solid fa-rotate-right"></i> Yêu cầu siêu âm lại
+    </button>
+
+
+
     <!-- Modal Thêm Hình Ảnh Y Tế -->
-    <div class="modal fade" th:id="'addMedicalImageModal-' + ${sessionId}" tabindex="-1" aria-labelledby="addMedicalImageModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-          <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-bottom: 1px solid #e2e8f0; border-radius: 12px 12px 0 0; padding: 1rem 1.5rem;">
-            <h5 class="modal-title" id="addMedicalImageModalLabel" style="font-weight: 600; color: #1e293b; font-size: 1.1rem;">
-                <i class="fa-solid fa-file-medical me-2" style="color: #3b82f6;"></i>Chỉ định hình ảnh y tế
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
-          </div>
-          <form th:action="@{/doctor/sessions/{sessionId}/medical-images(sessionId=${sessionId})}" method="post">
-            <div class="modal-body" style="padding: 1.5rem;">
-              <div class="mb-3 text-start">
-                <label for="imageType" class="form-label" style="font-weight: 500; color: #475569; font-size: 0.95rem;">Thông tin/Yêu cầu (VD: Siêu âm ổ bụng, MRI não...)</label>
-                <input type="text" class="form-control" id="imageType" name="imageType" required 
-                       placeholder="Nhập loại hình ảnh y tế..." 
-                       style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 0.6rem 1rem; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">
-              </div>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
-              <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500; padding: 0.5rem 1.25rem;">Hủy</button>
-              <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 500; padding: 0.5rem 1.25rem; background-color: #3b82f6; border: none; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);">
-                  <i class="fa-solid fa-check me-1"></i> Xác nhận
-              </button>
-            </div>
-          </form>
+    <!-- Modal Thêm Hình Ảnh Y Tế -->
+    <div id="addMedicalImageModal" class="modal" style="display: none;">
+      <div class="modal-overlay" onclick="closeAddMedicalImageModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-file-medical"></i> Thêm hình ảnh y tế</h3>
+          <button type="button" class="modal-close" onclick="closeAddMedicalImageModal()">&times;</button>
         </div>
+        <form th:action="@{/doctor/sessions/{sessionId}/medical-images(sessionId=${sessionId})}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="imageType">Thông tin/Yêu cầu (VD: Siêu âm ổ bụng...) <span class="required">*</span></label>
+              <input type="text" class="form-control" id="imageType" name="imageType" required
+                     placeholder="Nhập loại hình ảnh y tế...">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-action btn-outline" onclick="closeAddMedicalImageModal()">
+              <i class="fa-solid fa-times"></i> Hủy
+            </button>
+            <button type="submit" class="btn-action btn-primary">
+                <i class="fa-solid fa-plus"></i> Xác nhận
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Yêu Cầu Siêu Âm Lại -->
+    <div id="retakeModal" class="modal" style="display: none;">
+      <div class="modal-overlay" onclick="closeRetakeModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-bottom: 2px solid #fcd34d;">
+          <h3 style="color: #92400e;"><i class="fa-solid fa-rotate-right" style="color: #f59e0b;"></i> Yêu cầu siêu âm lại</h3>
+          <button type="button" class="modal-close" onclick="closeRetakeModal()">&times;</button>
+        </div>
+        <form th:action="@{/doctor/sessions/{sessionId}/medical-images/retake(sessionId=${sessionId})}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <!-- Lấy imageType của ảnh COMPLETED gần nhất -->
+          <input type="hidden" id="retakeImageType" name="originalImageType"
+                 th:value="${not #lists.isEmpty(medicalImages.?[status.name() == 'COMPLETED'])
+                             ? medicalImages.?[status.name() == 'COMPLETED'][0].imageType
+                             : 'Siêu âm'}" />
+          <div class="modal-body">
+            <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start;">
+              <i class="fa-solid fa-circle-exclamation" style="color: #f59e0b; margin-top: 2px;"></i>
+              <p style="margin: 0; font-size: 0.9rem; color: #92400e;">
+                Hệ thống sẽ gửi yêu cầu chụp lại đến kỹ thuật viên. Ảnh cũ sẽ vẫn được lưu lại trong lịch sử.
+              </p>
+            </div>
+            <div class="form-group">
+              <label for="retakeReason" style="font-weight: 600; color: #374151;">
+                Lý do yêu cầu chụp lại <span style="color: #6b7280; font-weight: 400;">(không bắt buộc)</span>
+              </label>
+              <textarea id="retakeReason" name="retakeReason" rows="3"
+                        class="form-control"
+                        placeholder="VD: Ảnh bị mờ không nhìn rõ vùng gan, cần chụp lại với góc rõ hơn..."
+                        style="resize: vertical;"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-action btn-outline" onclick="closeRetakeModal()">
+              <i class="fa-solid fa-times"></i> Hủy
+            </button>
+            <button type="submit"
+                    style="background: #f59e0b; color: white; border: none; padding: 10px 20px;
+                           border-radius: 8px; font-weight: 600; cursor: pointer; display: flex;
+                           align-items: center; gap: 8px; font-size: 0.95rem;">
+              <i class="fa-solid fa-paper-plane"></i> Gửi yêu cầu
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

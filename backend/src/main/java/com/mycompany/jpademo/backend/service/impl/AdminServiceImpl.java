@@ -576,6 +576,8 @@ public class AdminServiceImpl implements AdminService {
             case "UPDATE_SESSION_STATUS": return "Cập nhật";
             case "UPDATE_SESSION_SHARE": return "Cập nhật";
             case "UPDATE_CLINICAL_SYMPTOMS": return "Cập nhật";
+            case "REQUEST_MEDICAL_IMAGE": return "Yêu cầu ảnh y tế";
+            case "DELETE_MEDICAL_IMAGE": return "Xóa ảnh y tế";
             default: return action;
         }
     }

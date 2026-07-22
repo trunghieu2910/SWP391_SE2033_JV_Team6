@@ -143,15 +143,7 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    showResult(`Truyền ảnh thành công! Đã gửi về Bác sĩ (ID Ảnh: ${data.imageId})`, 'success');
-                    
-                    // Nút xem thử
-                    const btnLink = document.createElement('a');
-                    btnLink.href = `/ai-result?imageId=${data.imageId}`;
-                    btnLink.textContent = "Mở xem ảnh AI ngay";
-                    btnLink.style = "display:block; margin-top:10px; color:#38bdf8; text-decoration:underline; font-weight:bold;";
-                    resultMessage.appendChild(btnLink);
-                    
+                    window.location.href = `/ai-result?imageId=${data.imageId}`;
                 } else {
                     const errText = await response.text();
                     showResult(`Lỗi từ máy chủ: ${errText}`, 'error');

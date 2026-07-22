@@ -28,6 +28,17 @@ async function fetchImageDetails(id) {
                 origImg.classList.remove('placeholder');
             }
             
+            // Manual Image
+            if (data.imgResultConclusion) {
+                const manualImgBox = document.getElementById('manual-img-box');
+                const manualImg = document.getElementById('manual-img');
+                if (manualImgBox && manualImg) {
+                    manualImgBox.style.display = 'block';
+                    manualImg.src = data.imgResultConclusion;
+                    manualImg.classList.remove('placeholder');
+                }
+            }
+            
             // AI Image
             if (data.aiImageUrl) {
                 const aiImg = document.getElementById('ai-img');
@@ -48,11 +59,17 @@ async function fetchImageDetails(id) {
             }
             
             if (data.technicalConclusion) {
-                // For Technical Role input
+                // For Technical Role input (if it's not hidden, but we will hide the whole block)
                 const ta = document.getElementById('technical-conclusion');
                 if (ta) ta.value = data.technicalConclusion;
                 
-                // For Doctor/Patient view
+                // Hide the editing controls since it's already saved
+                const techControls = document.querySelector('.technical-controls');
+                if (techControls) {
+                    techControls.style.display = 'none';
+                }
+                
+                // For Doctor/Patient/History view (show static text)
                 const tcView = document.getElementById('technical-conclusion-view');
                 const tcText = document.getElementById('technical-conclusion-text');
                 if (tcView && tcText) {
@@ -61,12 +78,12 @@ async function fetchImageDetails(id) {
                 }
             }
             
-            if (data.manualAiImageUrl) {
+            if (data.imgResultConclusion) {
                 const manualImgBox = document.getElementById('manual-img-box');
                 const manualImg = document.getElementById('manual-img');
                 if (manualImgBox && manualImg) {
                     manualImgBox.style.display = 'block';
-                    manualImg.src = data.manualAiImageUrl;
+                    manualImg.src = data.imgResultConclusion;
                     manualImg.classList.remove('placeholder');
                 }
             }
@@ -207,6 +224,7 @@ function toggleManualDraw() {
 
 async function saveTechnicalConclusion() {
     const conclusion = document.getElementById('technical-conclusion')?.value || '';
+    
     const btn = document.getElementById('btn-save-conclusion');
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
@@ -237,6 +255,9 @@ async function saveTechnicalConclusion() {
         manualImageBase64 = tempCanvas.toDataURL('image/jpeg', 0.9);
     }
     
+    const errorDiv = document.getElementById('conclusion-error');
+    if (errorDiv) errorDiv.style.display = 'none';
+
     try {
         const payload = { conclusion, manualImageBase64 };
         const response = await fetch(`/api/ultrasound/save-conclusion/${imageId}`, {
@@ -246,10 +267,15 @@ async function saveTechnicalConclusion() {
         });
         
         if (response.ok) {
-            alert('Lưu kết luận thành công!');
             window.location.href = '/technical/dashboard';
         } else {
-            alert('Lỗi: ' + await response.text());
+            const errorMsg = await response.text();
+            if (errorDiv) {
+                errorDiv.querySelector('span').textContent = errorMsg;
+                errorDiv.style.display = 'block';
+            } else {
+                alert('Lỗi: ' + errorMsg);
+            }
         }
     } catch (e) {
         alert('Lỗi kết nối máy chủ');

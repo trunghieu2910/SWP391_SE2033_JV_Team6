@@ -138,12 +138,12 @@
                     <div class="accordion-title">
                         <i class="fa-solid fa-image"></i>
                         <span>Hình ảnh y tế</span>
-                        <span class="accordion-badge" th:text="${sessionDetail.medicalImages != null ? sessionDetail.medicalImages.size() : 0} + ' hình ảnh'">0 hình ảnh</span>
+                        <span class="accordion-badge" th:text="${sessionDetail.medicalImages != null ? sessionDetail.medicalImages.?[status.name() == 'COMPLETED'].size() : 0} + ' hình ảnh'">0 hình ảnh</span>
                     </div>
                     <i class="fa-solid fa-chevron-down accordion-icon" id="imageIcon"></i>
                 </div>
                 <div class="accordion-body" id="imageAccordion" style="display: none;">
-                    <div th:replace="~{doctor/fragments/medical-images :: list(medicalImages=${sessionDetail.medicalImages}, sessionId=${sessionDetail.sessionId})}"></div>
+                    <div th:replace="~{doctor/fragments/medical-images :: list(medicalImages=${sessionDetail.medicalImages}, sessionId=${sessionDetail.sessionId}, hasReview=${sessionDetail.review != null})}"></div>
                 </div>
             </div>
 
