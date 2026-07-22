@@ -13,12 +13,26 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * Runs when a form login attempt FAILS (wrong password, account temporarily
+ * locked, etc.). Distinguishes between the two failure types so the login
+ * page can redirect with the correct error code and show the right message.
+ */
 @Component
 @RequiredArgsConstructor
 public class LoginFailureHandler implements AuthenticationFailureHandler {
 
     private final AccountLockoutService accountLockoutService;
 
+    /**
+     * Invoked by Spring Security whenever the AuthenticationProvider throws
+     * an exception.
+     *   - If it's an AccountTemporarilyLockedException (account currently
+     *     locked due to too many failed attempts) -> redirect with "?error=locked".
+     *   - If it's a BadCredentialsException (wrong password) -> increment the
+     *     failed-attempt counter via accountLockoutService.registerFailedAttempt(),
+     *     then redirect with "?error=invalid".
+     */
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {

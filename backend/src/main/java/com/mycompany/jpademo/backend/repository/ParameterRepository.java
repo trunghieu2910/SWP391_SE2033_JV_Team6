@@ -6,13 +6,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Data access for the shared, system-wide lab parameter catalog.
+ */
 @Repository
 public interface ParameterRepository extends JpaRepository<Parameter, Integer> {
 
     /**
-     * Dùng để khớp testName từ LIS với Parameter đã có trong danh mục.
-     *
-     * Tìm kiếm không phân biệt hoa/thường.
+     * Matches an incoming parameter name (from the LIS payload) against
+     * an existing catalog entry. Case-insensitive — note this does NOT
+     * normalize whitespace, so near-duplicate names may still create
+     * separate catalog entries.
      */
     Optional<Parameter> findByParameterNameIgnoreCase(String parameterName);
 }

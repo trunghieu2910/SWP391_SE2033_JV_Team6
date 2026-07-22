@@ -16,6 +16,12 @@ import java.time.LocalDateTime;
 
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Runs after Spring Security has already invalidated the session (logout
+ * succeeded). Responsibilities: update the user's last-logout timestamp in
+ * the DB, write a SystemLog entry with action = "LOGOUT", then send the
+ * user back to the login page.
+ */
 @Component
 @RequiredArgsConstructor
 public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
@@ -23,6 +29,14 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
     private final UserRepository userRepository;
     private final SystemLogService systemLogService;
 
+    /**
+     * @Transactional because there's a DB UPDATE (updateLastLogoutTime)
+     * happening right inside the logout request handling — must be
+     * committed before the response is sent.
+     * If Authentication is null (a rare case, e.g. the session had already
+     * expired before the logout button was clicked), the logging step is
+     * simply skipped — no error is thrown.
+     */
     @Override
     @Transactional
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,

@@ -11,11 +11,27 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Bridge between Spring Security and the user database.
+ * Whenever someone attempts to log in, Spring Security calls
+ * loadUserByUsername() to fetch the account details before matching the password.
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
+
     private final UserRepository userRepository;
 
+    /**
+     * Looks up the user by the "username" that was entered — in practice
+     * this accepts email, username, phone number, or national ID
+     * (multi-method login).
+     * If the account is currently under a temporary lock (lockedUntil is
+     * still in the future), throws AccountTemporarilyLockedException right
+     * here, BEFORE the password-matching step even runs (rejecting early so
+     * the response time doesn't leak whether the failure was "wrong
+     * password" vs. "account locked").
+     */
     @Override
     public UserDetails loadUserByUsername(String username) {
         User user = userRepository.findByEmailOrUsernameOrPhoneNumberOrNationalId(username, username, username, username)

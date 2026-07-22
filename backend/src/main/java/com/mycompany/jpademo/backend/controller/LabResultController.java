@@ -18,6 +18,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+/**
+ * Web endpoints for a doctor to create, view, and delete lab test
+ * orders on a diagnosis session, plus the read-only view for a
+ * patient to see their own results.
+ */
 @Controller
 @RequiredArgsConstructor
 public class LabResultController {
@@ -25,10 +30,7 @@ public class LabResultController {
     private final LabResultService labResultService;
     private final DiagnosisSessionRepository sessionRepository;
 
-    // ══════════════════════════════════════════════
-    //  TẠO XÉT NGHIỆM (đã làm ở phần trước — giữ nguyên)
-    // ══════════════════════════════════════════════
-
+    /** Renders the "add lab test" form pre-filled with the target session. */
     @PreAuthorize("hasRole('DOCTOR')")
     @GetMapping("/doctor/lab-results/create")
     public String showCreateForm(@RequestParam("sessionId") Integer sessionId, Model model) {
@@ -44,6 +46,7 @@ public class LabResultController {
         return "doctor/lab-result";
     }
 
+    /** Handles form submission for creating a new lab order; redirects back to the session detail page either way. */
     @PreAuthorize("hasRole('DOCTOR')")
     @PostMapping("/doctor/lab-results/create")
     public String createLabResult(
@@ -69,11 +72,7 @@ public class LabResultController {
         return "redirect:/doctor/sessions/" + form.getSessionId() + "?openLab=true";
     }
 
-    // ══════════════════════════════════════════════
-    //  XEM XÉT NGHIỆM (chức năng mới của phần này)
-    // ══════════════════════════════════════════════
-
-    // ---- Bác sĩ xem ----
+    /** Doctor-facing list view of all lab results for a session. */
     @PreAuthorize("hasRole('DOCTOR')")
     @GetMapping("/doctor/lab-results/session/{sessionId}")
     public String viewByDoctorSession(
@@ -101,7 +100,7 @@ public class LabResultController {
         }
     }
 
-    // ---- Bệnh nhân xem ----
+    /** Patient-facing list view of their own lab results for a session (subject to the session being shared). */
     @PreAuthorize("hasRole('PATIENT')")
     @GetMapping("/patient/lab-results/session/{sessionId}")
     public String viewByPatientSession(
@@ -130,10 +129,7 @@ public class LabResultController {
         }
     }
 
-    // ══════════════════════════════════════════════
-    //  XÓA XÉT NGHIỆM (chỉ khi đang PENDING)
-    // ══════════════════════════════════════════════
-
+    /** Deletes a still-PENDING lab order and redirects back to the session detail page. */
     @PreAuthorize("hasRole('DOCTOR')")
     @PostMapping("/doctor/lab-results/{labResultId}/delete")
     public String deleteLabResult(

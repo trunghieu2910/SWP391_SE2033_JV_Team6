@@ -25,6 +25,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Default implementation of {@link GoogleAuthService}. Owns every
+ * repository/data-access call for the Google sign-in feature, so that
+ * WebGoogleAuthController stays a thin, servlet-facing layer.
+ */
 @Service
 @RequiredArgsConstructor
 public class GoogleAuthServiceImpl implements GoogleAuthService {
@@ -36,6 +41,16 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Looks the verified email up in the database:
+     * <ul>
+     *   <li>no matching user -> {@code NEED_MORE_INFO} (first-time sign-in)</li>
+     *   <li>user exists but BANNED / INACTIVE / temporarily LOCKED -> rejected</li>
+     *   <li>otherwise -> {@code OK}, wrapping the existing user</li>
+     * </ul>
+     */
     @Override
     public GoogleSessionResult resolveSession(String idToken) {
         FirebaseToken decoded = firebaseService.verifyIdToken(idToken);
@@ -61,6 +76,20 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
         return GoogleSessionResult.ok(user);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Re-verifies the Firebase ID token (never trusts the email/name the
+     * client claims), rejects duplicate email/username/phone/national ID,
+     * then creates the {@link User} + {@link Patient} pair with an
+     * auto-generated password, and emails that password to the user.
+     *
+     * @throws ResourceAlreadyExistsException if the email, username, phone
+     *                                          number, or national ID is
+     *                                          already registered
+     * @throws ResourceNotFoundException if the PATIENT role is missing from
+     *                                     the Roles table (configuration error)
+     */
     @Override
     @Transactional
     public User completeRegistration(GoogleCompleteRequest request) {
@@ -96,6 +125,12 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
 
         Patient patient = new Patient();
         patient.setUser(user);
+        patient.setGender(request.getGender());
+        patient.setDob(request.getDob());
+
+        String fullAddress = request.getAddressDetail() + ", " + request.getDistrict() + ", " + request.getProvince();
+        patient.setAddress(fullAddress);
+
         patientRepository.save(patient);
 
         emailService.sendPasswordEmail(email, decoded.getName(), rawPassword);

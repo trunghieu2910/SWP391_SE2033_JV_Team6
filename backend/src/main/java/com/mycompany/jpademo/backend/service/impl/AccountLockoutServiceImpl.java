@@ -17,6 +17,9 @@ import java.util.Optional;
 @Slf4j
 public class AccountLockoutServiceImpl implements AccountLockoutService {
 
+    // Lockout threshold: 5 consecutive failures -> locked for 15 minutes.
+    // Changing these two constants is the only place needed to tune how
+    // strict the brute-force protection is.
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final int LOCK_DURATION_MINUTES = 15;
 
@@ -24,8 +27,8 @@ public class AccountLockoutServiceImpl implements AccountLockoutService {
     private final EmailService emailService;
 
     /**
-     * Gọi khi đăng nhập sai mật khẩu (KHÔNG gọi khi tài khoản đã BANNED/đang bị khóa tạm,
-     * vì lúc đó luồng đã bị chặn từ CustomUserDetailsService trước khi tới đây).
+     * Call when incorrect password is entered (DO NOT call when the account is BANNED/temporarily locked,
+     * because the thread would have been blocked from CustomUserDetailsService before reaching this point).
      */
     @Override
     public void registerFailedAttempt(String loginIdentifier) {
@@ -54,6 +57,8 @@ public class AccountLockoutServiceImpl implements AccountLockoutService {
         }
     }
 
+    /** Only writes to the DB if there's actually something to reset (avoids
+     *  an unnecessary UPDATE on every single successful login). */
     @Override
     public void resetFailedAttempts(User user) {
         if ((user.getFailedLoginAttempts() != null && user.getFailedLoginAttempts() > 0)
@@ -64,6 +69,9 @@ public class AccountLockoutServiceImpl implements AccountLockoutService {
         }
     }
 
+    /** Sends a warning email when an account has just been locked — any
+     *  email failure (SMTP down, etc.) is only logged, and must NEVER throw
+     *  and break the main login flow. */
     private void sendLockoutWarningEmail(User user) {
         if (user.getEmail() == null) return;
         try {

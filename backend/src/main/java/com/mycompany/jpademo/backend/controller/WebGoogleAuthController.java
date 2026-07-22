@@ -22,6 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+/**
+ * Handles Google sign-in (a Firebase ID token sent up by the frontend after
+ * the user signs in with Google in the browser). Replaces JWT entirely:
+ * once the token is validated, a genuine Spring Security session is created
+ * directly (exactly the same way as a form login), so the rest of the
+ * system uses a single, unified session mechanism regardless of which
+ * "login method" was used.
+ */
 @RestController
 @RequestMapping("/auth/google")
 @RequiredArgsConstructor
@@ -30,6 +38,20 @@ public class WebGoogleAuthController {
     private final GoogleAuthService googleAuthService;
     private final SystemLogService systemLogService;
 
+    /**
+     * STEP 1 — receives the idToken from Firebase and determines whether
+     * this person already has an account in the system
+     * (googleAuthService.resolveSession):
+     *   - OK: the account already exists (this is the user's SECOND OR LATER
+     *     Google login) -> the session is created immediately, a
+     *     "GOOGLE_LOGIN" log entry is written, and the redirect URL is returned.
+     *   - NEED_MORE_INFO: no account exists yet for this Google email
+     *     (this is the FIRST-EVER Google login) -> NO session is created at
+     *     this step; email/fullName are returned so the frontend can open
+     *     the "complete your profile" form (see completeSession() below).
+     *   - BANNED / INACTIVE / LOCKED: the account exists but isn't allowed
+     *     to log in -> returns 401 with the corresponding status.
+     */
     @PostMapping("/session")
     public ResponseEntity<Map<String, String>> googleSession(
             @RequestBody Map<String, String> body,
@@ -60,6 +82,16 @@ public class WebGoogleAuthController {
         };
     }
 
+    /**
+     * STEP 2 (only reached when googleSession() returned NEED_MORE_INFO) —
+     * the first-time Google user fills in the remaining required fields
+     * (phone number, national ID, etc.); a new account is created in the DB
+     * (googleAuthService.completeRegistration), and a session is established
+     * right away, as if a normal login had just happened.
+     * Logged separately as "GOOGLE_LOGIN_FIRST_TIME" (as opposed to the
+     * regular "GOOGLE_LOGIN") to distinguish first-time signups from
+     * returning Google logins — useful for reporting/audit purposes.
+     */
     @PostMapping("/complete-session")
     public ResponseEntity<Map<String, String>> completeSession(
             @Valid @RequestBody GoogleCompleteRequest req,
@@ -74,7 +106,12 @@ public class WebGoogleAuthController {
         return ResponseEntity.ok(Map.of("status", "OK", "redirect", redirectByRole(user)));
     }
 
-    // ── Hàm lõi: tạo session thủ công, thay cho việc sinh JWT ──
+    /**
+     * Core helper shared by both flows above: manually builds an
+     * Authentication + SecurityContext and persists it into the
+     * HttpSession — this is the manual, non-form way of "logging someone
+     * in", fully replacing the old JWT-issuing approach.
+     */
     private void establishSession(User user, HttpServletRequest request, HttpServletResponse response) {
         CustomUserDetails userDetails = new CustomUserDetails(user);
         UsernamePasswordAuthenticationToken authToken =
@@ -87,6 +124,10 @@ public class WebGoogleAuthController {
         new HttpSessionSecurityContextRepository().saveContext(context, request, response);
     }
 
+    /** Looks up the home page for this user's Role — must stay in sync with
+     *  the ROLE_HOME map in RoleBasedSuccessHandler (form login). If the two
+     *  ever drift apart, Google users and form-login users with the same
+     *  role will land on different home pages — worth checking periodically. */
     private String redirectByRole(User user) {
         return switch (user.getRole().getRoleName()) {
             case DOCTOR       -> "/doctor/sessions";

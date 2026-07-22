@@ -1,11 +1,12 @@
 package com.mycompany.jpademo.backend.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -25,4 +26,22 @@ public class GoogleCompleteRequest {
     @NotBlank
     @Size(min = 12, max = 12, message = "CCCD phải đúng 12 ký tự")
     private String nationalID;
+
+    @NotBlank(message = "Vui lòng chọn giới tính.")
+    @Pattern(regexp = "^(Male|Female|Other)$", message = "Giới tính không hợp lệ.")
+    private String gender;
+
+    @NotNull(message = "Vui lòng nhập ngày sinh.")
+    @Past(message = "Ngày sinh phải là ngày trong quá khứ.")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dob;
+
+    @NotBlank(message = "Vui lòng chọn tỉnh/thành phố.")
+    private String province;
+
+    @NotBlank(message = "Vui lòng chọn quận/huyện.")
+    private String district;
+
+    @NotBlank(message = "Vui lòng nhập địa chỉ cư trú.")
+    private String addressDetail;
 }

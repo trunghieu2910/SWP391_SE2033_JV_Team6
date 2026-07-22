@@ -5,6 +5,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
+/**
+ * Request payload submitted by a doctor to order a new lab test
+ * (indication) for a diagnosis session. Only the test type is chosen
+ * by the doctor at creation time — parameter values are filled in
+ * later, either by the LIS webhook or the "simulate" button.
+ */
 @Data
 public class CreateLabResultRequest {
 

@@ -15,6 +15,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Displays the "Diagnosis Statistics" page for doctors: a breakdown of how
+ * many diagnosis reviews were recorded per disease type within a chosen
+ * date range. Restricted to the DOCTOR role only.
+ */
 @Controller
 @RequestMapping("/doctor/statistics")
 @RequiredArgsConstructor
@@ -23,6 +28,17 @@ public class DoctorStatisticsController {
 
     private final ReviewRepository reviewRepository;
 
+    /**
+     * Renders the statistics page.
+     * startDate/endDate are optional query parameters (?startDate=...&endDate=...);
+     * if either is missing, defaults are applied so the page always shows a
+     * sensible result on first load:
+     *   - from: 2000-01-01 (effectively "since the beginning of the data")
+     *   - to:   today
+     * The date range is converted to LocalDateTime bounds (start of day /
+     * end of day) before being passed to the repository, since Review
+     * timestamps are stored with time-of-day precision.
+     */
     @GetMapping
     public String showStatistics(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,

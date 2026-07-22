@@ -16,6 +16,12 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Runs immediately AFTER a successful form login (email/username + password).
+ * Responsibilities: log the login event, reset the failed-login-attempt
+ * counter (anti-lockout), and redirect the user to the home page that
+ * matches their role.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -36,6 +42,15 @@ public class RoleBasedSuccessHandler implements AuthenticationSuccessHandler {
             "ROLE_TECHNICAL", "/technical/dashboard"
     );
 
+    /**
+     * Automatically invoked by Spring Security right after the
+     * AuthenticationProvider has successfully authenticated the user.
+     * Steps:
+     *   1. Extract the actual User from the Authentication (via CustomUserDetails).
+     *   2. Reset the failed-login counter (accountLockoutService.resetFailedAttempts).
+     *   3. Write a SystemLog entry with action = "LOGIN".
+     *   4. Look up the ROLE_HOME map to find this role's home page and redirect there.
+     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {

@@ -25,7 +25,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Mô phỏng tầng "Software-level Integration" (LIS/HIS → AI System).
+ * Implementation of {@link LisIntegrationService}. Simulates the
+ * "software-level integration" layer between an external LIS/HIS
+ * system and this application: turns a PENDING LabResult into a
+ * COMPLETED one by saving its parameter values, auto-registering any
+ * previously-unknown Parameter names into the shared catalog.
  */
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,15 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
     private final ParameterRepository parameterRepository;
     private final SystemLogService systemLogService;
 
+    /**
+     * Core result-ingestion logic shared by the real webhook and the
+     * UI simulate button.
+     * Steps: look up the PENDING LabResult (guards against double
+     * completion) -> if source == UI_SIMULATE, verify the caller is
+     * the session's owning doctor -> for each incoming item, resolve
+     * or auto-create its Parameter catalog entry -> save one
+     * LabResultParameter per item -> flip the LabResult to COMPLETED.
+     */
     @Override
     @Transactional
     public LabResultResponse receiveLabResults(LisResultRequest request, String source) {
@@ -47,8 +60,9 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
                                 + request.getLabResultId()
                                 + ". Có thể đã được xử lý hoặc labResultId không tồn tại."));
 
-        // chỉ bác sĩ phụ trách ca mới được bấm "Lấy kết quả giả lập"
-        // (webhook thật REAL_LIS không có phiên đăng nhập nên bỏ qua check này)
+        // Only the doctor who owns this diagnosis session may trigger the
+        // "simulate result" action (the real REAL_LIS webhook has no login
+        // session, so this ownership check is skipped for that source).
         if ("UI_SIMULATE".equals(source)) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
@@ -62,11 +76,15 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
 
         List<LabResultParameter> savedParameters = new ArrayList<>();
 
+        // For each incoming test item: look up its Parameter by name
+        // (case-insensitive); if it doesn't exist yet in the shared
+        // catalog, auto-create it on the fly with the given unit.
         for (LisResultRequest.TestResultItem item : request.getTestResults()) {
 
             Parameter parameter = parameterRepository
                     .findByParameterNameIgnoreCase(item.getTestName())
                     .orElseGet(() -> {
+                        // Parameter not found by name — register a new catalog entry.
                         Parameter newParam = Parameter.builder()
                                 .parameterName(item.getTestName())
                                 .unit(item.getUnit() != null ? item.getUnit() : null)
@@ -86,6 +104,8 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
         labResult.setStatus(LabResultStatus.COMPLETED);
         labResultRepository.save(labResult);
 
+        // Build a distinct audit-log entry depending on which caller
+        // triggered this ingestion (simulated vs. a real LIS webhook).
         String action = "UI_SIMULATE".equals(source) ? "LIS_SIMULATE" : "LIS_RECEIVE";
         String description = "UI_SIMULATE".equals(source)
                 ? "Bác sĩ mô phỏng lấy kết quả LIS cho xét nghiệm \"" + labResult.getTestType() + "\""
@@ -96,6 +116,7 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
         return mapToLabResultResponse(labResult, savedParameters);
     }
 
+    /** Maps the now-COMPLETED LabResult and its freshly saved parameters to the response DTO. */
     private LabResultResponse mapToLabResultResponse(LabResult labResult,
                                                       List<LabResultParameter> parameters) {
 

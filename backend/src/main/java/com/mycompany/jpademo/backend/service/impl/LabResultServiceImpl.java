@@ -26,6 +26,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of {@link LabResultService}. Enforces ownership
+ * rules (a lab order belongs to the session's assigned doctor) and
+ * data-visibility rules (patients can only see their own, already
+ * shared, sessions).
+ */
 @Service
 @RequiredArgsConstructor
 public class LabResultServiceImpl implements LabResultService {
@@ -40,6 +46,13 @@ public class LabResultServiceImpl implements LabResultService {
 
     private final LisMockDataProvider lisMockDataProvider;
 
+    /**
+     * Creates a new PENDING lab order for the given session.
+     * Validation order: session exists -> caller is the owning doctor
+     * -> testType is one of the supported types -> session is not
+     * already COMPLETED -> no duplicate order of the same test type
+     * already exists for this session.
+     */
     @Override
     public LabResultResponse createLabResult(CreateLabResultRequest request) {
 
@@ -90,6 +103,13 @@ public class LabResultServiceImpl implements LabResultService {
         return mapToLabResultResponse(labResult, Collections.emptyList());
     }
 
+    /**
+     * Returns all lab results for a session, resolving each result's
+     * parameter values. PATIENT callers must own the session and the
+     * session must be shared; DOCTOR callers are allowed to view any
+     * session (cross-doctor consultation); every other role is
+     * rejected outright.
+     */
     @Override
     public List<LabResultResponse> getLabResultsBySession(Integer sessionId) {
 
@@ -138,6 +158,10 @@ public class LabResultServiceImpl implements LabResultService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Maps a LabResult entity (plus its already-loaded parameters, if
+     * any) to the response DTO used by the UI.
+     */
     private LabResultResponse mapToLabResultResponse(LabResult labResult,
                                                      List<LabResultParameter> parameters) {
 
@@ -178,6 +202,12 @@ public class LabResultServiceImpl implements LabResultService {
                 .build();
     }
 
+    /**
+     * Deletes a PENDING lab order belonging to the caller's session.
+     * Also removes any (normally non-existent, since PENDING orders
+     * have no results yet) LabResultParameter rows first to satisfy
+     * the FK constraint.
+     */
     @Override
     public void deleteLabResult(Integer labResultId) {
 

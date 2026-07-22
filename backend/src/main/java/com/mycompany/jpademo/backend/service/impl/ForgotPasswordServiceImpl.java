@@ -22,6 +22,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Default implementation of {@link ForgotPasswordService}.
+ */
 @Service
 @RequiredArgsConstructor
 public class ForgotPasswordServiceImpl implements ForgotPasswordService {
@@ -32,6 +35,16 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     private final ResetPasswordJwtService resetPasswordJwtService;
     private final SystemLogService systemLogService;
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Deliberately timing- and response-indistinguishable for existing vs.
+     * non-existing emails: an OTP is always generated and stored (even for
+     * emails with no account), and the same generic response is always
+     * returned, so this endpoint cannot be used to enumerate registered
+     * emails. A cooldown (based on {@link OtpUtil#getRemainingTime}) also
+     * prevents spamming a new OTP while a previous one is still valid.
+     */
     @Override
     public ResponseEntity<ApiResponse> forgotPassword(ForgotPasswordRequest request) {
 
@@ -68,6 +81,13 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                 .build();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * On success, the OTP is immediately invalidated (single use) and
+     * exchanged for a short-lived JWT reset token bound to this email and
+     * the user's current password hash (see {@link ResetPasswordJwtService}).
+     */
     @Override
     public ResponseEntity<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request) {
         boolean valid = OtpUtil.verifyOtp(request.getEmail(), request.getOtp());
@@ -89,6 +109,14 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                         .build());
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The reset token embeds the password hash that was current at the time
+     * the OTP was verified; if it no longer matches the user's current hash,
+     * the password was already changed since (e.g. via a second concurrent
+     * reset), so the token is rejected as already used.
+     */
     @Override
     public ResponseEntity<ApiResponse> resetPassword(ResetPasswordRequest request) {
         if (!resetPasswordJwtService.isValid(request.getResetToken())){

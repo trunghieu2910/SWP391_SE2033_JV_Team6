@@ -49,9 +49,9 @@ CREATE TABLE [Users]
 CREATE TABLE Patient
 (
     patientID INT IDENTITY (1,1) PRIMARY KEY,
-    gender    NVARCHAR(10),
-    dob       DATE,
-    address   NVARCHAR(255),
+    gender    NVARCHAR(10) NOT NULL,
+    dob       DATE NOT NULL,
+    address   NVARCHAR(255) NOT NULL,
     userID    INT UNIQUE NOT NULL, -- Ràng buộc UNIQUE tạo ra quan hệ 1-1
     FOREIGN KEY (userID) REFERENCES [Users] (userID)
 );
@@ -1189,6 +1189,9 @@ select * from LabResult
 select * from LabResultParameter
 
 select * from SystemLog
+
+select * from Users
+select * from Patient
 
 DELETE FROM SystemLog WHERE logID = 9
 
