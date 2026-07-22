@@ -9,11 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * In-memory catalog of canned lab result values, keyed by test type,
+ * used to fake a real LIS response when a doctor clicks
+ * "Lấy kết quả giả lập" instead of waiting on a real lab system.
+ * The set of keys here is the single source of truth for which
+ * test types are considered valid when creating a lab order.
+ */
 @Component
 public class LisMockDataProvider {
 
     private final Map<String, List<LisResultRequest.TestResultItem>> mockData = new HashMap<>();
 
+    /** Populates the mock dataset once at application startup. */
     @PostConstruct
     private void init() {
         mockData.put("Xét nghiệm tế bào học cổ tử cung", List.of(
@@ -75,6 +83,7 @@ public class LisMockDataProvider {
         ));
     }
 
+    /** Builds a single mock TestResultItem (name/value/unit) for readability above. */
     private LisResultRequest.TestResultItem item(String name, String value, String unit) {
         LisResultRequest.TestResultItem i = new LisResultRequest.TestResultItem();
         i.setTestName(name);
@@ -83,10 +92,12 @@ public class LisMockDataProvider {
         return i;
     }
 
+    /** Returns the canned results for a test type, or an empty list if the type is unsupported. */
     public List<LisResultRequest.TestResultItem> getMockResults(String testType) {
         return mockData.getOrDefault(testType, List.of());
     }
 
+    /** Returns the set of test type names this provider has mock data for — also used as the allow-list when creating a lab order. */
     public Set<String> getSupportedTestTypes() {
         return mockData.keySet();
     }

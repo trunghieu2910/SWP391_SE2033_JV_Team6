@@ -15,4 +15,10 @@ public class DashboardStatsResponse {
     private Long blockedUsers;
 
     private Long totalDiagnosisSessions;
+
+    private Long totalTechnical;
+
+    private Long totalReceptionist;
+
+    private Long totalPharmacist;
 }

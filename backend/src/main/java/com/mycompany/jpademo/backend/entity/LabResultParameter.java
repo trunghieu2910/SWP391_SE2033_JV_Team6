@@ -3,6 +3,12 @@ package com.mycompany.jpademo.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Join entity linking a completed LabResult to one measured Parameter
+ * and the actual value recorded for it (e.g. LabResult "Blood Test"
+ * + Parameter "WBC" + value "1.5"). Rows only exist once a lab
+ * result has been marked COMPLETED.
+ */
 @Entity
 @Table(name = "LabResultParameter")
 @Getter

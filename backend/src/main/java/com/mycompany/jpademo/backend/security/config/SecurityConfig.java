@@ -25,6 +25,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/**
+ * Central security configuration for the application (Spring Security).
+ * Responsible for: form-based login flow, logout flow, URL-based
+ * authorization, CORS, CSRF, and how unauthenticated access to
+ * protected resources is handled.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -39,6 +45,10 @@ public class SecurityConfig {
     private final LoginFailureHandler loginFailureHandler;
     private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
+    /**
+     * CORS configuration allowing a separate frontend (e.g. React dev server)
+     * to call the API while sending the session cookie (allowCredentials = true).
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -58,6 +68,18 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Declares the full security filter chain — the core of the login/logout
+     * configuration:
+     *  - formLogin(): login page at /auth/login, processes POST to the same
+     *    URL, username taken from the "login" field (allows email/phone/
+     *    national ID as identifier), success -> roleBasedSuccessHandler,
+     *    failure -> loginFailureHandler.
+     *  - logout(): logout at /auth/logout, invalidates the session + deletes
+     *    the JSESSIONID cookie, then calls customLogoutSuccessHandler.
+     *  - exceptionHandling(): on unauthorized access, distinguishes between
+     *    returning JSON (API calls) or redirecting to the login page (browser).
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -65,7 +87,7 @@ public class SecurityConfig {
                 
                 .csrf(csrf -> csrf
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/**", "/auth/login", "/auth/logout"))
+                        .ignoringRequestMatchers("/api/**"))
 
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
@@ -144,11 +166,19 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /** Password hashing algorithm — BCrypt is used both when storing and
+     *  when matching passwords at login time. */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Authentication provider: wires CustomUserDetailsService (looks up the
+     * user in the DB) together with PasswordEncoder (matches the password) —
+     * this is where Spring Security actually decides whether a login
+     * attempt is valid.
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();

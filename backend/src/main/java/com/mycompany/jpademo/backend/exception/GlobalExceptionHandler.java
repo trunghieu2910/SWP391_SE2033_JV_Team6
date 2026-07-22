@@ -6,6 +6,8 @@ import com.mycompany.jpademo.backend.util.OtpUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.checkerframework.checker.units.qual.A;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -30,9 +32,12 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     private boolean isApiRequest(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/");
+        return path.startsWith("/api/") || path.startsWith("/auth/google/");
     }
 
     private String getFallbackRedirect(HttpServletRequest request) {
@@ -148,15 +153,19 @@ public class GlobalExceptionHandler {
             HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
+        // Log đầy đủ chi tiết lỗi (kèm stack trace) ở phía server để debug,
+        // KHÔNG trả các chi tiết này về cho client.
+        log.error("Unhandled exception at {}", request.getRequestURI(), e);
+
         if (isApiRequest(request)) {
             Map<String, Object> response = new HashMap<>();
             response.put("timestamp", LocalDateTime.now());
             response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            response.put("message", e.getMessage());
+            response.put("message", "Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 
-        redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
+        redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.");
         return getFallbackRedirect(request);
     }
 
@@ -166,15 +175,17 @@ public class GlobalExceptionHandler {
             HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
+        log.warn("RuntimeException at {}: {}", request.getRequestURI(), e.getMessage());
+
         if (isApiRequest(request)) {
             Map<String, Object> response = new HashMap<>();
             response.put("timestamp", LocalDateTime.now());
             response.put("status", HttpStatus.BAD_REQUEST.value());
-            response.put("message", e.getMessage());
+            response.put("message", "Yêu cầu không hợp lệ, vui lòng kiểm tra lại dữ liệu.");
             return ResponseEntity.badRequest().body(response);
         }
 
-        redirectAttributes.addFlashAttribute("error", e.getMessage());
+        redirectAttributes.addFlashAttribute("error", "Yêu cầu không hợp lệ, vui lòng kiểm tra lại dữ liệu.");
         return getFallbackRedirect(request);
     }
 

@@ -18,6 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Service implementation for managing system logs, tracking user activities, and fetching log detail data.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,6 +29,7 @@ public class SystemLogServiceImpl implements SystemLogService {
     private final SystemLogRepository systemLogRepository;
     private final UserRepository userRepository;
 
+    /** Retrieves a filtered, paginated list of system activity logs. */
     @Override
     public Page<SystemLogResponse> getLogs(String action, String keyword, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         String cleanAction = (action == null || action.isBlank()) ? null : action;
@@ -33,19 +38,21 @@ public class SystemLogServiceImpl implements SystemLogService {
         return systemLogs.map(this::mapToSystemLogResponse);
     }
 
+    /** Records a new system activity log entry. */
     @Override
     public void logActivity(String targetType, Integer targetId, String action, String description) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails)) {
-                return;
+            User currentUser = null;
+            if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
+                currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
             }
-            User currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
 
             SystemLog systemLog = SystemLog.builder()
                     .action(action)
                     .targetType(targetType != null ? targetType : "SYSTEM")
-                    .targetId(targetId != null ? targetId : currentUser.getUserId())
+                    .targetId(targetId != null ? targetId
+                            : (currentUser != null ? currentUser.getUserId() : 0))
                     .description(description)
                     .user(currentUser)
                     .build();
@@ -56,6 +63,7 @@ public class SystemLogServiceImpl implements SystemLogService {
         }
     }
 
+    /** Retrieves detailed information for a specific system log entry. */
     @Override
     public SystemLogResponse getLogDetail(Integer logId) {
         SystemLog systemLog = systemLogRepository.findById(logId)
@@ -73,9 +81,12 @@ public class SystemLogServiceImpl implements SystemLogService {
                 .build();
     }
 
+    /** Translates system log actions into Vietnamese display strings. */
     private String mapActionToVietnamese(String action) {
         switch (action) {
             case "LOGIN": return "Đăng nhập";
+            case "GOOGLE_LOGIN_FIRST_TIME": return "Đăng nhập";
+            case "GOOGLE_LOGIN": return "Đăng nhập";
             case "LOGOUT": return "Đăng xuất";
             case "BAN_USER": return "Khóa User";
             case "UNBAN_USER": return "Mở khóa";
@@ -89,10 +100,18 @@ public class SystemLogServiceImpl implements SystemLogService {
             case "UPDATE_SESSION_STATUS": return "Cập nhật";
             case "UPDATE_SESSION_SHARE": return "Cập nhật";
             case "UPDATE_CLINICAL_SYMPTOMS": return "Cập nhật";
+            case "FORGOT_PASSWORD": return "Quên mật khẩu";
+            case "VERIFY_OTP": return "Xác minh OTP";
+            case "UPDATE_PASSWORD": return "Cập nhật";
+            case "CREATE_LAB_RESULT": return "Tạo";
+            case "DELETE_LAB_RESULT": return "Xóa";
+            case "LIS_RECEIVE": return "Nhận kết quả";
+            case "LIS_SIMULATE": return "Nhận kết quả";
             default: return action;
         }
     }
 
+    /** Maps a SystemLog entity to a SystemLogResponse DTO. */
     private SystemLogResponse mapToSystemLogResponse(SystemLog systemLog) {
         return SystemLogResponse.builder()
                 .logId(systemLog.getLogId())

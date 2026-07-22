@@ -30,6 +30,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Manages doctor-side diagnosis sessions, including patient symptoms, reviews, session status, and medical images.
+ */
 @Slf4j
 @Controller
 @RequestMapping("/doctor/sessions")
@@ -40,6 +44,7 @@ public class DoctorDiagnosisController {
     private final DoctorDiagnosisService doctorDiagnosisService;
     private final DiseaseTypeService diseaseTypeService;
 
+    /** Retrieves a paginated list of diagnosis sessions assigned to the current doctor. */
     @GetMapping
     public String getMySessions(
             @RequestParam(required = false) String keyword,
@@ -62,6 +67,7 @@ public class DoctorDiagnosisController {
         return "doctor/sessions";
     }
 
+    /** Retrieves detailed information for a specific diagnosis session. */
     @GetMapping("/{sessionId}")
     public String getSessionDetail(
             @PathVariable Integer sessionId,
@@ -76,6 +82,7 @@ public class DoctorDiagnosisController {
         return "doctor/session-detail";
     }
 
+    /** Updates the status of a specific diagnosis session. */
     @PostMapping("/{sessionId}/status")
     public String updateSessionStatus(
             @PathVariable Integer sessionId,
@@ -96,6 +103,7 @@ public class DoctorDiagnosisController {
         return "redirect:/doctor/sessions/" + sessionId;
     }
 
+    /** Updates the sharing preference/status of a diagnosis session. */
     @PostMapping("/{sessionId}/share")
     public String updateSessionShare(
             @PathVariable Integer sessionId,
@@ -118,6 +126,7 @@ public class DoctorDiagnosisController {
         return "redirect:/doctor/sessions/" + sessionId;
     }
 
+    /** API endpoint to fetch all symptoms associated with a specific diagnosis session. */
     @GetMapping("/{sessionId}/symptoms")
     @ResponseBody
     public List<SymptomResponse> getSessionSymptoms(@PathVariable Integer sessionId,
@@ -126,6 +135,7 @@ public class DoctorDiagnosisController {
         return doctorDiagnosisService.getSessionSymptoms(sessionId, doctorId);
     }
 
+    /** Updates/saves clinical symptoms for a diagnosis session. */
     @PostMapping("/{sessionId}/symptoms")
     public String updateSessionSymptoms(
             @PathVariable Integer sessionId,
@@ -152,6 +162,7 @@ public class DoctorDiagnosisController {
         return "redirect:/doctor/sessions/" + sessionId;
     }
 
+    /** Sets the symptom input method/mode for a diagnosis session. */
     @PostMapping("/{sessionId}/input-mode")
     public String setClinicalInputMode(
             @PathVariable Integer sessionId,
@@ -168,6 +179,7 @@ public class DoctorDiagnosisController {
         return "redirect:/doctor/sessions/" + sessionId;
     }
 
+    /** Saves the doctor's review, conclusions, or diagnosis results for a session. */
     @PostMapping("/{sessionId}/review")
     public String saveSessionReview(
             @PathVariable Integer sessionId,
@@ -194,6 +206,7 @@ public class DoctorDiagnosisController {
         return "redirect:/doctor/sessions/" + sessionId;
     }
 
+    /** Issues a new medical imaging order/request for a session. */
     @PostMapping("/{sessionId}/medical-images")
     public String createMedicalImage(
             @PathVariable Integer sessionId,
@@ -210,6 +223,7 @@ public class DoctorDiagnosisController {
         return "redirect:/doctor/sessions/" + sessionId;
     }
 
+    /** Cancels/deletes a pending medical imaging order from a session. */
     @PostMapping("/{sessionId}/medical-images/retake")
     public String retakeMedicalImage(
             @PathVariable Integer sessionId,

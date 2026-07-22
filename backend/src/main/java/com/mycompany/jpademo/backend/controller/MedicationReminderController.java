@@ -11,6 +11,7 @@ import com.mycompany.jpademo.backend.service.interfaces.MedicationReminderServic
 import com.mycompany.jpademo.backend.service.interfaces.ProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ import java.util.List;
 @RequestMapping("/patient/reminders")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@PreAuthorize("hasRole('PATIENT')")
 public class MedicationReminderController {
 
     private final ProfileService profileService;

@@ -7,9 +7,7 @@ import com.mycompany.jpademo.backend.dto.request.UpdateSessionShareRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateSessionStatusRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.*;
-import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
-import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
-import com.mycompany.jpademo.backend.enums.SymptomResultStatus;
+import com.mycompany.jpademo.backend.enums.*;
 import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
@@ -28,6 +26,10 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Service implementation for managing doctor-side diagnosis sessions, handling symptoms, reviews, clinical modes, and medical images.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -67,6 +69,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             "estrogenTherapy", "Điều trị hormone estrogen kéo dài"
     );
 
+    /** Retrieves doctor diagnosis sessions filtered by keyword, status, and dates. */
     @Override
     @Transactional(readOnly = true)
     public Page<DoctorSessionResponse> getSessionsByDoctor(Integer doctorId,
@@ -111,6 +114,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build());
     }
 
+    /** Updates the status of a specific diagnosis session. */
     @Override
     @Transactional
     @DoctorActionLog(action = "UPDATE_SESSION_STATUS", targetType = "DiagnosisSession")
@@ -123,6 +127,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
 
+        if (session.getReview() == null && DiagnosisSessionStatus.COMPLETED.equals(newStatus)) {
+            throw new BadRequestException("Không thể chuyển sang trạng thái hoàn thành khi chưa có kết luận cuối cùng.");
+        }
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền cập nhật trạng thái ca chẩn đoán này.");
         }
@@ -142,6 +149,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         sessionRepository.save(session);
     }
 
+    /** Updates the sharing configuration of a diagnosis session. */
     @Override
     @Transactional
     @DoctorActionLog(action = "UPDATE_SESSION_SHARE", targetType = "DiagnosisSession")
@@ -152,6 +160,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền cập nhật trạng thái ca chẩn đoán này.");
         }
+        if (session.getReview() == null) {
+            throw new BadRequestException("Không thể công bố ca chẩn đoán chưa có kết luận cuối cùng.");
+        }
         if (!DiagnosisSessionStatus.COMPLETED.equals(session.getStatus())) {
             throw new BadRequestException("Không thể công bố ca chẩn đoán chưa hoàn thành.");
         }
@@ -159,6 +170,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         sessionRepository.save(session);
     }
 
+    /** Retrieves all symptoms recorded for a specific diagnosis session. */
     @Override
     @Transactional(readOnly = true)
     public List<SymptomResponse> getSessionSymptoms(Integer sessionId, Integer doctorId) {
@@ -189,6 +201,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .collect(Collectors.toList());
     }
 
+    /** Saves or updates clinical symptoms associated with a diagnosis session. */
     @Override
     @Transactional
     public void updateClinicalSymptoms(Integer doctorId, Integer sessionId, UpdateClinicalSymptomsRequest request) {
@@ -280,6 +293,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         }
     }
 
+    /** Configures clinical input mode for symptom selection. */
     @Override
     @Transactional
     public void setClinicalInputMode(Integer doctorId, Integer sessionId, ClinicalInputMode clinicalInputMode) {
@@ -298,6 +312,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         sessionRepository.save(session);
     }
 
+    /** Retrieves detailed session overview, patient data, and logs for a doctor. */
     @Override
     @Transactional
     public DoctorSessionDetailResponse getSessionDetail(Integer sessionId, Integer doctorId) {
@@ -327,6 +342,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages, review);
     }
 
+    /** Saves the final review diagnosis and conclusions for a session. */
     @Override
     @Transactional
     public void saveReview(Integer doctorId, Integer sessionId, CreateReviewRequest request) {
@@ -339,6 +355,37 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
         if (session.getReview() != null) {
             throw new IllegalStateException("Ca chẩn đoán này đã có kết luận và không thể chỉnh sửa lại.");
+        }
+
+        // ===== VALIDATE ĐIỀU KIỆN TIÊN QUYẾT TRƯỚC KHI KẾT LUẬN =====
+        if (session.getSymptomResult() == null
+                || session.getSymptomResult().getStatus() != SymptomResultStatus.COMPLETED) {
+            throw new BadRequestException(
+                    "Chưa thể lưu kết luận: triệu chứng lâm sàng chưa được cung cấp hoặc chưa hoàn tất.");
+        }
+
+        List<LabResult> labResults = session.getLabResults();
+        if (labResults == null || labResults.isEmpty()) {
+            throw new BadRequestException(
+                    "Chưa thể lưu kết luận: cần có ít nhất 1 xét nghiệm chỉ số.");
+        }
+        boolean allLabCompleted = labResults.stream()
+                .allMatch(lr -> lr.getStatus() == LabResultStatus.COMPLETED);
+        if (!allLabCompleted) {
+            throw new BadRequestException(
+                    "Chưa thể lưu kết luận: còn xét nghiệm chỉ số chưa ở trạng thái hoàn tất.");
+        }
+
+        List<MedicalImage> medicalImages = session.getMedicalImages();
+        if (medicalImages == null || medicalImages.isEmpty()) {
+            throw new BadRequestException(
+                    "Chưa thể lưu kết luận: cần có ít nhất 1 xét nghiệm hình ảnh.");
+        }
+        boolean allImageCompleted = medicalImages.stream()
+                .allMatch(mi -> mi.getStatus() == MedicalImageStatus.COMPLETED);
+        if (!allImageCompleted) {
+            throw new BadRequestException(
+                    "Chưa thể lưu kết luận: còn xét nghiệm hình ảnh chưa ở trạng thái hoàn tất.");
         }
 
         User doctor = userRepository.findById(doctorId)
@@ -382,6 +429,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         sessionRepository.save(session);
     }
 
+    /** Extracts checked symptom names from request maps. */
     private void collectSelectedSymptomNames(Map<String, Boolean> source,
                                              Map<String, String> keyToSymptomName,
                                              Set<String> target) {
@@ -393,6 +441,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         });
     }
 
+    /** Maps session components into a detailed session response DTO. */
     private DoctorSessionDetailResponse mapToDoctorSessionDetailResponse(
             DiagnosisSession session,
             Patient patient,
@@ -469,6 +518,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build();
     }
 
+    /** Maps medical image entity to DTO response. */
     private MedicalImageResponse mapToMedicalImageResponse(MedicalImage medicalImage) {
         List<MedicalImageDetailResponse> details = medicalImage.getMedicalImageDetailsList() != null ? 
             medicalImage.getMedicalImageDetailsList().stream()
@@ -493,6 +543,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build();
     }
 
+    /** Maps lab result entity to DTO response. */
     private LabResultResponse mapToLabResultResponse(LabResult labResult) {
         List<LabResultResponse.ParameterValueResponse> parameters = labResult.getLabResultParameters().stream()
                 .map(lrp -> LabResultResponse.ParameterValueResponse.builder()
@@ -514,6 +565,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build();
     }
 
+    /** Deletes an imaging order from a diagnosis session. */
     @Override
     @Transactional
     public void deleteMedicalImage(Integer doctorId, Integer sessionId, Integer imageId) {
@@ -538,6 +590,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         medicalImageRepository.delete(image);
     }
 
+    /** Generates a new medical imaging order for a session. */
     @Override
     @Transactional
     public void createMedicalImage(Integer doctorId, Integer sessionId, String imageType) {
@@ -559,5 +612,14 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build();
         
         medicalImageRepository.save(image);
+    }
+
+    @Override
+    public void verifyDoctorOwnsSession(Integer doctorId, Integer sessionId) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán với: " + sessionId));
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("Bạn không có quyền thao tác trên ca chẩn đoán này.");
+        }
     }
 }

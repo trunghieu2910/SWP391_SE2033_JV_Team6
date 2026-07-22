@@ -232,4 +232,34 @@ public class EmailUtil {
                     </html>
                 """.formatted(fullName, rawPassword);
     }
+
+    public static String buildAccountLockedTemplate(String name, int lockDurationMinutes) {
+        return """
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+            <h2 style="color: #c62828;">
+                Cảnh báo bảo mật tài khoản
+            </h2>
+            <p>Xin chào <b>%s</b></p>
+            <p>
+                Chúng tôi phát hiện nhiều lần đăng nhập thất bại vào tài khoản của bạn.
+            </p>
+            <p>
+                Hệ thống đã tạm khóa đăng nhập trong <b>%d phút</b> để bảo vệ bạn.
+            </p>
+            <p>
+                Nếu đây không phải là bạn, vui lòng đổi mật khẩu ngay sau khi tài khoản được mở lại,
+                bằng chức năng "Quên mật khẩu".
+            </p>
+            <br>
+            <p>
+                Trân trọng,<br>
+                <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+            </p>
+        </div>
+        </body>
+        </html>
+        """.formatted(name, lockDurationMinutes);
+    }
 }

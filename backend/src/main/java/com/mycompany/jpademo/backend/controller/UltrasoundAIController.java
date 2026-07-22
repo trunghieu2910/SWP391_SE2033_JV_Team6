@@ -28,6 +28,7 @@ import java.nio.file.StandardCopyOption;
 
 @RestController
 @RequestMapping("/api")
+@PreAuthorize("hasRole('TECHNICAL')")
 public class UltrasoundAIController {
 
     private final MedicalImageDetailsRepository repository;

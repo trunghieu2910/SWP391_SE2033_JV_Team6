@@ -8,6 +8,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Represents a single lab test order (indication) placed by a doctor
+ * for a diagnosis session — e.g. "HPV DNA Test". Starts as PENDING
+ * with no parameters, and becomes COMPLETED once result values are
+ * received (via the LIS webhook or the UI simulate action).
+ */
 @Entity
 @Table(name = "LabResult")
 @Getter

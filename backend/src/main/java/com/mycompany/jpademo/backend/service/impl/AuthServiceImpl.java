@@ -1,6 +1,5 @@
 package com.mycompany.jpademo.backend.service.impl;
 
-import com.mycompany.jpademo.backend.aop.annotation.LogActivity;
 import com.mycompany.jpademo.backend.dto.request.*;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.repository.UserRepository;
@@ -8,6 +7,7 @@ import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.AuthService;
 import com.mycompany.jpademo.backend.repository.RoleRepository;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
+import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.mycompany.jpademo.backend.exception.ResourceAlreadyExistsException;
@@ -36,9 +36,9 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final PatientRepository patientRepository;
+    private final SystemLogService systemLogService;
 
     @Override
-    @LogActivity(action = "LOGOUT", targetType = "Users", description = "Người dùng đăng xuất")
     public void logout() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setPhoneNumber(request.getPhoneNumber());
         user.setNationalID(request.getNationalID());
-        user.setStatus(UserStatus.PENDING);
+        user.setStatus(UserStatus.INACTIVE);
         user.setCreatedAt(LocalDateTime.now());
         user.setRole(patientRole);
 
@@ -145,7 +145,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUserName(request.getUserName())
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
 
-        if (user.getStatus() != UserStatus.PENDING) {
+        if (user.getStatus() != UserStatus.INACTIVE) {
             throw new InvalidOtpException("no");
         }
 
@@ -164,7 +164,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUserName(request.getUserName())
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại."));
 
-        if (user.getStatus() != UserStatus.PENDING) {
+        if (user.getStatus() != UserStatus.INACTIVE) {
             throw new InvalidOtpException("no");
         }
 

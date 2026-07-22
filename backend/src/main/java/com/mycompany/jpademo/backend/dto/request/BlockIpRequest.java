@@ -2,6 +2,7 @@ package com.mycompany.jpademo.backend.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,5 +17,6 @@ public class BlockIpRequest {
     private String ipAddress;
 
     @NotBlank(message = "Lý do chặn không được để trống")
+    @Size(min = 5, max = 200, message = "Lý do chặn phải từ 5 đê 200 ký tự")
     private String reason;
 }

@@ -9,6 +9,11 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Response DTO returned to the UI (doctor/patient views) representing
+ * a lab test order together with its current status and, once
+ * completed, the list of measured parameter values.
+ */
 @Data
 @Builder
 public class LabResultResponse {

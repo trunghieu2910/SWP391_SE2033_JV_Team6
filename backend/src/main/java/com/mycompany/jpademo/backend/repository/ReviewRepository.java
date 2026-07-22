@@ -16,6 +16,17 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     Optional<Review> findByDiagnosisSessionSessionId(Integer sessionId);
 
+    /**
+     * Aggregation query backing the Diagnosis Statistics page: groups all
+     * Review records within [startDate, endDate] by disease type and counts
+     * how many reviews fall into each group.
+     * Returns a projection (DiseaseStatItem) rather than full Review
+     * entities, since only the disease name and the count are needed —
+     * avoids loading unnecessary entity data for a pure reporting query.
+     * Results are ordered alphabetically by disease name for stable,
+     * predictable rendering on the statistics page/chart.
+     */
+
     @Query("""
     SELECT r.diseaseType.name AS diseaseName, COUNT(r) AS total
     FROM Review r
