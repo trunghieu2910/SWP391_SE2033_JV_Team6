@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class InitiateCreateDoctorResponse {
+public class InitiateCreateStaffResponse {
     private String requestId;
     private String message;
 }

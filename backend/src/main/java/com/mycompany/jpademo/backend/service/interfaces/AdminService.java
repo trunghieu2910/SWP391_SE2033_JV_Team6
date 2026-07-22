@@ -1,8 +1,8 @@
 package com.mycompany.jpademo.backend.service.interfaces;
 
-import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.InitiateCreateStaffRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
-import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.VerifyPendingStaffRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
@@ -19,9 +19,9 @@ public interface AdminService {
 
     boolean updateUserStatus(UpdateUserStatusRequest request, User admin);
 
-    void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin);
+    void verifyAndCreateStaff(VerifyPendingStaffRequest request, User admin);
 
-    InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin);
+    InitiateCreateStaffResponse initiateCreateStaff(InitiateCreateStaffRequest request, User admin);
 
     DashboardPageResponse getDashboardPageData(LocalDate startDate, LocalDate endDate);
 

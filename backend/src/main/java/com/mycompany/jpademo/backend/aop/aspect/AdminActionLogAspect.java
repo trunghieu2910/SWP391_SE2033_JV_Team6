@@ -5,7 +5,7 @@ import com.mycompany.jpademo.backend.aop.interfaces.LoggableTarget;
 import com.mycompany.jpademo.backend.dto.request.BlockIpRequest;
 import com.mycompany.jpademo.backend.dto.request.UnblockIpRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
-import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.VerifyPendingStaffRequest;
 import com.mycompany.jpademo.backend.entity.SystemLog;
 import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.enums.UserStatus;
@@ -48,7 +48,7 @@ public class AdminActionLogAspect {
                     description = "ADMIN: Chuyển sang không hoạt động. Lý do: " + req.getReason();
                 }
             }
-            if (arg instanceof VerifyPendingDoctorRequest request) {
+            if (arg instanceof VerifyPendingStaffRequest request) {
                 description = "ADMIN: Tạo tài khoản bác sĩ";
             }
             if (arg instanceof BlockIpRequest request) {

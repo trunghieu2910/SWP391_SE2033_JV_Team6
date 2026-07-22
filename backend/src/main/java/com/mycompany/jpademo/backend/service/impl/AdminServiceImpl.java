@@ -1,9 +1,9 @@
 package com.mycompany.jpademo.backend.service.impl;
 
 import com.mycompany.jpademo.backend.aop.annotation.AdminActionLog;
-import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.InitiateCreateStaffRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
-import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.VerifyPendingStaffRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.BlockedIP;
 import com.mycompany.jpademo.backend.entity.Role;
@@ -17,8 +17,8 @@ import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.EmailService;
 import com.mycompany.jpademo.backend.util.EmailUtil;
 import com.mycompany.jpademo.backend.util.OtpUtil;
-import com.mycompany.jpademo.backend.cache.PendingDoctorData;
-import com.mycompany.jpademo.backend.cache.PendingDoctorStore;
+import com.mycompany.jpademo.backend.cache.PendingStaffData;
+import com.mycompany.jpademo.backend.cache.PendingStaffStore;
 import com.mycompany.jpademo.backend.util.SecureFileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -153,13 +153,13 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
-    public void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin) {
+    public void verifyAndCreateStaff(VerifyPendingStaffRequest request, User admin) {
         String otp = request.getOtp();
         String adminEmail = admin.getEmail();
 
-        PendingDoctorData pending = PendingDoctorStore.getPending(request.getRequestId());
+        PendingStaffData pending = PendingStaffStore.getPending(request.getRequestId());
         if (pending == null) {
-            throw new IllegalArgumentException("Không tìm thấy yêu cầu tạo bác sĩ hoặc đã hết hạn.");
+            throw new IllegalArgumentException("Không tìm thấy yêu cầu tạo tài khoản hoặc đã hết hạn.");
         }
 
         if (!pending.getAdminEmail().equals(adminEmail)) {
@@ -172,7 +172,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         OtpUtil.removeOtp(adminEmail);
-        PendingDoctorStore.removePending(pending.getRequestId());
+        PendingStaffStore.removePending(pending.getRequestId());
 
         if (userRepository.existsByEmail(pending.getEmail())) {
             throw new DuplicateResourceException("Tài khoản email đã tồn tại: " + pending.getEmail());
@@ -195,16 +195,16 @@ public class AdminServiceImpl implements AdminService {
         user.setStatus(UserStatus.ACTIVE);
         user.setNationalID(pending.getNationalId());
         user.setCertificateUrl(pending.getCertificateUrl());
-        Role doctorRole = roleRepository.findByRoleName(RoleName.DOCTOR)
-                .orElseThrow(() -> new UserNotFoundException("Không tìm thấy role bác sĩ"));
-        user.setRole(doctorRole);
+        Role role = roleRepository.findByRoleName(RoleName.valueOf(pending.getRoleName()))
+                .orElseThrow(() -> new UserNotFoundException("Không tìm thấy role: " + pending.getRoleName()));
+        user.setRole(role);
         String rawPassword = UUID.randomUUID().toString().substring(0, 8);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         User savedUser = userRepository.save(user);
 
         SystemLog log = SystemLog.builder()
-                .action("CREATE_DOCTOR")
-                .description("ADMIN: Tạo tài khoản bác sĩ: " + savedUser.getFullName() + " (" + savedUser.getUserName() + ")")
+                .action("CREATE_STAFF")
+                .description("ADMIN: Tạo tài khoản: " + savedUser.getFullName() + " (" + savedUser.getUserName() + ")")
                 .targetType("User")
                 .targetId(savedUser.getUserId())
                 .user(admin)
@@ -214,13 +214,13 @@ public class AdminServiceImpl implements AdminService {
 
         emailService.sendEmail(
                 savedUser.getEmail(),
-                "Tài khoản bác sĩ đã được tạo",
-                EmailUtil.buildCreateDoctorAccountTemplate(savedUser.getFullName(), savedUser.getUserName(), rawPassword)
+                "Tài khoản nhân viên đã được tạo",
+                EmailUtil.buildCreateStaffAccountTemplate(savedUser.getFullName(), savedUser.getUserName(), rawPassword)
         );
     }
 
     @Override
-    public InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin) {
+    public InitiateCreateStaffResponse initiateCreateStaff(InitiateCreateStaffRequest request, User admin) {
         String adminEmail = admin.getEmail();
 
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -251,7 +251,7 @@ public class AdminServiceImpl implements AdminService {
             }
         }
 
-        PendingDoctorData pending = PendingDoctorData.builder()
+        PendingStaffData pending = PendingStaffData.builder()
                 .requestId(requestId)
                 .userName(request.getUserName())
                 .fullName(request.getFullName())
@@ -259,19 +259,20 @@ public class AdminServiceImpl implements AdminService {
                 .phoneNumber(request.getPhoneNumber())
                 .nationalId(request.getNationalId())
                 .certificateUrl(certificateStoredFileName)
+                .roleName(request.getRoleName())
                 .build();
-        PendingDoctorStore.savePending(adminEmail, pending);
+        PendingStaffStore.savePending(adminEmail, pending);
 
         String otp = OtpUtil.generateOtp();
         OtpUtil.saveOtp(adminEmail, otp);
 
         emailService.sendEmail(
                 adminEmail,
-                "Mã xác thực OTP tạo tài khoản Bác sĩ",
-                EmailUtil.buildCreateDoctorOtpForAdmin(admin.getFullName(), otp)
+                "Mã xác thực OTP tạo tài khoản nhân viên",
+                EmailUtil.buildCreateStaffOtpForAdmin(admin.getFullName(), otp)
         );
 
-        return InitiateCreateDoctorResponse.builder()
+        return InitiateCreateStaffResponse.builder()
                 .requestId(requestId)
                 .message("OTP đã được gửi đến email " + adminEmail)
                 .build();
@@ -422,10 +423,10 @@ public class AdminServiceImpl implements AdminService {
     public Map<String, Object> resendOtp(String adminEmail) {
         Map<String, Object> response = new HashMap<>();
         try {
-            PendingDoctorData pending = PendingDoctorStore.getPendingByAdminEmail(adminEmail);
+            PendingStaffData pending = PendingStaffStore.getPendingByAdminEmail(adminEmail);
             if (pending == null) {
                 response.put("success", false);
-                response.put("message", "Không tìm thấy yêu cầu tạo bác sĩ đang chờ xử lý.");
+                response.put("message", "Không tìm thấy yêu cầu tạo tài khoản đang chờ xử lý.");
                 return response;
             }
             String otp = OtpUtil.generateOtp();
@@ -436,8 +437,8 @@ public class AdminServiceImpl implements AdminService {
 
             emailService.sendEmail(
                     adminEmail,
-                    "Mã xác thực OTP mới - Tạo tài khoản Bác sĩ",
-                    EmailUtil.buildCreateDoctorOtpForAdmin(admin.getFullName(), otp)
+                    "Mã xác thực OTP mới - Tạo tài khoản nhân viên",
+                    EmailUtil.buildCreateStaffOtpForAdmin(admin.getFullName(), otp)
             );
             response.put("success", true);
             response.put("message", "Đã gửi lại mã OTP mới. Vui lòng kiểm tra email.");

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: main-layout(~{::main}, 'Tạo tài khoản bác sĩ', 'create-doctor')}">
+      th:replace="~{admin/layout :: main-layout(~{::main}, 'Tạo tài khoản bác sĩ', 'create-staff')}">
 <body>
 <main>
-    <link rel="stylesheet" th:href="@{/css/admin/create-doctor.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/create-staff.css}">
 
     <div class="wizard-card">
         <!-- HEADER -->
@@ -52,12 +52,30 @@
                     </ul>
                 </div>
 
-                <form th:action="@{/admin/create-doctor/initiate}"
-                      th:object="${doctorRequest}"
+                <form th:action="@{/admin/create-staff/initiate}"
+                      th:object="${staffRequest}"
                       method="post"
                       enctype="multipart/form-data"
                       class="form-grid"
-                      id="doctorForm">
+                      id="staffForm">
+
+                    <div class="form-row">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label for="roleName">
+                                <i class="fa-solid fa-briefcase"></i> Vai trò
+                                <span class="required">*</span>
+                            </label>
+                            <select id="roleName" th:field="*{roleName}" required class="form-select" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background-color: #fff; font-family: inherit;">
+                                <option value="" disabled selected>-- Chọn vai trò --</option>
+                                <option value="ADMIN">Quản trị viên (Admin)</option>
+                                <option value="DOCTOR">Bác sĩ (Doctor)</option>
+                                <option value="PHARMACIST">Dược sĩ (Pharmacist)</option>
+                                <option value="RECEPTIONIST">Lễ tân (Receptionist)</option>
+                                <option value="TECHNICAL">Kỹ thuật viên hình ảnh (Technical)</option>
+                            </select>
+                            <span class="error-span" th:if="${#fields.hasErrors('roleName')}" th:errors="*{roleName}"></span>
+                        </div>
+                    </div>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -145,7 +163,7 @@
 
                 <!-- ===== KHÔNG CÓ th:if="${error}" Ở ĐÂY ===== -->
 
-                <form th:action="@{/admin/create-doctor/confirm}" method="post" class="otp-box" id="otpForm">
+                <form th:action="@{/admin/create-staff/confirm}" method="post" class="otp-box" id="otpForm">
                     <input type="hidden" name="requestId" th:value="${requestId}">
                     <div class="otp-icon-wrapper">
                         <div class="otp-icon">
@@ -194,7 +212,7 @@
                     </div>
 
                     <div class="otp-actions">
-                        <a th:href="@{/admin/create-doctor}" class="btn-action btn-outline btn-md">
+                        <a th:href="@{/admin/create-staff}" class="btn-action btn-outline btn-md">
                             <i class="fa-solid fa-arrow-left"></i> Nhập lại thông tin
                         </a>
                         <button type="submit" class="btn-action btn-success btn-md" id="confirmBtn">
@@ -206,7 +224,7 @@
         </div>
     </div>
 
-    <script th:src="@{/js/admin/create-doctor.js}"></script>
+    <script th:src="@{/js/admin/create-staff.js}"></script>
 </main>
 </body>
 </html>

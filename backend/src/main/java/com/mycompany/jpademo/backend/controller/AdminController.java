@@ -1,8 +1,8 @@
 package com.mycompany.jpademo.backend.controller;
 
-import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.InitiateCreateStaffRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
-import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
+import com.mycompany.jpademo.backend.dto.request.VerifyPendingStaffRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
@@ -129,14 +129,14 @@ public class AdminController {
         return "redirect:/admin/users/" + id;
     }
 
-    @GetMapping("/create-doctor")
-    public String createDoctorPage(
+    @GetMapping("/create-staff")
+    public String createStaffPage(
             @RequestParam(defaultValue = "1") int step,
             @RequestParam(required = false) Integer remainingTime,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
-        if (!model.containsAttribute("doctorRequest")) {
-            model.addAttribute("doctorRequest", new InitiateCreateDoctorRequest());
+        if (!model.containsAttribute("staffRequest")) {
+            model.addAttribute("staffRequest", new InitiateCreateStaffRequest());
         }
 
         String adminEmail = userDetails.getUser().getEmail();
@@ -150,39 +150,39 @@ public class AdminController {
         model.addAttribute("step", step);
         model.addAttribute("remainingTime", remainingTimeValue);
         model.addAttribute("adminEmail", adminEmail);
-        return "admin/create-doctor";
+        return "admin/create-staff";
     }
 
-    @PostMapping("/create-doctor/initiate")
-    public String initiateCreateDoctor(
-            @Valid @ModelAttribute("doctorRequest") InitiateCreateDoctorRequest request,
+    @PostMapping("/create-staff/initiate")
+    public String initiateCreateStaff(
+            @Valid @ModelAttribute("staffRequest") InitiateCreateStaffRequest request,
             BindingResult result,
             @RequestParam(required = false) MultipartFile certificateFile,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("doctorRequest", request);
+            redirectAttributes.addFlashAttribute("staffRequest", request);
             redirectAttributes.addFlashAttribute("hasErrors", true);
             redirectAttributes.addFlashAttribute("errors", result.getAllErrors());
-            return "redirect:/admin/create-doctor";
+            return "redirect:/admin/create-staff";
         }
         try {
             if (certificateFile != null && !certificateFile.isEmpty()) {
                 request.setCertificateFile(certificateFile);
             }
             User adminUser = userDetails.getUser();
-            InitiateCreateDoctorResponse response = adminService.initiateCreateDoctor(request, adminUser);
+            InitiateCreateStaffResponse response = adminService.initiateCreateStaff(request, adminUser);
             redirectAttributes.addAttribute("requestId", response.getRequestId());
-            return "redirect:/admin/create-doctor/verify";
+            return "redirect:/admin/create-staff/verify";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            redirectAttributes.addFlashAttribute("doctorRequest", request);
-            return "redirect:/admin/create-doctor";
+            redirectAttributes.addFlashAttribute("staffRequest", request);
+            return "redirect:/admin/create-staff";
         }
     }
 
-    @GetMapping("/create-doctor/verify")
-    public String verifyDoctorPage(
+    @GetMapping("/create-staff/verify")
+    public String verifyStaffPage(
             @RequestParam(required = false) String requestId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
@@ -192,28 +192,28 @@ public class AdminController {
         model.addAttribute("requestId", requestId);
         model.addAttribute("remainingTime", remainingTime);
         model.addAttribute("adminEmail", adminEmail);
-        return "admin/create-doctor";
+        return "admin/create-staff";
     }
 
-    @PostMapping("/create-doctor/confirm")
-    public String confirmCreateDoctor(
-            @Valid @ModelAttribute VerifyPendingDoctorRequest request,
+    @PostMapping("/create-staff/confirm")
+    public String confirmCreateStaff(
+            @Valid @ModelAttribute VerifyPendingStaffRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
 
         try {
             User adminUser = userDetails.getUser();
-            adminService.verifyAndCreateDoctor(request, adminUser);
+            adminService.verifyAndCreateStaff(request, adminUser);
             redirectAttributes.addFlashAttribute("success", "Tạo tài khoản bác sĩ thành công!");
             return "redirect:/admin/users";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             redirectAttributes.addAttribute("requestId", request.getRequestId());
-            return "redirect:/admin/create-doctor/verify";
+            return "redirect:/admin/create-staff/verify";
         }
     }
 
-    @PostMapping("/create-doctor/resend-otp")
+    @PostMapping("/create-staff/resend-otp")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> resendOtp(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {

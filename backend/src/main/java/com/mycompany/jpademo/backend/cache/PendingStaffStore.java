@@ -7,8 +7,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
 
-public class PendingDoctorStore {
-    private static final Map<String, PendingDoctorData> STORE = new ConcurrentHashMap<>();
+public class PendingStaffStore {
+    private static final Map<String, PendingStaffData> STORE = new ConcurrentHashMap<>();
     private static final int PENDING_EXPIRE_MINUTES = 10;
 
     public static List<String> cleanupExpiredAndGetOrphanFiles() {
@@ -24,7 +24,7 @@ public class PendingDoctorStore {
         return orphanFiles;
     }
 
-    public static String savePending(String adminEmail, PendingDoctorData data) {
+    public static String savePending(String adminEmail, PendingStaffData data) {
         String id = data.getRequestId();
         if (id == null || id.isBlank()) {
             id = UUID.randomUUID().toString();
@@ -37,8 +37,8 @@ public class PendingDoctorStore {
         return id;
     }
 
-    public static PendingDoctorData getPending(String requestId) {
-        PendingDoctorData data = STORE.get(requestId);
+    public static PendingStaffData getPending(String requestId) {
+        PendingStaffData data = STORE.get(requestId);
         if (data == null) return null;
         if (LocalDateTime.now().isAfter(data.getExpireAt())) {
             STORE.remove(requestId);
@@ -47,8 +47,8 @@ public class PendingDoctorStore {
         return data;
     }
 
-    public static PendingDoctorData getPendingByAdminEmail(String adminEmail) {
-        Optional<PendingDoctorData> opt = STORE.values().stream()
+    public static PendingStaffData getPendingByAdminEmail(String adminEmail) {
+        Optional<PendingStaffData> opt = STORE.values().stream()
                 .filter(d -> adminEmail.equals(d.getAdminEmail()))
                 .filter(d -> LocalDateTime.now().isBefore(d.getExpireAt()))
                 .findFirst();

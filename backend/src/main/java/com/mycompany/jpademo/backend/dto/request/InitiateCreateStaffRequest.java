@@ -12,7 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class InitiateCreateDoctorRequest {
+public class InitiateCreateStaffRequest {
+    @NotBlank(message = "Role is required")
+    private String roleName;
+
     @NotBlank(message = "Username is required!")
     private String userName;
 
