@@ -78,16 +78,6 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             }
             session.setAttribute("originalUrl", originalUrl);
 
-            try {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
-                    CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-                    String role = userDetails.getUser().getRole().getRoleName().name();
-                    session.setAttribute("userRole", role);
-                }
-            } catch (Exception e) {
-            }
-
             requestCache.remove(ipAddress);
 
             String acceptHeader = request.getHeader("Accept");

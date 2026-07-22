@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Provides API endpoints for admin global search operations.
+ */
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class SearchApiController {
 
     private final AdminService adminService;
 
+    /** Performs a global keyword search for admin dashboard data. */
     @GetMapping("/search")
     public ResponseEntity<GlobalSearchResponse> searchGlobal(
             @RequestParam(required = false) String keyword) {

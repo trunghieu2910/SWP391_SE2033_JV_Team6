@@ -43,6 +43,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Service implementation containing business logic for system administrators, managing user accounts, audits, dashboard data, and certificates.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -63,6 +67,7 @@ public class AdminServiceImpl implements AdminService {
 
     private static final int SEARCH_MIN_KEYWORD_LENGTH = 2;
 
+    /** Retrieves a paginated list of users based on search filters. */
     @Override
     public Page<UserResponse> getUser(String keyword, String role, UserStatus status,
                                       LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
@@ -127,6 +132,7 @@ public class AdminServiceImpl implements AdminService {
         return users.map(this::mapToUserResponse);
     }
 
+    /** Updates the status of a specific user. */
     @Override
     @AdminActionLog(action = "UPDATE_USER_STATUS",
             targetType = "User")
@@ -141,16 +147,12 @@ public class AdminServiceImpl implements AdminService {
             throw new BadRequestException("Không thể cập nhật vì người dùng đã ở trạng thái này.");
         }
         user.setStatus(request.getStatus());
-        if (request.getStatus() == UserStatus.BANNED) {
-            user.setStatus(UserStatus.BANNED);
-        } else if (request.getStatus() == UserStatus.ACTIVE){
-            user.setStatus(UserStatus.ACTIVE);
-        }
         userRepository.save(user);
         sendStatusEmail(user, request.getStatus(), request.getReason(), admin);
         return true;
     }
 
+    /** Verifies the OTP and finalizes doctor creation. */
     @Override
     @Transactional
     public void verifyAndCreateDoctor(VerifyPendingDoctorRequest request, User admin) {
@@ -219,6 +221,7 @@ public class AdminServiceImpl implements AdminService {
         );
     }
 
+    /** Initiates the creation of a doctor account by sending an OTP. */
     @Override
     public InitiateCreateDoctorResponse initiateCreateDoctor(InitiateCreateDoctorRequest request, User admin) {
         String adminEmail = admin.getEmail();
@@ -277,6 +280,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Retrieves page data for the admin dashboard. */
     @Override
     public DashboardPageResponse getDashboardPageData(LocalDate startDate, LocalDate endDate) {
         LocalDate[] range = resolveDateRange(startDate, endDate);
@@ -319,6 +323,7 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    /** Retrieves details of a specific user. */
     @Override
     public UserDetailResponse getUserDetail(Integer userId) {
         User user = userRepository.findById(userId)
@@ -330,6 +335,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Retrieves chart statistical data for a given date range. */
     @Override
     public ChartStatsResponse getChartStats(LocalDate startDate, LocalDate endDate) {
         try {
@@ -381,6 +387,7 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    /** Performs a global search across different entities. */
     @Override
     public GlobalSearchResponse searchGlobal(String keyword) {
         Pageable limit = PageRequest.of(0, 5);
@@ -417,6 +424,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Resends the verification OTP code to the admin email. */
     @Override
     public Map<String, Object> resendOtp(String adminEmail) {
         Map<String, Object> response = new HashMap<>();
@@ -447,12 +455,14 @@ public class AdminServiceImpl implements AdminService {
         return response;
     }
 
+    /** Retrieves the current admin user entity. */
     @Override
     public User getAdminUser() {
         return userRepository.findFirstByRoleRoleName(RoleName.ADMIN)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy admin trong hệ thống"));
     }
 
+    /** Retrieves a doctor's certificate resource and metadata. */
     @Override
     public CertificateFileResponse getDoctorCertificate(Integer userId) {
         User doctor = userRepository.findById(userId)
@@ -484,6 +494,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Retrieves all available role names. */
     @Override
     public List<String> getRoleName() {
         List<RoleName> roleNames = List.of(RoleName.values());
@@ -494,6 +505,7 @@ public class AdminServiceImpl implements AdminService {
         return roles;
     }
 
+    /** Retrieves all available user status names. */
     @Override
     public List<String> getUserStatus() {
         List<UserStatus> userStatuses = List.of(UserStatus.values());
@@ -506,6 +518,7 @@ public class AdminServiceImpl implements AdminService {
         return status;
     }
 
+    /** Retrieves user registrations aggregated by month. */
     private List<MonthlyStats> getMonthlyUserRegistrations(LocalDate startDate, LocalDate endDate) {
         try {
             LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
@@ -518,6 +531,7 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    /** Retrieves diagnosis sessions aggregated by month. */
     private List<MonthlyStats> getMonthlyDiagnosisSessions(LocalDate startDate, LocalDate endDate) {
         try {
             LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
@@ -530,6 +544,7 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    /** Maps a user entity to a user search DTO. */
     private UserSearchDTO mapToUserSearchDTO(User user) {
         return UserSearchDTO.builder()
                 .userId(user.getUserId())
@@ -541,6 +556,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Maps a system log entity to a log search DTO. */
     private LogSearchDTO mapToLogSearchDTO(SystemLog log) {
         return LogSearchDTO.builder()
                 .logId(log.getLogId())
@@ -552,6 +568,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Sorts the monthly statistics list in chronological order. */
     private void sortMonthlyStats(List<MonthlyStats> stats) {
         stats.sort((a, b) -> {
             try {
@@ -571,6 +588,7 @@ public class AdminServiceImpl implements AdminService {
         });
     }
 
+    /** Maps database query rows to monthly stats DTO list. */
     private List<MonthlyStats> mapToMonthlyStats(List<Object[]> stats) {
         if (stats == null || stats.isEmpty()) {
             return List.of();
@@ -583,6 +601,7 @@ public class AdminServiceImpl implements AdminService {
                 .collect(Collectors.toList());
     }
 
+    /** Maps a user entity to a user response DTO. */
     private UserResponse mapToUserResponse(User user) {
         return UserResponse.builder()
                 .userId(user.getUserId())
@@ -600,6 +619,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Translates action keys into Vietnamese labels. */
     private String mapActionToVietnamese(String action) {
         switch (action) {
             case "LOGIN": return "Đăng nhập";
@@ -620,6 +640,7 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    /** Maps a system log entity to a log response DTO. */
     private SystemLogResponse mapToLogResponse(SystemLog log) {
         return SystemLogResponse.builder()
                 .logId(log.getLogId())
@@ -631,6 +652,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Maps a blocked IP entity to a security search DTO. */
     private SecuritySearchDTO mapToSecuritySearchDTO(BlockedIP blockedIp) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
@@ -643,6 +665,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     // Helper method để lọc 12 tháng gần nhất
+    /** Filters the monthly stats list to include only the last 12 months. */
     private List<MonthlyStats> filterLast12Months(List<MonthlyStats> data, LocalDate fromDate) {
         if (data == null || data.isEmpty()) {
             return new ArrayList<>();
@@ -670,6 +693,7 @@ public class AdminServiceImpl implements AdminService {
         return filtered;
     }
 
+    /** Sends an email notifying a user of their status update. */
     private void sendStatusEmail(User user, UserStatus userStatus, String reason, User admin) {
         switch (userStatus) {
             case BANNED:
@@ -695,6 +719,7 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    /** Gathers and calculates dashboard summary counts. */
     private DashboardStatsResponse getDashboardStats(LocalDate startDate, LocalDate endDate) {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
         LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
@@ -711,6 +736,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Maps system log list to system log response DTOs. */
     private List<SystemLogResponse> mapToSystemLogResponse(List<SystemLog> systemLog) {
         List<SystemLogResponse> list = new ArrayList<>();
         for (SystemLog s: systemLog) {
@@ -728,6 +754,7 @@ public class AdminServiceImpl implements AdminService {
         return list;
     }
 
+    /** Adjusts and validates starting and ending date ranges. */
     private LocalDate[] resolveDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate == null && endDate == null) {
             return new LocalDate[]{null, null};
@@ -746,6 +773,7 @@ public class AdminServiceImpl implements AdminService {
         return new LocalDate[]{startDate, endDate};
     }
 
+    /** Sanitizes dashboard stats, providing fallback default values if null. */
     private DashboardStatsResponse ensureStatsNotNull(DashboardStatsResponse stats) {
         if (stats != null) {
             return stats;
@@ -759,6 +787,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Sanitizes chart stats, providing fallback default values if null. */
     private ChartStatsResponse ensureChartsNotNull(ChartStatsResponse charts) {
         List<MonthlyStats> userRegistrations = (charts != null && charts.getUserRegistrations() != null)
                 ? charts.getUserRegistrations() : new ArrayList<>();
@@ -770,6 +799,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
+    /** Identifies media type corresponding to certificate file extension. */
     private MediaType resolveSafeMediaType(String storedFileName) {
         String ext = storedFileName.substring(storedFileName.lastIndexOf('.')).toLowerCase();
         return switch (ext) {

@@ -28,6 +28,10 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Service implementation for managing doctor-side diagnosis sessions, handling symptoms, reviews, clinical modes, and medical images.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -67,6 +71,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
             "estrogenTherapy", "Điều trị hormone estrogen kéo dài"
     );
 
+    /** Retrieves doctor diagnosis sessions filtered by keyword, status, and dates. */
     @Override
     @Transactional(readOnly = true)
     public Page<DoctorSessionResponse> getSessionsByDoctor(Integer doctorId,
@@ -111,6 +116,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build());
     }
 
+    /** Updates the status of a specific diagnosis session. */
     @Override
     @Transactional
     @DoctorActionLog(action = "UPDATE_SESSION_STATUS", targetType = "DiagnosisSession")
@@ -145,6 +151,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         sessionRepository.save(session);
     }
 
+    /** Updates the sharing configuration of a diagnosis session. */
     @Override
     @Transactional
     @DoctorActionLog(action = "UPDATE_SESSION_SHARE", targetType = "DiagnosisSession")
@@ -165,6 +172,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         sessionRepository.save(session);
     }
 
+    /** Retrieves all symptoms recorded for a specific diagnosis session. */
     @Override
     @Transactional(readOnly = true)
     public List<SymptomResponse> getSessionSymptoms(Integer sessionId, Integer doctorId) {
@@ -195,6 +203,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .collect(Collectors.toList());
     }
 
+    /** Saves or updates clinical symptoms associated with a diagnosis session. */
     @Override
     @Transactional
     public void updateClinicalSymptoms(Integer doctorId, Integer sessionId, UpdateClinicalSymptomsRequest request) {
@@ -286,6 +295,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         }
     }
 
+    /** Configures clinical input mode for symptom selection. */
     @Override
     @Transactional
     public void setClinicalInputMode(Integer doctorId, Integer sessionId, ClinicalInputMode clinicalInputMode) {
@@ -304,6 +314,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         sessionRepository.save(session);
     }
 
+    /** Retrieves detailed session overview, patient data, and logs for a doctor. */
     @Override
     @Transactional(readOnly = true)
     public DoctorSessionDetailResponse getSessionDetail(Integer sessionId, Integer doctorId) {
@@ -325,6 +336,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages, review);
     }
 
+    /** Saves the final review diagnosis and conclusions for a session. */
     @Override
     @Transactional
     public void saveReview(Integer doctorId, Integer sessionId, CreateReviewRequest request) {
@@ -377,6 +389,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         reviewRepository.save(review);
     }
 
+    /** Extracts checked symptom names from request maps. */
     private void collectSelectedSymptomNames(Map<String, Boolean> source,
                                              Map<String, String> keyToSymptomName,
                                              Set<String> target) {
@@ -388,6 +401,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         });
     }
 
+    /** Maps session components into a detailed session response DTO. */
     private DoctorSessionDetailResponse mapToDoctorSessionDetailResponse(
             DiagnosisSession session,
             Patient patient,
@@ -464,6 +478,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build();
     }
 
+    /** Maps medical image entity to DTO response. */
     private MedicalImageResponse mapToMedicalImageResponse(MedicalImage medicalImage) {
         List<MedicalImageDetailResponse> details = medicalImage.getMedicalImageDetailsList().stream()
                 .map(detail -> MedicalImageDetailResponse.builder()
@@ -483,6 +498,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build();
     }
 
+    /** Maps lab result entity to DTO response. */
     private LabResultResponse mapToLabResultResponse(LabResult labResult) {
         List<LabResultResponse.ParameterValueResponse> parameters = labResult.getLabResultParameters().stream()
                 .map(lrp -> LabResultResponse.ParameterValueResponse.builder()
@@ -504,6 +520,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build();
     }
 
+    /** Deletes an imaging order from a diagnosis session. */
     @Override
     @Transactional
     public void deleteMedicalImage(Integer doctorId, Integer sessionId, Integer imageId) {
@@ -528,6 +545,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         medicalImageRepository.delete(image);
     }
 
+    /** Generates a new medical imaging order for a session. */
     @Override
     @Transactional
     public void createMedicalImage(Integer doctorId, Integer sessionId, String imageType) {

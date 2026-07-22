@@ -30,6 +30,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Service implementation for system security auditing, monitoring IP traffic, and blocking malicious IPs.
+ */
 @Service
 @RequiredArgsConstructor
 public class SecurityServiceImpl implements SecurityService {
@@ -39,6 +43,7 @@ public class SecurityServiceImpl implements SecurityService {
     private final HttpServletRequest httpServletRequest;
     private final ClientIpResolver clientIpResolver;
 
+    /** Retrieves aggregated security stats for request limits. */
     @Override
     public SecurityStatsResponse getStats(LocalDateTime startDate, LocalDateTime endDate) {
         long totalRequests = requestLogRepository.countWithDateFilter(startDate, endDate);
@@ -62,6 +67,7 @@ public class SecurityServiceImpl implements SecurityService {
                 .build();
     }
 
+    /** Retrieves the most active IP addresses by request count. */
     @Override
     public List<IpRequestStats> getTopIps(int limit, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(0, limit);
@@ -71,6 +77,7 @@ public class SecurityServiceImpl implements SecurityService {
         return requestLogRepository.findTopIps(pageable);
     }
 
+    /** Retrieves the most accessed endpoints by request count. */
     @Override
     public List<EndpointRequestStats> getTopEndpoints(int limit, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(0, limit);
@@ -80,6 +87,7 @@ public class SecurityServiceImpl implements SecurityService {
         return requestLogRepository.findTopEndpoints(pageable);
     }
 
+    /** Retrieves a list of all currently blocked IP addresses. */
     @Override
     public List<BlockedIP> getBlockedIps(LocalDateTime startDate, LocalDateTime endDate) {
         if (startDate == null || endDate == null) {
@@ -88,6 +96,7 @@ public class SecurityServiceImpl implements SecurityService {
         return blockedIPRepository.findByCreatedAtBetween(startDate, endDate);
     }
 
+    /** Blocks a specific IP address based on an administrator's decision. */
     @Override
     @Transactional
     @AdminActionLog(action = "BLOCKED_IP", targetType = "BlockedIP")
@@ -117,6 +126,7 @@ public class SecurityServiceImpl implements SecurityService {
         eventPublisher.publishEvent(new BlockedIpChangeEvent(request.getIpAddress(), true));
     }
 
+    /** Unblocks a previously blocked IP address. */
     @Override
     @AdminActionLog(action = "UNBLOCKED_IP", targetType = "BlockedIP")
     public void unblockIp(UnblockIpRequest request, User admin) {
