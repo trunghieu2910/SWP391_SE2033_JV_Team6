@@ -5,10 +5,10 @@ GO
 -- 1. LÀM SẠCH DATABASE CŨ (NẾU CÓ)
 -- =============================================
 IF EXISTS (SELECT * FROM sys.databases WHERE name = 'MedicalDiagnosisDB')
-BEGIN
-    ALTER DATABASE MedicalDiagnosisDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE MedicalDiagnosisDB;
-END
+    BEGIN
+        ALTER DATABASE MedicalDiagnosisDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+        DROP DATABASE MedicalDiagnosisDB;
+    END
 GO
 
 -- Tạo Database
@@ -38,7 +38,7 @@ CREATE TABLE [Users]
     certificateUrl VARCHAR(255),
     status       VARCHAR(20), -- ACTIVE , PENDING , BLOCKED
     lastChangePassTime DATETIME,
-	lastLogoutTime DATETIME,
+    lastLogoutTime DATETIME,
     createdAt    DATETIME     DEFAULT GETDATE(),
     nationalID   CHAR(12),
     FOREIGN KEY (roleID) REFERENCES Role (roleID)
@@ -114,7 +114,7 @@ CREATE TABLE SymptomResult
 CREATE TABLE SymptomDetails
 (
     symptomDetailsID INT IDENTITY (1,1) PRIMARY KEY,
-    symptomResultID  INT NOT NULL, 
+    symptomResultID  INT NOT NULL,
     symptomID        INT NOT NULL,
     createdAt        DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (symptomResultID) REFERENCES SymptomResult (symptomResultID),
@@ -129,14 +129,14 @@ CREATE TABLE LabResult
     labResultID INT IDENTITY (1,1) PRIMARY KEY,
     sessionID   INT NOT NULL,
     testType    NVARCHAR(100),
-    status      NVARCHAR(50) default 'PENDING', 
+    status      NVARCHAR(50) default 'PENDING',
     createdAt   DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (sessionID) REFERENCES DiagnosisSession (sessionID)
 );
 
 -- 1. Thêm giá cho Phiếu Xét nghiệm (LabResult)
 ALTER TABLE LabResult
-ADD price DECIMAL(18,2) NOT NULL DEFAULT 0;
+    ADD price DECIMAL(18,2) NOT NULL DEFAULT 0;
 
 
 CREATE TABLE LabResultParameter
@@ -154,14 +154,14 @@ CREATE TABLE MedicalImage
     medicalImageID INT IDENTITY (1,1) PRIMARY KEY,
     sessionID      INT NOT NULL,
     imageType      NVARCHAR(50),
-    status         NVARCHAR(50) DEFAULT 'PENDING', 
+    status         NVARCHAR(50) DEFAULT 'PENDING',
     createdAt      DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (sessionID) REFERENCES DiagnosisSession (sessionID)
 );
 
 -- 2. Thêm giá cho Phiếu Siêu âm / Chụp chiếu (MedicalImage)
 ALTER TABLE MedicalImage
-ADD price DECIMAL(18,2) NOT NULL DEFAULT 0;
+    ADD price DECIMAL(18,2) NOT NULL DEFAULT 0;
 
 CREATE TABLE MedicalImageDetails
 (
@@ -170,6 +170,8 @@ CREATE TABLE MedicalImageDetails
     imageUrl       NVARCHAR(255) NOT NULL,
     aiImageUrl     NVARCHAR(255) NULL,
     confidenceScore FLOAT NULL,
+    technicalConclusion NVARCHAR(MAX) NULL,
+    imgResultConclusion NVARCHAR(255) NULL,
     uploadedAt     DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (medicalImageID) REFERENCES MedicalImage (medicalImageID)
 );
@@ -178,17 +180,17 @@ CREATE TABLE MedicalImageDetails
 -- 4. REVIEW BÁC SĨ
 -- ==========================================
 CREATE TABLE DiseaseType (
-    diseaseTypeID INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(255) NOT NULL,
+                             diseaseTypeID INT IDENTITY(1,1) PRIMARY KEY,
+                             name NVARCHAR(255) NOT NULL,
 
-    CONSTRAINT UQ_DiseaseType_Name UNIQUE (name)
+                             CONSTRAINT UQ_DiseaseType_Name UNIQUE (name)
 );
 
 CREATE TABLE Review
 (
     reviewID       INT IDENTITY (1,1) PRIMARY KEY,
     sessionID      INT UNIQUE NOT NULL,
-    userID         INT        NOT NULL, 
+    userID         INT        NOT NULL,
     diseaseTypeID  INT		  NULL,
     treatmentPlan  NVARCHAR(MAX),
     doctorAdvice   NVARCHAR(MAX),
@@ -196,7 +198,7 @@ CREATE TABLE Review
     reviewedAt     DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (sessionID) REFERENCES DiagnosisSession (sessionID),
     FOREIGN KEY (userID) REFERENCES [Users] (userID),
-	FOREIGN KEY (diseaseTypeID) REFERENCES DiseaseType(diseaseTypeID)
+    FOREIGN KEY (diseaseTypeID) REFERENCES DiseaseType(diseaseTypeID)
 );
 
 -- ==========================================
@@ -206,8 +208,8 @@ CREATE TABLE SystemLog
 (
     logID       INT IDENTITY (1,1) PRIMARY KEY,
     userID      INT,
-    targetType  VARCHAR(50), 
-    targetID    INT, 
+    targetType  VARCHAR(50),
+    targetID    INT,
     action      VARCHAR(50),
     description NVARCHAR(MAX),
     performedAt DATETIME DEFAULT GETDATE(),
@@ -217,21 +219,21 @@ GO
 
 -- 1. Bảng lưu IP bị chặn
 CREATE TABLE BlockedIP (
-    ipAddress VARCHAR(45) NOT NULL PRIMARY KEY,
-    reason NVARCHAR(255) NULL,
-    createdAt DATETIME NOT NULL DEFAULT GETDATE(),
-    createdBy NVARCHAR(100) NULL
+                           ipAddress VARCHAR(45) NOT NULL PRIMARY KEY,
+                           reason NVARCHAR(255) NULL,
+                           createdAt DATETIME NOT NULL DEFAULT GETDATE(),
+                           createdBy NVARCHAR(100) NULL
 );
 GO
 
 -- 2. Bảng lưu nhật ký truy cập
 CREATE TABLE RequestLog (
-    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    ipAddress VARCHAR(45) NOT NULL,
-    uri VARCHAR(255) NOT NULL,
-    method VARCHAR(10) NOT NULL,
-    userAgent VARCHAR(500) NULL,
-    [timestamp] DATETIME NOT NULL DEFAULT GETDATE()
+                            id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                            ipAddress VARCHAR(45) NOT NULL,
+                            uri VARCHAR(255) NOT NULL,
+                            method VARCHAR(10) NOT NULL,
+                            userAgent VARCHAR(500) NULL,
+                            [timestamp] DATETIME NOT NULL DEFAULT GETDATE()
 );
 GO
 
@@ -241,33 +243,33 @@ GO
 
 -- ROLE
 INSERT INTO [Role] (roleName)
-VALUES (N'ADMIN'), (N'DOCTOR'), (N'AITRAINER'), (N'PATIENT'), (N'RECEPTIONIST'),(N'PHARMACIST');
+VALUES (N'ADMIN'), (N'DOCTOR'), (N'TECHNICAL'), (N'PATIENT'), (N'RECEPTIONIST'),(N'PHARMACIST');
 
 -- USERS
 INSERT INTO [Users]
 (roleID, username, fullName, email, passwordHash, phoneNumber, status, lastChangePassTime, nationalID)
 VALUES
-(4, 'patient_nam', N'Phạm Thùy Linh', 'ntpl2404@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445466', 'ACTIVE', GETDATE(), '043678901234'),
-(1, 'admin_system', N'Quản trị viên', 'luugiang205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0999999999', 'ACTIVE', GETDATE(), '001234567890'),
-(2, 'dr_nguyen', N'Bác sĩ Nguyễn Văn Tùng', 'likey2404@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0912345678', 'ACTIVE', GETDATE(), '012345678901'),
-(2, 'dr_tran', N'Bác sĩ Trần Thị Mai', 'mai.tran@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0987654321', 'ACTIVE', GETDATE(), '023456789012'),
-(4, 'patient_hoang', N'Lê Minh Hoàng', 'hoang.le@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0901112233', 'ACTIVE', GETDATE(), '034567890123'),
-(4, 'patient_linh', N'Phạm Thùy Linh', 'linh.pham@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445566', 'ACTIVE', GETDATE(), '045678901234'),
-(4, 'patient_huong', N'Nguyễn Thu Hương', 'huong.nguyen@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0905556677', 'ACTIVE', GETDATE(), '056789012345'),
-(4, 'patient_lan', N'Trần Thị Lan', 'lan.tran@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0906667788', 'PENDING', GETDATE(), '067890123456'),
-(4, 'patient_my', N'Đỗ Thanh Mỹ', 'my.do@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907778899', 'BANNED', GETDATE(), '078901234567'),
-(5, 'rp_linh', N'Nguyễn Thị Huyền Linh', 'LinhNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887776', 'ACTIVE', GETDATE(), '098765432109'),
-(5, 'rp_ly', N'Nguyễn Thị Ly', 'LyNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887676', 'ACTIVE', GETDATE(), '098765432009'),
-(5, 'rp_hong', N'Hong Hae In', 'HongHaeIn@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887775', 'ACTIVE', GETDATE(), '098765032109');
+    (4, 'patient_nam', N'Phạm Thùy Linh', 'ntpl2404@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445466', 'ACTIVE', GETDATE(), '043678901234'),
+    (1, 'admin_system', N'Quản trị viên', 'luugiang205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0999999999', 'ACTIVE', GETDATE(), '001234567890'),
+    (2, 'dr_nguyen', N'Bác sĩ Nguyễn Văn Tùng', 'likey2404@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0912345678', 'ACTIVE', GETDATE(), '012345678901'),
+    (2, 'dr_tran', N'Bác sĩ Trần Thị Mai', 'mai.tran@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0987654321', 'ACTIVE', GETDATE(), '023456789012'),
+    (4, 'patient_hoang', N'Lê Minh Hoàng', 'hoang.le@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0901112233', 'ACTIVE', GETDATE(), '034567890123'),
+    (4, 'patient_linh', N'Phạm Thùy Linh', 'linh.pham@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445566', 'ACTIVE', GETDATE(), '045678901234'),
+    (4, 'patient_huong', N'Nguyễn Thu Hương', 'huong.nguyen@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0905556677', 'ACTIVE', GETDATE(), '056789012345'),
+    (4, 'patient_lan', N'Trần Thị Lan', 'lan.tran@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0906667788', 'ACTIVE', GETDATE(), '067890123456'),
+    (4, 'patient_my', N'Đỗ Thanh Mỹ', 'my.do@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907778899', 'BANNED', GETDATE(), '078901234567'),
+    (5, 'rp_linh', N'Nguyễn Thị Huyền Linh', 'LinhNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887776', 'ACTIVE', GETDATE(), '098765432109'),
+    (5, 'rp_ly', N'Nguyễn Thị Ly', 'LyNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887676', 'ACTIVE', GETDATE(), '098765432009'),
+    (5, 'rp_hong', N'Hong Hae In', 'HongHaeIn@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887775', 'ACTIVE', GETDATE(), '098765032109');
 
 -- PATIENT (Sửa lại trường liên kết userID cho đúng logic phân quyền)
 INSERT INTO Patient (gender, dob, address, userID)
 VALUES
-(N'Male', '1995-08-15', N'Cầu Giấy, Hà Nội', 1),
-(N'Female', '2001-02-20', N'Thanh Xuân, Hà Nội', 6),
-(N'Female', '1988-06-12', N'Ba Đình, Hà Nội', 7),
-(N'Female', '1975-11-25', N'Đống Đa, Hà Nội', 8),
-(N'Female', '1992-09-08', N'Hoàng Mai, Hà Nội', 9);
+    (N'Male', '1995-08-15', N'Cầu Giấy, Hà Nội', 1),
+    (N'Female', '2001-02-20', N'Thanh Xuân, Hà Nội', 6),
+    (N'Female', '1988-06-12', N'Ba Đình, Hà Nội', 7),
+    (N'Female', '1975-11-25', N'Đống Đa, Hà Nội', 8),
+    (N'Female', '1992-09-08', N'Hoàng Mai, Hà Nội', 9);
 
 -- CHUẨN HÓA SYMPTOM: Đã lọc bỏ toàn bộ các ô trắc nghiệm đơn để chuyển sang bảng SymptomResult
 INSERT INTO Symptom (symptomName) VALUES
@@ -293,27 +295,27 @@ VALUES (N'Hồng cầu (RBC)', 'T/L'), (N'Bạch cầu (WBC)', 'G/L'), (N'Đư�
 -- DiagnosisSession
 INSERT INTO DiagnosisSession (userID, patientID, weight, height, status, isShared)
 VALUES
-(3,1,52,155,N'COMPLETED',0),
-(4,2,58,160,N'COMPLETED',1),
-(3,3,61,158,N'PENDING',0),
-(4,4,49,152,N'COMPLETED',0),
-(3,5,67,162,N'PENDING',0);
+    (3,1,52,155,N'COMPLETED',0),
+    (4,2,58,160,N'COMPLETED',1),
+    (3,3,61,158,N'PENDING',0),
+    (4,4,49,152,N'COMPLETED',0),
+    (3,5,67,162,N'PENDING',0);
 
 -- CẬP NHẬT: Thêm dữ liệu mẫu trực tiếp vào 3 cột mới ứng với cấu trúc form
 INSERT INTO SymptomResult (sessionID, status, menopauseStatus, symptomDuration, symptomProgressing) VALUES
-(1, N'COMPLETED', N'Chưa mãn kinh', N'Dưới 1 tháng', 0),
-(2, N'COMPLETED', N'Chưa mãn kinh', N'1-3 tháng', 1),
-(3, N'PENDING',   N'Đã mãn kinh',   N'3-6 tháng', 1),
-(4, N'COMPLETED', N'Chưa mãn kinh', N'Dưới 1 tháng', 0),
-(5, N'PENDING',   N'Đã mãn kinh',   N'Trên 6 tháng', 1);
+                                                                                                        (1, N'COMPLETED', N'Chưa mãn kinh', N'Dưới 1 tháng', 0),
+                                                                                                        (2, N'COMPLETED', N'Chưa mãn kinh', N'1-3 tháng', 1),
+                                                                                                        (3, N'PENDING',   N'Đã mãn kinh',   N'3-6 tháng', 1),
+                                                                                                        (4, N'COMPLETED', N'Chưa mãn kinh', N'Dưới 1 tháng', 0),
+                                                                                                        (5, N'PENDING',   N'Đã mãn kinh',   N'Trên 6 tháng', 1);
 
 -- CẬP NHẬT: Định vị lại chính xác ID triệu chứng sau khi bảng Symptom thu gọn dữ liệu
 INSERT INTO SymptomDetails (symptomResultID, symptomID) VALUES
-(1,2),(1,4),(1,10),(1,15),          -- Phiên 1: Kinh nguyệt kéo dài, Ra máu sau mãn kinh, Đau vùng chậu...
-(2,1),(2,3),(2,7),(2,11),(2,16),     -- Phiên 2: Ra máu giữa kỳ, Rong kinh, Khí hư có mùi hôi...
-(3,2),(3,8),(3,12),(3,14),(3,25),    -- Phiên 3: Kinh nguyệt kéo dài, Dịch tiết màu nâu, Đau bụng dưới...
-(4,1),(4,4),(4,8),(4,11),(4,22),     -- Phiên 4: Ra máu giữa kỳ, Ra máu sau mãn kinh...
-(5,2),(5,4),(5,10),(5,15),(5,26);    -- Phiên 5: Kinh nguyệt kéo dài, Ra máu sau mãn kinh...
+                                                            (1,2),(1,4),(1,10),(1,15),          -- Phiên 1: Kinh nguyệt kéo dài, Ra máu sau mãn kinh, Đau vùng chậu...
+                                                            (2,1),(2,3),(2,7),(2,11),(2,16),     -- Phiên 2: Ra máu giữa kỳ, Rong kinh, Khí hư có mùi hôi...
+                                                            (3,2),(3,8),(3,12),(3,14),(3,25),    -- Phiên 3: Kinh nguyệt kéo dài, Dịch tiết màu nâu, Đau bụng dưới...
+                                                            (4,1),(4,4),(4,8),(4,11),(4,22),     -- Phiên 4: Ra máu giữa kỳ, Ra máu sau mãn kinh...
+                                                            (5,2),(5,4),(5,10),(5,15),(5,26);    -- Phiên 5: Kinh nguyệt kéo dài, Ra máu sau mãn kinh...
 
 -- LabResult
 INSERT INTO LabResult (sessionID, testType, price, status)
@@ -324,8 +326,8 @@ VALUES
 -- LabResultParameter
 INSERT INTO LabResultParameter (labResultID, parameterID, value)
 VALUES
-    (1, 1, '4.8'), 
-    (1, 2, '8.5'); 
+    (1, 1, '4.8'),
+    (1, 2, '8.5');
 
 -- MedicalImage
 INSERT INTO MedicalImage (sessionID, imageType, price, status)
@@ -339,14 +341,14 @@ VALUES
     (1, 'https://storage.hospital.com/xray/2026/session1_lung.jpg');
 
 INSERT INTO DiseaseType (name) VALUES
-(N'Bình thường / Không phát hiện bất thường'),
-(N'Viêm cổ tử cung'),
-(N'Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1)'),
-(N'Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3)'),
-(N'Ung thư biểu mô tại chỗ (CIS)'),
-(N'Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II)'),
-(N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)'),
-(N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận');
+                                   (N'Bình thường / Không phát hiện bất thường'),
+                                   (N'Viêm cổ tử cung'),
+                                   (N'Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1)'),
+                                   (N'Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3)'),
+                                   (N'Ung thư biểu mô tại chỗ (CIS)'),
+                                   (N'Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II)'),
+                                   (N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)'),
+                                   (N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận');
 
 -- Review
 INSERT INTO Review (sessionID, userID, treatmentPlan, doctorAdvice, note)
@@ -362,18 +364,18 @@ GO
 
 select * from Users
 
-SELECT 
+SELECT
     tc.constraint_name,
     tc.table_name,
     kc.column_name
-FROM 
+FROM
     information_schema.table_constraints tc
-JOIN 
-    information_schema.key_column_usage kc 
+        JOIN
+    information_schema.key_column_usage kc
     ON tc.constraint_name = kc.constraint_name
-WHERE 
+WHERE
     tc.constraint_type = 'UNIQUE'
-    AND tc.table_name = 'Users';
+  AND tc.table_name = 'Users';
 
 
 
@@ -395,193 +397,193 @@ GO
 
 -- 2.1. Nhóm thuốc cấp 1
 CREATE TABLE DrugCategory (
-    categoryID INT IDENTITY(1,1) PRIMARY KEY,
-    categoryName NVARCHAR(100) NOT NULL UNIQUE,
-    description NVARCHAR(500),
-    createdAt DATETIME DEFAULT GETDATE()
+                              categoryID INT IDENTITY(1,1) PRIMARY KEY,
+                              categoryName NVARCHAR(100) NOT NULL UNIQUE,
+                              description NVARCHAR(500),
+                              createdAt DATETIME DEFAULT GETDATE()
 );
 
 -- 2.2. Nhóm thuốc cấp 2 (Chi tiết)
 CREATE TABLE DrugSubCategory (
-    subCategoryID INT IDENTITY(1,1) PRIMARY KEY,
-    categoryID INT NOT NULL,
-    subCategoryName NVARCHAR(100) NOT NULL UNIQUE,
-    priorityLevel TINYINT DEFAULT 2, -- 1: Cao, 2: Trung bình, 3: Thấp
-    requireSpecialPrescription BIT DEFAULT 0, -- 1: Chỉ BS chuyên khoa, 0: BS đa khoa
-    description NVARCHAR(500),
-    createdAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (categoryID) REFERENCES DrugCategory(categoryID)
+                                 subCategoryID INT IDENTITY(1,1) PRIMARY KEY,
+                                 categoryID INT NOT NULL,
+                                 subCategoryName NVARCHAR(100) NOT NULL UNIQUE,
+                                 priorityLevel TINYINT DEFAULT 2, -- 1: Cao, 2: Trung bình, 3: Thấp
+                                 requireSpecialPrescription BIT DEFAULT 0, -- 1: Chỉ BS chuyên khoa, 0: BS đa khoa
+                                 description NVARCHAR(500),
+                                 createdAt DATETIME DEFAULT GETDATE(),
+                                 FOREIGN KEY (categoryID) REFERENCES DrugCategory(categoryID)
 );
 
 -- 2.3. Đơn vị tính
 CREATE TABLE Unit (
-    unitID INT IDENTITY(1,1) PRIMARY KEY,
-    unitName VARCHAR(20) NOT NULL UNIQUE,
-    description NVARCHAR(100)
+                      unitID INT IDENTITY(1,1) PRIMARY KEY,
+                      unitName VARCHAR(20) NOT NULL UNIQUE,
+                      description NVARCHAR(100)
 );
 
 -- 2.4. Danh mục thuốc
 CREATE TABLE Drug (
 
-    drugID INT IDENTITY(1,1) PRIMARY KEY,
-	drugCode VARCHAR(20) NOT NULL UNIQUE,
-	drugName NVARCHAR(200) NOT NULL,
-	strength VARCHAR(50) NULL,
-	strengthUnit VARCHAR(10) NULL,
-	dosageForm NVARCHAR(50) NOT NULL,
-	routeOfAdministration NVARCHAR(50) NOT NULL,
-	subCategoryID INT NOT NULL,
-	baseUnitID INT NOT NULL,  -- THÊM CỘT NÀY: Để biết thuốc này khi kê đơn lẻ thì dùng đơn vị gốc nào (VIÊN/ỐNG/ml)
-	packaging NVARCHAR(100),
-	manufacturer NVARCHAR(100),
-	countryOfOrigin NVARCHAR(50),
-	storageCondition NVARCHAR(200),
-	shelfLifeMonths INT DEFAULT 24,
-	sellingPrice DECIMAL(18,2) DEFAULT 0, -- Chuyển luôn lệnh ALTER vào đây cho sạch code
-	notes NVARCHAR(500),
-	status TINYINT DEFAULT 1,
-	createdAt DATETIME DEFAULT GETDATE(),
-	createdBy INT,
-	FOREIGN KEY (subCategoryID) REFERENCES DrugSubCategory(subCategoryID),
-	FOREIGN KEY (createdBy) REFERENCES [Users](userID),
-	FOREIGN KEY (baseUnitID) REFERENCES Unit(unitID) -- Khóa ngoại liên kết bảng Unit
+                      drugID INT IDENTITY(1,1) PRIMARY KEY,
+                      drugCode VARCHAR(20) NOT NULL UNIQUE,
+                      drugName NVARCHAR(200) NOT NULL,
+                      strength VARCHAR(50) NULL,
+                      strengthUnit VARCHAR(10) NULL,
+                      dosageForm NVARCHAR(50) NOT NULL,
+                      routeOfAdministration NVARCHAR(50) NOT NULL,
+                      subCategoryID INT NOT NULL,
+                      baseUnitID INT NOT NULL,  -- THÊM CỘT NÀY: Để biết thuốc này khi kê đơn lẻ thì dùng đơn vị gốc nào (VIÊN/ỐNG/ml)
+                      packaging NVARCHAR(100),
+                      manufacturer NVARCHAR(100),
+                      countryOfOrigin NVARCHAR(50),
+                      storageCondition NVARCHAR(200),
+                      shelfLifeMonths INT DEFAULT 24,
+                      sellingPrice DECIMAL(18,2) DEFAULT 0, -- Chuyển luôn lệnh ALTER vào đây cho sạch code
+                      notes NVARCHAR(500),
+                      status TINYINT DEFAULT 1,
+                      createdAt DATETIME DEFAULT GETDATE(),
+                      createdBy INT,
+                      FOREIGN KEY (subCategoryID) REFERENCES DrugSubCategory(subCategoryID),
+                      FOREIGN KEY (createdBy) REFERENCES [Users](userID),
+                      FOREIGN KEY (baseUnitID) REFERENCES Unit(unitID) -- Khóa ngoại liên kết bảng Unit
 );
 
 -- 2.5. Quy đổi đơn vị (Nhập theo LỌ/VỈ, Xuất theo VIÊN/ml)
 CREATE TABLE UnitConversion (
-    conversionID INT IDENTITY(1,1) PRIMARY KEY,
-    drugID INT NOT NULL,
-    largeUnitID INT NOT NULL,      -- Đơn vị lớn dùng để nhập (HỘP, LỌ)
-    smallUnitID INT NOT NULL,      -- Đơn vị nhỏ dùng để xuất (VIÊN, ỐNG). Cột này bắt buộc phải trùng với baseUnitID của bảng Drug.
-    conversionQuantity INT NOT NULL, -- Hệ số quy đổi: 1 đơn vị lớn = bao nhiêu đơn vị nhỏ
-    createdAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (drugID) REFERENCES Drug(drugID),
-    FOREIGN KEY (largeUnitID) REFERENCES Unit(unitID),
-    FOREIGN KEY (smallUnitID) REFERENCES Unit(unitID),
-    CONSTRAINT UQ_Drug_LargeUnit UNIQUE (drugID, largeUnitID) -- Đảm bảo một thuốc với một đơn vị lớn chỉ có 1 công thức quy đổi
+                                conversionID INT IDENTITY(1,1) PRIMARY KEY,
+                                drugID INT NOT NULL,
+                                largeUnitID INT NOT NULL,      -- Đơn vị lớn dùng để nhập (HỘP, LỌ)
+                                smallUnitID INT NOT NULL,      -- Đơn vị nhỏ dùng để xuất (VIÊN, ỐNG). Cột này bắt buộc phải trùng với baseUnitID của bảng Drug.
+                                conversionQuantity INT NOT NULL, -- Hệ số quy đổi: 1 đơn vị lớn = bao nhiêu đơn vị nhỏ
+                                createdAt DATETIME DEFAULT GETDATE(),
+                                FOREIGN KEY (drugID) REFERENCES Drug(drugID),
+                                FOREIGN KEY (largeUnitID) REFERENCES Unit(unitID),
+                                FOREIGN KEY (smallUnitID) REFERENCES Unit(unitID),
+                                CONSTRAINT UQ_Drug_LargeUnit UNIQUE (drugID, largeUnitID) -- Đảm bảo một thuốc với một đơn vị lớn chỉ có 1 công thức quy đổi
 );
 
 -- 2.6. Lô hàng nhập kho
 CREATE TABLE DrugBatch (
-    batchID INT IDENTITY(1,1) PRIMARY KEY,
-    drugID INT NOT NULL,
-    batchNumber VARCHAR(50) NOT NULL,
-    manufactureDate DATE NOT NULL,
-    expiryDate DATE NOT NULL,
+                           batchID INT IDENTITY(1,1) PRIMARY KEY,
+                           drugID INT NOT NULL,
+                           batchNumber VARCHAR(50) NOT NULL,
+                           manufactureDate DATE NOT NULL,
+                           expiryDate DATE NOT NULL,
 
     -- LƯU Ý: unitID ở đây chính là Đơn vị lớn khi nhập (HỘP/LỌ).
     -- Hệ thống sẽ lấy cặp (drugID, unitID) này đối chiếu sang bảng UnitConversion để tìm ra conversionQuantity.
-    unitID INT NOT NULL,
-    quantity INT NOT NULL, -- Số lượng nhập theo Đơn vị lớn (Ví dụ: 50 hộp)
-    importPrice DECIMAL(18,2) DEFAULT 0,
-    supplier NVARCHAR(200),
-    importDate DATETIME DEFAULT GETDATE(),
-    importedBy INT NOT NULL,
-    notes NVARCHAR(500),
-    FOREIGN KEY (drugID) REFERENCES Drug(drugID),
-    FOREIGN KEY (unitID) REFERENCES Unit(unitID),
-    FOREIGN KEY (importedBy) REFERENCES [Users](userID),
-    UNIQUE (batchNumber, drugID)
+                           unitID INT NOT NULL,
+                           quantity INT NOT NULL, -- Số lượng nhập theo Đơn vị lớn (Ví dụ: 50 hộp)
+                           importPrice DECIMAL(18,2) DEFAULT 0,
+                           supplier NVARCHAR(200),
+                           importDate DATETIME DEFAULT GETDATE(),
+                           importedBy INT NOT NULL,
+                           notes NVARCHAR(500),
+                           FOREIGN KEY (drugID) REFERENCES Drug(drugID),
+                           FOREIGN KEY (unitID) REFERENCES Unit(unitID),
+                           FOREIGN KEY (importedBy) REFERENCES [Users](userID),
+                           UNIQUE (batchNumber, drugID)
 );
 
 -- 2.7. Tồn kho chi tiết (Tính theo đơn vị nhỏ nhất)
 CREATE TABLE Inventory (
-    inventoryID INT IDENTITY(1,1) PRIMARY KEY,
-    batchID INT NOT NULL,
-    quantityInStock INT NOT NULL DEFAULT 0, -- Tồn theo đơn vị nhỏ nhất (VIÊN/ỐNG/ml)
-    lastUpdated DATETIME DEFAULT GETDATE(),
-    status TINYINT DEFAULT 1, -- 1: Bình thường, 2: Sắp hết (<30 ngày), 0: Hết
-    FOREIGN KEY (batchID) REFERENCES DrugBatch(batchID)
+                           inventoryID INT IDENTITY(1,1) PRIMARY KEY,
+                           batchID INT NOT NULL,
+                           quantityInStock INT NOT NULL DEFAULT 0, -- Tồn theo đơn vị nhỏ nhất (VIÊN/ỐNG/ml)
+                           lastUpdated DATETIME DEFAULT GETDATE(),
+                           status TINYINT DEFAULT 1, -- 1: Bình thường, 2: Sắp hết (<30 ngày), 0: Hết
+                           FOREIGN KEY (batchID) REFERENCES DrugBatch(batchID)
 );
 
 -- 2.8. Đơn thuốc (Liên kết với DiagnosisSession)
 CREATE TABLE Prescription (
-    prescriptionID INT IDENTITY(1,1) PRIMARY KEY,
-    prescriptionCode VARCHAR(20) NOT NULL UNIQUE,
-    sessionID INT NOT NULL, -- Liên kết với phiên chẩn đoán
-    patientID INT NOT NULL,
-    doctorID INT NOT NULL, -- Bác sĩ kê đơn (UserID)
-    diagnosis NVARCHAR(500),
-    treatmentCycle NVARCHAR(50),
-    prescriptionDate DATETIME DEFAULT GETDATE(),
-    status TINYINT DEFAULT 0, -- 0: Mới kê, 1: Đã cấp phát, 2: Đã hủy
-    notes NVARCHAR(500),
-    FOREIGN KEY (sessionID) REFERENCES DiagnosisSession(sessionID),
-    FOREIGN KEY (patientID) REFERENCES Patient(patientID),
-    FOREIGN KEY (doctorID) REFERENCES [Users](userID)
+                              prescriptionID INT IDENTITY(1,1) PRIMARY KEY,
+                              prescriptionCode VARCHAR(20) NOT NULL UNIQUE,
+                              sessionID INT NOT NULL, -- Liên kết với phiên chẩn đoán
+                              patientID INT NOT NULL,
+                              doctorID INT NOT NULL, -- Bác sĩ kê đơn (UserID)
+                              diagnosis NVARCHAR(500),
+                              treatmentCycle NVARCHAR(50),
+                              prescriptionDate DATETIME DEFAULT GETDATE(),
+                              status TINYINT DEFAULT 0, -- 0: Mới kê, 1: Đã cấp phát, 2: Đã hủy
+                              notes NVARCHAR(500),
+                              FOREIGN KEY (sessionID) REFERENCES DiagnosisSession(sessionID),
+                              FOREIGN KEY (patientID) REFERENCES Patient(patientID),
+                              FOREIGN KEY (doctorID) REFERENCES [Users](userID)
 );
 
 -- 2.9. Chi tiết đơn thuốc (Kê thuốc + Xuất kho)
 CREATE TABLE PrescriptionDetail (
-    detailID INT IDENTITY(1,1) PRIMARY KEY,
-    prescriptionID INT NOT NULL,
-    drugID INT NOT NULL,
-    dosePerTime DECIMAL(10,2) NOT NULL, -- Liều mỗi lần (mg)
-    timesPerDay INT NOT NULL DEFAULT 1,
-    daysOfTreatment INT NOT NULL DEFAULT 1,
-    quantityPrescribed INT NOT NULL, -- Tổng số lượng kê (theo đơn vị nhỏ nhất)
-    batchID INT NULL, -- Lô hàng đã xuất
-    quantityDispensed INT DEFAULT 0, -- Số lượng đã xuất thực tế
-    actualExpiryDate DATE NULL, -- Hạn dùng ghi trên túi thuốc
-    dispenseUnit VARCHAR(10) DEFAULT 'VIÊN',
-    instruction NVARCHAR(500),
-    dispensedAt DATETIME NULL,
-    dispensedBy INT NULL, -- Dược sĩ xuất thuốc
-    notes NVARCHAR(200),
-    FOREIGN KEY (prescriptionID) REFERENCES Prescription(prescriptionID),
-    FOREIGN KEY (drugID) REFERENCES Drug(drugID),
-    FOREIGN KEY (batchID) REFERENCES DrugBatch(batchID),
-    FOREIGN KEY (dispensedBy) REFERENCES [Users](userID)
+                                    detailID INT IDENTITY(1,1) PRIMARY KEY,
+                                    prescriptionID INT NOT NULL,
+                                    drugID INT NOT NULL,
+                                    dosePerTime DECIMAL(10,2) NOT NULL, -- Liều mỗi lần (mg)
+                                    timesPerDay INT NOT NULL DEFAULT 1,
+                                    daysOfTreatment INT NOT NULL DEFAULT 1,
+                                    quantityPrescribed INT NOT NULL, -- Tổng số lượng kê (theo đơn vị nhỏ nhất)
+                                    batchID INT NULL, -- Lô hàng đã xuất
+                                    quantityDispensed INT DEFAULT 0, -- Số lượng đã xuất thực tế
+                                    actualExpiryDate DATE NULL, -- Hạn dùng ghi trên túi thuốc
+                                    dispenseUnit VARCHAR(10) DEFAULT 'VIÊN',
+                                    instruction NVARCHAR(500),
+                                    dispensedAt DATETIME NULL,
+                                    dispensedBy INT NULL, -- Dược sĩ xuất thuốc
+                                    notes NVARCHAR(200),
+                                    FOREIGN KEY (prescriptionID) REFERENCES Prescription(prescriptionID),
+                                    FOREIGN KEY (drugID) REFERENCES Drug(drugID),
+                                    FOREIGN KEY (batchID) REFERENCES DrugBatch(batchID),
+                                    FOREIGN KEY (dispensedBy) REFERENCES [Users](userID)
 );
 
 -- 2.10. Log xuất nhập kho
 CREATE TABLE InventoryLog (
-    logID INT IDENTITY(1,1) PRIMARY KEY,
-    batchID INT NOT NULL,
-    userID INT NOT NULL,
-    actionType VARCHAR(20) NOT NULL, -- IMPORT, DISPENSE, ADJUST
-    quantityChange INT NOT NULL, -- Số lượng thay đổi (theo đơn vị nhỏ)
-    quantityBefore INT NOT NULL,
-    quantityAfter INT NOT NULL,
-    referenceID INT NULL, -- ID của PrescriptionDetail hoặc DrugBatch
-    referenceType VARCHAR(50) NULL,
-    performedAt DATETIME DEFAULT GETDATE(),
-    notes NVARCHAR(500),
-    FOREIGN KEY (batchID) REFERENCES DrugBatch(batchID),
-    FOREIGN KEY (userID) REFERENCES [Users](userID)
+                              logID INT IDENTITY(1,1) PRIMARY KEY,
+                              batchID INT NOT NULL,
+                              userID INT NOT NULL,
+                              actionType VARCHAR(20) NOT NULL, -- IMPORT, DISPENSE, ADJUST
+                              quantityChange INT NOT NULL, -- Số lượng thay đổi (theo đơn vị nhỏ)
+                              quantityBefore INT NOT NULL,
+                              quantityAfter INT NOT NULL,
+                              referenceID INT NULL, -- ID của PrescriptionDetail hoặc DrugBatch
+                              referenceType VARCHAR(50) NULL,
+                              performedAt DATETIME DEFAULT GETDATE(),
+                              notes NVARCHAR(500),
+                              FOREIGN KEY (batchID) REFERENCES DrugBatch(batchID),
+                              FOREIGN KEY (userID) REFERENCES [Users](userID)
 );
 GO
 
 -- 3.1. Đơn vị tính
 INSERT INTO Unit (unitName, description) VALUES
-('VIÊN', N'Đơn vị nhỏ nhất - viên thuốc'),
-('VỈ', N'Đóng gói thương mại - vỉ nhôm/nhựa'),
-('HỘP', N'Đóng gói thương mại - hộp giấy'),
-('LỌ', N'Đóng gói thương mại - lọ nhựa/thủy tinh'),
-('ỐNG', N'Đóng gói thương mại - ống nhựa/giấy'),
-('TUÝP', N'Đóng gói thương mại - tuýp nhôm/nhựa cho thuốc bôi');
+                                             ('VIÊN', N'Đơn vị nhỏ nhất - viên thuốc'),
+                                             ('VỈ', N'Đóng gói thương mại - vỉ nhôm/nhựa'),
+                                             ('HỘP', N'Đóng gói thương mại - hộp giấy'),
+                                             ('LỌ', N'Đóng gói thương mại - lọ nhựa/thủy tinh'),
+                                             ('ỐNG', N'Đóng gói thương mại - ống nhựa/giấy'),
+                                             ('TUÝP', N'Đóng gói thương mại - tuýp nhôm/nhựa cho thuốc bôi');
 
 -- 3.2. Nhóm thuốc cấp 1
 INSERT INTO DrugCategory (categoryName, description) VALUES
-(N'Thuốc điều trị', N'Thuốc tác động trực tiếp lên tế bào ung thư'),
-(N'Thuốc hỗ trợ điều trị', N'Thuốc giảm tác dụng phụ, nâng đỡ cơ thể');
+                                                         (N'Thuốc điều trị', N'Thuốc tác động trực tiếp lên tế bào ung thư'),
+                                                         (N'Thuốc hỗ trợ điều trị', N'Thuốc giảm tác dụng phụ, nâng đỡ cơ thể');
 
 -- 3.3. Nhóm thuốc cấp 2
 INSERT INTO DrugSubCategory (categoryID, subCategoryName, priorityLevel, requireSpecialPrescription, description) VALUES
-(1, N'Thuốc nội tiết', 1, 1, N'Điều trị ung thư phụ thuộc hormone'),
-(1, N'Thuốc điều trị đích', 1, 1, N'Tác động chọn lọc lên tế bào ung thư qua cơ chế phân tử'),
-(1, N'Thuốc hóa trị toàn thân', 1, 1, N'Hóa chất tác động lên tế bào phân chia nhanh'),
-(1, N'Thuốc miễn dịch', 1, 1, N'Kích thích hệ miễn dịch tấn công tế bào ung thư'),
-(2, N'Thuốc giảm đau', 2, 0, N'Giảm đau do ung thư xâm lấn hoặc sau phẫu thuật'),
-(2, N'Thuốc chống nôn', 2, 0, N'Dự phòng và điều trị buồn nôn do hóa trị/xạ trị'),
-(2, N'Thuốc bảo vệ dạ dày', 2, 0, N'Bảo vệ niêm mạc dạ dày khi dùng Corticoid/NSAIDs'),
-(2, N'Thuốc kháng sinh', 2, 0, N'Điều trị nhiễm khuẩn do suy giảm miễn dịch'),
-(2, N'Thuốc kháng nấm', 2, 0, N'Điều trị nhiễm nấm cơ hội'),
-(2, N'Vitamin và khoáng chất', 3, 0, N'Bổ sung vi chất, nâng cao thể trạng'),
-(2, N'Thuốc nhuận tràng', 3, 0, N'Điều trị táo bón do thuốc giảm đau opioid'),
-(2, N'Thuốc chống tiêu chảy', 3, 0, N'Điều trị tiêu chảy do hóa trị hoặc nhiễm trùng'),
-(2, N'Thuốc chống dị ứng', 2, 0, N'Dự phòng và điều trị phản ứng dị ứng khi truyền thuốc'),
-(2, N'Thuốc chống viêm', 2, 1, N'Chống viêm, chống dị ứng, giảm phù nề');
+                                                                                                                      (1, N'Thuốc nội tiết', 1, 1, N'Điều trị ung thư phụ thuộc hormone'),
+                                                                                                                      (1, N'Thuốc điều trị đích', 1, 1, N'Tác động chọn lọc lên tế bào ung thư qua cơ chế phân tử'),
+                                                                                                                      (1, N'Thuốc hóa trị toàn thân', 1, 1, N'Hóa chất tác động lên tế bào phân chia nhanh'),
+                                                                                                                      (1, N'Thuốc miễn dịch', 1, 1, N'Kích thích hệ miễn dịch tấn công tế bào ung thư'),
+                                                                                                                      (2, N'Thuốc giảm đau', 2, 0, N'Giảm đau do ung thư xâm lấn hoặc sau phẫu thuật'),
+                                                                                                                      (2, N'Thuốc chống nôn', 2, 0, N'Dự phòng và điều trị buồn nôn do hóa trị/xạ trị'),
+                                                                                                                      (2, N'Thuốc bảo vệ dạ dày', 2, 0, N'Bảo vệ niêm mạc dạ dày khi dùng Corticoid/NSAIDs'),
+                                                                                                                      (2, N'Thuốc kháng sinh', 2, 0, N'Điều trị nhiễm khuẩn do suy giảm miễn dịch'),
+                                                                                                                      (2, N'Thuốc kháng nấm', 2, 0, N'Điều trị nhiễm nấm cơ hội'),
+                                                                                                                      (2, N'Vitamin và khoáng chất', 3, 0, N'Bổ sung vi chất, nâng cao thể trạng'),
+                                                                                                                      (2, N'Thuốc nhuận tràng', 3, 0, N'Điều trị táo bón do thuốc giảm đau opioid'),
+                                                                                                                      (2, N'Thuốc chống tiêu chảy', 3, 0, N'Điều trị tiêu chảy do hóa trị hoặc nhiễm trùng'),
+                                                                                                                      (2, N'Thuốc chống dị ứng', 2, 0, N'Dự phòng và điều trị phản ứng dị ứng khi truyền thuốc'),
+                                                                                                                      (2, N'Thuốc chống viêm', 2, 1, N'Chống viêm, chống dị ứng, giảm phù nề');
 
 -- 3.4. Danh mục thuốc (Đã sửa lỗi cú pháp và bổ sung sellingPrice)
 INSERT INTO Drug (
@@ -700,8 +702,9 @@ INSERT INTO UnitConversion (drugID, largeUnitID, smallUnitID, conversionQuantity
 -- 3.6. Thêm tài khoản Dược sĩ
 INSERT INTO [Users] (roleID, userName, fullName, email, passwordHash, phoneNumber, status, lastChangePassTime, nationalID)
 VALUES
-(6, 'pharmacist', N'Dược sĩ Nguyễn Hoàng Anh', 'anh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0908889999', 'ACTIVE', GETDATE(), '089012345678'),
-(6, 'pharmacist_linh', N'Dược sĩ Trần Thị Linh', 'linh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907776666', 'ACTIVE', GETDATE(), '090123456789');
+    (6, 'pharmacist', N'Dược sĩ Nguyễn Hoàng Anh', 'anh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0908889999', 'ACTIVE', GETDATE(), '089012345678'),
+    (6, 'pharmacist_linh', N'Dược sĩ Trần Thị Linh', 'linh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907776666', 'ACTIVE', GETDATE(), '090123456789'),
+    (3, 'technical', N'Kỹ thuật viên AI', 'technical@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0911111111', 'ACTIVE', GETDATE(), '111111111111');
 
 -- ============================================================================
 -- 3.7. Nhập kho mẫu (Sử dụng mã lô dạng LOT-DRUG-XXX-MMYY)
@@ -765,66 +768,66 @@ INSERT INTO DrugBatch (drugID, batchNumber, manufactureDate, expiryDate, unitID,
 -- 3.8. Khởi tạo tồn kho mẫu (Giữ nguyên theo batchID 1 -> 41)
 -- ============================================================================
 INSERT INTO Inventory (batchID, quantityInStock, lastUpdated, status) VALUES
-(1,  1500, GETDATE(), 1), (2,  900,  GETDATE(), 1), (3,  1200, GETDATE(), 1),
-(4,  750,  GETDATE(), 1), (5,  600,  GETDATE(), 1), (6,  450,  GETDATE(), 1),
-(7,  1800, GETDATE(), 1), (8,  2400, GETDATE(), 1), (9,  3000, GETDATE(), 1),
-(10, 900,  GETDATE(), 1), (11, 500,  GETDATE(), 1), (12, 1000, GETDATE(), 1),
-(13, 4000, GETDATE(), 1), (14, 1000, GETDATE(), 1), (15, 2400, GETDATE(), 1),
-(16, 1400, GETDATE(), 1), (17, 700,  GETDATE(), 1), (18, 1800, GETDATE(), 1),
-(19, 1000, GETDATE(), 1), (20, 1000, GETDATE(), 1), (21, 1800, GETDATE(), 1),
-(22, 1000, GETDATE(), 1), (23, 2400, GETDATE(), 1), (24, 1000, GETDATE(), 1),
-(25, 1800, GETDATE(), 1), (26, 2400, GETDATE(), 1), (27, 1000, GETDATE(), 1),
-(28, 1500, GETDATE(), 1), (29, 1200, GETDATE(), 1), (30, 3600, GETDATE(), 1),
-(31, 1000, GETDATE(), 1), (32, 600,  GETDATE(), 1), (33, 2000, GETDATE(), 1),
-(34, 800,  GETDATE(), 1), (35, 150,  GETDATE(), 1), (36, 40,   GETDATE(), 1),
-(37, 600,  GETDATE(), 1), (38, 50,   GETDATE(), 1), (39, 40,   GETDATE(), 1),
-(40, 30,   GETDATE(), 1), (41, 40,   GETDATE(), 1);
+                                                                          (1,  1500, GETDATE(), 1), (2,  900,  GETDATE(), 1), (3,  1200, GETDATE(), 1),
+                                                                          (4,  750,  GETDATE(), 1), (5,  600,  GETDATE(), 1), (6,  450,  GETDATE(), 1),
+                                                                          (7,  1800, GETDATE(), 1), (8,  2400, GETDATE(), 1), (9,  3000, GETDATE(), 1),
+                                                                          (10, 900,  GETDATE(), 1), (11, 500,  GETDATE(), 1), (12, 1000, GETDATE(), 1),
+                                                                          (13, 4000, GETDATE(), 1), (14, 1000, GETDATE(), 1), (15, 2400, GETDATE(), 1),
+                                                                          (16, 1400, GETDATE(), 1), (17, 700,  GETDATE(), 1), (18, 1800, GETDATE(), 1),
+                                                                          (19, 1000, GETDATE(), 1), (20, 1000, GETDATE(), 1), (21, 1800, GETDATE(), 1),
+                                                                          (22, 1000, GETDATE(), 1), (23, 2400, GETDATE(), 1), (24, 1000, GETDATE(), 1),
+                                                                          (25, 1800, GETDATE(), 1), (26, 2400, GETDATE(), 1), (27, 1000, GETDATE(), 1),
+                                                                          (28, 1500, GETDATE(), 1), (29, 1200, GETDATE(), 1), (30, 3600, GETDATE(), 1),
+                                                                          (31, 1000, GETDATE(), 1), (32, 600,  GETDATE(), 1), (33, 2000, GETDATE(), 1),
+                                                                          (34, 800,  GETDATE(), 1), (35, 150,  GETDATE(), 1), (36, 40,   GETDATE(), 1),
+                                                                          (37, 600,  GETDATE(), 1), (38, 50,   GETDATE(), 1), (39, 40,   GETDATE(), 1),
+                                                                          (40, 30,   GETDATE(), 1), (41, 40,   GETDATE(), 1);
 
 -- ============================================================================
 -- 3.9. Log xuất nhập kho (Cập nhật ghi chú cho đồng bộ với mã lô mới)
 -- ============================================================================
 INSERT INTO InventoryLog (batchID, userID, actionType, quantityChange, quantityBefore, quantityAfter, referenceID, referenceType, performedAt, notes) VALUES
-(1,  11, 'IMPORT', 1500, 0, 1500, 1,  'BATCH', GETDATE(), N'Nhập 50 hộp Tamoxifen (DRUG-001)'),
-(2,  11, 'IMPORT', 900,  0, 900,  2,  'BATCH', GETDATE(), N'Nhập 30 hộp Letrozole (DRUG-002)'),
-(3,  11, 'IMPORT', 1200, 0, 1200, 3,  'BATCH', GETDATE(), N'Nhập 40 hộp Anastrozole (DRUG-003)'),
-(4,  11, 'IMPORT', 750,  0, 750,  4,  'BATCH', GETDATE(), N'Nhập 25 hộp Exemestane (DRUG-004)'),
-(5,  11, 'IMPORT', 600,  0, 600,  5,  'BATCH', GETDATE(), N'Nhập 20 hộp Imatinib (DRUG-005)'),
-(6,  11, 'IMPORT', 450,  0, 450,  6,  'BATCH', GETDATE(), N'Nhập 15 hộp Erlotinib (DRUG-006)'),
-(7,  11, 'IMPORT', 1800, 0, 1800, 7,  'BATCH', GETDATE(), N'Nhập 60 hộp Capecitabine (DRUG-007)'),
-(8,  11, 'IMPORT', 2400, 0, 2400, 8,  'BATCH', GETDATE(), N'Nhập 80 hộp Cyclophosphamide (DRUG-008)'),
-(9,  11, 'IMPORT', 3000, 0, 3000, 9,  'BATCH', GETDATE(), N'Nhập 100 hộp Methotrexate (DRUG-009)'),
-(10, 11, 'IMPORT', 900,  0, 900,  10, 'BATCH', GETDATE(), N'Nhập 30 hộp Thalidomide (DRUG-010)'),
-(11, 11, 'IMPORT', 500,  0, 500,  11, 'BATCH', GETDATE(), N'Nhập 25 hộp Morphine (DRUG-011)'),
-(12, 11, 'IMPORT', 1000, 0, 1000, 12, 'BATCH', GETDATE(), N'Nhập 50 hộp Tramadol (DRUG-012)'),
-(13, 11, 'IMPORT', 4000, 0, 4000, 13, 'BATCH', GETDATE(), N'Nhập 200 hộp Paracetamol (DRUG-013)'),
-(14, 11, 'IMPORT', 1000, 0, 1000, 14, 'BATCH', GETDATE(), N'Nhập 100 hộp Ondansetron (DRUG-014)'),
-(15, 11, 'IMPORT', 2400, 0, 2400, 15, 'BATCH', GETDATE(), N'Nhập 80 hộp Metoclopramide (DRUG-015)'),
-(16, 11, 'IMPORT', 1400, 0, 1400, 16, 'BATCH', GETDATE(), N'Nhập 70 hộp Domperidone (DRUG-016)'),
-(17, 11, 'IMPORT', 700,  0, 700,  17, 'BATCH', GETDATE(), N'Nhập 50 hộp Pantoprazole (DRUG-017)'),
-(18, 11, 'IMPORT', 1800, 0, 1800, 18, 'BATCH', GETDATE(), N'Nhập 90 hộp Omeprazole (DRUG-018)'),
-(19, 11, 'IMPORT', 1000, 0, 1000, 19, 'BATCH', GETDATE(), N'Nhập 100 hộp Cetirizine (DRUG-019)'),
-(20, 11, 'IMPORT', 1000, 0, 1000, 20, 'BATCH', GETDATE(), N'Nhập 100 hộp Loratadine (DRUG-020)'),
-(21, 11, 'IMPORT', 1800, 0, 1800, 21, 'BATCH', GETDATE(), N'Nhập 60 hộp Dexamethasone (DRUG-021)'),
-(22, 11, 'IMPORT', 1000, 0, 1000, 22, 'BATCH', GETDATE(), N'Nhập 50 hộp Methylprednisolone (DRUG-022)'),
-(23, 11, 'IMPORT', 2400, 0, 2400, 23, 'BATCH', GETDATE(), N'Nhập 80 hộp Prednisolone (DRUG-023)'),
-(24, 12, 'IMPORT', 1000, 0, 1000, 24, 'BATCH', GETDATE(), N'Nhập 100 ống Vitamin C (DRUG-024)'),
-(25, 12, 'IMPORT', 1800, 0, 1800, 25, 'BATCH', GETDATE(), N'Nhập 30 lọ Vitamin tổng hợp (DRUG-025)'),
-(26, 12, 'IMPORT', 2400, 0, 2400, 26, 'BATCH', GETDATE(), N'Nhập 40 lọ Centrum (DRUG-026)'),
-(27, 12, 'IMPORT', 1000, 0, 1000, 27, 'BATCH', GETDATE(), N'Nhập 50 ống Calcium + D3 (DRUG-027)'),
-(28, 12, 'IMPORT', 1500, 0, 1500, 28, 'BATCH', GETDATE(), N'Nhập 50 lọ Omega-3 (DRUG-028)'),
-(29, 12, 'IMPORT', 1200, 0, 1200, 29, 'BATCH', GETDATE(), N'Nhập 40 lọ Probiotics (DRUG-029)'),
-(30, 12, 'IMPORT', 3600, 0, 3600, 30, 'BATCH', GETDATE(), N'Nhập 60 lọ Magnesium (DRUG-030)'),
-(31, 12, 'IMPORT', 1000, 0, 1000, 31, 'BATCH', GETDATE(), N'Nhập 50 hộp Bisacodyl (DRUG-031)'),
-(32, 12, 'IMPORT', 600,  0, 600,  32, 'BATCH', GETDATE(), N'Nhập 60 hộp Loperamide (DRUG-032)'),
-(33, 12, 'IMPORT', 2000, 0, 2000, 33, 'BATCH', GETDATE(), N'Nhập 100 hộp Amoxicillin (DRUG-033)'),
-(34, 12, 'IMPORT', 800,  0, 800,  34, 'BATCH', GETDATE(), N'Nhập 80 hộp Ciprofloxacin (DRUG-034)'),
-(35, 12, 'IMPORT', 150,  0, 150,  35, 'BATCH', GETDATE(), N'Nhập 50 hộp Azithromycin (DRUG-035)'),
-(36, 12, 'IMPORT', 40,   0, 40,   36, 'BATCH', GETDATE(), N'Nhập 40 hộp Fluconazole (DRUG-036)'),
-(37, 12, 'IMPORT', 600,  0, 600,  37, 'BATCH', GETDATE(), N'Nhập 30 hộp Itraconazole (DRUG-037)'),
-(38, 12, 'IMPORT', 50,   0, 50,   38, 'BATCH', GETDATE(), N'Nhập 50 hộp Clotrimazole (DRUG-038)'),
-(39, 12, 'IMPORT', 40,   0, 40,   39, 'BATCH', GETDATE(), N'Nhập 40 hộp Ketoconazole (DRUG-039)'),
-(40, 12, 'IMPORT', 30,   0, 30,   40, 'BATCH', GETDATE(), N'Nhập 30 hộp Terbinafine (DRUG-040)'),
-(41, 12, 'IMPORT', 40,   0, 40,   41, 'BATCH', GETDATE(), N'Nhập 40 hộp Miconazole (DRUG-041)');
+                                                                                                                                                          (1,  11, 'IMPORT', 1500, 0, 1500, 1,  'BATCH', GETDATE(), N'Nhập 50 hộp Tamoxifen (DRUG-001)'),
+                                                                                                                                                          (2,  11, 'IMPORT', 900,  0, 900,  2,  'BATCH', GETDATE(), N'Nhập 30 hộp Letrozole (DRUG-002)'),
+                                                                                                                                                          (3,  11, 'IMPORT', 1200, 0, 1200, 3,  'BATCH', GETDATE(), N'Nhập 40 hộp Anastrozole (DRUG-003)'),
+                                                                                                                                                          (4,  11, 'IMPORT', 750,  0, 750,  4,  'BATCH', GETDATE(), N'Nhập 25 hộp Exemestane (DRUG-004)'),
+                                                                                                                                                          (5,  11, 'IMPORT', 600,  0, 600,  5,  'BATCH', GETDATE(), N'Nhập 20 hộp Imatinib (DRUG-005)'),
+                                                                                                                                                          (6,  11, 'IMPORT', 450,  0, 450,  6,  'BATCH', GETDATE(), N'Nhập 15 hộp Erlotinib (DRUG-006)'),
+                                                                                                                                                          (7,  11, 'IMPORT', 1800, 0, 1800, 7,  'BATCH', GETDATE(), N'Nhập 60 hộp Capecitabine (DRUG-007)'),
+                                                                                                                                                          (8,  11, 'IMPORT', 2400, 0, 2400, 8,  'BATCH', GETDATE(), N'Nhập 80 hộp Cyclophosphamide (DRUG-008)'),
+                                                                                                                                                          (9,  11, 'IMPORT', 3000, 0, 3000, 9,  'BATCH', GETDATE(), N'Nhập 100 hộp Methotrexate (DRUG-009)'),
+                                                                                                                                                          (10, 11, 'IMPORT', 900,  0, 900,  10, 'BATCH', GETDATE(), N'Nhập 30 hộp Thalidomide (DRUG-010)'),
+                                                                                                                                                          (11, 11, 'IMPORT', 500,  0, 500,  11, 'BATCH', GETDATE(), N'Nhập 25 hộp Morphine (DRUG-011)'),
+                                                                                                                                                          (12, 11, 'IMPORT', 1000, 0, 1000, 12, 'BATCH', GETDATE(), N'Nhập 50 hộp Tramadol (DRUG-012)'),
+                                                                                                                                                          (13, 11, 'IMPORT', 4000, 0, 4000, 13, 'BATCH', GETDATE(), N'Nhập 200 hộp Paracetamol (DRUG-013)'),
+                                                                                                                                                          (14, 11, 'IMPORT', 1000, 0, 1000, 14, 'BATCH', GETDATE(), N'Nhập 100 hộp Ondansetron (DRUG-014)'),
+                                                                                                                                                          (15, 11, 'IMPORT', 2400, 0, 2400, 15, 'BATCH', GETDATE(), N'Nhập 80 hộp Metoclopramide (DRUG-015)'),
+                                                                                                                                                          (16, 11, 'IMPORT', 1400, 0, 1400, 16, 'BATCH', GETDATE(), N'Nhập 70 hộp Domperidone (DRUG-016)'),
+                                                                                                                                                          (17, 11, 'IMPORT', 700,  0, 700,  17, 'BATCH', GETDATE(), N'Nhập 50 hộp Pantoprazole (DRUG-017)'),
+                                                                                                                                                          (18, 11, 'IMPORT', 1800, 0, 1800, 18, 'BATCH', GETDATE(), N'Nhập 90 hộp Omeprazole (DRUG-018)'),
+                                                                                                                                                          (19, 11, 'IMPORT', 1000, 0, 1000, 19, 'BATCH', GETDATE(), N'Nhập 100 hộp Cetirizine (DRUG-019)'),
+                                                                                                                                                          (20, 11, 'IMPORT', 1000, 0, 1000, 20, 'BATCH', GETDATE(), N'Nhập 100 hộp Loratadine (DRUG-020)'),
+                                                                                                                                                          (21, 11, 'IMPORT', 1800, 0, 1800, 21, 'BATCH', GETDATE(), N'Nhập 60 hộp Dexamethasone (DRUG-021)'),
+                                                                                                                                                          (22, 11, 'IMPORT', 1000, 0, 1000, 22, 'BATCH', GETDATE(), N'Nhập 50 hộp Methylprednisolone (DRUG-022)'),
+                                                                                                                                                          (23, 11, 'IMPORT', 2400, 0, 2400, 23, 'BATCH', GETDATE(), N'Nhập 80 hộp Prednisolone (DRUG-023)'),
+                                                                                                                                                          (24, 12, 'IMPORT', 1000, 0, 1000, 24, 'BATCH', GETDATE(), N'Nhập 100 ống Vitamin C (DRUG-024)'),
+                                                                                                                                                          (25, 12, 'IMPORT', 1800, 0, 1800, 25, 'BATCH', GETDATE(), N'Nhập 30 lọ Vitamin tổng hợp (DRUG-025)'),
+                                                                                                                                                          (26, 12, 'IMPORT', 2400, 0, 2400, 26, 'BATCH', GETDATE(), N'Nhập 40 lọ Centrum (DRUG-026)'),
+                                                                                                                                                          (27, 12, 'IMPORT', 1000, 0, 1000, 27, 'BATCH', GETDATE(), N'Nhập 50 ống Calcium + D3 (DRUG-027)'),
+                                                                                                                                                          (28, 12, 'IMPORT', 1500, 0, 1500, 28, 'BATCH', GETDATE(), N'Nhập 50 lọ Omega-3 (DRUG-028)'),
+                                                                                                                                                          (29, 12, 'IMPORT', 1200, 0, 1200, 29, 'BATCH', GETDATE(), N'Nhập 40 lọ Probiotics (DRUG-029)'),
+                                                                                                                                                          (30, 12, 'IMPORT', 3600, 0, 3600, 30, 'BATCH', GETDATE(), N'Nhập 60 lọ Magnesium (DRUG-030)'),
+                                                                                                                                                          (31, 12, 'IMPORT', 1000, 0, 1000, 31, 'BATCH', GETDATE(), N'Nhập 50 hộp Bisacodyl (DRUG-031)'),
+                                                                                                                                                          (32, 12, 'IMPORT', 600,  0, 600,  32, 'BATCH', GETDATE(), N'Nhập 60 hộp Loperamide (DRUG-032)'),
+                                                                                                                                                          (33, 12, 'IMPORT', 2000, 0, 2000, 33, 'BATCH', GETDATE(), N'Nhập 100 hộp Amoxicillin (DRUG-033)'),
+                                                                                                                                                          (34, 12, 'IMPORT', 800,  0, 800,  34, 'BATCH', GETDATE(), N'Nhập 80 hộp Ciprofloxacin (DRUG-034)'),
+                                                                                                                                                          (35, 12, 'IMPORT', 150,  0, 150,  35, 'BATCH', GETDATE(), N'Nhập 50 hộp Azithromycin (DRUG-035)'),
+                                                                                                                                                          (36, 12, 'IMPORT', 40,   0, 40,   36, 'BATCH', GETDATE(), N'Nhập 40 hộp Fluconazole (DRUG-036)'),
+                                                                                                                                                          (37, 12, 'IMPORT', 600,  0, 600,  37, 'BATCH', GETDATE(), N'Nhập 30 hộp Itraconazole (DRUG-037)'),
+                                                                                                                                                          (38, 12, 'IMPORT', 50,   0, 50,   38, 'BATCH', GETDATE(), N'Nhập 50 hộp Clotrimazole (DRUG-038)'),
+                                                                                                                                                          (39, 12, 'IMPORT', 40,   0, 40,   39, 'BATCH', GETDATE(), N'Nhập 40 hộp Ketoconazole (DRUG-039)'),
+                                                                                                                                                          (40, 12, 'IMPORT', 30,   0, 30,   40, 'BATCH', GETDATE(), N'Nhập 30 hộp Terbinafine (DRUG-040)'),
+                                                                                                                                                          (41, 12, 'IMPORT', 40,   0, 40,   41, 'BATCH', GETDATE(), N'Nhập 40 hộp Miconazole (DRUG-041)');
 
 
 -- ============================================================================
@@ -832,11 +835,11 @@ INSERT INTO InventoryLog (batchID, userID, actionType, quantityChange, quantityB
 -- ============================================================================
 INSERT INTO Prescription (prescriptionCode, sessionID, patientID, doctorID, diagnosis, treatmentCycle, notes)
 VALUES
-('RX-202607-003', 1, 1, 3, N'Ung thư vú giai đoạn II, sau phẫu thuật', N'Chu kỳ 3/6', N'Bệnh nhân có biểu hiện thiếu máu nhẹ, bổ sung vi chất'),
-('RX-202607-004', 2, 1, 5, N'Ung thư đại trực tràng giai đoạn IV, di căn gan', N'Chu kỳ 1/4', N'Theo dõi sát chức năng tiêu hóa và tình trạng nôn nghén'),
-('RX-202607-005', 3, 1, 4, N'Ung thư phổi tế bào nhỏ, nhiễm trùng đường hô hấp kèm theo', N'Chu kỳ 2/6', N'Kết hợp kháng sinh điều trị viêm phổi cấp'),
-('RX-202607-006', 4, 1, 3, N'Ung thư dạ dày giai đoạn III, đau xơ hóa vùng thượng vị', N'Điều trị giảm nhẹ', N'Bệnh nhân nuốt nghẹn, đau nhiều, cần bọc dạ dày kỹ'),
-('RX-202607-007', 5, 1, 5, N'Nhiễm nấm da diện rộng trên bệnh nhân suy giảm miễn dịch do hóa trị', N'Ngoại trú', N'Sử dụng kết hợp thuốc uống và thuốc bôi ngoài da');
+    ('RX-202607-003', 1, 1, 3, N'Ung thư vú giai đoạn II, sau phẫu thuật', N'Chu kỳ 3/6', N'Bệnh nhân có biểu hiện thiếu máu nhẹ, bổ sung vi chất'),
+    ('RX-202607-004', 2, 1, 5, N'Ung thư đại trực tràng giai đoạn IV, di căn gan', N'Chu kỳ 1/4', N'Theo dõi sát chức năng tiêu hóa và tình trạng nôn nghén'),
+    ('RX-202607-005', 3, 1, 4, N'Ung thư phổi tế bào nhỏ, nhiễm trùng đường hô hấp kèm theo', N'Chu kỳ 2/6', N'Kết hợp kháng sinh điều trị viêm phổi cấp'),
+    ('RX-202607-006', 4, 1, 3, N'Ung thư dạ dày giai đoạn III, đau xơ hóa vùng thượng vị', N'Điều trị giảm nhẹ', N'Bệnh nhân nuốt nghẹn, đau nhiều, cần bọc dạ dày kỹ'),
+    ('RX-202607-007', 5, 1, 5, N'Nhiễm nấm da diện rộng trên bệnh nhân suy giảm miễn dịch do hóa trị', N'Ngoại trú', N'Sử dụng kết hợp thuốc uống và thuốc bôi ngoài da');
 
 -- ============================================================================
 -- BỔ SUNG: 3.11. Chi tiết đơn thuốc (Bác sĩ kê theo VIÊN)
@@ -876,7 +879,300 @@ VALUES
 GO
 
 
+------------------------------------------------------------
+-- BƯỚC 0: Đảm bảo đủ 12 loại chẩn đoán (bỏ qua nếu tên đã tồn tại)
+------------------------------------------------------------
+INSERT INTO DiseaseType (name)
+SELECT v.name FROM (VALUES
+                        (N'Bình thường'),
+                        (N'Bình thường / Không phát hiện bất thường'),
+                        (N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận'),
+                        (N'fbgfdbfd'),
+                        (N'Loạn sản cổ tử cung nặng (CIN 2/3)'),
+                        (N'Loạn sản cổ tử cung nhẹ (CIN 1)'),
+                        (N'Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3)'),
+                        (N'Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1)'),
+                        (N'Ung thư biểu mô tại chỗ (CIS)'),
+                        (N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)'),
+                        (N'Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II)'),
+                        (N'Viêm cổ tử cung')
+                   ) AS v(name)
+WHERE NOT EXISTS (SELECT 1 FROM DiseaseType d WHERE d.name = v.name);
 
+
+------------------------------------------------------------
+-- 1. Bình thường — 37 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19),(20),(21),(22),(23),(24),(25),(26),(27),(28),(29),(30),(31),(32),(33),(34),(35),(36),(37)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (37)
+    N'Không phát hiện bất thường, tái khám định kỳ theo lịch tầm soát',
+    N'Duy trì tầm soát định kỳ 1-3 năm/lần',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Bình thường') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 2. Bình thường / Không phát hiện bất thường — 14 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (14)
+    N'Không cần điều trị, tái khám định kỳ theo lịch tầm soát',
+    N'Duy trì tầm soát định kỳ 1-3 năm/lần',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Bình thường / Không phát hiện bất thường') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 3. Cần theo dõi thêm / Chưa đủ dữ liệu kết luận — 9 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (9)
+    N'Cần bổ sung xét nghiệm, hẹn tái khám sớm để có kết luận rõ ràng',
+    N'Thực hiện thêm xét nghiệm theo chỉ định của bác sĩ',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 4. fbgfdbfd — 1 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (1)
+    N'Dữ liệu test', N'Dữ liệu test',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'fbgfdbfd') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 5. Loạn sản cổ tử cung nặng (CIN 2/3) — 7 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (7)
+    N'Chỉ định soi cổ tử cung, cân nhắc khoét chóp (LEEP)',
+    N'Cần tái khám đúng hẹn, không tự ý bỏ điều trị',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Loạn sản cổ tử cung nặng (CIN 2/3)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 6. Loạn sản cổ tử cung nhẹ (CIN 1) — 21 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19),(20),(21)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (21)
+    N'Theo dõi, làm lại xét nghiệm tế bào sau 6-12 tháng',
+    N'Tăng cường theo dõi, tránh yếu tố nguy cơ (thuốc lá, HPV)',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Loạn sản cổ tử cung nhẹ (CIN 1)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 7. Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3) — 10 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (10)
+    N'Soi cổ tử cung, sinh thiết xác định, cân nhắc LEEP/khoét chóp',
+    N'Cần điều trị sớm, tái khám đúng hẹn',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Tổn thương biểu mô vảy mức độ cao (HSIL/CIN 2-3)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 8. Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1) — 14 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (14)
+    N'Theo dõi định kỳ, xét nghiệm lại sau 6-12 tháng',
+    N'Duy trì theo dõi, tái khám đúng hẹn',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Tổn thương biểu mô vảy mức độ thấp (LSIL/CIN 1)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 9. Ung thư biểu mô tại chỗ (CIS) — 3 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (3)
+    N'Chuyển tuyến chuyên khoa ung bướu, hội chẩn đa chuyên khoa',
+    N'Cần điều trị sớm, tuân thủ lịch hẹn chuyên khoa',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Ung thư biểu mô tại chỗ (CIS)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 10. Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV) — 12 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (12)
+    N'Hội chẩn đa chuyên khoa, phác đồ hóa-xạ trị kết hợp',
+    N'Cần nhập viện điều trị chuyên sâu, theo dõi sát',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 11. Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II) — 8 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (8)
+    N'Phẫu thuật triệt căn hoặc xạ trị theo giai đoạn',
+    N'Tuân thủ phác đồ điều trị, tái khám định kỳ',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Ung thư cổ tử cung xâm lấn giai đoạn sớm (I-II)') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
+
+
+------------------------------------------------------------
+-- 12. Viêm cổ tử cung — 17 ca
+------------------------------------------------------------
+INSERT INTO DiagnosisSession (weight, height, status, createdAt, patientID, userID, clinicalInputMode, isShared)
+SELECT 45 + (ABS(CHECKSUM(NEWID())) % 35), 148 + (ABS(CHECKSUM(NEWID())) % 27), 'COMPLETED',
+       DATEADD(DAY, -(ABS(CHECKSUM(NEWID())) % 365), GETDATE()), pt.patientID, dc.userID,
+       CASE WHEN ABS(CHECKSUM(NEWID())) % 2 = 0 THEN 'DOCTOR' ELSE 'PATIENT' END, 0
+FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17)) AS t(n)
+         CROSS APPLY (SELECT TOP 1 patientID FROM Patient WHERE t.n = t.n ORDER BY NEWID()) pt
+         CROSS APPLY (SELECT TOP 1 u.userID FROM Users u JOIN Role r ON u.roleID = r.roleID WHERE r.roleName = 'DOCTOR' AND t.n = t.n ORDER BY NEWID()) dc;
+
+INSERT INTO Review (treatmentPlan, doctorAdvice, note, reviewedAt, sessionID, userID, diseaseTypeID)
+SELECT TOP (17)
+    N'Kháng sinh đường âm đạo 7-10 ngày, tái khám sau 2 tuần',
+    N'Giữ vệ sinh, tránh quan hệ trong thời gian điều trị',
+    N'Dữ liệu khôi phục', DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 5, ds.createdAt),
+    ds.sessionID, ds.userID, dt.diseaseTypeID
+FROM DiagnosisSession ds
+         CROSS JOIN (SELECT diseaseTypeID FROM DiseaseType WHERE name = N'Viêm cổ tử cung') dt
+WHERE NOT EXISTS (SELECT 1 FROM Review r WHERE r.sessionID = ds.sessionID)
+ORDER BY ds.sessionID DESC;
 
 
 
@@ -898,3 +1194,4 @@ select * from Users order by createdAt desc
 
 
 SELECT drugID, drugCode FROM Drug ORDER BY drugID;
+

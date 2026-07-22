@@ -201,7 +201,7 @@ public class UltrasoundAIController {
                     detail.getAiImageUrl(),
                     detail.getConfidenceScore(),
                     detail.getTechnicalConclusion(),
-                    detail.getManualAiImageUrl()
+                    detail.getImgResultConclusion()
             ));
 
         } catch (Exception e) {
@@ -223,7 +223,7 @@ public class UltrasoundAIController {
             detail.getAiImageUrl(),
             detail.getConfidenceScore(),
             detail.getTechnicalConclusion(),
-            detail.getManualAiImageUrl()
+            detail.getImgResultConclusion()
         ));
     }
 
@@ -355,7 +355,7 @@ public class UltrasoundAIController {
                     detail.getAiImageUrl(),
                     detail.getConfidenceScore(),
                     detail.getTechnicalConclusion(),
-                    detail.getManualAiImageUrl()
+                    detail.getImgResultConclusion()
                 ));
             } else {
                 return ResponseEntity.status(500).body("AI Service trả về lỗi");
@@ -390,7 +390,7 @@ public class UltrasoundAIController {
                 }
                 Files.write(aiPath, imageBytes);
                 
-                detail.setManualAiImageUrl("/uploads/" + newFileName);
+                detail.setImgResultConclusion("/uploads/" + newFileName);
             }
             
             repository.save(detail);

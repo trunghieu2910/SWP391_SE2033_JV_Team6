@@ -36,7 +36,7 @@ public class DoctorMedicalRecordViewController {
     private final MedicalRecordService medicalRecordService;
     private final PdfService pdfService;
 
-    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int DEFAULT_PAGE_SIZE = 9;
 
     /**
      * Trang danh sách hồ sơ bệnh án — maps to: GET /doctor/medical-records
@@ -137,7 +137,7 @@ public class DoctorMedicalRecordViewController {
             @PathVariable Integer sessionId) {
         // Bác sĩ xuất được bản đầy đủ (isPatient = false → không che chẩn đoán)
         MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordDetail(sessionId, false);
-        byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record);
+        byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record, false);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

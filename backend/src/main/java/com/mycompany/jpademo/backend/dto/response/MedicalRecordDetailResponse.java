@@ -100,5 +100,8 @@ public class MedicalRecordDetailResponse {
         private Integer imageID;
         private String imageUrl;
         private Date uploadedAt;
+        private String aiImageUrl;
+        private String imgResultConclusion;
+        private Double confidenceScore;
     }
 }

@@ -31,9 +31,23 @@
             </form>
           </div>
           <div class="image-thumbs">
-            <div th:each="d : ${img.images}" class="thumb">
-              <img th:src="${d.imageUrl}" alt="Medical Image">
-            </div>
+            <th:block th:each="d : ${img.images}">
+              <div class="thumb" th:if="${!#strings.isEmpty(d.imageUrl)}">
+                <a th:href="${d.imageUrl}" target="_blank" style="display: block; text-decoration: none;">
+                  <img th:src="${d.imageUrl}" alt="Ảnh gốc" title="Ảnh gốc">
+                </a>
+              </div>
+              <div class="thumb" th:if="${!#strings.isEmpty(d.aiImageUrl)}">
+                <a th:href="${d.aiImageUrl}" target="_blank" style="display: block; text-decoration: none;">
+                  <img th:src="${d.aiImageUrl}" alt="Ảnh AI" title="Ảnh AI">
+                </a>
+              </div>
+              <div class="thumb" th:if="${!#strings.isEmpty(d.imgResultConclusion)}">
+                <a th:href="${d.imgResultConclusion}" target="_blank" style="display: block; text-decoration: none;">
+                  <img th:src="${d.imgResultConclusion}" alt="Ảnh KTV khoanh" title="Ảnh KTV khoanh">
+                </a>
+              </div>
+            </th:block>
           </div>
           <div class="image-time" th:text="${#temporals.format(img.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</div>
         </div>

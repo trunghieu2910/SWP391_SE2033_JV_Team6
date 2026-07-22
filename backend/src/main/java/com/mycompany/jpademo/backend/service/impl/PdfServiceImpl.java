@@ -16,7 +16,7 @@ import java.util.List;
 public class PdfServiceImpl implements PdfService {
 
     @Override
-    public byte[] generateMedicalRecordPdf(MedicalRecordDetailResponse record) {
+    public byte[] generateMedicalRecordPdf(MedicalRecordDetailResponse record, boolean isPatientView) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 36, 36, 36, 36);
 
@@ -252,33 +252,24 @@ public class PdfServiceImpl implements PdfService {
 
                     if (img.getDetails() != null && !img.getDetails().isEmpty()) {
                         for (int i = 0; i < img.getDetails().size(); i++) {
-                            String url = img.getDetails().get(i).getImageUrl();
-                            String fileName = (url != null && url.contains("/")) ? url.substring(url.lastIndexOf("/") + 1) : url;
-                            Paragraph fileList = new Paragraph("• File: " + (fileName != null ? fileName : "—"), normalFont);
-                            fileList.setSpacingAfter(4f);
-                            document.add(fileList);
-
-                            if (url != null && !url.trim().isEmpty()) {
-                                try {
-                                    String imagePath = url;
-                                    if (url.startsWith("/uploads/")) {
-                                        imagePath = "uploads/" + url.substring(9);
-                                    }
-                                    
-                                    java.io.File imgFile = new java.io.File(imagePath);
-                                    if (imgFile.exists()) {
-                                        Image image = Image.getInstance(imgFile.getAbsolutePath());
-                                        image.scaleToFit(500f, 400f);
-                                        image.setAlignment(Element.ALIGN_CENTER);
-                                        image.setSpacingAfter(15f);
-                                        document.add(image);
-                                    } else {
-                                        Paragraph errorPara = new Paragraph(" (Không tìm thấy file hình ảnh thực tế trên hệ thống)", italicFont);
-                                        errorPara.setSpacingAfter(8f);
-                                        document.add(errorPara);
-                                    }
-                                } catch (Exception ex) {
-                                    System.err.println("Could not add image to PDF: " + ex.getMessage());
+                            MedicalRecordDetailResponse.ImageDetailDTO detail = img.getDetails().get(i);
+                            
+                            if (isPatientView) {
+                                // Bệnh nhân chỉ xem Ảnh kết luận (KTV khoanh), không cần fallback sang Ảnh gốc
+                                String url = detail.getImgResultConclusion();
+                                if (url != null && !url.trim().isEmpty()) {
+                                    addImageToPdf(document, url, "Ảnh kết luận", normalFont, italicFont);
+                                }
+                            } else {
+                                // Bác sĩ xem tất cả các ảnh có sẵn
+                                if (detail.getImageUrl() != null && !detail.getImageUrl().trim().isEmpty()) {
+                                    addImageToPdf(document, detail.getImageUrl(), "Ảnh gốc", normalFont, italicFont);
+                                }
+                                if (detail.getAiImageUrl() != null && !detail.getAiImageUrl().trim().isEmpty()) {
+                                    addImageToPdf(document, detail.getAiImageUrl(), "Ảnh AI dự đoán", normalFont, italicFont);
+                                }
+                                if (detail.getImgResultConclusion() != null && !detail.getImgResultConclusion().trim().isEmpty()) {
+                                    addImageToPdf(document, detail.getImgResultConclusion(), "Ảnh KTV khoanh (Kết luận)", normalFont, italicFont);
                                 }
                             }
                         }
@@ -494,5 +485,59 @@ public class PdfServiceImpl implements PdfService {
         
         card.addCell(cell);
         document.add(card);
+    }
+    
+    private void addImageToPdf(Document document, String url, String label, Font normalFont, Font italicFont) throws DocumentException {
+        if (url == null || url.trim().isEmpty()) return;
+
+        // Chọn icon phù hợp với nhãn
+        String iconPrefix;
+        if (label.contains("gốc")) iconPrefix = "📷";
+        else if (label.contains("AI")) iconPrefix = "🤖";
+        else iconPrefix = "✏️";
+
+        try {
+            String imagePath = url;
+            if (url.startsWith("/uploads/")) {
+                imagePath = "uploads/" + url.substring(9);
+            }
+
+            java.io.File imgFile = new java.io.File(imagePath);
+            if (imgFile.exists()) {
+                // Dùng bảng 1 cột để giữ nhãn + ảnh luôn liền nhau, không bị tách trang
+                PdfPTable wrapper = new PdfPTable(1);
+                wrapper.setWidthPercentage(100);
+                wrapper.setSpacingBefore(10f);
+                wrapper.setSpacingAfter(10f);
+                wrapper.setKeepTogether(true);
+
+                PdfPCell cell = new PdfPCell();
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell.setPadding(0);
+
+                // Nhãn nằm trên ảnh
+                Paragraph labelPara = new Paragraph(iconPrefix + "  " + label, normalFont);
+                labelPara.setSpacingAfter(5f);
+                cell.addElement(labelPara);
+
+                // Ảnh nằm dưới nhãn
+                Image image = Image.getInstance(imgFile.getAbsolutePath());
+                image.scaleToFit(480f, 380f);
+                image.setAlignment(Element.ALIGN_CENTER);
+                cell.addElement(image);
+
+                wrapper.addCell(cell);
+                document.add(wrapper);
+            } else {
+                Paragraph labelPara = new Paragraph(iconPrefix + "  " + label, normalFont);
+                labelPara.setSpacingBefore(6f);
+                document.add(labelPara);
+                Paragraph errorPara = new Paragraph("   (Không tìm thấy file hình ảnh thực tế trên hệ thống)", italicFont);
+                errorPara.setSpacingAfter(8f);
+                document.add(errorPara);
+            }
+        } catch (Exception ex) {
+            System.err.println("Could not add image to PDF: " + ex.getMessage());
+        }
     }
 }

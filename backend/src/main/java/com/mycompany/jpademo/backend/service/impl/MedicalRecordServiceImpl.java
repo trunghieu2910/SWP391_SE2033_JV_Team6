@@ -221,6 +221,9 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                             MedicalRecordDetailResponse.ImageDetailDTO detailDTO = new MedicalRecordDetailResponse.ImageDetailDTO();
                             detailDTO.setImageID(mid.getImageId());
                             detailDTO.setImageUrl(mid.getImageUrl());
+                            detailDTO.setAiImageUrl(mid.getAiImageUrl());
+                            detailDTO.setImgResultConclusion(mid.getImgResultConclusion());
+                            detailDTO.setConfidenceScore(mid.getConfidenceScore());
                             if (mid.getUploadedAt() != null) {
                                 detailDTO.setUploadedAt(java.sql.Timestamp.valueOf(mid.getUploadedAt()));
                             }

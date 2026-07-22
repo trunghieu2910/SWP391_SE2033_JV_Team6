@@ -463,6 +463,8 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .map(detail -> MedicalImageDetailResponse.builder()
                         .imageId(detail.getImageId())
                         .imageUrl(detail.getImageUrl())
+                        .aiImageUrl(detail.getAiImageUrl())
+                        .imgResultConclusion(detail.getImgResultConclusion())
                         .uploadedAt(detail.getUploadedAt())
                         .build())
                 .collect(Collectors.toList());
