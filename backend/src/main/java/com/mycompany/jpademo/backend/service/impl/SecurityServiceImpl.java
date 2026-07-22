@@ -14,7 +14,9 @@ import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.repository.BlockedIPRepository;
 import com.mycompany.jpademo.backend.repository.RequestLogRepository;
+import com.mycompany.jpademo.backend.security.util.ClientIpResolver;
 import com.mycompany.jpademo.backend.service.interfaces.SecurityService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -28,13 +30,20 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Service implementation for system security auditing, monitoring IP traffic, and blocking malicious IPs.
+ */
 @Service
 @RequiredArgsConstructor
 public class SecurityServiceImpl implements SecurityService {
     private final BlockedIPRepository blockedIPRepository;
     private final RequestLogRepository requestLogRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final HttpServletRequest httpServletRequest;
+    private final ClientIpResolver clientIpResolver;
 
+    /** Retrieves aggregated security stats for request limits. */
     @Override
     public SecurityStatsResponse getStats(LocalDateTime startDate, LocalDateTime endDate) {
         long totalRequests = requestLogRepository.countWithDateFilter(startDate, endDate);
@@ -58,6 +67,7 @@ public class SecurityServiceImpl implements SecurityService {
                 .build();
     }
 
+    /** Retrieves the most active IP addresses by request count. */
     @Override
     public List<IpRequestStats> getTopIps(int limit, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(0, limit);
@@ -67,6 +77,7 @@ public class SecurityServiceImpl implements SecurityService {
         return requestLogRepository.findTopIps(pageable);
     }
 
+    /** Retrieves the most accessed endpoints by request count. */
     @Override
     public List<EndpointRequestStats> getTopEndpoints(int limit, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(0, limit);
@@ -76,6 +87,7 @@ public class SecurityServiceImpl implements SecurityService {
         return requestLogRepository.findTopEndpoints(pageable);
     }
 
+    /** Retrieves a list of all currently blocked IP addresses. */
     @Override
     public List<BlockedIP> getBlockedIps(LocalDateTime startDate, LocalDateTime endDate) {
         if (startDate == null || endDate == null) {
@@ -84,12 +96,21 @@ public class SecurityServiceImpl implements SecurityService {
         return blockedIPRepository.findByCreatedAtBetween(startDate, endDate);
     }
 
+    /** Blocks a specific IP address based on an administrator's decision. */
     @Override
     @Transactional
     @AdminActionLog(action = "BLOCKED_IP", targetType = "BlockedIP")
     public void blockIp(BlockIpRequest request, User admin) {
         if (!RoleName.ADMIN.equals(admin.getRole().getRoleName())) {
             throw new UnauthorizedActionException("Bạn không có quyền thực hiện hành động này");
+        }
+        String currentIp = clientIpResolver.resolve(httpServletRequest);
+        if (request.getIpAddress().equals(currentIp)) {
+            throw new BadRequestException("Không thể tự chặn địa chỉ IP hiện tại của chính bạn.");
+        }
+        List<String> sensitiveIps = List.of("127.0.0.1", "0.0.0.0", "0:0:0:0:0:0:0:1", "localhost");
+        if (sensitiveIps.contains(request.getIpAddress().trim())) {
+            throw new BadRequestException("Không thể chặn các địa chỉ IP nội bộ hoặc nhạy cảm của hệ thống.");
         }
         if (blockedIPRepository.existsById(request.getIpAddress())) {
             throw new BadRequestException("IP " + request.getIpAddress() + " đã bị chặn trước đó.");
@@ -105,6 +126,7 @@ public class SecurityServiceImpl implements SecurityService {
         eventPublisher.publishEvent(new BlockedIpChangeEvent(request.getIpAddress(), true));
     }
 
+    /** Unblocks a previously blocked IP address. */
     @Override
     @AdminActionLog(action = "UNBLOCKED_IP", targetType = "BlockedIP")
     public void unblockIp(UnblockIpRequest request, User admin) {

@@ -25,6 +25,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Manages security settings, displays IP traffic statistics, and allows blocking or unblocking IP addresses.
+ */
 @Controller
 @RequestMapping("/admin/security")
 @PreAuthorize("hasRole('ADMIN')")
@@ -33,6 +37,7 @@ public class SecurityController {
     private final SecurityService securityService;
     private static final int TOP_LIMIT = 10;
 
+    /** Displays the main security administration page containing IP access stats and blocked IPs list. */
     @GetMapping
     public String securityPage(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -60,6 +65,7 @@ public class SecurityController {
         return "admin/security";
     }
 
+    /** Blocks a specific IP address to prevent further access from it. */
     @PostMapping("/block-ip")
     public String blockIp(
             @Valid @ModelAttribute("blockIpRequest") BlockIpRequest blockIpRequest,
@@ -85,6 +91,7 @@ public class SecurityController {
         return "redirect:/admin/security";
     }
 
+    /** Unblocks a previously blocked IP address. */
     @PostMapping("/unlock-ip")
     public String unlockIp(
             @Valid @ModelAttribute UnblockIpRequest unblockIpRequest,

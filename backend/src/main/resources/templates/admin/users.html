@@ -22,7 +22,10 @@
                                 th:text="${r == '' ? 'Tất cả vai trò' :
                                     r == 'ADMIN' ? 'Quản trị viên' :
                                     r == 'DOCTOR' ? 'Bác sĩ' :
-                                    r == 'PATIENT' ? 'Bệnh nhân' : r}"
+                                    r == 'PATIENT' ? 'Bệnh nhân' :
+                                    r == 'PHARMACIST' ? 'Dược sĩ' :
+                                    r == 'RECEPTIONIST' ? 'Lễ tân' :
+                                    r == 'TECHNICAL' ? 'Kỹ thuật viên' : r}"
                                 th:selected="${r == role}"></option>
                     </select>
                 </div>
@@ -31,7 +34,6 @@
                     <select name="status">
                         <option value="" th:selected="${status == null}">Tất cả trạng thái</option>
                         <option value="ACTIVE" th:selected="${status != null && status.name() == 'ACTIVE'}">Hoạt động</option>
-                        <option value="INACTIVE" th:selected="${status != null && status.name() == 'INACTIVE'}">Không hoạt động</option>
                         <option value="BANNED" th:selected="${status != null && status.name() == 'BANNED'}">Đang bị khóa</option>
                     </select>
                 </div>
@@ -84,12 +86,15 @@
                     <td th:text="${user.userId}">1</td>
                     <td class="user-name" th:text="${user.fullName}">Nguyễn Văn A</td>
                     <td th:text="${user.userName}">userA</td>
-                    <td th:text="${user.email}">userA@gmail.com</td>
+                    <td class="email-cell" th:text="${user.email}" th:title="${user.email}">userA@gmail.com</td>
                     <td>
                         <span class="role-badge"
                               th:classappend="${user.roleName != null ? 'role-' + user.roleName.toString().toLowerCase() : ''}"
                               th:text="${user.roleName?.name() == 'ADMIN' ? 'Quản trị viên' :
                                        user.roleName?.name() == 'DOCTOR' ? 'Bác sĩ' :
+                                       user.roleName?.name() == 'RECEPTIONIST' ? 'Lễ tân' :
+                                       user.roleName?.name() == 'TECHNICAL' ? 'Kỹ thuật viên' :
+                                       user.roleName?.name() == 'PHARMACIST' ? 'Dược sĩ' :
                                        user.roleName?.name() == 'PATIENT' ? 'Bệnh nhân' : user.roleName}">
                         </span>
                     </td>
@@ -98,13 +103,12 @@
                               th:classappend="${user.status != null ? 'status-' + user.status.toString().toLowerCase() : ''}">
                             <span class="status-dot"></span>
                             <span th:text="${user.status?.name() == 'ACTIVE' ? 'Hoạt động' :
-                                           user.status?.name() == 'INACTIVE' ? 'Không hoạt động' :
                                            user.status?.name() == 'BANNED' ? 'Đã khóa' : user.status}">
                             </span>
                         </span>
                     </td>
 
-                    <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</td>
+                    <td class="date-cell" th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</td>
                     <td class="actions-col">
                         <div class="action-buttons">
                             <a th:href="@{/admin/users/{id}(id=${user.userId})}"
@@ -185,7 +189,6 @@
                     <select name="status" id="statusSelect" required>
                         <option value="ACTIVE">Mở khoá tài khoản</option>
                         <option value="BANNED">Khoá tài khoản</option>
-                        <option value="INACTIVE">Không hoạt động</option>
                     </select>
                 </div>
 

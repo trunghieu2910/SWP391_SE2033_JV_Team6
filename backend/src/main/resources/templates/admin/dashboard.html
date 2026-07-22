@@ -65,53 +65,87 @@
     <link rel="stylesheet" th:href="@{/css/admin/dashboard.css}">
 
     <div class="dashboard-stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
-                <i class="fa-solid fa-users"></i>
+        <div class="stat-row">
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Tổng người dùng</h3>
+                    <p th:text="${stats.totalUsers}">0</p>
+                </div>
             </div>
-            <div class="stat-info">
-                <h3>Tổng người dùng</h3>
-                <p th:text="${stats.totalUsers}">0</p>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981;">
+                    <i class="fa-solid fa-user-md"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Tổng Bác sĩ</h3>
+                    <p th:text="${stats.totalDoctors}">0</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Tổng Bệnh nhân</h3>
+                    <p th:text="${stats.totalPatients}">0</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                    <i class="fa-solid fa-user-slash"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Bị Khóa</h3>
+                    <p th:text="${stats.blockedUsers}">0</p>
+                </div>
             </div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-icon" style="background-color: rgba(16, 185, 129, 0.1); color: #10b981;">
-                <i class="fa-solid fa-user-md"></i>
+        <div class="stat-row">
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(20, 184, 166, 0.1); color: #14b8a6;">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Tổng kỹ thuật viên</h3>
+                    <p th:text="${stats.totalTechnical}">0</p>
+                </div>
             </div>
-            <div class="stat-info">
-                <h3>Tổng Bác sĩ</h3>
-                <p th:text="${stats.totalDoctors}">0</p>
-            </div>
-        </div>
 
-        <div class="stat-card">
-            <div class="stat-icon" style="background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
-                <i class="fa-solid fa-hospital-user"></i>
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                    <i class="fa-solid fa-pills"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Tổng dược sĩ</h3>
+                    <p th:text="${stats.totalPharmacist}">0</p>
+                </div>
             </div>
-            <div class="stat-info">
-                <h3>Tổng Bệnh nhân</h3>
-                <p th:text="${stats.totalPatients}">0</p>
-            </div>
-        </div>
 
-        <div class="stat-card">
-            <div class="stat-icon" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444;">
-                <i class="fa-solid fa-user-slash"></i>
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(236, 72, 153, 0.1); color: #ec4899;">
+                    <i class="fa-solid fa-clipboard-user"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Tổng lễ tân</h3>
+                    <p th:text="${stats.totalReceptionist}">0</p>
+                </div>
             </div>
-            <div class="stat-info">
-                <h3>Bị Khóa</h3>
-                <p th:text="${stats.blockedUsers}">0</p>
-            </div>
-        </div>
 
-        <div class="stat-card">
-            <div class="stat-icon" style="background-color: rgba(245, 158, 11, 0.1); color: #f59e0b;">
-                <i class="fa-solid fa-stethoscope"></i>
-            </div>
-            <div class="stat-info">
-                <h3>Phiên chẩn đoán</h3>
-                <p th:text="${stats.totalDiagnosisSessions}">0</p>
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                    <i class="fa-solid fa-notes-medical"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Phiên chẩn đoán</h3>
+                    <p th:text="${stats.totalDiagnosisSessions}">0</p>
+                </div>
             </div>
         </div>
     </div>

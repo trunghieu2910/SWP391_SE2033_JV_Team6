@@ -4,6 +4,7 @@ import com.mycompany.jpademo.backend.dto.request.InitiateCreateDoctorRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyPendingDoctorRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
+import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
@@ -28,6 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.mycompany.jpademo.backend.entity.User;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Manages administration tasks, user management, doctor account creation with OTP verification, and system log audits.
+ */
 @Slf4j
 @Controller
 @RequestMapping("/admin")
@@ -44,12 +50,13 @@ public class AdminController {
     private final AdminService adminService;
     private final SystemLogService systemLogService;
 
+    /** Displays the admin dashboard statistics and logs. */
     @GetMapping({"/", "/dashboard"})
     public String dashboard(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model) {
+             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+             @AuthenticationPrincipal CustomUserDetails userDetails,
+             Model model) {
 
         String adminEmail = userDetails.getUser().getEmail();
         DashboardPageResponse data = adminService.getDashboardPageData(startDate, endDate);
@@ -66,6 +73,7 @@ public class AdminController {
         return "admin/dashboard";
     }
 
+    /** Displays a paginated, filterable list of all system users. */
     @GetMapping("/users")
     public String userManagement(
             @RequestParam(required = false) String keyword,
@@ -79,15 +87,18 @@ public class AdminController {
         LocalDateTime endDateTime = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
 
         Page<UserResponse> users = adminService.getUser(keyword, role, status, startDateTime, endDateTime, pageable);
+        List<String> roles = adminService.getRoleName();
+        List<String> userStatus = adminService.getUserStatus();
         model.addAttribute("users", users);
         model.addAttribute("keyword", keyword);
         model.addAttribute("role", role);
         model.addAttribute("status", status);
-        model.addAttribute("roles", new String[]{"", "ADMIN", "DOCTOR", "PATIENT"});
-        model.addAttribute("statuses", new String[]{"", "ACTIVE", "INACTIVE", "BANNED"});
+        model.addAttribute("roles", roles);
+        model.addAttribute("statuses", userStatus);
         return "admin/users";
     }
 
+    /** Retrieves details of a specific user. */
     @GetMapping("/users/{id}")
     public String userDetail(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         try {
@@ -100,6 +111,7 @@ public class AdminController {
         }
     }
 
+    /** Updates the status (active/inactive/etc.) of a user. */
     @PostMapping("/users/{id}/status")
     public String updateUserStatus(
             @PathVariable Integer id,
@@ -129,6 +141,7 @@ public class AdminController {
         return "redirect:/admin/users/" + id;
     }
 
+    /** Renders the step-based doctor registration page. */
     @GetMapping("/create-doctor")
     public String createDoctorPage(
             @RequestParam(defaultValue = "1") int step,
@@ -153,6 +166,7 @@ public class AdminController {
         return "admin/create-doctor";
     }
 
+    /** Handles step 1 of doctor creation, submitting details and sending OTP. */
     @PostMapping("/create-doctor/initiate")
     public String initiateCreateDoctor(
             @Valid @ModelAttribute("doctorRequest") InitiateCreateDoctorRequest request,
@@ -181,6 +195,7 @@ public class AdminController {
         }
     }
 
+    /** Renders the OTP verification page for doctor creation. */
     @GetMapping("/create-doctor/verify")
     public String verifyDoctorPage(
             @RequestParam(required = false) String requestId,
@@ -195,6 +210,7 @@ public class AdminController {
         return "admin/create-doctor";
     }
 
+    /** Verifies the OTP and finalizes the creation of the doctor user. */
     @PostMapping("/create-doctor/confirm")
     public String confirmCreateDoctor(
             @Valid @ModelAttribute VerifyPendingDoctorRequest request,
@@ -213,6 +229,7 @@ public class AdminController {
         }
     }
 
+    /** Resends the registration OTP code to the administrator. */
     @PostMapping("/create-doctor/resend-otp")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> resendOtp(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -224,6 +241,7 @@ public class AdminController {
         }
     }
 
+    /** Displays the paginated and filterable system logs list. */
     @GetMapping("/logs")
     public String systemLogs(
             @RequestParam(required = false) Integer userId,
@@ -245,6 +263,7 @@ public class AdminController {
         return "admin/logs";
     }
 
+    /** Retrieves and displays details of a specific system log entry. */
     @GetMapping("/logs/{id}")
     public String logDetail(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         try {
@@ -257,6 +276,7 @@ public class AdminController {
         }
     }
 
+    /** Downloads or views a doctor's certificate file. */
     @GetMapping("/users/{id}/certificate")
     public ResponseEntity<Resource> viewDoctorCertificate(@PathVariable Integer id) {
         CertificateFileResponse certificate = adminService.getDoctorCertificate(id);

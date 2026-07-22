@@ -18,6 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Author: GiangLTHE194888
+ * Task: Service implementation for managing system logs, tracking user activities, and fetching log detail data.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,6 +29,7 @@ public class SystemLogServiceImpl implements SystemLogService {
     private final SystemLogRepository systemLogRepository;
     private final UserRepository userRepository;
 
+    /** Retrieves a filtered, paginated list of system activity logs. */
     @Override
     public Page<SystemLogResponse> getLogs(String action, String keyword, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         String cleanAction = (action == null || action.isBlank()) ? null : action;
@@ -33,6 +38,7 @@ public class SystemLogServiceImpl implements SystemLogService {
         return systemLogs.map(this::mapToSystemLogResponse);
     }
 
+    /** Records a new system activity log entry. */
     @Override
     public void logActivity(String targetType, Integer targetId, String action, String description) {
         try {
@@ -57,6 +63,7 @@ public class SystemLogServiceImpl implements SystemLogService {
         }
     }
 
+    /** Retrieves detailed information for a specific system log entry. */
     @Override
     public SystemLogResponse getLogDetail(Integer logId) {
         SystemLog systemLog = systemLogRepository.findById(logId)
@@ -74,6 +81,7 @@ public class SystemLogServiceImpl implements SystemLogService {
                 .build();
     }
 
+    /** Translates system log actions into Vietnamese display strings. */
     private String mapActionToVietnamese(String action) {
         switch (action) {
             case "LOGIN": return "Đăng nhập";
@@ -103,6 +111,7 @@ public class SystemLogServiceImpl implements SystemLogService {
         }
     }
 
+    /** Maps a SystemLog entity to a SystemLogResponse DTO. */
     private SystemLogResponse mapToSystemLogResponse(SystemLog systemLog) {
         return SystemLogResponse.builder()
                 .logId(systemLog.getLogId())
