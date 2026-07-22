@@ -253,36 +253,35 @@
                               th:text="${mi.status == 'PENDING' ? '⏳ Chờ' : mi.status == 'COMPLETED' ? '✓ Hoàn thành' : mi.status}">Trạng thái</span>
                     </div>
 
-                    <div th:if="${mi.details != null and !mi.details.isEmpty()}">
-                        <div class="sub-lbl" style="margin-bottom: 12px;">
-                            🖼 Danh sách ảnh (<span th:text="${mi.details.size()}">0</span>)
-                        </div>
-                        <div class="img-grid">
-                            <div th:each="d : ${mi.details}" class="img-thumb">
-                                <div class="img-thumb-box">
-                                    <img th:src="${d.imageUrl}"
-                                         th:alt="${mi.imageType}"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                         style="width:100%;height:100%;object-fit:cover;"/>
-                                    <span style="display:none; align-items:center; justify-content:center;
-                                                 font-size:28px; color:var(--text-xmuted);
-                                                 position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                    <div th:with="validImages=${mi.details != null ? mi.details.?[imgResultConclusion != null and !imgResultConclusion.isEmpty()] : null}">
+                        <div th:if="${validImages != null and !validImages.isEmpty()}">
+                            <div class="sub-lbl" style="margin-bottom: 12px;">
+                                🖼 Danh sách ảnh (<span th:text="${validImages.size()}">0</span>)
+                            </div>
+                            <div class="img-grid">
+                                <div th:each="d : ${validImages}" class="img-thumb">
+                                    <a th:href="${d.imgResultConclusion}" target="_blank" style="display: block; text-decoration: none;" class="img-thumb-box">
+                                        <img th:src="${d.imgResultConclusion}"
+                                             th:alt="${mi.imageType}"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                             style="width:100%;height:100%;object-fit:cover;"/>
+                                        <span style="display:none; align-items:center; justify-content:center;
+                                                     font-size:28px; color:var(--text-xmuted);
+                                                     position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                                    </a>
+                                    <span class="img-name">Ảnh kết luận</span>
+                                    <span class="img-date"
+                                          th:text="${d.uploadedAt != null}
+                                                   ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
+                                                   : '—'">—</span>
+                                    <a th:href="${d.imgResultConclusion}" target="_blank" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-magnifying-glass-plus"></i> Xem ảnh lớn</a>
                                 </div>
-                                <span class="img-name"
-                                      th:text="${d.imageUrl != null and d.imageUrl.contains('/')}
-                                               ? ${d.imageUrl.substring(d.imageUrl.lastIndexOf('/') + 1)}
-                                               : ${d.imageUrl ?: '—'}">—</span>
-                                <span class="img-date"
-                                      th:text="${d.uploadedAt != null}
-                                               ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
-                                               : '—'">—</span>
-                                <a th:href="@{/ai-result(imageId=${d.imageID})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-robot"></i> Xem chi tiết</a>
                             </div>
                         </div>
-                    </div>
 
-                    <div th:unless="${mi.details != null and !mi.details.isEmpty()}" style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 12px 0;">
-                        Chưa có hình ảnh được tải lên
+                        <div th:unless="${validImages != null and !validImages.isEmpty()}" style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 12px 0;">
+                            Chưa có hình ảnh kết luận được tải lên
+                        </div>
                     </div>
                 </div>
             </div>

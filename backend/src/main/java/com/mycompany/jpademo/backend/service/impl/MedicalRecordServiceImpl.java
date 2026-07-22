@@ -221,6 +221,9 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                             MedicalRecordDetailResponse.ImageDetailDTO detailDTO = new MedicalRecordDetailResponse.ImageDetailDTO();
                             detailDTO.setImageID(mid.getImageId());
                             detailDTO.setImageUrl(mid.getImageUrl());
+                            detailDTO.setAiImageUrl(mid.getAiImageUrl());
+                            detailDTO.setImgResultConclusion(mid.getImgResultConclusion());
+                            detailDTO.setConfidenceScore(mid.getConfidenceScore());
                             if (mid.getUploadedAt() != null) {
                                 detailDTO.setUploadedAt(java.sql.Timestamp.valueOf(mid.getUploadedAt()));
                             }
@@ -256,5 +259,19 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         });
 
         return detail;
+    }
+
+    // ===== ĐẾM SỐ LƯỢNG TỪ DB — CHÍNH XÁC, KHÔNG PHỤ THUỘC PHÂN TRANG =====
+
+    @Override
+    public long countByStatus(String keyword, String status, String diseaseType,
+                              LocalDateTime startDate, LocalDateTime endDate) {
+        return sessionRepository.countMedicalRecordsByStatus(keyword, status, diseaseType, startDate, endDate);
+    }
+
+    @Override
+    public long countWithDiagnosis(String keyword, String diseaseType,
+                                   LocalDateTime startDate, LocalDateTime endDate) {
+        return sessionRepository.countMedicalRecordsWithDiagnosis(keyword, diseaseType, startDate, endDate);
     }
 }

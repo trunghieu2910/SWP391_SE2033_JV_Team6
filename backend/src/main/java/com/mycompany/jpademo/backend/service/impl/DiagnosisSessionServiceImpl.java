@@ -3,6 +3,7 @@ package com.mycompany.jpademo.backend.service.impl;
 import com.mycompany.jpademo.backend.dto.request.CreateDiagnosisSessionRequest;
 import com.mycompany.jpademo.backend.dto.request.SubmitSymptomFormRequest;
 import com.mycompany.jpademo.backend.dto.response.DiagnosisSessionResponse;
+import com.mycompany.jpademo.backend.dto.response.DoctorWorkloadResponse;
 import com.mycompany.jpademo.backend.dto.response.SymptomDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.SymptomResultResponse;
 import com.mycompany.jpademo.backend.entity.*;
@@ -10,7 +11,9 @@ import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.enums.LabResultStatus;
 import com.mycompany.jpademo.backend.enums.MedicalImageStatus;
+import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.SymptomResultStatus;
+import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.repository.*;
@@ -18,9 +21,12 @@ import com.mycompany.jpademo.backend.service.interfaces.DiagnosisSessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -80,7 +86,7 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .weight(request.getWeight())
                 .height(request.getHeight())
                 .status(DiagnosisSessionStatus.PENDING)
-                .clinicalInputMode(ClinicalInputMode.PATIENT)
+                .clinicalInputMode(request.getClinicalInputMode())
                 .build();
 
         DiagnosisSession savedSession = diagnosisSessionRepository.save(session);
@@ -446,6 +452,50 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
         public Integer getPatientUserId() {
             return patientUserId;
         }
+    }
+
+    // ==================== DOCTOR WORKLOAD (for Receptionist) ====================
+
+    // [Nguyen The Hieu]: Bước 3 - Service Impl: Triển khai logic tính toán danh sách tải bác sĩ (Màn hình 1)
+    @Override
+    public List<DoctorWorkloadResponse> getDoctorWorkloads() {
+        // Lấy tất cả bác sĩ đang có trạng thái ACTIVE
+        List<User> doctors = userRepository.findByRoleRoleNameAndStatus(
+                RoleName.DOCTOR, UserStatus.ACTIVE, Pageable.unpaged()).getContent();
+
+        // Với mỗi bác sĩ, gọi repository để đếm số lượng ca theo từng trạng thái (PENDING, PROCESSING, FAILED)
+        return doctors.stream().map(doctor -> {
+            long pending = diagnosisSessionRepository.countByUserUserIdAndStatus(
+                    doctor.getUserId(), DiagnosisSessionStatus.PENDING);
+            long processing = diagnosisSessionRepository.countByUserUserIdAndStatus(
+                    doctor.getUserId(), DiagnosisSessionStatus.PROCESSING);
+            long failed = diagnosisSessionRepository.countByUserUserIdAndStatus(
+                    doctor.getUserId(), DiagnosisSessionStatus.FAILED);
+            // Đếm tổng số ca ĐANG HOẠT ĐỘNG (nghĩa là trạng thái khác COMPLETED)
+            long totalActive = diagnosisSessionRepository.countByUserUserIdAndStatusNot(
+                    doctor.getUserId(), DiagnosisSessionStatus.COMPLETED);
+
+            // Gói vào DTO và trả về
+            return DoctorWorkloadResponse.builder()
+                    .doctorId(doctor.getUserId())
+                    .doctorName(doctor.getFullName())
+                    .pendingCount(pending)
+                    .processingCount(processing)
+                    .failedCount(failed)
+                    .totalActive(totalActive)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    // [Nguyen The Hieu]: Bước 3 - Service Impl: Triển khai logic lấy chi tiết ca khám của một bác sĩ (Màn hình 2)
+    @Override
+    public Page<DiagnosisSession> getSessionsByDoctor(Integer doctorId,
+                                                      LocalDateTime startDate,
+                                                      LocalDateTime endDate,
+                                                      Pageable pageable) {
+        // Chỉ đơn giản là gọi xuống Repository method vừa tạo ở Bước 1
+        return diagnosisSessionRepository.findByDoctorIdWithDateFilter(
+                doctorId, startDate, endDate, pageable);
     }
 
     public static class SymptomFormSubmittedEvent {

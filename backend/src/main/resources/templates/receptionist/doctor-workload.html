@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{receptionist/layout :: main-layout(~{::main}, 'Theo dõi ca bác sĩ', 'doctor-workload')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/receptionist/doctor-workload.css}"/>
+
+    <!-- [Nguyen The Hieu]: Bước 5 - View (Màn hình 1): Hiển thị bảng tổng hợp số liệu ca khám của tất cả các bác sĩ -->
+    <section class="workload-card" aria-labelledby="workload-heading">
+        <header class="workload-card-header">
+            <h2 id="workload-heading" class="workload-card-title">
+                <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
+                Danh sách ca của bác sĩ
+            </h2>
+            <span class="workload-count"
+                  th:text="${workloads != null ? workloads.size() + ' bác sĩ' : '0 bác sĩ'}"></span>
+        </header>
+
+        <figure class="workload-table-wrap" role="group" aria-label="Bảng tải bác sĩ">
+            <table class="workload-table" th:if="${workloads != null && !workloads.isEmpty()}">
+                <thead>
+                <tr>
+                    <th scope="col">Bác sĩ</th>
+                    <th scope="col" style="text-align:center;">Chờ xử lý</th>
+                    <th scope="col" style="text-align:center;">Đang xử lý</th>
+                    <th scope="col" style="text-align:center;">Thất bại</th>
+                    <th scope="col" style="text-align:center;">Tổng ca hoạt động</th>
+                    <th scope="col">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="w : ${workloads}">
+                    <td class="doctor-name" th:text="${w.doctorName}">Nguyễn Văn A</td>
+                    <td class="count-cell pending" th:text="${w.pendingCount}">0</td>
+                    <td class="count-cell processing" th:text="${w.processingCount}">0</td>
+                    <td class="count-cell failed" th:text="${w.failedCount}">0</td>
+                    <td class="count-cell total" th:text="${w.totalActive}">0</td>
+                    <td>
+                        <a th:href="@{/receptionist/doctor-workload/{id}(id=${w.doctorId})}"
+                           class="btn-detail" aria-label="Xem chi tiết ca của bác sĩ">
+                            <i class="fa-solid fa-eye" aria-hidden="true"></i> Xem chi tiết
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <figcaption class="empty-state" th:if="${workloads == null || workloads.isEmpty()}">
+                <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
+                <p>Không có bác sĩ nào đang hoạt động.</p>
+            </figcaption>
+        </figure>
+    </section>
+</main>
+</body>
+</html>

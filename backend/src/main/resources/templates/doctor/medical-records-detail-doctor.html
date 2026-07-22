@@ -270,26 +270,62 @@
                             🖼 Danh sách ảnh (<span th:text="${mi.details.size()}">0</span>)
                         </div>
                         <div class="img-grid">
-                            <div th:each="d : ${mi.details}" class="img-thumb">
-                                <div class="img-thumb-box">
-                                    <img th:src="${d.imageUrl}"
-                                         th:alt="${mi.imageType}"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                         style="width:100%;height:100%;object-fit:cover;"/>
-                                    <span style="display:none; align-items:center; justify-content:center;
-                                                 font-size:28px; color:var(--text-xmuted);
-                                                 position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                            <th:block th:each="d : ${mi.details}">
+                                <!-- Ảnh gốc -->
+                                <div class="img-thumb" th:if="${!#strings.isEmpty(d.imageUrl)}">
+                                    <a th:href="${d.imageUrl}" target="_blank" style="display: block; text-decoration: none;" class="img-thumb-box">
+                                        <img th:src="${d.imageUrl}"
+                                             th:alt="'Ảnh gốc - ' + ${mi.imageType}"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                             style="width:100%;height:100%;object-fit:cover;"/>
+                                        <span style="display:none; align-items:center; justify-content:center; font-size:28px; color:var(--text-xmuted); position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                                    </a>
+                                    <span class="img-name">Ảnh gốc</span>
+                                    <span class="img-date" th:text="${d.uploadedAt != null} ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')} : '—'">—</span>
                                 </div>
-                                <span class="img-name"
-                                      th:text="${d.imageUrl != null and d.imageUrl.contains('/')}
-                                               ? ${d.imageUrl.substring(d.imageUrl.lastIndexOf('/') + 1)}
-                                               : ${d.imageUrl ?: '—'}">—</span>
-                                <span class="img-date"
-                                      th:text="${d.uploadedAt != null}
-                                               ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
-                                               : '—'">—</span>
-                                <a th:href="@{/ai-result(imageId=${d.imageID})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-robot"></i> Xem chi tiết</a>
-                            </div>
+                                
+                                <!-- Ảnh AI -->
+                                <div class="img-thumb" th:if="${!#strings.isEmpty(d.aiImageUrl)}">
+                                    <a th:href="${d.aiImageUrl}" target="_blank" style="display: block; text-decoration: none;" class="img-thumb-box">
+                                        <img th:src="${d.aiImageUrl}"
+                                             th:alt="'Ảnh AI - ' + ${mi.imageType}"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                             style="width:100%;height:100%;object-fit:cover;"/>
+                                        <span style="display:none; align-items:center; justify-content:center; font-size:28px; color:var(--text-xmuted); position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                                    </a>
+                                    <span class="img-name">Ảnh AI dự đoán</span>
+                                    <span class="img-date" th:text="${d.confidenceScore != null} ? ${'Độ tin cậy: ' + d.confidenceScore + '%'} : '—'">—</span>
+                                </div>
+
+                                <!-- Ảnh KTV khoanh (Kết luận) -->
+                                <div class="img-thumb" th:if="${!#strings.isEmpty(d.imgResultConclusion)}">
+                                    <a th:href="${d.imgResultConclusion}" target="_blank" style="display: block; text-decoration: none;" class="img-thumb-box">
+                                        <img th:src="${d.imgResultConclusion}"
+                                             th:alt="'Ảnh kết luận - ' + ${mi.imageType}"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                             style="width:100%;height:100%;object-fit:cover;"/>
+                                        <span style="display:none; align-items:center; justify-content:center; font-size:28px; color:var(--text-xmuted); position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                                    </a>
+                                    <span class="img-name">Ảnh KTV khoanh</span>
+                                    <span class="img-date" th:text="${d.uploadedAt != null} ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')} : '—'">—</span>
+                                </div>
+                                
+                                <!-- Nút xem chi tiết AI -->
+                                <div style="grid-column: 1 / -1; display: flex; justify-content: flex-start; margin-top: 4px; margin-bottom: 8px;">
+                                    <a th:href="@{/ai-result(imageId=${d.imageID})}"
+                                       style="display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px;
+                                              background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+                                              color: white; border-radius: 20px; text-decoration: none;
+                                              font-size: 13px; font-weight: 600; letter-spacing: 0.01em;
+                                              box-shadow: 0 3px 10px rgba(99,102,241,0.35);
+                                              transition: all 0.2s ease;"
+                                       onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 16px rgba(99,102,241,0.45)';"
+                                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 10px rgba(99,102,241,0.35)';">
+                                        <i class="fa-solid fa-robot"></i>
+                                        Xem phân tích AI
+                                    </a>
+                                </div>
+                            </th:block>
                         </div>
                     </div>
 

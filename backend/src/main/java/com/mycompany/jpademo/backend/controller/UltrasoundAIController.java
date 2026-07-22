@@ -416,7 +416,7 @@ public class UltrasoundAIController {
                 MedicalImage mi = detail.getMedicalImage();
                 mi.setStatus(com.mycompany.jpademo.backend.enums.MedicalImageStatus.COMPLETED);
                 medicalImageRepository.save(mi);
-                
+
                 // Cập nhật trạng thái session: kỹ thuật viên đã lưu kết luận xong → chuyển sang PENDING (chờ bác sĩ kết luận)
                 DiagnosisSession session = mi.getDiagnosisSession();
                 if (session != null && session.getStatus() == com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.PROCESSING) {

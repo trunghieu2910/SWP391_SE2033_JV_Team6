@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.dto.request;
 
+import com.mycompany.jpademo.backend.enums.ClinicalInputMode;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -26,4 +27,8 @@ public class CreateDiagnosisSessionRequest {
 
     @Positive(message = "Chiều cao phải là số dương")
     private Double height;
+
+    @NotNull(message = "Vui lòng chọn người nhập triệu chứng")
+    @Builder.Default
+    private ClinicalInputMode clinicalInputMode = ClinicalInputMode.PATIENT;
 }

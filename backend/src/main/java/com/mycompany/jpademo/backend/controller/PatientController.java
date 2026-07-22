@@ -151,7 +151,7 @@ public class PatientController {
 
         // Bệnh nhân chỉ xuất được bản có che/mask chẩn đoán nếu bác sĩ chưa công bố
         MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordDetail(id, true);
-        byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record);
+        byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record, true);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
