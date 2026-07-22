@@ -24,7 +24,9 @@ public class MedicationReminderRequest {
     @Size(max = 500, message = "Ghi chú không được vượt quá 500 ký tự")
     private String note;
 
-    @NotNull(message = "Giờ nhắc không được để trống")
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime scheduledTime;
+
+    @DateTimeFormat(pattern = "HH:mm")
+    private java.util.List<LocalTime> scheduledTimes;
 }

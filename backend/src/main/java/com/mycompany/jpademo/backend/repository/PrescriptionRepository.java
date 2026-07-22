@@ -23,4 +23,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Inte
 
     @Query("SELECT p FROM Prescription p WHERE p.doctor.userId = :doctorId")
     List<Prescription> findByDoctorId(@Param("doctorId") Integer doctorId);
+
+    @Query("SELECT p FROM Prescription p WHERE p.session.sessionId = :sessionId")
+    Optional<Prescription> findBySessionSessionId(@Param("sessionId") Integer sessionId);
 }

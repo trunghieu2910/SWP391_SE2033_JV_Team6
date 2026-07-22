@@ -43,6 +43,7 @@ public class DoctorDiagnosisController {
 
     private final DoctorDiagnosisService doctorDiagnosisService;
     private final DiseaseTypeService diseaseTypeService;
+    private final com.mycompany.jpademo.backend.service.interfaces.DoctorPrescriptionService doctorPrescriptionService;
 
     /** Retrieves a paginated list of diagnosis sessions assigned to the current doctor. */
     @GetMapping
@@ -79,6 +80,8 @@ public class DoctorDiagnosisController {
         model.addAttribute("sessionDetail", sessionDetail);
         model.addAttribute("statuses", DiagnosisSessionStatus.values());
         model.addAttribute("diseaseTypes", diseaseTypeService.getAllDiseaseTypes());
+        model.addAttribute("activeDrugs", doctorPrescriptionService.getActiveDrugs());
+        model.addAttribute("prescription", doctorPrescriptionService.getPrescriptionBySessionId(sessionId).orElse(null));
         return "doctor/session-detail";
     }
 

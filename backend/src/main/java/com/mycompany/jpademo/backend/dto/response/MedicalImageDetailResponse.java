@@ -23,4 +23,5 @@ public class MedicalImageDetailResponse {
     private String imgResultConclusion;
 
     private LocalDateTime uploadedAt;
+
 }

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{receptionist/layout :: main-layout(~{::main}, 'Hồ sơ cá nhân', 'profile')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/patient/profile.css}"/>
+
+    <!-- Success / Error messages -->
+    <output th:if="${success}" role="status"
+            style="display:flex;align-items:center;gap:10px;background:#ecfdf5;border:1px solid #10b981;color:#065f46;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-weight:600;">
+        <i class="fas fa-check-circle" aria-hidden="true"></i> Thay đổi thông tin cá nhân thành công.
+    </output>
+    <output th:if="${error}" role="alert"
+            style="display:flex;align-items:center;gap:10px;background:#fef2f2;border:1px solid #ef4444;color:#991b1b;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-weight:600;">
+        <i class="fas fa-exclamation-circle" aria-hidden="true"></i> <span th:text="${error}"></span>
+    </output>
+
+    <article class="content-grid" style="display:grid;grid-template-columns:1fr 2fr;gap:24px;margin-top:20px;">
+
+        <!-- Summary Card -->
+        <aside class="summary-card" aria-label="Tóm tắt hồ sơ"
+               style="background:white;padding:24px;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <figure class="avatar-large"
+                    style="width:96px;height:96px;border-radius:50%;background:#e0f2fe;color:#0284c7;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;margin-bottom:16px;"
+                    th:text="${profile.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'L'}"
+                    aria-label="Ảnh đại diện">L</figure>
+            <h2 style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:4px;"
+                th:text="${profile.fullName != null ? profile.fullName : 'Chưa cập nhật'}">Họ tên lễ tân</h2>
+            <p class="muted" style="color:#64748b;font-size:14px;margin-bottom:24px;"
+               th:text="${profile.email != null ? profile.email : 'Chưa có email'}">email@example.com</p>
+            <dl class="summary-list" style="width:100%;border-top:1px solid #f1f5f9;padding-top:16px;text-align:left;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;">
+                    <dt style="color:#64748b;">Số điện thoại</dt>
+                    <dd style="color:#0f172a;font-weight:700;margin:0;"
+                        th:text="${profile.phoneNumber != null ? profile.phoneNumber : 'Chưa cập nhật'}"></dd>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:14px;">
+                    <dt style="color:#64748b;">CCCD/CMND</dt>
+                    <dd style="color:#0f172a;font-weight:700;margin:0;"
+                        th:text="${profile.nationalID != null ? profile.nationalID : 'Chưa cập nhật'}"></dd>
+                </div>
+            </dl>
+        </aside>
+
+        <!-- Edit Profile Form -->
+        <section class="form-card" aria-labelledby="form-heading"
+                 style="background:white;padding:24px;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+            <h3 id="form-heading" class="sr-only">Chỉnh sửa hồ sơ cá nhân</h3>
+            <form th:action="@{/receptionist/profile}" th:object="${profileForm}" method="post" novalidate>
+                <fieldset style="border:none;padding:0;margin:0;">
+                    <legend class="sr-only">Thông tin cá nhân</legend>
+                    <div class="field-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+                        <div class="form-group" style="display:flex;flex-direction:column;gap:6px;">
+                            <label style="font-weight:600;font-size:14px;color:#334155;" for="username">Tên đăng nhập</label>
+                            <input style="padding:10px;border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;"
+                                   id="username" type="text" th:field="*{username}" class="form-input" readonly
+                                   aria-describedby="username-hint"/>
+                            <small id="username-hint" style="font-size:12px;color:#64748b;">Tên đăng nhập không thể thay đổi.</small>
+                        </div>
+
+                        <div class="form-group" style="display:flex;flex-direction:column;gap:6px;">
+                            <label style="font-weight:600;font-size:14px;color:#334155;" for="fullName">Họ và tên</label>
+                            <input style="padding:10px;border:1px solid #cbd5e1;border-radius:6px;"
+                                   id="fullName" type="text" th:field="*{fullName}" class="form-input" required
+                                   aria-required="true"/>
+                            <span class="error" style="color:#ef4444;font-size:12px;" role="alert"
+                                  th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></span>
+                        </div>
+
+                        <div class="form-group" style="display:flex;flex-direction:column;gap:6px;">
+                            <label style="font-weight:600;font-size:14px;color:#334155;" for="phoneNumber">Số điện thoại</label>
+                            <input style="padding:10px;border:1px solid #cbd5e1;border-radius:6px;"
+                                   id="phoneNumber" type="tel" th:field="*{phoneNumber}" class="form-input"
+                                   autocomplete="tel"/>
+                            <span class="error" style="color:#ef4444;font-size:12px;" role="alert"
+                                  th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></span>
+                        </div>
+
+                        <div class="form-group" style="display:flex;flex-direction:column;gap:6px;">
+                            <label style="font-weight:600;font-size:14px;color:#334155;" for="nationalID">CCCD/CMND</label>
+                            <input style="padding:10px;border:1px solid #cbd5e1;border-radius:6px;"
+                                   id="nationalID" type="text" th:field="*{nationalID}" class="form-input"/>
+                            <span class="error" style="color:#ef4444;font-size:12px;" role="alert"
+                                  th:if="${#fields.hasErrors('nationalID')}" th:errors="*{nationalID}"></span>
+                        </div>
+
+                    </div>
+                </fieldset>
+
+                <nav class="form-actions" aria-label="Hành động biểu mẫu"
+                     style="margin-top:24px;display:flex;justify-content:flex-end;gap:12px;">
+                    <a th:href="@{/change-password}" class="btn-action"
+                       style="padding:10px 20px;font-weight:600;border-radius:6px;border:1px solid #cbd5e1;background:white;color:#334155;text-decoration:none;display:inline-block;cursor:pointer;">Đổi mật khẩu</a>
+                    <button type="submit" class="btn-action btn-primary"
+                            style="padding:10px 20px;font-weight:600;border-radius:6px;border:none;background:#0284c7;color:white;cursor:pointer;"
+                            onclick="return confirm('Bạn có chắc chắn muốn lưu thay đổi hồ sơ này không?');">Lưu thay đổi</button>
+                </nav>
+            </form>
+        </section>
+
+    </article>
+</main>
+</body>
+</html>

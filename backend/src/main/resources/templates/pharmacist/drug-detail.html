@@ -68,6 +68,19 @@
                 </div>
             </div>
 
+            <!-- Unit Conversion Display -->
+            <div th:if="${conversions != null and not #lists.isEmpty(conversions)}" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light); display: block; margin-bottom: 12px;">Thiết lập quy đổi</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                    <th:block th:each="conv, iterStat : ${conversions}">
+                        <div style="background: #f8fafc; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: 600; color: var(--neutral-dark);">
+                            1 <span th:text="${conv.largeUnitName}"></span> = <span th:text="${conv.conversionQuantity}"></span> <span th:text="${conv.smallUnitName}"></span>
+                        </div>
+                        <i th:if="${!iterStat.last}" class="fas fa-arrow-right" style="color: var(--neutral-light); font-size: 0.9rem;"></i>
+                    </th:block>
+                </div>
+            </div>
+
             <!-- Audit Trail -->
             <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color); display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
                 <div style="display: flex; align-items: flex-start; gap: 12px; background: #f8fafc; border-radius: var(--radius); padding: 14px 18px;">
@@ -91,7 +104,13 @@
                 </div>
             </div>
 
-            <div style="display: flex; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+            <div th:if="${drug.status == 0}" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <div style="background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
+                    <i class="fas fa-exclamation-circle"></i> Không được chỉnh sửa: thuốc đã ngưng sử dụng
+                </div>
+            </div>
+
+            <div th:if="${drug.status != 0}" style="display: flex; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 24px;">
                 <button type="button" class="btn btn-warning" th:onclick="showEditForm()">
                     <i class="fas fa-edit"></i> Sửa thông tin thuốc
                 </button>
@@ -99,7 +118,7 @@
         </section>
 
         <!-- Edit Form Card (Initially Hidden) -->
-        <section id="editFormCard" class="card" style="display: none; margin-bottom: 32px;">
+        <section th:if="${drug.status != 0}" id="editFormCard" class="card" style="display: none; margin-bottom: 32px;">
             <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 24px;">
                 <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--neutral-dark);">Cập nhật thông tin thuốc</h2>
             </div>
@@ -311,11 +330,17 @@
     <script th:src="@{/js/pharmacist/drug-form.js}"></script>
     <script>
         function showEditForm() {
-            document.getElementById('editFormCard').style.display = 'block';
-            document.getElementById('editFormCard').scrollIntoView({ behavior: 'smooth' });
+            const editCard = document.getElementById('editFormCard');
+            if (editCard) {
+                editCard.style.display = 'block';
+                editCard.scrollIntoView({ behavior: 'smooth' });
+            }
         }
         function hideEditForm() {
-            document.getElementById('editFormCard').style.display = 'none';
+            const editCard = document.getElementById('editFormCard');
+            if (editCard) {
+                editCard.style.display = 'none';
+            }
         }
         // Validate edit form before submit
         document.addEventListener('DOMContentLoaded', function() {

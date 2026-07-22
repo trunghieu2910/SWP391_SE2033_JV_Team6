@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -182,10 +183,20 @@ public class UltrasoundAIController {
             }
 
             // 5. Lưu vào Database
-            MedicalImage mi = new MedicalImage();
-            mi.setDiagnosisSession(sessionOpt.get());
-            mi.setImageType("Siêu âm bụng");
-            mi.setStatus(com.mycompany.jpademo.backend.enums.MedicalImageStatus.COMPLETED);
+            List<MedicalImage> existingImages = medicalImageRepository.findByDiagnosisSessionSessionId(sessionId);
+            MedicalImage mi = null;
+            for(MedicalImage img : existingImages) {
+                if(img.getStatus() == com.mycompany.jpademo.backend.enums.MedicalImageStatus.PENDING) {
+                    mi = img;
+                    break;
+                }
+            }
+            if (mi == null) {
+                mi = new MedicalImage();
+                mi.setDiagnosisSession(sessionOpt.get());
+                mi.setImageType("Siêu âm bụng");
+                mi.setStatus(com.mycompany.jpademo.backend.enums.MedicalImageStatus.PENDING);
+            }
             mi = medicalImageRepository.save(mi);
             
             MedicalImageDetails detail = new MedicalImageDetails();
@@ -195,13 +206,6 @@ public class UltrasoundAIController {
             detail.setConfidenceScore(confidenceScore);
             detail = repository.save(detail);
 
-            // 6. Cập nhật trạng thái session: AI đã xử lý xong → chuyển sang PENDING (chờ bác sĩ kết luận)
-            DiagnosisSession session = sessionOpt.get();
-            if (session.getStatus() == com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.PROCESSING) {
-                session.setStatus(com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.PENDING);
-                diagnosisSessionRepository.save(session);
-            }
-            
             return ResponseEntity.ok(new ImageDetailDto(
                     detail.getImageId(),
                     "Siêu âm bụng",
@@ -406,6 +410,21 @@ public class UltrasoundAIController {
             }
             
             repository.save(detail);
+
+            // Đánh dấu MedicalImage là COMPLETED để rời khỏi hàng đợi
+            if (detail.getMedicalImage() != null) {
+                MedicalImage mi = detail.getMedicalImage();
+                mi.setStatus(com.mycompany.jpademo.backend.enums.MedicalImageStatus.COMPLETED);
+                medicalImageRepository.save(mi);
+
+                // Cập nhật trạng thái session: kỹ thuật viên đã lưu kết luận xong → chuyển sang PENDING (chờ bác sĩ kết luận)
+                DiagnosisSession session = mi.getDiagnosisSession();
+                if (session != null && session.getStatus() == com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.PROCESSING) {
+                    session.setStatus(com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.PENDING);
+                    diagnosisSessionRepository.save(session);
+                }
+            }
+
             return ResponseEntity.ok("Đã lưu kết luận thành công!");
         } catch (Exception e) {
             e.printStackTrace();

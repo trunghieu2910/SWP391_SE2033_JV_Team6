@@ -337,6 +337,20 @@ public class PharmacistController {
             model.addAttribute("patientDob", dobFormatted);
             model.addAttribute("prescriptionId", prescriptionId);
             model.addAttribute("details", details);
+
+            // Add dispensing pharmacist details if available
+            PrescriptionDetailDTO dispensedDetail = details.stream()
+                .filter(d -> d.getDispensedByUser() != null)
+                .findFirst()
+                .orElse(null);
+            if (dispensedDetail != null) {
+                model.addAttribute("dispensedPharmacistName", dispensedDetail.getDispensedByUser());
+                model.addAttribute("dispensedPharmacistId", dispensedDetail.getDispensedByUserId());
+            } else {
+                model.addAttribute("dispensedPharmacistName", null);
+                model.addAttribute("dispensedPharmacistId", null);
+            }
+
             return "pharmacist/dispense-prescription-detail";
         } catch (Exception e) {
             log.error("Error loading prescription detail", e);
@@ -384,13 +398,17 @@ public class PharmacistController {
     // ==================== INVENTORY MANAGEMENT ====================
     @GetMapping("/inventory")
     public String getInventory(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String smallUnit,
             @PageableDefault(size = 10) Pageable pageable,
             Model model) {
         try {
-            Page<InventoryDTO> inventories = pharmacistService.getInventory(pageable);
+            Page<InventoryDTO> inventories = pharmacistService.getInventory(search, smallUnit, pageable);
             List<InventoryDTO> expiringItems = pharmacistService.getExpiringInventory();
             List<InventoryDTO> lowStockItems = pharmacistService.getLowStockInventory();
             
+            model.addAttribute("search", search);
+            model.addAttribute("smallUnit", smallUnit);
             model.addAttribute("inventories", inventories);
             model.addAttribute("expiringItems", expiringItems);
             model.addAttribute("lowStockItems", lowStockItems);

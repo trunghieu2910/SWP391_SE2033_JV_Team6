@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{receptionist/layout :: main-layout(~{::main}, 'Chi tiết ca bác sĩ', 'doctor-workload')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/receptionist/doctor-workload.css}"/>
+
+    <!-- [Nguyen The Hieu]: Bước 5 - View (Màn hình 2): Hiển thị danh sách ca khám cụ thể của một bác sĩ -->
+
+    <!-- Back link -->
+    <a th:href="@{/receptionist/doctor-workload}" class="back-link">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Quay lại danh sách
+    </a>
+
+    <!-- Doctor name heading -->
+    <h2 style="font-size:1.25rem;font-weight:800;color:#0f172a;margin-bottom:20px;">
+        <i class="fa-solid fa-user-doctor" aria-hidden="true" style="color:var(--primary);margin-right:8px;"></i>
+        Chi tiết ca của bác sĩ: <span th:text="${doctorName}">Tên bác sĩ</span>
+    </h2>
+
+    <!-- Filter by creation date -->
+    <aside class="workload-filter" aria-label="Bộ lọc theo ngày tạo ca">
+        <form th:action="@{/receptionist/doctor-workload/{id}(id=${doctorId})}" method="get"
+              class="workload-filter-form" id="filterForm">
+
+            <fieldset style="border:none;padding:0;margin:0;display:contents;">
+                <legend class="sr-only">Lọc theo ngày tạo ca</legend>
+
+                <label for="dateFilter" class="sr-only">Lọc theo ngày tạo ca</label>
+                <select id="dateFilter" name="dateFilter"
+                        aria-label="Chọn khoảng thời gian lọc">
+                    <option value="ALL" th:selected="${dateFilter == 'ALL'}">Tất cả</option>
+                    <option value="TODAY" th:selected="${dateFilter == 'TODAY'}">Hôm nay</option>
+                    <option value="LAST_7_DAYS" th:selected="${dateFilter == 'LAST_7_DAYS'}">7 ngày gần nhất</option>
+                    <option value="THIS_MONTH" th:selected="${dateFilter == 'THIS_MONTH'}">Tháng này</option>
+                    <option value="CUSTOM" th:selected="${dateFilter == 'CUSTOM'}">Từ ngày – Đến ngày</option>
+                </select>
+
+                <span id="dateRangeFields" class="date-range-fields"
+                      th:classappend="${dateFilter == 'CUSTOM' ? 'visible' : ''}">
+                    <label for="startDate" class="sr-only">Từ ngày</label>
+                    <input type="date" id="startDate" name="startDate"
+                           th:value="${startDate}" aria-label="Từ ngày"/>
+
+                    <label for="endDate" class="sr-only">Đến ngày</label>
+                    <input type="date" id="endDate" name="endDate"
+                           th:value="${endDate}" aria-label="Đến ngày"/>
+
+                    <button type="submit" class="btn-action btn-primary">
+                        <i class="fa-solid fa-search" aria-hidden="true"></i> Lọc
+                    </button>
+                </span>
+            </fieldset>
+        </form>
+    </aside>
+
+    <!-- Sessions table -->
+    <section class="workload-card" aria-labelledby="sessions-heading">
+        <header class="workload-card-header">
+            <h3 id="sessions-heading" class="workload-card-title">
+                <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                Danh sách ca chẩn đoán
+            </h3>
+            <span class="workload-count" th:text="${totalElements + ' ca'}"></span>
+        </header>
+
+        <figure class="workload-table-wrap" role="group" aria-label="Bảng danh sách ca">
+            <table class="workload-table" th:if="${sessions != null && sessions.hasContent()}">
+                <thead>
+                <tr>
+                    <th scope="col">Mã ca</th>
+                    <th scope="col">Bệnh nhân</th>
+                    <th scope="col">Ngày tạo</th>
+                    <th scope="col">Trạng thái</th>
+                    <th scope="col">Đã công bố</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${sessions.content}">
+                    <td>
+                        <strong th:text="${s.sessionId}">105</strong>
+                    </td>
+                    <td th:text="${s.patient != null && s.patient.user != null ? s.patient.user.fullName : 'N/A'}">
+                        Nguyễn Thị A
+                    </td>
+                    <td th:text="${#temporals.format(s.createdAt, 'dd/MM/yyyy')}">20/07/2026</td>
+                    <td>
+                        <mark class="status-badge"
+                             th:classappend="${s.status.name() == 'PENDING' ? 'status-pending' :
+                                               s.status.name() == 'PROCESSING' ? 'status-processing' :
+                                               s.status.name() == 'COMPLETED' ? 'status-completed' : 'status-failed'}">
+                            <span class="status-dot" aria-hidden="true"></span>
+                            <span th:text="${s.status.name() == 'PENDING' ? 'Chờ xử lý' :
+                                             s.status.name() == 'PROCESSING' ? 'Đang xử lý' :
+                                             s.status.name() == 'COMPLETED' ? 'Hoàn thành' : 'Thất bại'}">
+                                Chờ xử lý
+                            </span>
+                        </mark>
+                    </td>
+                    <td>
+                        <span th:if="${s.isShared != null && s.isShared}" class="badge-shared">Đã công bố</span>
+                        <span th:unless="${s.isShared != null && s.isShared}" class="badge-private">Chưa</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <figcaption class="empty-state" th:if="${sessions == null || !sessions.hasContent()}">
+                <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                <p>Không có ca chẩn đoán nào trong khoảng thời gian đã chọn.</p>
+            </figcaption>
+        </figure>
+
+        <!-- Pagination -->
+        <nav class="pagination-bar" aria-label="Phân trang"
+             th:if="${sessions != null && sessions.totalPages > 1}">
+            <span class="pagination-info"
+                  th:text="'Trang ' + (${currentPage} + 1) + ' / ' + ${totalPages}"></span>
+            <ul class="page-links" style="list-style:none;display:flex;gap:4px;padding:0;margin:0;">
+                <li th:if="${currentPage > 0}">
+                    <a th:href="@{/receptionist/doctor-workload/{id}(id=${doctorId}, page=${currentPage - 1}, dateFilter=${dateFilter}, startDate=${startDate}, endDate=${endDate})}"
+                       class="page-btn" aria-label="Trang trước">
+                        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                    </a>
+                </li>
+                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/receptionist/doctor-workload/{id}(id=${doctorId}, page=${i}, dateFilter=${dateFilter}, startDate=${startDate}, endDate=${endDate})}"
+                       class="page-btn" th:classappend="${i == currentPage ? 'active' : ''}"
+                       th:text="${i + 1}" th:aria-label="'Trang ' + (${i} + 1)">1</a>
+                </li>
+                <li th:if="${currentPage < totalPages - 1}">
+                    <a th:href="@{/receptionist/doctor-workload/{id}(id=${doctorId}, page=${currentPage + 1}, dateFilter=${dateFilter}, startDate=${startDate}, endDate=${endDate})}"
+                       class="page-btn" aria-label="Trang sau">
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </section>
+
+    <script>
+        document.getElementById('dateFilter').addEventListener('change', function () {
+            var fields = document.getElementById('dateRangeFields');
+            if (this.value === 'CUSTOM') {
+                fields.classList.add('visible');
+            } else {
+                fields.classList.remove('visible');
+                this.form.submit();
+            }
+        });
+    </script>
+</main>
+</body>
+</html>

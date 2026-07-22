@@ -43,14 +43,14 @@
           <!-- Hiện 3 ảnh và kết luận -->
           <div class="completed-result-view" style="margin-top: 15px;">
             <div th:each="d : ${img.images}" style="display: flex; flex-direction: column; gap: 15px; border-top: 1px dashed #e2e8f0; padding-top: 15px;">
-                
+
                 <!-- Hiển thị 3 ảnh -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                     <div style="text-align: center;">
                         <span style="display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 8px;">Ảnh Gốc</span>
                         <img th:src="${d.imageUrl}" alt="Ảnh gốc" style="width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     </div>
-                    
+
                     <div th:if="${d.aiImageUrl}" style="text-align: center;">
                         <span style="display: block; font-size: 0.85rem; font-weight: 600; color: #3b82f6; margin-bottom: 8px;">Phân Tích AI</span>
                         <img th:src="${d.aiImageUrl}" alt="AI Image" style="width: 100%; border-radius: 8px; border: 1px solid #bfdbfe; box-shadow: 0 2px 4px rgba(59,130,246,0.15);">
@@ -118,7 +118,7 @@
           <div class="modal-body">
             <div class="form-group">
               <label for="imageType">Thông tin/Yêu cầu (VD: Siêu âm ổ bụng...) <span class="required">*</span></label>
-              <input type="text" class="form-control" id="imageType" name="imageType" required 
+              <input type="text" class="form-control" id="imageType" name="imageType" required
                      placeholder="Nhập loại hình ảnh y tế...">
             </div>
           </div>
@@ -183,4 +183,4 @@
   </div>
 </div>
 </body>
-</html>
+</html>

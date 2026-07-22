@@ -62,6 +62,14 @@
                     <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Trạng thái đơn</span>
                     <strong id="prescriptionStatusSummary" style="font-size: 1rem;">-</strong>
                 </div>
+                <div id="dispensedPharmacistNameContainer" style="display: none; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Dược sĩ cấp phát</span>
+                    <strong th:text="${dispensedPharmacistName != null ? dispensedPharmacistName : '-'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
+                <div id="dispensedPharmacistIdContainer" style="display: none; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã dược sĩ</span>
+                    <strong th:text="${dispensedPharmacistId != null ? dispensedPharmacistId : '-'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
+                </div>
             </div>
         </section>
 
@@ -133,6 +141,14 @@
                 statusEl.innerHTML = pendingCount > 0
                     ? '<span class="badge badge-warning">Chờ cấp phát</span>'
                     : '<span class="badge badge-success">Đã cấp phát</span>';
+            }
+
+            const pharmacistNameEl = document.getElementById('dispensedPharmacistNameContainer');
+            const pharmacistIdEl = document.getElementById('dispensedPharmacistIdContainer');
+            
+            if (pendingCount === 0 && pharmacistNameEl && pharmacistIdEl) {
+                pharmacistNameEl.style.display = 'flex';
+                pharmacistIdEl.style.display = 'flex';
             }
         });
     </script>

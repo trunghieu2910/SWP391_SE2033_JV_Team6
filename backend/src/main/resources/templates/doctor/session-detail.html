@@ -261,6 +261,27 @@
                 </div>
             </div>
 
+            <!-- 5. KÊ ĐƠN THUỐC -->
+            <div class="accordion-item prescription-accordion" style="border: 2px solid #0284c7; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12); margin-top: 20px;">
+                <div class="accordion-header" onclick="toggleAccordion('prescriptionAccordion')" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); cursor: pointer;">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-pills" style="color: #0284c7;"></i>
+                        <span style="color: #0369a1; font-weight: 700;">Kê đơn thuốc</span>
+                        <span class="review-status-indicator"
+                              th:classappend="${prescription != null} ? 'completed' : 'pending'">
+                            <span class="status-dot"></span>
+                            <span th:if="${prescription != null}" th:text="'Đã kê đơn (' + ${#lists.size(prescription.details)} + ' loại thuốc)'">Đã kê đơn</span>
+                            <span th:if="${prescription == null}">Chưa kê đơn</span>
+                        </span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="prescriptionIcon"></i>
+                </div>
+                <div class="accordion-body review-section" id="prescriptionAccordion"
+                     th:style="${prescription != null or (param.openPrescription != null and param.openPrescription[0] == 'true')} ? 'display: block; padding: 24px;' : 'display: none; padding: 24px;'">
+                    <div th:replace="~{doctor/fragments/prescription-form :: form(sessionDetail=${sessionDetail}, activeDrugs=${activeDrugs}, prescription=${prescription})}"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 

@@ -59,6 +59,7 @@ public class PatientController {
     private final DiagnosisSessionRepository sessionRepository;
     private final SymptomResultRepository symptomResultRepository;
     private final PdfService pdfService;
+    private final com.mycompany.jpademo.backend.repository.PrescriptionRepository prescriptionRepository;
 
     @GetMapping("")
     public String redirectToHome() {
@@ -131,6 +132,7 @@ public class PatientController {
 
         model.addAttribute("profile", profile);
         model.addAttribute("record", record);
+        model.addAttribute("prescription", prescriptionRepository.findBySessionSessionId(id).orElse(null));
 
         return "patient/medical-record-detail";
     }
@@ -151,7 +153,7 @@ public class PatientController {
 
         // Bệnh nhân chỉ xuất được bản có che/mask chẩn đoán nếu bác sĩ chưa công bố
         MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordDetail(id, true);
-        byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record);
+        byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record, true);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

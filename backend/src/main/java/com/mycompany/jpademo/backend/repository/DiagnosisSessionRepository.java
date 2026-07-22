@@ -201,5 +201,64 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     List<DiagnosisSession> findByStatusOrderByCreatedAtDesc(DiagnosisSessionStatus status);
     
     List<DiagnosisSession> findByStatusInOrderByCreatedAtDesc(List<DiagnosisSessionStatus> statuses);
+
+    // [Nguyen The Hieu]: Bước 1 - Repository: Đếm số ca khám của một bác sĩ dựa theo một trạng thái (status) cụ thể.
+    long countByUserUserIdAndStatus(Integer userId, DiagnosisSessionStatus status);
+
+    // [Nguyen The Hieu]: Bước 1 - Repository: Lấy danh sách ca khám của một bác sĩ.
+    // Hỗ trợ bộ lọc theo khoảng thời gian (startDate, endDate) và phân trang (Pageable) cho màn hình chi tiết.
+    @Query("SELECT ds FROM DiagnosisSession ds " +
+            "LEFT JOIN FETCH ds.patient p " +
+            "LEFT JOIN FETCH p.user pu " +
+            "WHERE ds.user.userId = :doctorId " +
+            "AND (:startDate IS NULL OR ds.createdAt >= :startDate) " +
+            "AND (:endDate IS NULL OR ds.createdAt <= :endDate) " +
+            "ORDER BY ds.createdAt DESC")
+    Page<DiagnosisSession> findByDoctorIdWithDateFilter(
+            @Param("doctorId") Integer doctorId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
+    // ===== QUERIES ĐẾM SỐ LƯỢNG CHO TRANG THỐNG KÊ (CHÍNH XÁC - KHÔNG PHỤ THUỘC PHÂN TRANG) =====
+
+    @Query(value = "SELECT COUNT(s.sessionID) " +
+            "FROM DiagnosisSession s " +
+            "JOIN Patient p ON s.patientID = p.patientID " +
+            "JOIN [Users] u ON p.userID = u.userID " +
+            "LEFT JOIN Review r ON s.sessionID = r.sessionID " +
+            "LEFT JOIN DiseaseType dt ON r.diseaseTypeID = dt.diseaseTypeID " +
+            "WHERE (:keyword IS NULL OR u.fullName COLLATE Latin1_General_CI_AI " +
+            "LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%')) " +
+            "  AND (:status IS NULL OR s.status = :status) " +
+            "  AND (:diseaseType IS NULL OR dt.name = :diseaseType) " +
+            "  AND (:startDate IS NULL OR r.reviewedAt >= :startDate) " +
+            "  AND (:endDate IS NULL OR r.reviewedAt <= :endDate)",
+            nativeQuery = true)
+    long countMedicalRecordsByStatus(
+            @Param("keyword") String keyword,
+            @Param("status") String status,
+            @Param("diseaseType") String diseaseType,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    @Query(value = "SELECT COUNT(s.sessionID) " +
+            "FROM DiagnosisSession s " +
+            "JOIN Patient p ON s.patientID = p.patientID " +
+            "JOIN [Users] u ON p.userID = u.userID " +
+            "LEFT JOIN Review r ON s.sessionID = r.sessionID " +
+            "LEFT JOIN DiseaseType dt ON r.diseaseTypeID = dt.diseaseTypeID " +
+            "WHERE (:keyword IS NULL OR u.fullName COLLATE Latin1_General_CI_AI " +
+            "LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%')) " +
+            "  AND (dt.name IS NOT NULL) " +
+            "  AND (:diseaseType IS NULL OR dt.name = :diseaseType) " +
+            "  AND (:startDate IS NULL OR r.reviewedAt >= :startDate) " +
+            "  AND (:endDate IS NULL OR r.reviewedAt <= :endDate)",
+            nativeQuery = true)
+    long countMedicalRecordsWithDiagnosis(
+            @Param("keyword") String keyword,
+            @Param("diseaseType") String diseaseType,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 }
 

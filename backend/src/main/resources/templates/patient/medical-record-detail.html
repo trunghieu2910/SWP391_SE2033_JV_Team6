@@ -253,36 +253,35 @@
                               th:text="${mi.status == 'PENDING' ? '⏳ Chờ' : mi.status == 'COMPLETED' ? '✓ Hoàn thành' : mi.status}">Trạng thái</span>
                     </div>
 
-                    <div th:if="${mi.details != null and !mi.details.isEmpty()}">
-                        <div class="sub-lbl" style="margin-bottom: 12px;">
-                            🖼 Danh sách ảnh (<span th:text="${mi.details.size()}">0</span>)
-                        </div>
-                        <div class="img-grid">
-                            <div th:each="d : ${mi.details}" class="img-thumb">
-                                <div class="img-thumb-box">
-                                    <img th:src="${d.imageUrl}"
-                                         th:alt="${mi.imageType}"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                         style="width:100%;height:100%;object-fit:cover;"/>
-                                    <span style="display:none; align-items:center; justify-content:center;
-                                                 font-size:28px; color:var(--text-xmuted);
-                                                 position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                    <div th:with="validImages=${mi.details != null ? mi.details.?[imgResultConclusion != null and !imgResultConclusion.isEmpty()] : null}">
+                        <div th:if="${validImages != null and !validImages.isEmpty()}">
+                            <div class="sub-lbl" style="margin-bottom: 12px;">
+                                🖼 Danh sách ảnh (<span th:text="${validImages.size()}">0</span>)
+                            </div>
+                            <div class="img-grid">
+                                <div th:each="d : ${validImages}" class="img-thumb">
+                                    <a th:href="${d.imgResultConclusion}" target="_blank" style="display: block; text-decoration: none;" class="img-thumb-box">
+                                        <img th:src="${d.imgResultConclusion}"
+                                             th:alt="${mi.imageType}"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                             style="width:100%;height:100%;object-fit:cover;"/>
+                                        <span style="display:none; align-items:center; justify-content:center;
+                                                     font-size:28px; color:var(--text-xmuted);
+                                                     position:absolute; inset:0; background:#f3f4f6;">🖼️</span>
+                                    </a>
+                                    <span class="img-name">Ảnh kết luận</span>
+                                    <span class="img-date"
+                                          th:text="${d.uploadedAt != null}
+                                                   ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
+                                                   : '—'">—</span>
+                                    <a th:href="${d.imgResultConclusion}" target="_blank" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-magnifying-glass-plus"></i> Xem ảnh lớn</a>
                                 </div>
-                                <span class="img-name"
-                                      th:text="${d.imageUrl != null and d.imageUrl.contains('/')}
-                                               ? ${d.imageUrl.substring(d.imageUrl.lastIndexOf('/') + 1)}
-                                               : ${d.imageUrl ?: '—'}">—</span>
-                                <span class="img-date"
-                                      th:text="${d.uploadedAt != null}
-                                               ? ${'Upload: ' + #dates.format(d.uploadedAt, 'dd/MM/yyyy')}
-                                               : '—'">—</span>
-                                <a th:href="@{/ai-result(imageId=${d.imageID})}" class="btn" style="margin-top: 8px; padding: 4px 12px; background-color: var(--primary); color: white; border-radius: 4px; text-decoration: none; font-size: 12px; display: inline-block; transition: var(--transition);"><i class="fa-solid fa-robot"></i> Xem chi tiết</a>
                             </div>
                         </div>
-                    </div>
 
-                    <div th:unless="${mi.details != null and !mi.details.isEmpty()}" style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 12px 0;">
-                        Chưa có hình ảnh được tải lên
+                        <div th:unless="${validImages != null and !validImages.isEmpty()}" style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 12px 0;">
+                            Chưa có hình ảnh kết luận được tải lên
+                        </div>
                     </div>
                 </div>
             </div>
@@ -360,6 +359,90 @@
                 </div>
                 <div style="font-size:12px; color:var(--text-xmuted);">
                     Kết quả sẽ được cập nhật sau khi bác sĩ hoàn tất đánh giá.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 6. ĐƠN THUỐC BÁC SĨ KÊ ══ -->
+    <div class="card" style="margin-top: 24px;">
+        <div class="sec-hdr">
+            <div class="sec-hdr-left">
+                <div class="sec-icon" style="background: rgba(2, 132, 199, 0.1); color: #0284c7;"><i class="fa-solid fa-pills"></i></div>
+                <span class="sec-title" style="color: #0369a1;">Đơn Thuốc Bác Sĩ Kê</span>
+            </div>
+            <span class="sec-badge" th:if="${prescription != null}"
+                  th:text="${prescription.status == 1 ? '✓ Đã cấp phát' : '⏳ Chờ cấp phát'}">Chờ cấp phát</span>
+        </div>
+        <div class="sec-inner">
+            <!-- Đã có đơn thuốc -->
+            <div th:if="${prescription != null and !#lists.isEmpty(prescription.details)}" style="display:flex; flex-direction:column; gap:16px;">
+                <div class="info-grid info-grid-3" style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div class="info-pair">
+                        <span class="info-lbl">Mã đơn thuốc</span>
+                        <span class="info-val mono accent" th:text="${prescription.prescriptionCode}">RX12345</span>
+                    </div>
+                    <div class="info-pair">
+                        <span class="info-lbl">Ngày kê đơn</span>
+                        <span class="info-val" th:text="${#temporals.format(prescription.prescriptionDate, 'dd/MM/yyyy HH:mm')}">22/07/2026</span>
+                    </div>
+                    <div class="info-pair">
+                        <span class="info-lbl">Chẩn đoán</span>
+                        <span class="info-val" th:text="${prescription.diagnosis ?: '—'}">—</span>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-top: 4px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                        <thead>
+                            <tr style="background: #f1f5f9; color: #475569; border-bottom: 2px solid #cbd5e1;">
+                                <th style="padding: 12px; width: 40px; text-align: center;">#</th>
+                                <th style="padding: 12px;">Tên thuốc</th>
+                                <th style="padding: 12px; width: 140px;">Số lượng kê</th>
+                                <th style="padding: 12px;">Cách sử dụng thuốc (Hướng dẫn của bác sĩ)</th>
+                                <th style="padding: 12px; width: 150px; text-align: center;">Tạo lời nhắc</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="detail, iterStat : ${prescription.details}" style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 12px; text-align: center; font-weight: 600; color: #64748b;" th:text="${iterStat.count}">1</td>
+                                <td style="padding: 12px;">
+                                    <div style="font-weight: 700; color: #0284c7;" th:text="${detail.drug != null ? detail.drug.drugName : 'Thuốc'}">Tên thuốc</div>
+                                    <div style="font-size: 0.775rem; color: #64748b;"
+                                         th:text="${detail.drug != null and detail.drug.strength != null ? '[' + detail.drug.drugCode + '] ' + detail.drug.strength + ' ' + detail.drug.strengthUnit : (detail.drug != null ? '[' + detail.drug.drugCode + ']' : '')}">Mã thuốc</div>
+                                </td>
+                                <td style="padding: 12px; font-weight: 700; color: #334155;">
+                                    <span th:text="${detail.quantityPrescribed}">10</span>
+                                    <span style="font-weight: normal; color: #64748b; font-size: 0.85rem;" th:text="${detail.dispenseUnit}">viên</span>
+                                </td>
+                                <td style="padding: 12px; color: #1e293b; background: #fff8f1; border-left: 3px solid #f97316;">
+                                    <i class="fa-solid fa-notes-medical" style="color: #f97316; margin-right: 6px;"></i>
+                                    <span th:text="${detail.instruction}">Uống 1 viên sau ăn sáng và tối</span>
+                                </td>
+                                <td style="padding: 12px; text-align: center;">
+                                    <a th:href="@{/patient/reminders/new(note=${'Uống ' + (detail.drug != null ? detail.drug.drugName : 'thuốc') + ' - ' + detail.instruction})}"
+                                       class="btn-create-reminder"
+                                       style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.2s;"
+                                       title="Tạo lời nhắc uống thuốc này">
+                                        <i class="fa-solid fa-bell" style="color: #0284c7;"></i>
+                                        <span>Nhắc thuốc</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${prescription.notes != null and !#strings.isEmpty(prescription.notes)}" style="font-size: 0.875rem; color: #475569; background: #f8fafc; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #0284c7;">
+                    <strong>Lời dặn chung của Bác sĩ:</strong> <span th:text="${prescription.notes}">—</span>
+                </div>
+            </div>
+
+            <!-- Chưa có đơn thuốc -->
+            <div th:unless="${prescription != null and !#lists.isEmpty(prescription.details)}" class="no-review" style="padding: 24px; text-align: center;">
+                <span style="font-size:32px;">💊</span>
+                <div style="font-size:14px; font-weight:600; color:var(--text-secondary); margin-top: 6px;">
+                    Chưa có đơn thuốc được kê cho ca chẩn đoán này.
                 </div>
             </div>
         </div>

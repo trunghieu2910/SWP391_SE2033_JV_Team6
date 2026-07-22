@@ -424,7 +424,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         review.setReviewedAt(LocalDateTime.now());
 
         reviewRepository.save(review);
-        
+
         session.setStatus(DiagnosisSessionStatus.COMPLETED);
         sessionRepository.save(session);
     }
@@ -520,7 +520,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     /** Maps medical image entity to DTO response. */
     private MedicalImageResponse mapToMedicalImageResponse(MedicalImage medicalImage) {
-        List<MedicalImageDetailResponse> details = medicalImage.getMedicalImageDetailsList() != null ? 
+        List<MedicalImageDetailResponse> details = medicalImage.getMedicalImageDetailsList() != null ?
             medicalImage.getMedicalImageDetailsList().stream()
                 .map(detail -> MedicalImageDetailResponse.builder()
                         .imageId(detail.getImageId())
@@ -528,6 +528,8 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                         .aiImageUrl(detail.getAiImageUrl())
                         .confidenceScore(detail.getConfidenceScore())
                         .technicalConclusion(detail.getTechnicalConclusion())
+                        .imgResultConclusion(detail.getImgResultConclusion())
+                        .aiImageUrl(detail.getAiImageUrl())
                         .imgResultConclusion(detail.getImgResultConclusion())
                         .uploadedAt(detail.getUploadedAt())
                         .build())
