@@ -48,8 +48,8 @@ public interface AdminService {
     /** Retrieves the current admin user entity. */
     User getAdminUser();
 
-    /** Retrieves a doctor's certificate resource and metadata. */
-    CertificateFileResponse getDoctorCertificate(Integer userId);
+    /** Retrieves a staff's certificate resource and metadata. */
+    CertificateFileResponse getStaffCertificate(Integer userId);
 
     /** Retrieves all available role names. */
     List<String> getRoleName();

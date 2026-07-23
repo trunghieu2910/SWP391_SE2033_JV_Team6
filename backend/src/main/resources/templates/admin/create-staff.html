@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: main-layout(~{::main}, 'Tạo tài khoản bác sĩ', 'create-staff')}">
+      th:replace="~{admin/layout :: main-layout(~{::main}, 'Tạo tài khoản nội bộ', 'create-staff')}">
 <body>
 <main>
     <link rel="stylesheet" th:href="@{/css/admin/create-staff.css}">
@@ -13,7 +13,7 @@
                     <i class="fa-solid fa-user-plus"></i>
                 </div>
                 <div>
-                    <h2 class="wizard-title">Đăng ký tài khoản bác sĩ mới</h2>
+                    <h2 class="wizard-title">Đăng ký tài khoản nội bộ mới</h2>
                     <p class="wizard-subtitle">Nhập thông tin và xác thực OTP để tạo tài khoản</p>
                 </div>
             </div>
@@ -40,7 +40,7 @@
 
         <div class="wizard-body">
             <!-- ============================================ -->
-            <!-- BƯỚC 1: ĐIỀN THÔNG TIN BÁC SĨ                 -->
+            <!-- BƯỚC 1: ĐIỀN THÔNG TIN                       -->
             <!-- ============================================ -->
             <div th:if="${step == 1}">
                 <!-- Hiển thị lỗi validation -->
@@ -83,7 +83,7 @@
                                 <i class="fa-regular fa-user"></i> Tên đăng nhập
                                 <span class="required">*</span>
                             </label>
-                            <input type="text" id="userName" th:field="*{userName}" placeholder="VD: doctor.nam" required>
+                            <input type="text" id="userName" th:field="*{userName}" placeholder="VD: staff.nam" required>
                             <span class="error-span" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></span>
                         </div>
 
@@ -103,7 +103,7 @@
                                 <i class="fa-regular fa-envelope"></i> Địa chỉ Email
                                 <span class="required">*</span>
                             </label>
-                            <input type="email" id="email" th:field="*{email}" placeholder="doctor.nam@hospital.com" required>
+                            <input type="email" id="email" th:field="*{email}" placeholder="staff.nam@hospital.com" required>
                             <span class="error-span" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
                         </div>
 
@@ -161,8 +161,6 @@
             <div th:if="${step == 2}">
                 <input type="hidden" id="remainingTime" th:value="${remainingTime}">
 
-                <!-- ===== KHÔNG CÓ th:if="${error}" Ở ĐÂY ===== -->
-
                 <form th:action="@{/admin/create-staff/confirm}" method="post" class="otp-box" id="otpForm">
                     <input type="hidden" name="requestId" th:value="${requestId}">
                     <div class="otp-icon-wrapper">
@@ -174,7 +172,7 @@
                     <h3 class="otp-title">Nhập mã xác thực OTP</h3>
                     <p class="otp-description">
                         Mã xác nhận OTP đã được gửi đến email quản trị viên của bạn.
-                        Vui lòng kiểm tra email và nhập mã để xác thực hành động tạo tài khoản bác sĩ này.
+                        Vui lòng kiểm tra email và nhập mã để xác thực hành động tạo tài khoản nội bộ này.
                     </p>
 
                     <div class="otp-input-wrapper">
@@ -197,12 +195,6 @@
                                 <i class="fa-regular fa-circle-check"></i> Đã gửi lại OTP thành công!
                             </span>
                         </div>
-                    </div>
-
-                    <!-- ===== HIỂN THỊ LỖI Ở ĐÂY (TRONG FORM) ===== -->
-                    <div th:if="${error}" class="alert alert-danger" role="alert" style="width: 100%; max-width: 420px; margin-top: 8px;">
-                        <i class="fa-solid fa-circle-exclamation"></i>
-                        <span th:text="${error}"></span>
                     </div>
 
                     <!-- OTP Error (JavaScript) -->

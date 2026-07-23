@@ -138,7 +138,7 @@
     </div>
 
     <!-- ===== CHỨNG CHỈ (Nếu là DOCTOR) ===== -->
-    <div th:if="${user.userResponse.roleName != null && user.userResponse.roleName.name() == 'DOCTOR'}"
+    <div th:if="${user.userResponse.roleName != null && user.userResponse.roleName.name() != 'PATIENT'}"
          class="certificate-section">
         <h3 class="section-title">
             <i class="fa-solid fa-certificate"></i> Chứng chỉ hành nghề

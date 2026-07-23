@@ -56,6 +56,34 @@ public final class SecureFileUploadUtil {
         return UUID.randomUUID() + declaredExt;
     }
 
+    /**
+     * Validate toàn diện 1 file upload và trả về tên file theo định dạng custom.
+     */
+    public static String validateAndGenerateCustomFileName(MultipartFile file, String customName) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("File không được để trống.");
+        }
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new BadRequestException("File vượt quá dung lượng cho phép (tối đa 5MB).");
+        }
+
+        String declaredExt = extractExtension(file.getOriginalFilename());
+        if (!ALLOWED_EXTENSIONS.contains(declaredExt)) {
+            throw new BadRequestException(
+                    "Định dạng file không được hỗ trợ. Chỉ chấp nhận: " + ALLOWED_EXTENSIONS);
+        }
+
+        if (!matchesRealContent(file, declaredExt)) {
+            throw new BadRequestException(
+                    "Nội dung file không khớp với định dạng khai báo (" + declaredExt + ").");
+        }
+
+        // Đảm bảo tên custom an toàn cho hệ thống file
+        String safeCustomName = customName.replaceAll("[^a-zA-Z0-9_.-]", "_");
+        return safeCustomName + declaredExt;
+    }
+
+
     // Đảm bảo path ghi file thực sự nằm trong thư mục cho phép.
     public static Path resolveSafely(Path baseDir, String safeFileName) {
         Path target = baseDir.resolve(safeFileName).normalize();

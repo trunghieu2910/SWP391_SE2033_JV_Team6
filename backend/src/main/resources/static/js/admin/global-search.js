@@ -6,11 +6,13 @@
     let searchTimeout = null;
     let isSearching = false;
 
-    // ===== MAP DỮ LIỆU SANG TIẾNG VIỆT =====
     const roleMap = {
         'ADMIN': 'Quản trị viên',
         'DOCTOR': 'Bác sĩ',
-        'PATIENT': 'Bệnh nhân'
+        'PATIENT': 'Bệnh nhân',
+        'PHARMACIST': 'Dược sĩ',
+        'RECEPTIONIST': 'Lễ tân',
+        'ULTRASOUND_DOCTOR': 'Bác sĩ siêu âm'
     };
 
     const statusMap = {
@@ -18,16 +20,92 @@
         'BANNED': 'Đã khóa'
     };
 
+    // Đồng bộ với AdminServiceImpl#mapActionToVietnamese bên backend.
+    // Khi thêm action mới bên Java, nhớ cập nhật lại map này.
     const actionMap = {
+        // Nhóm Đăng nhập
         'LOGIN': 'Đăng nhập',
+        'GOOGLE_LOGIN_FIRST_TIME': 'Đăng nhập',
+        'GOOGLE_LOGIN': 'Đăng nhập',
+
+        // Nhóm Tạo
+        'CREATE_DOCTOR': 'Tạo',
+        'CREATE_FINAL_DIAGNOSIS': 'Tạo',
+        'CREATE': 'Tạo',
+        'CREATE_LAB_RESULT': 'Tạo',
+
+        // Nhóm Cập nhật
+        'UPDATE_SESSION_STATUS': 'Cập nhật',
+        'UPDATE_SESSION_SHARE': 'Cập nhật',
+        'UPDATE_CLINICAL_SYMPTOMS': 'Cập nhật',
+        'UPDATE_PASSWORD': 'Cập nhật',
+        'UPDATE_REMINDER': 'Cập nhật',
+
+        // Nhóm Nhận kết quả
+        'LIS_RECEIVE': 'Nhận kết quả',
+        'LIS_SIMULATE': 'Nhận kết quả',
+
+        // Nhóm Xuất file pdf
+        'PATIENT_EXPORT_PDF_MEDICAL_RECORD': 'Xuất file pdf',
+        'DOCTOR_EXPORT_PDF_MEDICAL_RECORD': 'Xuất file pdf',
+
+        // Các action riêng lẻ
         'LOGOUT': 'Đăng xuất',
         'BAN_USER': 'Khóa User',
         'UNBAN_USER': 'Mở khóa',
-        'CREATE_DOCTOR': 'Tạo bác sĩ',
         'UPDATE_USER_STATUS': 'Đổi trạng thái',
         'BLOCK_IP': 'Chặn IP',
-        'UNBLOCK_IP': 'Mở khóa IP'
+        'UNBLOCK_IP': 'Mở khóa IP',
+        'PATIENT_NOTIFICATION': 'Thông báo',
+        'FORGOT_PASSWORD': 'Quên mật khẩu',
+        'VERIFY_OTP': 'Xác minh OTP',
+        'DELETE_LAB_RESULT': 'Xóa',
+        'REGISTER': 'Đăng kí',
+        'PATIENT_FILL_CLINLCAL_SYMPTOMS_FORM': 'Nhập',
+        'CREATE_REMINDER': 'Tạo nhắc nhở',
+        'VIEW_DIAGNOSIS_SESSIONS': 'Xem chẩn đoán',
+        'DELETE_REMINDER': 'Xoá nhắc nhở',
+        'REQUEST_MEDICAL_IMAGE': 'Yêu cầu',
+        'DELETE_MEDICAL_IMAGE': 'Xoá ảnh',
+        'RECEPTIONIST_CHANGE_PASSWORD': 'Đổi mật khẩu',
+        'RECEPTIONIST_CREATE_SESSION': 'Tạo ca khám',
+        'RECEPTIONIST_CREATE_PATIENT_ACCOUNT': 'Tạo tài khoản',
+        'CREATE_STAFF': 'Tạo tài khoản'
     };
+
+    // Map nhãn hiển thị -> class badge, tái sử dụng style .badge-* đã dùng ở admin/dashboard.html
+    const actionBadgeClassMap = {
+        'Đăng nhập': 'badge-login',
+        'Đăng xuất': 'badge-logout',
+        'Khóa User': 'badge-ban',
+        'Mở khóa': 'badge-unban',
+        'Tạo': 'badge-create',
+        'Đổi trạng thái': 'badge-update',
+        'Chặn IP': 'badge-block',
+        'Mở khóa IP': 'badge-unblock',
+        'Thông báo': 'badge-notification',
+        'Tạo ca khám': 'badge-create-session',
+        'Cập nhật': 'badge-update',
+        'Nhận kết quả': 'badge-receive',
+        'Xuất file pdf': 'badge-export',
+        'Quên mật khẩu': 'badge-forgot',
+        'Xác minh OTP': 'badge-otp',
+        'Xóa': 'badge-delete',
+        'Đăng kí': 'badge-register',
+        'Nhập': 'badge-input',
+        'Tạo nhắc nhở': 'badge-create',
+        'Xem chẩn đoán': 'badge-diagnosis',
+        'Xoá nhắc nhở': 'badge-delete',
+        'Yêu cầu': 'badge-request',
+        'Xoá ảnh': 'badge-delete',
+        'Đổi mật khẩu': 'badge-forgot',
+        'Tạo tài khoản': 'badge-create-session'
+    };
+
+    function getActionBadgeClass(action) {
+        const display = getActionDisplay(action);
+        return actionBadgeClassMap[display] || 'badge-other';
+    }
 
     function getRoleDisplay(role) {
         return roleMap[role] || role;
@@ -79,25 +157,15 @@
 
     function getRoleBadge(role) {
         if (!role) return '';
-        const roleMap = {
+        const roleClassMap = {
             'ADMIN': 'role-admin',
             'DOCTOR': 'role-doctor',
-            'PATIENT': 'role-patient'
+            'PATIENT': 'role-patient',
+            'PHARMACIST': 'role-pharmacist',
+            'RECEPTIONIST': 'role-receptionist',
+            'ULTRASOUND_DOCTOR': 'role-ultrasound_doctor'
         };
-        return `<span class="search-badge ${roleMap[role] || ''}">${getRoleDisplay(role)}</span>`;
-    }
-
-    function getItemLink(item, category) {
-        switch(category) {
-            case 'users':
-                return `/admin/users/${item.userId}`;
-            case 'logs':
-                return `/admin/logs?keyword=${encodeURIComponent(item.description || '')}`;
-            case 'blockedIPs':
-                return `/admin/security?keyword=${encodeURIComponent(item.ipAddress || '')}`;
-            default:
-                return '#';
-        }
+        return `<span class="search-badge ${roleClassMap[role] || ''}">${getRoleDisplay(role)}</span>`;
     }
 
     function renderUserItem(user) {
@@ -131,8 +199,7 @@
                 </div>
                 <div class="search-content">
                     <div class="search-title">
-                        ${getActionDisplay(log.action)}
-                        <span class="search-badge log-action">${log.action}</span>
+                        <span class="search-badge ${getActionBadgeClass(log.action)}">${getActionDisplay(log.action)}</span>
                     </div>
                     <div class="search-subtitle">
                         <span>${log.description || ''}</span>

@@ -139,12 +139,12 @@ function createSessionChart(data) {
     }
 
     if (!data || data.length === 0) {
-        console.warn('⚠️ Không có dữ liệu diagnosis sessions');
+        console.warn('⚠️ Không có dữ liệu access trends');
         canvas.style.display = 'none';
         if (errorEl) {
             errorEl.style.display = 'block';
             var span = errorEl.querySelector('span');
-            if (span) span.textContent = 'Chưa có dữ liệu phiên chẩn đoán';
+            if (span) span.textContent = 'Chưa có dữ liệu truy cập';
         }
         return;
     }
@@ -167,7 +167,7 @@ function createSessionChart(data) {
         if (errorEl) {
             errorEl.style.display = 'block';
             var span = errorEl.querySelector('span');
-            if (span) span.textContent = 'Chưa có dữ liệu phiên chẩn đoán';
+            if (span) span.textContent = 'Chưa có dữ liệu truy cập';
         }
         return;
     }
@@ -175,17 +175,21 @@ function createSessionChart(data) {
     try {
         var ctx = canvas.getContext('2d');
         new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: months,
                 datasets: [{
-                    label: 'Phiên chẩn đoán',
+                    label: 'Lượt truy cập',
                     data: counts,
-                    backgroundColor: '#8b5cf6',
-                    borderColor: '#7c3aed',
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    hoverBackgroundColor: '#7c3aed'
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
                 }]
             },
             options: {
@@ -196,7 +200,7 @@ function createSessionChart(data) {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.parsed.y + ' phiên';
+                                return context.parsed.y + ' lượt truy cập';
                             }
                         }
                     }
