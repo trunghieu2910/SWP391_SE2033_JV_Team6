@@ -26,8 +26,7 @@ public class AdminProfileViewController {
 
     @GetMapping
     public String profilePage(Model model,
-                              @AuthenticationPrincipal CustomUserDetails userDetails,
-                              @RequestParam(value = "success", required = false) boolean success) {
+                              @AuthenticationPrincipal CustomUserDetails userDetails) {
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
         UpdateProfileRequest profileForm = UpdateProfileRequest.builder()
                 .username(profile.getUsername())
@@ -41,7 +40,6 @@ public class AdminProfileViewController {
 
         model.addAttribute("profile", profile);
         model.addAttribute("profileForm", profileForm);
-        model.addAttribute("success", success);
         model.addAttribute("today", LocalDate.now());
 
         return "admin/profile";
@@ -49,10 +47,10 @@ public class AdminProfileViewController {
 
     @PostMapping
     public String saveProfile(@Valid @ModelAttribute("profileForm") UpdateProfileRequest profileForm,
-                               BindingResult bindingResult,
-                               Model model,
-                               @AuthenticationPrincipal CustomUserDetails userDetails,
-                               RedirectAttributes redirectAttributes) {
+                              BindingResult bindingResult,
+                              Model model,
+                              @AuthenticationPrincipal CustomUserDetails userDetails,
+                              RedirectAttributes redirectAttributes) {
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
         if (bindingResult.hasErrors()) {
             model.addAttribute("profile", profile);
@@ -62,6 +60,6 @@ public class AdminProfileViewController {
 
         profileService.updateProfile(userDetails.getUsername(), profileForm);
         redirectAttributes.addFlashAttribute("success", "Cập nhật hồ sơ thành công.");
-        return "redirect:/admin/profile?success=true";
+        return "redirect:/admin/profile";
     }
 }

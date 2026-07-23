@@ -12,14 +12,56 @@
                 <label><i class="fa-regular fa-circle-play"></i> Hành động</label>
                 <select name="action">
                     <option value="">Tất cả</option>
-                    <option value="LOGIN" th:selected="${param.action == 'LOGIN'}">Đăng nhập</option>
-                    <option value="LOGOUT" th:selected="${param.action == 'LOGOUT'}">Đăng xuất</option>
-                    <option value="BAN_USER" th:selected="${param.action == 'BAN_USER'}">Khóa tài khoản</option>
-                    <option value="UNBAN_USER" th:selected="${param.action == 'UNBAN_USER'}">Mở khóa</option>
-                    <option value="CREATE_DOCTOR" th:selected="${param.action == 'CREATE_DOCTOR'}">Tạo bác sĩ</option>
-                    <option value="UPDATE_USER_STATUS" th:selected="${param.action == 'UPDATE_USER_STATUS'}">Đổi trạng thái</option>
-                    <option value="BLOCK_IP" th:selected="${param.action == 'BLOCK_IP'}">Chặn IP</option>
-                    <option value="UNBLOCK_IP" th:selected="${param.action == 'UNBLOCK_IP'}">Mở khóa IP</option>
+                    <optgroup label="Tài khoản">
+                        <option value="LOGIN" th:selected="${param.action == 'LOGIN'}">Đăng nhập</option>
+                        <option value="LOGOUT" th:selected="${param.action == 'LOGOUT'}">Đăng xuất</option>
+                        <option value="REGISTER" th:selected="${param.action == 'REGISTER'}">Đăng kí</option>
+                        <option value="FORGOT_PASSWORD" th:selected="${param.action == 'FORGOT_PASSWORD'}">Quên mật khẩu</option>
+                        <option value="VERIFY_OTP" th:selected="${param.action == 'VERIFY_OTP'}">Xác minh OTP</option>
+                        <option value="UPDATE_PASSWORD" th:selected="${param.action == 'UPDATE_PASSWORD'}">Cập nhật mật khẩu</option>
+                        <option value="RECEPTIONIST_CHANGE_PASSWORD" th:selected="${param.action == 'RECEPTIONIST_CHANGE_PASSWORD'}">Đổi mật khẩu (lễ tân)</option>
+                    </optgroup>
+                    <optgroup label="Quản lý người dùng">
+                        <option value="BAN_USER" th:selected="${param.action == 'BAN_USER'}">Khóa tài khoản</option>
+                        <option value="UNBAN_USER" th:selected="${param.action == 'UNBAN_USER'}">Mở khóa</option>
+                        <option value="UPDATE_USER_STATUS" th:selected="${param.action == 'UPDATE_USER_STATUS'}">Đổi trạng thái</option>
+                        <option value="CREATE_STAFF" th:selected="${param.action == 'CREATE_STAFF'}">Tạo tài khoản nhân viên</option>
+                        <option value="CREATE_DOCTOR" th:selected="${param.action == 'CREATE_DOCTOR'}">Tạo bác sĩ</option>
+                        <option value="RECEPTIONIST_CREATE_PATIENT_ACCOUNT" th:selected="${param.action == 'RECEPTIONIST_CREATE_PATIENT_ACCOUNT'}">Tạo tài khoản bệnh nhân</option>
+                    </optgroup>
+                    <optgroup label="Bảo mật IP">
+                        <option value="BLOCK_IP" th:selected="${param.action == 'BLOCK_IP'}">Chặn IP</option>
+                        <option value="UNBLOCK_IP" th:selected="${param.action == 'UNBLOCK_IP'}">Mở khóa IP</option>
+                    </optgroup>
+                    <optgroup label="Khám bệnh">
+                        <option value="RECEPTIONIST_CREATE_SESSION" th:selected="${param.action == 'RECEPTIONIST_CREATE_SESSION'}">Tạo ca khám</option>
+                        <option value="UPDATE_SESSION_STATUS" th:selected="${param.action == 'UPDATE_SESSION_STATUS'}">Cập nhật ca khám</option>
+                        <option value="UPDATE_SESSION_SHARE" th:selected="${param.action == 'UPDATE_SESSION_SHARE'}">Chia sẻ ca khám</option>
+                        <option value="VIEW_DIAGNOSIS_SESSIONS" th:selected="${param.action == 'VIEW_DIAGNOSIS_SESSIONS'}">Xem chẩn đoán</option>
+                        <option value="CREATE_FINAL_DIAGNOSIS" th:selected="${param.action == 'CREATE_FINAL_DIAGNOSIS'}">Tạo chẩn đoán cuối</option>
+                        <option value="UPDATE_CLINICAL_SYMPTOMS" th:selected="${param.action == 'UPDATE_CLINICAL_SYMPTOMS'}">Cập nhật triệu chứng</option>
+                        <option value="PATIENT_FILL_CLINLCAL_SYMPTOMS_FORM" th:selected="${param.action == 'PATIENT_FILL_CLINLCAL_SYMPTOMS_FORM'}">Nhập triệu chứng</option>
+                    </optgroup>
+                    <optgroup label="Xét nghiệm / Kết quả">
+                        <option value="CREATE_LAB_RESULT" th:selected="${param.action == 'CREATE_LAB_RESULT'}">Tạo kết quả xét nghiệm</option>
+                        <option value="DELETE_LAB_RESULT" th:selected="${param.action == 'DELETE_LAB_RESULT'}">Xóa kết quả xét nghiệm</option>
+                        <option value="LIS_RECEIVE" th:selected="${param.action == 'LIS_RECEIVE'}">Nhận kết quả LIS</option>
+                        <option value="LIS_SIMULATE" th:selected="${param.action == 'LIS_SIMULATE'}">Giả lập kết quả LIS</option>
+                    </optgroup>
+                    <optgroup label="Hình ảnh y tế">
+                        <option value="REQUEST_MEDICAL_IMAGE" th:selected="${param.action == 'REQUEST_MEDICAL_IMAGE'}">Yêu cầu ảnh y tế</option>
+                        <option value="DELETE_MEDICAL_IMAGE" th:selected="${param.action == 'DELETE_MEDICAL_IMAGE'}">Xoá ảnh y tế</option>
+                    </optgroup>
+                    <optgroup label="Xuất báo cáo">
+                        <option value="PATIENT_EXPORT_PDF_MEDICAL_RECORD" th:selected="${param.action == 'PATIENT_EXPORT_PDF_MEDICAL_RECORD'}">Xuất PDF (bệnh nhân)</option>
+                        <option value="DOCTOR_EXPORT_PDF_MEDICAL_RECORD" th:selected="${param.action == 'DOCTOR_EXPORT_PDF_MEDICAL_RECORD'}">Xuất PDF (bác sĩ)</option>
+                    </optgroup>
+                    <optgroup label="Nhắc nhở & Thông báo">
+                        <option value="CREATE_REMINDER" th:selected="${param.action == 'CREATE_REMINDER'}">Tạo nhắc nhở</option>
+                        <option value="UPDATE_REMINDER" th:selected="${param.action == 'UPDATE_REMINDER'}">Cập nhật nhắc nhở</option>
+                        <option value="DELETE_REMINDER" th:selected="${param.action == 'DELETE_REMINDER'}">Xoá nhắc nhở</option>
+                        <option value="PATIENT_NOTIFICATION" th:selected="${param.action == 'PATIENT_NOTIFICATION'}">Thông báo bệnh nhân</option>
+                    </optgroup>
                 </select>
             </div>
             <div class="form-field">
@@ -78,10 +120,27 @@
                             <span th:case="'Đăng xuất'" class="badge badge-logout">Đăng xuất</span>
                             <span th:case="'Khóa User'" class="badge badge-ban">Khóa User</span>
                             <span th:case="'Mở khóa'" class="badge badge-unban">Mở khóa</span>
-                            <span th:case="'Tạo bác sĩ'" class="badge badge-create">Tạo bác sĩ</span>
+                            <span th:case="'Tạo'" class="badge badge-create">Tạo</span>
                             <span th:case="'Đổi trạng thái'" class="badge badge-update">Đổi trạng thái</span>
-                            <span th:case="'Chặn IP'" class="badge badge-ban">Chặn IP</span>
-                            <span th:case="'Mở khóa IP'" class="badge badge-unban">Mở khóa IP</span>
+                            <span th:case="'Chặn IP'" class="badge badge-block">Chặn IP</span>
+                            <span th:case="'Mở khóa IP'" class="badge badge-unblock">Mở khóa IP</span>
+                            <span th:case="'Thông báo'" class="badge badge-notification">Thông báo</span>
+                            <span th:case="'Tạo ca khám'" class="badge badge-create-session">Tạo ca khám</span>
+                            <span th:case="'Tạo tài khoản'" class="badge badge-create-session">Tạo tài khoản</span>
+                            <span th:case="'Cập nhật'" class="badge badge-update">Cập nhật</span>
+                            <span th:case="'Nhận kết quả'" class="badge badge-receive">Nhận kết quả</span>
+                            <span th:case="'Xuất file pdf'" class="badge badge-export">Xuất file pdf</span>
+                            <span th:case="'Quên mật khẩu'" class="badge badge-forgot">Quên mật khẩu</span>
+                            <span th:case="'Xác minh OTP'" class="badge badge-otp">Xác minh OTP</span>
+                            <span th:case="'Xóa'" class="badge badge-delete">Xóa</span>
+                            <span th:case="'Đăng kí'" class="badge badge-register">Đăng kí</span>
+                            <span th:case="'Nhập'" class="badge badge-input">Nhập</span>
+                            <span th:case="'Tạo nhắc nhở'" class="badge badge-create">Tạo nhắc nhở</span>
+                            <span th:case="'Xem chẩn đoán'" class="badge badge-diagnosis">Xem chẩn đoán</span>
+                            <span th:case="'Xoá nhắc nhở'" class="badge badge-delete">Xoá nhắc nhở</span>
+                            <span th:case="'Yêu cầu'" class="badge badge-request">Yêu cầu</span>
+                            <span th:case="'Xoá ảnh'" class="badge badge-delete">Xoá ảnh</span>
+                            <span th:case="'Đổi mật khẩu'" class="badge badge-forgot">Đổi mật khẩu</span>
                             <span th:case="*" class="badge badge-other" th:text="${log.actionDisplay}">Khác</span>
                         </span>
                     </td>

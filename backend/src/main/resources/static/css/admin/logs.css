@@ -1068,6 +1068,54 @@ td .badge {
         border-color: #312e81;
     }
 
+    .badge-receive {
+        background: #082f49;
+        color: #7dd3fc;
+        border-color: #0c4a6e;
+    }
+
+    .badge-export {
+        background: #4a044e;
+        color: #f0abfc;
+        border-color: #701a75;
+    }
+
+    .badge-forgot {
+        background: #431407;
+        color: #fdba74;
+        border-color: #7c2d12;
+    }
+
+    .badge-otp {
+        background: #422006;
+        color: #fde047;
+        border-color: #713f12;
+    }
+
+    .badge-delete {
+        background: #450a0a;
+        color: #f87171;
+        border-color: #7f1d1d;
+    }
+
+    .badge-register {
+        background: #1a2e05;
+        color: #bef264;
+        border-color: #365314;
+    }
+
+    .badge-input {
+        background: #042f2e;
+        color: #5eead4;
+        border-color: #115e59;
+    }
+
+    .badge-request {
+        background: #1e1b4b;
+        color: #c7d2fe;
+        border-color: #312e81;
+    }
+
     .badge-other {
         background: #1e293b;
         color: #94a3b8;
