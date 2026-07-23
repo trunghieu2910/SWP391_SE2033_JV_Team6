@@ -112,6 +112,9 @@ public class WebGoogleAuthController {
      * in", fully replacing the old JWT-issuing approach.
      */
     private void establishSession(User user, HttpServletRequest request, HttpServletResponse response) {
+        request.getSession(true);
+        request.changeSessionId();
+
         CustomUserDetails userDetails = new CustomUserDetails(user);
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -129,12 +132,12 @@ public class WebGoogleAuthController {
      *  role will land on different home pages — worth checking periodically. */
     private String redirectByRole(User user) {
         return switch (user.getRole().getRoleName()) {
-            case DOCTOR       -> "/doctor/sessions";
-            case PATIENT      -> "/patient/home";
-            case ADMIN        -> "/admin/dashboard";
-            case PHARMACIST   -> "/pharmacist/";
-            case RECEPTIONIST -> "/receptionist/create-session";
-            default -> "/";
+            case DOCTOR             -> "/doctor/sessions";
+            case PATIENT            -> "/patient/home";
+            case ADMIN              -> "/admin/dashboard";
+            case PHARMACIST         -> "/pharmacist/";
+            case RECEPTIONIST       -> "/receptionist/create-session";
+            case ULTRASOUND_DOCTOR  -> "/ultrasound-doctor/dashboard";
         };
     }
 }

@@ -133,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
 
         boolean valid = OtpUtil.verifyOtp(registerRequest.getEmail(), request.getOtp());
         if (!valid) {
-            throw new InvalidOtpException("no");
+            throw new InvalidOtpException();
         }
 
         Role patientRole = roleRepository.findByRoleName(RoleName.PATIENT)

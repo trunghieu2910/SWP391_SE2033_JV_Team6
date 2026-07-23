@@ -18,7 +18,6 @@
                         <form th:if="${lab.status.name() == 'PENDING'}"
                               th:action="@{/api/integration/lis/simulate/{sessionId}/{labResultId}(sessionId=${sessionId}, labResultId=${lab.labResultId})}"
                               method="post" class="lab-simulate-form">
-                            <input type="hidden" name="testType" th:value="${lab.testType}">
                             <button type="submit" class="btn-action btn-outline btn-simulate">
                                 <i class="fa-solid fa-flask-vial"></i> Lấy kết quả giả lập
                             </button>

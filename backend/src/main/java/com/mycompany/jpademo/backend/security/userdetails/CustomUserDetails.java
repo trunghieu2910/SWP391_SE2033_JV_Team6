@@ -34,11 +34,8 @@ public class CustomUserDetails implements UserDetails {
      *  and by @PreAuthorize. */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<SimpleGrantedAuthority> authorities =
-                List.of(new SimpleGrantedAuthority(
-                        "ROLE_" + user.getRole().getRoleName().name()));
-        System.out.println("Authorities: " + authorities);
-        return authorities;
+        return List.of(new SimpleGrantedAuthority(
+                "ROLE_" + user.getRole().getRoleName().name()));
     }
 
     /** Returns the HASHED password (bcrypt) — Spring Security matches it

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -33,14 +34,17 @@ public class LisResultRequest {
     public static class TestResultItem {
 
         @NotBlank(message = "testName không được để trống")
+        @Size(max = 100, message = "testName không được vượt quá 100 ký tự")
         private String testName;
 
         @NotBlank(message = "resultValue không được để trống")
+        @Size(max = 100, message = "resultValue không được vượt quá 100 ký tự")
         private String resultValue;
 
         // Only used when this Parameter needs to be newly created
         // (if the Parameter already exists in the catalog, its
         // existing unit is kept as-is and this value is ignored).
+        @Size(max = 50, message = "unit không được vượt quá 50 ký tự")
         private String unit;
     }
 }

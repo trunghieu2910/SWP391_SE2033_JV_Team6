@@ -15,11 +15,7 @@ public interface LisIntegrationService {
      * {@code request.getLabResultId()} (which must currently be
      * PENDING) and marks it COMPLETED.
      *
-     * @param source distinguishes the caller for logging/authorization
-     *                purposes — {@code "REAL_LIS"} for the external
-     *                webhook, {@code "UI_SIMULATE"} for the doctor's
-     *                UI action.
      */
-    LabResultResponse receiveLabResults(LisResultRequest request, String source);
+    LabResultResponse receiveLabResults(LisResultRequest request);
 }
 

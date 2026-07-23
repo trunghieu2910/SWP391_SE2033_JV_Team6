@@ -133,7 +133,8 @@ CREATE TABLE LabResult
     testType    NVARCHAR(100),
     status      NVARCHAR(50) default 'PENDING', 
     createdAt   DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (sessionID) REFERENCES DiagnosisSession (sessionID)
+    FOREIGN KEY (sessionID) REFERENCES DiagnosisSession (sessionID),
+    CONSTRAINT UQ_LabResult_Session_TestType UNIQUE (sessionID, testType)
 );
 
 -- 1. Thêm giá cho Phiếu Xét nghiệm (LabResult)

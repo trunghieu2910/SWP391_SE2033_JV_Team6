@@ -48,14 +48,23 @@ public class DoctorStatisticsController {
         LocalDate from = startDate != null ? startDate : LocalDate.of(2000, 1, 1);
         LocalDate to = endDate != null ? endDate : LocalDate.now();
 
-        List<DiseaseStatItem> stats = reviewRepository.countByDiseaseTypeBetween(
-                from.atStartOfDay(),
-                to.atTime(LocalTime.MAX)
-        );
+        List<DiseaseStatItem> stats;
+        String dateRangeError = null;
+
+        if (from.isAfter(to)) {
+            dateRangeError = "Ngày bắt đầu không được sau ngày kết thúc.";
+            stats = List.of();
+        } else {
+            stats = reviewRepository.countByDiseaseTypeBetween(
+                    from.atStartOfDay(),
+                    to.atTime(LocalTime.MAX)
+            );
+        }
 
         model.addAttribute("stats", stats);
         model.addAttribute("startDate", from);
         model.addAttribute("endDate", to);
+        model.addAttribute("dateRangeError", dateRangeError);
         return "doctor/statistics";
     }
 }

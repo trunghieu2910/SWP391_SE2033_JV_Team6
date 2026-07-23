@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +55,7 @@ public class LabResultServiceImpl implements LabResultService {
      * already exists for this session.
      */
     @Override
+    @Transactional
     public LabResultResponse createLabResult(CreateLabResultRequest request) {
 
         DiagnosisSession session = sessionRepository.findById(request.getSessionId())
@@ -94,7 +96,15 @@ public class LabResultServiceImpl implements LabResultService {
                 .testType(request.getTestType())
                 .build();
 
-        labResult = labResultRepository.save(labResult);
+        try {
+            labResult = labResultRepository.save(labResult);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            // Two concurrent requests raced past the existsBy... check above;
+            // the DB-level UNIQUE constraint is the final authority here.
+            throw new BadRequestException(
+                    "Phiên khám này đã có xét nghiệm loại \"" + request.getTestType() + "\". " +
+                            "Vui lòng chọn loại xét nghiệm khác.");
+        }
 
         systemLogService.logActivity("LabResult", labResult.getLabResultId(), "CREATE_LAB_RESULT",
                 "Bác sĩ tạo chỉ định xét nghiệm \"" + labResult.getTestType()

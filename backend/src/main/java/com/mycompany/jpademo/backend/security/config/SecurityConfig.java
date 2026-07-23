@@ -145,7 +145,6 @@ public class SecurityConfig {
                                 "/api/auth/forgot-password/reset-password",
                                 "/api/auth/google",
                                 "/api/auth/google/complete",
-                                "/api/integration/lis/results",
                                 "/auth/**",
                                 "/forgot-password/**",
                                 "/error/**",
@@ -158,6 +157,16 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/assets/**"
                         ).permitAll()
+
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/doctor/**", "/api/integration/lis/simulate/**").hasRole("DOCTOR")
+                        .requestMatchers("/patient/**", "/api/patient/**").hasRole("PATIENT")
+                        .requestMatchers("/pharmacist/**").hasRole("PHARMACIST")
+                        .requestMatchers("/receptionist/**").hasRole("RECEPTIONIST")
+                        .requestMatchers("/ultrasound-doctor/**", "/ai-result", "/api/ultrasound/**", "/api/medical-images/**")
+                        .hasRole("ULTRASOUND_DOCTOR")
+                        .requestMatchers("/api/diagnosis-sessions/**")
+                        .hasAnyRole("DOCTOR", "PATIENT", "RECEPTIONIST")
 
                         .anyRequest().authenticated())
 

@@ -8,9 +8,11 @@ import com.mycompany.jpademo.backend.dto.response.VerifyOtpResponse;
 import com.mycompany.jpademo.backend.service.interfaces.ForgotPasswordService;
 import com.mycompany.jpademo.backend.util.OtpUtil;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -48,13 +50,18 @@ public class ForgotPasswordViewController {
      * session for the next steps, and moves on to step 2.
      */
     @PostMapping
-    public String submitStep1(@ModelAttribute("form") ForgotPasswordRequest form,
+    public String submitStep1(@Valid @ModelAttribute("form") ForgotPasswordRequest form,
+                              BindingResult bindingResult,
                               Model model, HttpSession session) {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("error", bindingResult.getFieldError().getDefaultMessage());
+            return "auth/forgot-password-step1";
+        }
+
         try {
             forgotPasswordService.forgotPassword(form);
         } catch (RuntimeException ex) {
-            // Chỉ còn bắt lỗi hệ thống thật sự (VD: SMTP server lỗi) — không còn
-            // trường hợp "email không tồn tại" nữa vì service không throw cho case đó.
             model.addAttribute("error", "Có lỗi xảy ra, vui lòng thử lại sau.");
             return "auth/forgot-password-step1";
         }
@@ -118,12 +125,17 @@ public class ForgotPasswordViewController {
             return "redirect:/forgot-password";
         }
 
-        ForgotPasswordRequest request = new ForgotPasswordRequest();
-        request.setEmail(email);
+        try {
+            ForgotPasswordRequest request = new ForgotPasswordRequest();
+            request.setEmail(email);
 
-        forgotPasswordService.forgotPassword(request); // cooldown được xử lý ngầm bên trong service
+            forgotPasswordService.forgotPassword(request);
 
-        redirectAttributes.addFlashAttribute("resent", true);
+            redirectAttributes.addFlashAttribute("resent", true);
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra, vui lòng thử lại sau.");
+        }
+
         return "redirect:/forgot-password/verify-otp";
     }
 
@@ -146,11 +158,18 @@ public class ForgotPasswordViewController {
      * clears the wizard's session state, and redirects to the login page.
      */
     @PostMapping("/reset")
-    public String submitStep3(@ModelAttribute("form") ResetPasswordFormRequest form,
+    public String submitStep3(@Valid @ModelAttribute("form") ResetPasswordFormRequest form,
+                              BindingResult bindingResult,
                               Model model, HttpSession session) {
+
         String resetToken = (String) session.getAttribute(SESSION_RESET_TOKEN);
         if (resetToken == null) {
             return "redirect:/forgot-password";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("error", bindingResult.getFieldError().getDefaultMessage());
+            return "auth/forgot-password-step3";
         }
 
         if (!form.getNewPassword().equals(form.getConfirmPassword())) {

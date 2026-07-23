@@ -34,6 +34,11 @@
         </div>
 
         <p class="filter-hint">* Thống kê theo thời điểm bác sĩ xác nhận kết luận chẩn đoán, không phải ngày tạo ca khám.</p>
+
+        <p th:if="${dateRangeError}" class="filter-error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span th:text="${dateRangeError}"></span>
+        </p>
     </div>
 
     <div class="stats-grid">

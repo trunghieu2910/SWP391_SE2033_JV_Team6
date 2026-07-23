@@ -170,7 +170,7 @@ public class AdminServiceImpl implements AdminService {
 
         boolean isOtpValid = OtpUtil.verifyOtp(adminEmail, otp);
         if (!isOtpValid) {
-            throw new InvalidOtpException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+            throw new InvalidOtpException();
         }
 
         OtpUtil.removeOtp(adminEmail);

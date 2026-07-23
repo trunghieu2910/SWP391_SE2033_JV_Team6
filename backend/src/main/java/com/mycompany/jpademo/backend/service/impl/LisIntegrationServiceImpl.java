@@ -51,7 +51,7 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
      */
     @Override
     @Transactional
-    public LabResultResponse receiveLabResults(LisResultRequest request, String source) {
+    public LabResultResponse receiveLabResults(LisResultRequest request) {
 
         LabResult labResult = labResultRepository
                 .findByLabResultIdAndStatus(request.getLabResultId(), LabResultStatus.PENDING)
@@ -60,31 +60,23 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
                                 + request.getLabResultId()
                                 + ". Có thể đã được xử lý hoặc labResultId không tồn tại."));
 
-        // Only the doctor who owns this diagnosis session may trigger the
-        // "simulate result" action (the real REAL_LIS webhook has no login
-        // session, so this ownership check is skipped for that source).
-        if ("UI_SIMULATE".equals(source)) {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
-            Integer currentDoctorId = currentUser.getUser().getUserId();
-            Integer ownerDoctorId = labResult.getDiagnosisSession().getUser().getUserId();
-            if (!ownerDoctorId.equals(currentDoctorId)) {
-                throw new UnauthorizedActionException(
-                        "Bạn không có quyền thao tác trên xét nghiệm của phiên khám này");
-            }
+        // NEW: chỉ còn 1 caller duy nhất (UI simulate) nên luôn bắt buộc kiểm tra
+        // quyền sở hữu — không còn nhánh "REAL_LIS" bỏ qua check này nữa.
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
+        Integer currentDoctorId = currentUser.getUser().getUserId();
+        Integer ownerDoctorId = labResult.getDiagnosisSession().getUser().getUserId();
+        if (!ownerDoctorId.equals(currentDoctorId)) {
+            throw new UnauthorizedActionException(
+                    "Bạn không có quyền thao tác trên xét nghiệm của phiên khám này");
         }
 
         List<LabResultParameter> savedParameters = new ArrayList<>();
 
-        // For each incoming test item: look up its Parameter by name
-        // (case-insensitive); if it doesn't exist yet in the shared
-        // catalog, auto-create it on the fly with the given unit.
         for (LisResultRequest.TestResultItem item : request.getTestResults()) {
-
             Parameter parameter = parameterRepository
                     .findByParameterNameIgnoreCase(item.getTestName())
                     .orElseGet(() -> {
-                        // Parameter not found by name — register a new catalog entry.
                         Parameter newParam = Parameter.builder()
                                 .parameterName(item.getTestName())
                                 .unit(item.getUnit() != null ? item.getUnit() : null)
@@ -104,14 +96,9 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
         labResult.setStatus(LabResultStatus.COMPLETED);
         labResultRepository.save(labResult);
 
-        // Build a distinct audit-log entry depending on which caller
-        // triggered this ingestion (simulated vs. a real LIS webhook).
-        String action = "UI_SIMULATE".equals(source) ? "LIS_SIMULATE" : "LIS_RECEIVE";
-        String description = "UI_SIMULATE".equals(source)
-                ? "Bác sĩ mô phỏng lấy kết quả LIS cho xét nghiệm \"" + labResult.getTestType() + "\""
-                : "Hệ thống LIS gửi kết quả thật cho xét nghiệm \"" + labResult.getTestType() + "\"";
-
-        systemLogService.logActivity("LabResult", labResult.getLabResultId(), action, description);
+        // NEW: chỉ còn 1 loại action, bỏ nhánh phân biệt LIS_SIMULATE / LIS_RECEIVE
+        systemLogService.logActivity("LabResult", labResult.getLabResultId(), "LIS_SIMULATE",
+                "Bác sĩ mô phỏng lấy kết quả LIS cho xét nghiệm \"" + labResult.getTestType() + "\"");
 
         return mapToLabResultResponse(labResult, savedParameters);
     }
