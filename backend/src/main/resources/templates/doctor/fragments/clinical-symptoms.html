@@ -200,22 +200,22 @@
                     <label class="section-label">Triệu chứng toàn thân</label>
                     <div class="radio-group">
                         <label>Sụt cân không rõ nguyên nhân:
-                            <input type="radio" name="systemicSymptoms.weightLoss" value="true"
+                            <input type="radio" name="systemicSymptoms[weightLoss]" value="true"
                                    th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDetails != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 14)}"> Có
                             <input type="radio" name="systemicSymptoms[weightLoss]" value="false"
-                                   th:checked="${sessionDetail.symptomResult == null or !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 14)}"> Không
+                                   th:checked="${sessionDetail.symptomResult == null ? true : !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 14)}"> Không
                         </label>
                         <label>Mệt mỏi kéo dài:
                             <input type="radio" name="systemicSymptoms[fatigue]" value="true"
                                    th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDetails != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 15)}"> Có
                             <input type="radio" name="systemicSymptoms[fatigue]" value="false"
-                                   th:checked="${sessionDetail.symptomResult == null or !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 15)}"> Không
+                                   th:checked="${sessionDetail.symptomResult == null ? true : !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 15)}"> Không
                         </label>
                         <label>Chán ăn:
                             <input type="radio" name="systemicSymptoms[anorexia]" value="true"
                                    th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomDetails != null and #lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 16)}"> Có
                             <input type="radio" name="systemicSymptoms[anorexia]" value="false"
-                                   th:checked="${sessionDetail.symptomResult == null or !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 16)}"> Không
+                                   th:checked="${sessionDetail.symptomResult == null ? true : !#lists.contains(sessionDetail.symptomResult.symptomDetails.![symptomId], 16)}"> Không
                         </label>
                     </div>
                 </div>
@@ -286,7 +286,7 @@
                             <input type="radio" name="symptomProgressing" value="true"
                                    th:checked="${sessionDetail.symptomResult != null and sessionDetail.symptomResult.symptomProgressing}"> Có
                             <input type="radio" name="symptomProgressing" value="false"
-                                   th:checked="${sessionDetail.symptomResult == null or !sessionDetail.symptomResult.symptomProgressing}"> Không
+                                   th:checked="${sessionDetail.symptomResult == null ? true : !sessionDetail.symptomResult.symptomProgressing}"> Không
                         </label>
                     </div>
                 </div>

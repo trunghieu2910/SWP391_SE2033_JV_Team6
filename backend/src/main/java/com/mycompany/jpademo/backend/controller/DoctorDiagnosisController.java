@@ -81,7 +81,13 @@ public class DoctorDiagnosisController {
         model.addAttribute("statuses", DiagnosisSessionStatus.values());
         model.addAttribute("diseaseTypes", diseaseTypeService.getAllDiseaseTypes());
         model.addAttribute("activeDrugs", doctorPrescriptionService.getActiveDrugs());
-        model.addAttribute("prescription", doctorPrescriptionService.getPrescriptionBySessionId(sessionId, doctorId).orElse(null));
+        try {
+            var prescriptionOpt = doctorPrescriptionService.getPrescriptionBySessionId(sessionId, doctorId);
+            model.addAttribute("prescription", prescriptionOpt.orElse(null));
+        } catch (Exception e) {
+            log.warn("Không thể lấy đơn thuốc cho session {}: {}", sessionId, e.getMessage());
+            model.addAttribute("prescription", null);
+        }
         return "doctor/session-detail";
     }
 
