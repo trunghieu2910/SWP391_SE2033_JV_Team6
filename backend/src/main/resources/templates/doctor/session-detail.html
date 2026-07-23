@@ -256,8 +256,7 @@
                 </div>
                 <div class="accordion-body review-section" id="prescriptionAccordion"
                      th:style="${prescription != null or (param.openPrescription != null and param.openPrescription[0] == 'true')} ? 'display: block; padding: 24px;' : 'display: none; padding: 24px;'">
-                    <div th:replace="~{doctor/fragments/prescription-form :: form(sessionDetail=${sessionDetail}, activeDrugs=${activeDrugs}, prescription=${prescription})}"></div>
-                </div>
+                    <div th:replace="~{doctor/fragments/prescription-form :: form(sessionDetail=${sessionDetail}, activeDrugs=${activeDrugs}, prescription=${prescription})}"></div>                </div>
             </div>
 
         </div>

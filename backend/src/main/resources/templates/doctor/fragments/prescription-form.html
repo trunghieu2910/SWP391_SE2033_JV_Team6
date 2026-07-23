@@ -10,7 +10,7 @@
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
         <div class="prescription-container" style="display: flex; flex-direction: column; gap: 20px;">
-            
+
             <!-- Thông báo trạng thái nếu ca đã có đơn thuốc -->
             <div th:if="${prescription != null}" class="prescription-status-info" style="display: flex; align-items: center; justify-content: space-between; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; color: #166534;">
                 <div>
@@ -27,38 +27,107 @@
             <div class="table-responsive" style="border: 1px solid var(--neutral-200, #e2e8f0); border-radius: 8px; overflow: visible;">
                 <table class="prescription-table" style="width: 100%; border-collapse: collapse; text-align: left;">
                     <thead>
-                        <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569; font-size: 0.875rem;">
-                            <th style="padding: 12px; width: 40px; text-align: center;">#</th>
-                            <th style="padding: 12px; min-width: 300px;">Tên thuốc & Mã thuốc <span class="required" style="color:#ef4444;">*</span></th>
-                            <th style="padding: 12px; width: 190px;">Số lượng (Đơn vị) <span class="required" style="color:#ef4444;">*</span></th>
-                            <th style="padding: 12px; min-width: 240px;">Cách sử dụng thuốc <span class="required" style="color:#ef4444;">*</span></th>
-                            <th style="padding: 12px; width: 60px; text-align: center;">Xóa</th>
-                        </tr>
+                    <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569; font-size: 0.875rem;">
+                        <th style="padding: 12px; width: 40px; text-align: center;">#</th>
+                        <th style="padding: 12px; min-width: 300px;">Tên thuốc & Mã thuốc <span class="required" style="color:#ef4444;">*</span></th>
+                        <th style="padding: 12px; width: 190px;">Số lượng (Đơn vị) <span class="required" style="color:#ef4444;">*</span></th>
+                        <th style="padding: 12px; min-width: 240px;">Cách sử dụng thuốc <span class="required" style="color:#ef4444;">*</span></th>
+                        <th style="padding: 12px; width: 60px; text-align: center;">Xóa</th>
+                    </tr>
                     </thead>
                     <tbody id="prescriptionTableBody">
-                        
-                        <!-- Trường hợp chưa kê đơn -> hiển thị 1 dòng trống mặc định -->
-                        <tr th:if="${prescription == null or #lists.isEmpty(prescription.details)}" class="prescription-row">
-                            <td class="row-index" style="padding: 12px; text-align: center; font-weight: 600; color: #64748b;">1</td>
+
+                    <th:block th:with="hasDetails = ${prescription != null and prescription.details != null and !#lists.isEmpty(prescription.details)}">
+
+                        <!-- Trường hợp đã có đơn thuốc -> hiển thị danh sách các thuốc đã kê -->
+                        <tr th:if="${hasDetails}"
+                            th:each="detail, iterStat : ${prescription?.details}" class="prescription-row">
+                            <td class="row-index" style="padding: 12px; text-align: center; font-weight: 600; color: #64748b;" th:text="${iterStat.count}">1</td>
                             <td style="padding: 12px; position: relative;">
                                 <div class="custom-drug-dropdown-wrapper" style="position: relative;">
-                                    <input type="hidden" name="items[0].drugId" class="drug-id-input" required>
+                                    <input type="hidden" th:name="'items[' + ${iterStat.index} + '].drugId'" th:value="${detail.drug != null ? detail.drug.drugId : ''}" class="drug-id-input" required>
                                     <div class="drug-search-box" style="position: relative;">
-                                        <input type="text" 
-                                               class="form-control drug-search-input" 
-                                               placeholder="🔍 Click chọn hoặc tìm mã/tên thuốc..." 
-                                               onfocus="showDrugDropdown(this)" 
+                                        <input type="text"
+                                               class="form-control drug-search-input"
+                                               th:value="${detail.drug != null ? '[' + detail.drug.drugCode + '] ' + detail.drug.drugName + (detail.drug.strength != null ? ' - ' + detail.drug.strength + ' ' + detail.drug.strengthUnit : '') : ''}"
+                                               placeholder="🔍 Click chọn hoặc tìm mã/tên thuốc..."
+                                               onfocus="showDrugDropdown(this)"
                                                oninput="filterCustomDrugList(this)"
                                                onclick="showDrugDropdown(this)"
                                                autocomplete="off"
                                                required
                                                style="padding-right: 30px; font-size: 0.875rem; cursor: pointer;">
-                                        <i class="fa-solid fa-chevron-down dropdown-arrow-icon" 
+                                        <i class="fa-solid fa-chevron-down dropdown-arrow-icon"
                                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;"></i>
                                     </div>
-                                    <div class="drug-dropdown-menu" 
+                                    <div class="drug-dropdown-menu"
                                          style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; max-height: 220px; overflow-y: auto; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); z-index: 9999;">
-                                        <div class="drug-option-item" 
+                                        <div class="drug-option-item"
+                                             th:each="drug : ${activeDrugs}"
+                                             th:data-id="${drug.drugId}"
+                                             th:data-code="${drug.drugCode}"
+                                             th:data-name="${drug.drugName}"
+                                             th:data-unit="${drug.baseUnit != null ? drug.baseUnit.unitName : 'Đơn vị'}"
+                                             th:data-strength="${drug.strength != null ? drug.strength + ' ' + drug.strengthUnit : ''}"
+                                             onclick="selectDrugOption(this)"
+                                             style="padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;">
+                                            <div style="font-weight: 700; color: #0284c7; font-size: 0.875rem;">
+                                                <span th:text="'[' + ${drug.drugCode} + '] ' + ${drug.drugName}">[MÁ] Tên thuốc</span>
+                                            </div>
+                                            <div style="font-size: 0.775rem; color: #64748b; margin-top: 2px; display: flex; gap: 12px;">
+                                                <span th:if="${drug.strength != null}" th:text="'Hàm lượng: ' + ${drug.strength} + ' ' + ${drug.strengthUnit}">Hàm lượng</span>
+                                                <span th:text="'Đơn vị nhỏ nhất: ' + ${drug.baseUnit != null ? drug.baseUnit.unitName : 'Đơn vị'}">Đơn vị</span>
+                                            </div>
+                                        </div>
+                                        <div class="no-drug-found" style="display: none; padding: 12px; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+                                            Không tìm thấy thuốc phù hợp
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="padding: 12px;">
+                                <div class="quantity-input-group" style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="number" th:name="'items[' + ${iterStat.index} + '].quantityPrescribed'"
+                                           th:value="${detail.quantityPrescribed}"
+                                           class="form-control quantity-input" min="1" step="1" placeholder="Số lượng" required style="width: 95px;">
+                                    <span class="unit-badge" style="background: #e0f2fe; color: #0369a1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; white-space: nowrap;"
+                                          th:text="${detail.dispenseUnit != null ? detail.dispenseUnit : (detail.drug != null and detail.drug.baseUnit != null ? detail.drug.baseUnit.unitName : 'Đơn vị')}">Viên</span>
+                                </div>
+                            </td>
+                            <td style="padding: 12px;">
+                                    <textarea th:name="'items[' + ${iterStat.index} + '].instruction'"
+                                              th:text="${detail.instruction}"
+                                              class="form-control instruction-input" rows="2" placeholder="Ví dụ: Uống 1 viên sau ăn sáng và tối..." required style="resize: vertical; font-size: 0.875rem;"></textarea>
+                            </td>
+                            <td style="padding: 12px; text-align: center;">
+                                <button type="button" class="btn-remove-row" onclick="removePrescriptionRow(this)" style="background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Xóa thuốc này">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Trường hợp chưa kê đơn -> hiển thị 1 dòng trống mặc định -->
+                        <tr th:unless="${hasDetails}" class="prescription-row">
+                            <td class="row-index" style="padding: 12px; text-align: center; font-weight: 600; color: #64748b;">1</td>
+                            <td style="padding: 12px; position: relative;">
+                                <div class="custom-drug-dropdown-wrapper" style="position: relative;">
+                                    <input type="hidden" name="items[0].drugId" class="drug-id-input" required>
+                                    <div class="drug-search-box" style="position: relative;">
+                                        <input type="text"
+                                               class="form-control drug-search-input"
+                                               placeholder="🔍 Click chọn hoặc tìm mã/tên thuốc..."
+                                               onfocus="showDrugDropdown(this)"
+                                               oninput="filterCustomDrugList(this)"
+                                               onclick="showDrugDropdown(this)"
+                                               autocomplete="off"
+                                               required
+                                               style="padding-right: 30px; font-size: 0.875rem; cursor: pointer;">
+                                        <i class="fa-solid fa-chevron-down dropdown-arrow-icon"
+                                           style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;"></i>
+                                    </div>
+                                    <div class="drug-dropdown-menu"
+                                         style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; max-height: 220px; overflow-y: auto; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); z-index: 9999;">
+                                        <div class="drug-option-item"
                                              th:each="drug : ${activeDrugs}"
                                              th:data-id="${drug.drugId}"
                                              th:data-code="${drug.drugCode}"
@@ -97,72 +166,7 @@
                             </td>
                         </tr>
 
-                        <!-- Trường hợp đã kê đơn -> hiển thị danh sách các thuốc đã kê -->
-                        <tr th:if="${prescription != null and !#lists.isEmpty(prescription.details)}"
-                            th:each="detail, iterStat : ${prescription.details}" class="prescription-row">
-                            <td class="row-index" style="padding: 12px; text-align: center; font-weight: 600; color: #64748b;" th:text="${iterStat.count}">1</td>
-                            <td style="padding: 12px; position: relative;">
-                                <div class="custom-drug-dropdown-wrapper" style="position: relative;">
-                                    <input type="hidden" th:name="'items[' + ${iterStat.index} + '].drugId'" th:value="${detail.drug != null ? detail.drug.drugId : ''}" class="drug-id-input" required>
-                                    <div class="drug-search-box" style="position: relative;">
-                                        <input type="text" 
-                                               class="form-control drug-search-input" 
-                                               th:value="${detail.drug != null ? '[' + detail.drug.drugCode + '] ' + detail.drug.drugName + (detail.drug.strength != null ? ' - ' + detail.drug.strength + ' ' + detail.drug.strengthUnit : '') : ''}"
-                                               placeholder="🔍 Click chọn hoặc tìm mã/tên thuốc..." 
-                                               onfocus="showDrugDropdown(this)" 
-                                               oninput="filterCustomDrugList(this)"
-                                               onclick="showDrugDropdown(this)"
-                                               autocomplete="off"
-                                               required
-                                               style="padding-right: 30px; font-size: 0.875rem; cursor: pointer;">
-                                        <i class="fa-solid fa-chevron-down dropdown-arrow-icon" 
-                                           style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none;"></i>
-                                    </div>
-                                    <div class="drug-dropdown-menu" 
-                                         style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; max-height: 220px; overflow-y: auto; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); z-index: 9999;">
-                                        <div class="drug-option-item" 
-                                             th:each="drug : ${activeDrugs}"
-                                             th:data-id="${drug.drugId}"
-                                             th:data-code="${drug.drugCode}"
-                                             th:data-name="${drug.drugName}"
-                                             th:data-unit="${drug.baseUnit != null ? drug.baseUnit.unitName : 'Đơn vị'}"
-                                             th:data-strength="${drug.strength != null ? drug.strength + ' ' + drug.strengthUnit : ''}"
-                                             onclick="selectDrugOption(this)"
-                                             style="padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;">
-                                            <div style="font-weight: 700; color: #0284c7; font-size: 0.875rem;">
-                                                <span th:text="'[' + ${drug.drugCode} + '] ' + ${drug.drugName}">[MÁ] Tên thuốc</span>
-                                            </div>
-                                            <div style="font-size: 0.775rem; color: #64748b; margin-top: 2px; display: flex; gap: 12px;">
-                                                <span th:if="${drug.strength != null}" th:text="'Hàm lượng: ' + ${drug.strength} + ' ' + ${drug.strengthUnit}">Hàm lượng</span>
-                                                <span th:text="'Đơn vị nhỏ nhất: ' + ${drug.baseUnit != null ? drug.baseUnit.unitName : 'Đơn vị'}">Đơn vị</span>
-                                            </div>
-                                        </div>
-                                        <div class="no-drug-found" style="display: none; padding: 12px; text-align: center; color: #94a3b8; font-size: 0.85rem;">
-                                            Không tìm thấy thuốc phù hợp
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td style="padding: 12px;">
-                                <div class="quantity-input-group" style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="number" th:name="'items[' + ${iterStat.index} + '].quantityPrescribed'"
-                                           th:value="${detail.quantityPrescribed}"
-                                           class="form-control quantity-input" min="1" step="1" placeholder="Số lượng" required style="width: 95px;">
-                                    <span class="unit-badge" style="background: #e0f2fe; color: #0369a1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; white-space: nowrap;"
-                                          th:text="${detail.dispenseUnit != null ? detail.dispenseUnit : (detail.drug != null and detail.drug.baseUnit != null ? detail.drug.baseUnit.unitName : 'Đơn vị')}">Viên</span>
-                                </div>
-                            </td>
-                            <td style="padding: 12px;">
-                                <textarea th:name="'items[' + ${iterStat.index} + '].instruction'"
-                                          th:text="${detail.instruction}"
-                                          class="form-control instruction-input" rows="2" placeholder="Ví dụ: Uống 1 viên sau ăn sáng và tối..." required style="resize: vertical; font-size: 0.875rem;"></textarea>
-                            </td>
-                            <td style="padding: 12px; text-align: center;">
-                                <button type="button" class="btn-remove-row" onclick="removePrescriptionRow(this)" style="background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Xóa thuốc này">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
+                    </th:block>
 
                     </tbody>
                 </table>

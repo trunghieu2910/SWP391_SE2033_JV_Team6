@@ -93,16 +93,6 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
 
         // NOTE: do NOT create SymptomResult here. It will be created when patient or doctor submits.
 
-        // Tạo LabResult
-        LabResult labResult = LabResult.builder()
-                .diagnosisSession(savedSession)
-                .testType("Xét nghiệm máu tổng quát")
-                .status(LabResultStatus.PENDING)
-                .build();
-        labResultRepository.save(labResult);
-
-
-
         // Ghi log
         systemLogService.logActivity("DiagnosisSession", savedSession.getSessionId(), "CREATE",
                 "Lễ tân " + creator.getFullName() + " tạo phiên khám mới cho bệnh nhân " + patient.getUser().getFullName() + ", chỉ định bác sĩ " + doctor.getFullName());

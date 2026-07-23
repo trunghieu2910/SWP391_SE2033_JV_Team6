@@ -13,6 +13,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.stream.Collectors;
+
 @Slf4j
 @Controller
 @RequestMapping("/doctor/sessions")
@@ -32,13 +34,29 @@ public class DoctorPrescriptionController {
 
         request.setSessionId(sessionId);
 
+        // LOG chi tiết lỗi validation
         if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getAllErrors().stream()
-                    .map(error -> error.getDefaultMessage())
-                    .findFirst()
-                    .orElse("Dữ liệu đơn thuốc không hợp lệ.");
-            redirectAttributes.addFlashAttribute("error", errorMessage);
-            return "redirect:/doctor/sessions/" + sessionId + "?openPrescription=true";
+            log.error("Validation errors when saving prescription for session {}:", sessionId);
+            String errorDetails = bindingResult.getAllErrors().stream()
+                    .map(error -> {
+                        if (error instanceof org.springframework.validation.FieldError) {
+                            org.springframework.validation.FieldError fieldError = (org.springframework.validation.FieldError) error;
+                            return fieldError.getField() + ": " + fieldError.getDefaultMessage();
+                        }
+                        return error.getDefaultMessage();
+                    })
+                    .collect(Collectors.joining("; "));
+
+            log.error("Errors: {}", errorDetails);
+
+            // Lưu lỗi để hiển thị trên view
+            redirectAttributes.addFlashAttribute("error", "Lỗi validation: " + errorDetails);
+            redirectAttributes.addFlashAttribute("validationErrors", bindingResult.getAllErrors());
+
+            // Giữ lại dữ liệu đã nhập để user không phải nhập lại
+            redirectAttributes.addFlashAttribute("prescriptionFormData", request);
+
+            return "redirect:/doctor/sessions/" + sessionId + "?openPrescription=true&error=true";
         }
 
         try {
