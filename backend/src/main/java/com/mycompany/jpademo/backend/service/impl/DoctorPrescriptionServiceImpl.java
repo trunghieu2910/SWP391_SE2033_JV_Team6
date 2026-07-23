@@ -40,7 +40,14 @@ public class DoctorPrescriptionServiceImpl implements DoctorPrescriptionService 
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Prescription> getPrescriptionBySessionId(Integer sessionId) {
+    public Optional<Prescription> getPrescriptionBySessionId(Integer sessionId, Integer doctorId) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán #" + sessionId));
+
+        if (!session.getUser().getUserId().equals(doctorId)) {
+            throw new UnauthorizedActionException("Bạn không có quyền xem đơn thuốc của ca chẩn đoán này.");
+        }
+
         return prescriptionRepository.findBySessionSessionId(sessionId);
     }
 

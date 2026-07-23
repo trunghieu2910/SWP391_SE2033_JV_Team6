@@ -81,7 +81,7 @@ public class DoctorDiagnosisController {
         model.addAttribute("statuses", DiagnosisSessionStatus.values());
         model.addAttribute("diseaseTypes", diseaseTypeService.getAllDiseaseTypes());
         model.addAttribute("activeDrugs", doctorPrescriptionService.getActiveDrugs());
-        model.addAttribute("prescription", doctorPrescriptionService.getPrescriptionBySessionId(sessionId).orElse(null));
+        model.addAttribute("prescription", doctorPrescriptionService.getPrescriptionBySessionId(sessionId, doctorId).orElse(null));
         return "doctor/session-detail";
     }
 

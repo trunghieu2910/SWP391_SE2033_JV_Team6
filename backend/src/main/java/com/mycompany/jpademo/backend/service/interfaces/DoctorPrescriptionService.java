@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface DoctorPrescriptionService {
     Prescription savePrescription(Integer doctorId, CreateDoctorPrescriptionRequest request);
 
-    Optional<Prescription> getPrescriptionBySessionId(Integer sessionId);
+    Optional<Prescription> getPrescriptionBySessionId(Integer sessionId, Integer doctorId);
 
     List<Drug> getActiveDrugs();
 }

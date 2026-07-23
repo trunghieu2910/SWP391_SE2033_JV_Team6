@@ -74,9 +74,10 @@ public class SecurityController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("error",
-                    bindingResult.getFieldError("ipAddress") != null
-                            ? bindingResult.getFieldError("ipAddress").getDefaultMessage()
-                            : "Địa chỉ IP không hợp lệ");
+                    bindingResult.getAllErrors().stream()
+                            .map(err -> err.getDefaultMessage())
+                            .findFirst()
+                            .orElse("Dữ liệu không hợp lệ"));
             redirectAttributes.addFlashAttribute("blockIpRequest", blockIpRequest);
             return "redirect:/admin/security";
         }
