@@ -16,8 +16,9 @@
                     <div class="lab-header-right">
                         <!-- Nút Lấy kết quả giả lập — chỉ hiện khi xét nghiệm đang CHỜ XỬ LÝ -->
                         <form th:if="${lab.status.name() == 'PENDING'}"
-                              th:action="@{/api/integration/lis/simulate/{sessionId}/{labResultId}(sessionId=${sessionId}, labResultId=${lab.labResultId})}"
+                              th:action="@{/doctor/lis/simulate/{sessionId}/{labResultId}(sessionId=${sessionId}, labResultId=${lab.labResultId})}"
                               method="post" class="lab-simulate-form">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button type="submit" class="btn-action btn-outline btn-simulate">
                                 <i class="fa-solid fa-flask-vial"></i> Lấy kết quả giả lập
                             </button>

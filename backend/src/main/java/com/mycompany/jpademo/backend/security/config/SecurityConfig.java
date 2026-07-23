@@ -159,7 +159,7 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/doctor/**", "/api/integration/lis/simulate/**").hasRole("DOCTOR")
+                        .requestMatchers("/doctor/**").hasRole("DOCTOR")
                         .requestMatchers("/patient/**", "/api/patient/**").hasRole("PATIENT")
                         .requestMatchers("/pharmacist/**").hasRole("PHARMACIST")
                         .requestMatchers("/receptionist/**").hasRole("RECEPTIONIST")

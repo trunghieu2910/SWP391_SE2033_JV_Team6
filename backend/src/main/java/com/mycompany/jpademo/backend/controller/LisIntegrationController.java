@@ -26,7 +26,7 @@ import java.util.List;
  * the canned mock dataset in LisMockDataProvider.
  */
 @RestController
-@RequestMapping("/api/integration/lis")
+@RequestMapping("/doctor/lis")
 @RequiredArgsConstructor
 public class LisIntegrationController {
 
