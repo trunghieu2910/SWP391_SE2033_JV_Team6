@@ -1,12 +1,19 @@
 package com.mycompany.jpademo.backend.controller;
 
 import com.mycompany.jpademo.backend.dto.request.ChangePasswordRequest;
+import com.mycompany.jpademo.backend.entity.User;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.ProfileService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -35,6 +42,8 @@ public class ChangePasswordController {
                                        BindingResult bindingResult,
                                        @AuthenticationPrincipal CustomUserDetails userDetails,
                                        RedirectAttributes redirectAttributes,
+                                       HttpServletRequest request,
+                                       HttpServletResponse response,
                                        Model model) {
         String backUrl = determineBackUrl(userDetails);
         if (bindingResult.hasErrors()) {
@@ -44,6 +53,16 @@ public class ChangePasswordController {
 
         try {
             profileService.changePassword(userDetails.getUsername(), form);
+
+            User refreshedUser = profileService.getUserByLogin(userDetails.getUsername());
+            CustomUserDetails refreshedDetails = new CustomUserDetails(refreshedUser);
+            UsernamePasswordAuthenticationToken newAuth = new UsernamePasswordAuthenticationToken(
+                    refreshedDetails, null, refreshedDetails.getAuthorities());
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(newAuth);
+            SecurityContextHolder.setContext(context);
+            new HttpSessionSecurityContextRepository().saveContext(context, request, response);
+
             redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
             return "redirect:/change-password?success=true";
         } catch (Exception e) {

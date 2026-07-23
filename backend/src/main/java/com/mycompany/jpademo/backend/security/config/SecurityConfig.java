@@ -1,6 +1,7 @@
 package com.mycompany.jpademo.backend.security.config;
 
 import com.mycompany.jpademo.backend.security.filter.BlockedIpFilter;
+import com.mycompany.jpademo.backend.security.filter.ForcePasswordChangeFilter;
 import com.mycompany.jpademo.backend.security.filter.RateLimitingFilter;
 import com.mycompany.jpademo.backend.security.filter.RequestLoggingFilter;
 import com.mycompany.jpademo.backend.security.handler.CustomLogoutSuccessHandler;
@@ -40,6 +41,7 @@ public class SecurityConfig {
     private final BlockedIpFilter blockedIpFilter;
     private final RateLimitingFilter rateLimitingFilterl;
     private final RequestLoggingFilter requestLoggingFilter;
+    private final ForcePasswordChangeFilter forcePasswordChangeFilter;
     private final CustomUserDetailsService customUserDetailsService;
     private final RoleBasedSuccessHandler roleBasedSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
@@ -161,7 +163,8 @@ public class SecurityConfig {
 
                 .addFilterBefore(requestLoggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(blockedIpFilter, RequestLoggingFilter.class)
-                .addFilterAfter(rateLimitingFilterl, BlockedIpFilter.class);
+                .addFilterAfter(rateLimitingFilterl, BlockedIpFilter.class)
+                .addFilterAfter(forcePasswordChangeFilter, RateLimitingFilter.class);
 
         return http.build();
     }

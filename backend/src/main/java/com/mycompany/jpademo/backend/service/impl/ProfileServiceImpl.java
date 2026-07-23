@@ -16,6 +16,8 @@ import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDateTime;
+
 @Service
 public class ProfileServiceImpl implements ProfileService {
 
@@ -93,16 +95,15 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setLastChangePassTime(LocalDateTime.now());
         userRepository.save(user);
     }
 
-    private User getUserByLogin(String login) {
+    @Override
+    public User getUserByLogin(String login) {
         return userRepository.findByEmailOrUsernameOrPhoneNumberOrNationalId(
-                login,
-                login,
-                login,
-                login
-        ).orElseThrow(() -> new ResourceNotFoundException("User not found with login identifier: " + login));
+                login, login, login, login
+        ).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với thông tin định danh đăng nhập: " + login));
     }
 
     private String getRoleName(User user) {
@@ -210,4 +211,6 @@ public class ProfileServiceImpl implements ProfileService {
             // Ignore if security context is not available or exception occurs
         }
     }
+
+
 }

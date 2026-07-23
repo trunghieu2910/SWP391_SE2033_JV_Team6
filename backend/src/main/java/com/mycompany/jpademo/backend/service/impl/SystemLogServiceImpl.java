@@ -48,6 +48,10 @@ public class SystemLogServiceImpl implements SystemLogService {
                 currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
             }
 
+            if (currentUser == null && "Users".equals(targetType) && targetId != null) {
+                currentUser = userRepository.findById(targetId).orElse(null);
+            }
+
             SystemLog systemLog = SystemLog.builder()
                     .action(action)
                     .targetType(targetType != null ? targetType : "SYSTEM")

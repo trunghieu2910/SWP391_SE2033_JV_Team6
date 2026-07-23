@@ -742,7 +742,7 @@ public class AdminServiceImpl implements AdminService {
             systemLogResponse.setDescription(s.getDescription());
             systemLogResponse.setTargetId(s.getTargetId());
             systemLogResponse.setTargetType(s.getTargetType());
-            systemLogResponse.setUserName(s.getUser().getUserName());
+            systemLogResponse.setUserName(s.getUser() != null ? s.getUser().getUserName() : "Hệ thống");
             systemLogResponse.setPerformedAt(s.getPerformedAt());
             list.add(systemLogResponse);
         }
