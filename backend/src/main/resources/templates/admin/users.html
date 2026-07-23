@@ -18,14 +18,15 @@
                 <div class="form-field">
                     <label><i class="fa-solid fa-user-tag"></i> Vai trò</label>
                     <select name="role">
-                        <option th:each="r : ${roles}" th:value="${r}"
-                                th:text="${r == '' ? 'Tất cả vai trò' :
-                                    r == 'ADMIN' ? 'Quản trị viên' :
-                                    r == 'DOCTOR' ? 'Bác sĩ' :
-                                    r == 'PATIENT' ? 'Bệnh nhân' :
-                                    r == 'PHARMACIST' ? 'Dược sĩ' :
-                                    r == 'RECEPTIONIST' ? 'Lễ tân' :
-                                    r == 'ULTRASOUND_DOCTOR' ? 'Bác sĩ siêu âm' : r}"
+                        <option value="">Tất cả vai trò</option>
+                        <option th:each="r : ${roles}"
+                                th:value="${r}"
+                                th:text="${r == 'ADMIN' ? 'Quản trị viên' :
+                          r == 'DOCTOR' ? 'Bác sĩ' :
+                          r == 'PATIENT' ? 'Bệnh nhân' :
+                          r == 'PHARMACIST' ? 'Dược sĩ' :
+                          r == 'RECEPTIONIST' ? 'Lễ tân' :
+                          r == 'ULTRASOUND_DOCTOR' ? 'Bác sĩ siêu âm' : r}"
                                 th:selected="${r == role}"></option>
                     </select>
                 </div>
@@ -146,17 +147,19 @@
             </div>
             <div class="page-links">
                 <a th:if="${users.number > 0}"
-                   th:href="@{/admin/users(page=${users.number - 1}, keyword=${keyword}, role=${role}, status=${status})}"
+                   th:href="@{/admin/users(page=${users.number - 1}, keyword=${keyword}, role=${role}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
                    class="page-btn">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
+
                 <a th:each="pageIdx : ${#numbers.sequence(0, users.totalPages - 1)}"
-                   th:href="@{/admin/users(page=${pageIdx}, keyword=${keyword}, role=${role}, status=${status})}"
+                   th:href="@{/admin/users(page=${pageIdx}, keyword=${keyword}, role=${role}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
                    th:text="${pageIdx + 1}"
                    class="page-btn"
                    th:classappend="${pageIdx == users.number ? 'active' : ''}"></a>
+
                 <a th:if="${users.number < users.totalPages - 1}"
-                   th:href="@{/admin/users(page=${users.number + 1}, keyword=${keyword}, role=${role}, status=${status})}"
+                   th:href="@{/admin/users(page=${users.number + 1}, keyword=${keyword}, role=${role}, status=${status}, startDate=${startDate}, endDate=${endDate})}"
                    class="page-btn">
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>

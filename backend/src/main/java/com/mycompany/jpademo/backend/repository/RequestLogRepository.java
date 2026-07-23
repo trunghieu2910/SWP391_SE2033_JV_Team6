@@ -60,4 +60,13 @@ public interface RequestLogRepository extends JpaRepository<RequestLog, Long> {
             "AND (:endDate IS NULL OR r.timestamp <= :endDate)")
     Double getAvgRequestsPerMinute(@Param("startDate") LocalDateTime startDate,
                                    @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT FUNCTION('FORMAT', r.timestamp, 'MM/yyyy') as month, COUNT(r) as count " +
+            "FROM RequestLog r " +
+            "WHERE (:start IS NULL OR r.timestamp >= :start) " +
+            "AND (:end IS NULL OR r.timestamp <= :end) " +
+            "GROUP BY FUNCTION('FORMAT', r.timestamp, 'MM/yyyy') " +
+            "ORDER BY month ASC")
+    List<Object[]> getMonthlyRequestTrend(@Param("start") LocalDateTime start,
+                                          @Param("end") LocalDateTime end);
 }

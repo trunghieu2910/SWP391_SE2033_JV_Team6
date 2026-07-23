@@ -457,6 +457,54 @@ td .badge {
     border-color: #cbd5e1;
 }
 
+.badge-receive {
+    background: #e0f2fe;
+    color: #0369a1;
+    border-color: #7dd3fc;
+}
+
+.badge-export {
+    background: #fae8ff;
+    color: #86198f;
+    border-color: #f0abfc;
+}
+
+.badge-forgot {
+    background: #ffedd5;
+    color: #c2410c;
+    border-color: #fdba74;
+}
+
+.badge-otp {
+    background: #fef9c3;
+    color: #854d0e;
+    border-color: #fde047;
+}
+
+.badge-delete {
+    background: #fecaca;
+    color: #991b1b;
+    border-color: #f87171;
+}
+
+.badge-register {
+    background: #ecfccb;
+    color: #3f6212;
+    border-color: #bef264;
+}
+
+.badge-input {
+    background: #f0fdfa;
+    color: #0f766e;
+    border-color: #5eead4;
+}
+
+.badge-request {
+    background: #eef2ff;
+    color: #3730a3;
+    border-color: #c7d2fe;
+}
+
 /* ============================================================ */
 /* ===== CỘT HÀNH ĐỘNG (NÚT XEM) ===== */
 /* ============================================================ */

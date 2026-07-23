@@ -144,7 +144,16 @@ document.addEventListener('DOMContentLoaded', function() {
             this.disabled = true;
             this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
 
-            fetch('/admin/create-staff/resend-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+            const csrfToken = document.querySelector('input[name="_csrf"]')?.value;
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfToken) {
+                headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+
+            fetch('/admin/create-staff/resend-otp', { 
+                method: 'POST', 
+                headers: headers 
+            })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {

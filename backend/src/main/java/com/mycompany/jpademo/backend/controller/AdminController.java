@@ -94,6 +94,8 @@ public class AdminController {
         model.addAttribute("role", role);
         model.addAttribute("status", status);
         model.addAttribute("roles", roles);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         model.addAttribute("statuses", userStatus);
         return "admin/users";
     }
@@ -278,8 +280,8 @@ public class AdminController {
 
     /** Downloads or views a doctor's certificate file. */
     @GetMapping("/users/{id}/certificate")
-    public ResponseEntity<Resource> viewDoctorCertificate(@PathVariable Integer id) {
-        CertificateFileResponse certificate = adminService.getDoctorCertificate(id);
+    public ResponseEntity<Resource> viewStaffCertificate(@PathVariable Integer id) {
+        CertificateFileResponse certificate = adminService.getStaffCertificate(id);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,

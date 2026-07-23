@@ -14,13 +14,6 @@
         <span>Chi tiết ca chẩn đoán #<span th:text="${sessionDetail.sessionId}" id="sessionIdDisplay">1</span></span>
     </nav>
 
-    <div th:if="${error}" class="alert alert-error" style="margin-bottom:16px;">
-        <span th:text="${error}"></span>
-    </div>
-    <div th:if="${success}" class="alert alert-success" style="margin-bottom:16px;">
-        <span th:text="${success}"></span>
-    </div>
-
     <!-- Header -->
     <div class="session-header">
         <div class="session-title">
