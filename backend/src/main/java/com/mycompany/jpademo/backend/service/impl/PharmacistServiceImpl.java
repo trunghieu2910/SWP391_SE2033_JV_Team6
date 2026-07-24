@@ -128,6 +128,10 @@ public class PharmacistServiceImpl implements PharmacistService {
     @Transactional
     public DrugDTO createDrug(CreateDrugRequest request, Integer pharmacistId) {
         validateDrugRequest(request);
+        
+        if (request.getBaseUnitId() == null) {
+            throw new RuntimeException("Vui lòng chọn Đơn vị gốc kê đơn.");
+        }
 
         User pharmacist = userRepository.findById(pharmacistId)
             .orElseThrow(() -> new RuntimeException("User not found: " + pharmacistId));
@@ -206,7 +210,6 @@ public class PharmacistServiceImpl implements PharmacistService {
         User pharmacist = userRepository.findById(pharmacistId)
             .orElseThrow(() -> new RuntimeException("User not found: " + pharmacistId));
         drug.setUpdatedByUser(pharmacist);
-        drug.setUpdateReason(request.getUpdateReason());
 
         Drug updatedDrug = drugRepository.save(drug);
 
@@ -255,8 +258,7 @@ public class PharmacistServiceImpl implements PharmacistService {
             request.getSubCategoryId() == null ||
             request.getManufacturer() == null || request.getManufacturer().trim().isEmpty() ||
             request.getCountryOfOrigin() == null || request.getCountryOfOrigin().trim().isEmpty() ||
-            request.getStorageCondition() == null || request.getStorageCondition().trim().isEmpty() ||
-            request.getBaseUnitId() == null) {
+            request.getStorageCondition() == null || request.getStorageCondition().trim().isEmpty()) {
             throw new RuntimeException("Vui lòng điền đầy đủ các thông tin bắt buộc.");
         }
 
@@ -988,7 +990,7 @@ public class PharmacistServiceImpl implements PharmacistService {
             .updatedBy(drug.getUpdatedByUser() != null ? drug.getUpdatedByUser().getUserId() : null)
             .updatedByName(drug.getUpdatedByUser() != null ? drug.getUpdatedByUser().getFullName() : null)
             .updatedAt(drug.getUpdatedAt() != null ? drug.getUpdatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : null)
-            .updateReason(drug.getUpdateReason())
+
             .build();
     }
 

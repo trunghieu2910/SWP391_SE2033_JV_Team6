@@ -79,7 +79,6 @@ public class AuthServiceImpl implements AuthService {
         emailService.sendOtpEmail(request.getEmail(), request.getFullName(), otp);
     }
 
-    @Override
     @Transactional
     @LogActivity(action = "REGISTER", targetType = "Users", description = "Đăng ký tài khoản Bệnh nhân mới (Lễ tân tạo)")
     public void registerByReceptionist(RegisterRequest request) {

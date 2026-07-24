@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Chi tiết thuốc', 'drugs')}">
 <body>
@@ -117,7 +117,7 @@
                     <div>
                         <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light); display: block; margin-bottom: 2px;">Cập nhật lần cuối</span>
                         <strong th:text="${drug.updatedAt}" style="font-size: 0.95rem; color: var(--neutral-dark);">—</strong>
-                        <div th:if="${drug.updateReason != null and !drug.updateReason.isEmpty()}" style="font-size: 0.85rem; color: var(--neutral-light); margin-top: 4px; font-style: italic;" th:text="${'Lý do: ' + drug.updateReason}"></div>
+
                     </div>
                 </div>
             </div>

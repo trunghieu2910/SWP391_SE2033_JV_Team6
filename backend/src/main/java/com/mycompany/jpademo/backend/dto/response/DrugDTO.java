@@ -32,5 +32,4 @@ public class DrugDTO {
     private Integer updatedBy;
     private String updatedByName;
     private String updatedAt;
-    private String updateReason;
 }

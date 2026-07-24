@@ -79,8 +79,7 @@ public class Drug {
     @JoinColumn(name = "updatedBy")
     private User updatedByUser;
 
-    @Column(name = "updateReason", length = 500)
-    private String updateReason;
+
 
     @OneToMany(mappedBy = "drug", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UnitConversion> conversions;
