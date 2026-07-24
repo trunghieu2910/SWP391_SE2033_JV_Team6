@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.BatchStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,8 +43,6 @@ public class DrugBatch {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "importPrice")
-    private BigDecimal importPrice;
 
     @Column(name = "supplier", length = 200)
     private String supplier;
@@ -56,11 +55,23 @@ public class DrugBatch {
     @JoinColumn(name = "importedBy", nullable = false)
     private User importedByUser;
 
-    @Column(name = "status")
-    private Byte status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private BatchStatus status;
 
     @Column(name = "notes", length = 500)
     private String notes;
+
+    @org.hibernate.annotations.UpdateTimestamp
+    @Column(name = "updatedAt")
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updatedBy")
+    private User updatedByUser;
+
+    @Column(name = "updateReason", length = 500)
+    private String updateReason;
 
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inventory> inventories;

@@ -221,6 +221,10 @@
     cursor: pointer;
     transition: var(--transition);
     background: #fafbfc;
+    user-select: none;
+}
+.accordion-header * {
+    pointer-events: none;
 }
 .accordion-header:hover { background: #f1f5f9; }
 .accordion-title {

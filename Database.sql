@@ -36,7 +36,7 @@ CREATE TABLE [Users]
     passwordHash VARCHAR(255) NOT NULL,
     phoneNumber  VARCHAR(20),
     certificateUrl VARCHAR(255),
-    status       VARCHAR(20), -- ACTIVE , BANNED
+    status       VARCHAR(20), -- ACTIVE , INACTIVE , BANNED
     lastChangePassTime DATETIME,
 	lastLogoutTime DATETIME,
     createdAt    DATETIME     DEFAULT GETDATE(),
@@ -171,7 +171,7 @@ CREATE TABLE MedicalImageDetails (
     imageUrl NVARCHAR(255) NOT NULL,
     aiImageUrl NVARCHAR(255),
     confidenceScore FLOAT,
-    ultrasoundConclusion NVARCHAR(MAX),
+    technicalConclusion NVARCHAR(MAX),
     imgResultConclusion NVARCHAR(255),
     uploadedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (medicalImageID) REFERENCES MedicalImage (medicalImageID)
@@ -244,24 +244,30 @@ GO
 
 -- ROLE
 INSERT INTO [Role] (roleName)
-VALUES (N'ADMIN'), (N'DOCTOR'), (N'ULTRASOUND_DOCTOR'), (N'PATIENT'), (N'RECEPTIONIST'),(N'PHARMACIST');
+VALUES (N'ADMIN'), (N'DOCTOR'), (N'TECHNICAL'), (N'PATIENT'), (N'RECEPTIONIST'),(N'PHARMACIST');
 
 -- USERS
 INSERT INTO [Users]
 (roleID, username, fullName, email, passwordHash, phoneNumber, status, lastChangePassTime, nationalID)
 VALUES
-(4, 'patient_nam', N'Phạm Thùy Linh', 'namvipnhatgt@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445466', 'ACTIVE', GETDATE(), '043678901234'),
+(4, 'patient_nam', N'Phạm Thùy Linh', 'namvipnhatgt@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445466', 'INACTIVE', GETDATE(), '043678901234'),
 (1, 'admin_system', N'Quản trị viên', 'luugiang205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0999999999', 'ACTIVE', GETDATE(), '001234567890'),
 (2, 'dr_nguyen', N'Bác sĩ Nguyễn Văn Tùng', 'likey2404@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0912345678', 'ACTIVE', GETDATE(), '012345678901'),
 (2, 'dr_tran', N'Bác sĩ Trần Thị Mai', 'mai.tran@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0987654321', 'ACTIVE', GETDATE(), '023456789012'),
 (4, 'patient_hoang', N'Lê Minh Hoàng', 'hoang.le@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0901112233', 'ACTIVE', GETDATE(), '034567890123'),
 (4, 'patient_linh', N'Phạm Thùy Linh', 'linh.pham@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445566', 'ACTIVE', GETDATE(), '045678901234'),
 (4, 'patient_huong', N'Nguyễn Thu Hương', 'huong.nguyen@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0905556677', 'ACTIVE', GETDATE(), '056789012345'),
-(4, 'patient_lan', N'Trần Thị Lan', 'lan.tran@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0906667788', 'ACTIVE', GETDATE(), '067890123456'),
+(4, 'patient_lan', N'Trần Thị Lan', 'lan.tran@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0906667788', 'INACTIVE', GETDATE(), '067890123456'),
 (4, 'patient_my', N'Đỗ Thanh Mỹ', 'my.do@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907778899', 'BANNED', GETDATE(), '078901234567'),
 (5, 'rp_linh', N'Nguyễn Thị Huyền Linh', 'LinhNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887776', 'ACTIVE', GETDATE(), '098765432109'),
 (5, 'rp_ly', N'Nguyễn Thị Ly', 'LyNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887676', 'ACTIVE', GETDATE(), '098765432009'),
-(5, 'rp_hong', N'Hong Hae In', 'HongHaeIn@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887775', 'ACTIVE', GETDATE(), '098765032109');
+(5, 'rp_hong', N'Hong Hae In', 'HongHaeIn@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887775', 'ACTIVE', GETDATE(), '098765032109'),
+(6, 'pharmacist', N'Nguyễn Hoàng Anh', 'anh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0908889999', 'ACTIVE', GETDATE(), '089012345678'),
+(6, 'pharmacist2', N'Trần Thị Linh', 'linh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907776666', 'ACTIVE', GETDATE(), '090123456789'),
+(6, 'pharmacist3', N'Nguyễn Hoàng Long', 'lonh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0918889999', 'ACTIVE', GETDATE(), '079012345678'),
+(6, 'pharmacist4', N'Nguyễn Thị Linh', 'linh1.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907276666', 'ACTIVE', GETDATE(), '090123406789'),
+(3, 'technical', N'Kỹ thuật viên AI', 'technical@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0911111111', 'ACTIVE', GETDATE(), '111111111111');
+
 
 -- PATIENT (Sửa lại trường liên kết userID cho đúng logic phân quyền)
 INSERT INTO Patient (gender, dob, address, userID)
@@ -351,10 +357,12 @@ INSERT INTO DiseaseType (name) VALUES
 (N'Ung thư cổ tử cung xâm lấn giai đoạn muộn (III-IV)'),
 (N'Cần theo dõi thêm / Chưa đủ dữ liệu kết luận');
 
--- Review
-INSERT INTO Review (sessionID, userID, treatmentPlan, doctorAdvice, note)
+-- Review (Chỉ các session 1, 2, 4 có kết luận chẩn đoán)
+INSERT INTO Review (sessionID, userID, diseaseTypeID, treatmentPlan, doctorAdvice, note)
 VALUES
-    (1, 3, N'Kê đơn kháng sinh 5 ngày, siro ho', N'Tránh nước đá, giữ ấm cổ họng', N'Bệnh nhân có tiền sử dị ứng thời tiết');
+    (1, 3, 1, N'Kê đơn kháng sinh 5 ngày, siro ho', N'Tránh nước đá, giữ ấm cổ họng', N'Bệnh nhân có tiền sử dị ứng thời tiết'),
+    (2, 4, 2, N'Phác đồ điều trị nội tiết và theo dõi sát chức năng gan', N'Theo dõi sát chức năng tiêu hóa và tình trạng nôn nghén', N'Tái khám theo hẹn'),
+    (4, 3, 3, N'Điều trị giảm nhẹ và kiểm soát đau thượng vị', N'Ăn thức ăn mềm, dễ tiêu', N'Bệnh nhân nuốt nghẹn');
 
 -- SystemLog
 INSERT INTO SystemLog (userID, targetType, targetID, action, description)
@@ -425,29 +433,41 @@ CREATE TABLE Unit (
 
 -- 2.4. Danh mục thuốc
 CREATE TABLE Drug (
+    -- Nhóm Định danh
+    drugID INT IDENTITY(1,1) PRIMARY KEY,          -- Mã ID tự tăng, khóa chính định danh duy nhất
+    drugCode VARCHAR(20) NOT NULL UNIQUE,          -- Mã quản lý thuốc (VD: TH-001), không trùng lặp
+    drugName NVARCHAR(200) NOT NULL,               -- Tên biệt dược / tên hoạt chất (VD: Paracetamol)
 
-    drugID INT IDENTITY(1,1) PRIMARY KEY,
-	drugCode VARCHAR(20) NOT NULL UNIQUE,
-	drugName NVARCHAR(200) NOT NULL,
-	strength VARCHAR(50) NULL,
-	strengthUnit VARCHAR(10) NULL,
-	dosageForm NVARCHAR(50) NOT NULL,
-	routeOfAdministration NVARCHAR(50) NOT NULL,
-	subCategoryID INT NOT NULL,
-	baseUnitID INT NOT NULL,  -- THÊM CỘT NÀY: Để biết thuốc này khi kê đơn lẻ thì dùng đơn vị gốc nào (VIÊN/ỐNG/ml)
-	packaging NVARCHAR(100),
-	manufacturer NVARCHAR(100),
-	countryOfOrigin NVARCHAR(50),
-	storageCondition NVARCHAR(200),
-	shelfLifeMonths INT DEFAULT 24,
-	sellingPrice DECIMAL(18,2) DEFAULT 0, -- Chuyển luôn lệnh ALTER vào đây cho sạch code
-	notes NVARCHAR(500),
-	status TINYINT DEFAULT 1,
-	createdAt DATETIME DEFAULT GETDATE(),
-	createdBy INT,
-	FOREIGN KEY (subCategoryID) REFERENCES DrugSubCategory(subCategoryID),
-	FOREIGN KEY (createdBy) REFERENCES [Users](userID),
-	FOREIGN KEY (baseUnitID) REFERENCES Unit(unitID) -- Khóa ngoại liên kết bảng Unit
+    -- Nhóm Bào chế & Hàm lượng
+    strength VARCHAR(50) NULL,                     -- Hàm lượng/nồng độ (VD: 500, 250/5)
+    strengthUnit VARCHAR(10) NULL,                 -- Đơn vị hàm lượng (VD: mg, g, ml, IU)
+    dosageForm NVARCHAR(50) NOT NULL,              -- Dạng bào chế (VD: Viên nén, Dung dịch tiêm)
+    routeOfAdministration NVARCHAR(50) NOT NULL,   -- Đường dùng (VD: Uống, Tiêm tĩnh mạch, Bôi)
+
+    -- Nhóm Phân loại & Đơn vị tính
+    subCategoryID INT NOT NULL,                    -- FK: Khóa ngoại trỏ đến danh mục con (DrugSubCategory)
+    baseUnitID INT NOT NULL,                       -- FK: Đơn vị cơ sở nhỏ nhất khi kê đơn/bán lẻ (Viên, Ống, ml)
+
+    -- Nhóm Xuất xứ & Bảo quản
+    manufacturer NVARCHAR(100) NULL,               -- Nhà sản xuất (VD: AstraZeneca, Pfizer)
+    countryOfOrigin NVARCHAR(50) NULL,             -- Nước sản xuất (VD: Việt Nam, Pháp)
+    storageCondition NVARCHAR(200) NULL,           -- Điều kiện bảo quản (VD: Tránh ánh nắng, 15-30°C)
+
+    -- Trạng thái & Ghi chú
+    notes NVARCHAR(500) NULL,                     
+    status VARCHAR(20) DEFAULT 'ACTIVE',           -- Trạng thái: ACTIVE , INACTIVE 
+
+    -- Nhóm Kiểm toán (Audit Log)
+    createdAt DATETIME DEFAULT GETDATE(),          -- Thời gian tạo bản ghi (mặc định hiện tại)
+    createdBy INT NULL,                            -- FK: ID người tạo bản ghi ([Users])
+    updatedAt DATETIME NULL,                       -- Thời gian cập nhật gần nhất (NULL khi mới tạo)
+    updatedBy INT NULL,                            -- FK: ID người cập nhật gần nhất ([Users])
+
+    -- Ràng buộc Khóa ngoại (Foreign Keys)
+    FOREIGN KEY (subCategoryID) REFERENCES DrugSubCategory(subCategoryID),
+    FOREIGN KEY (baseUnitID) REFERENCES Unit(unitID),
+    FOREIGN KEY (createdBy) REFERENCES [Users](userID),
+    FOREIGN KEY (updatedBy) REFERENCES [Users](userID)
 );
 
 -- 2.5. Quy đổi đơn vị (Nhập theo LỌ/VỈ, Xuất theo VIÊN/ml)
@@ -466,25 +486,41 @@ CREATE TABLE UnitConversion (
 
 -- 2.6. Lô hàng nhập kho
 CREATE TABLE DrugBatch (
-    batchID INT IDENTITY(1,1) PRIMARY KEY,
-    drugID INT NOT NULL,
-    batchNumber VARCHAR(50) NOT NULL,
-    manufactureDate DATE NOT NULL,
-    expiryDate DATE NOT NULL,
+    -- Nhóm Định danh & Liên kết Thuốc
+    batchID INT IDENTITY(1,1) PRIMARY KEY,      -- Mã ID tự tăng, khóa chính định danh duy nhất cho từng lô hàng
+    drugID INT NOT NULL,                         -- FK: Mã thuốc nhập kho (liên kết bảng Drug)
+    batchNumber VARCHAR(50) NOT NULL,            -- Số lô sản xuất ghi trên bao bì (VD: LOT-2026-001)
 
-    -- LƯU Ý: unitID ở đây chính là Đơn vị lớn khi nhập (HỘP/LỌ).
-    -- Hệ thống sẽ lấy cặp (drugID, unitID) này đối chiếu sang bảng UnitConversion để tìm ra conversionQuantity.
-    unitID INT NOT NULL,
-    quantity INT NOT NULL, -- Số lượng nhập theo Đơn vị lớn (Ví dụ: 50 hộp)
-    importPrice DECIMAL(18,2) DEFAULT 0,
-    supplier NVARCHAR(200),
-    importDate DATETIME DEFAULT GETDATE(),
-    importedBy INT NOT NULL,
-    notes NVARCHAR(500),
+    -- Nhóm Hạn sử dụng (Phục vụ xuất kho FEFO - Hết hạn trước xuất trước)
+    manufactureDate DATE NOT NULL,              -- Ngày sản xuất của lô thuốc
+    expiryDate DATE NOT NULL,                   -- Ngày hết hạn sử dụng của lô thuốc
+
+    -- Nhóm Số lượng & Đơn vị tính
+    unitID INT NOT NULL,                        -- FK: Đơn vị lớn khi nhập (Hộp/Lọ/Thùng) (liên kết bảng Unit)
+    quantity INT NOT NULL,                      -- Số lượng nhập theo đơn vị lớn (VD: 50 hộp)
+
+    -- Nhóm Chi phí, Nhà cung cấp & Thời gian
+    supplier NVARCHAR(200) NULL,                -- Tên công ty / Nhà cung cấp phân phối lô thuốc
+    importDate DATETIME DEFAULT GETDATE(),       -- Ngày giờ tiến hành nhập kho (mặc định hiện tại)
+
+    -- Trạng thái & Ghi chú
+    importedBy INT NOT NULL,                     -- FK: ID nhân viên/thủ kho thực hiện nhập (liên kết bảng Users)
+    status VARCHAR(20) DEFAULT 'ACTIVE',         -- ACTIVE, INACTIVE, EXPIRED
+    notes NVARCHAR(500) NULL,                    -- Ghi chú bổ sung khi nhập kho (VD: Hàng tài trợ, Vỏ hộp bị móp)
+
+	-- Nhóm Lịch sử & Kiểm toán chỉnh sửa (Audit Log)
+    updatedAt DATETIME NULL,                     -- Ngày giờ diễn ra lần chỉnh sửa lô hàng gần nhất (NULL khi mới tạo)
+    updatedBy INT NULL,                          -- FK: ID người thực hiện lần chỉnh sửa gần nhất (liên kết bảng Users)
+    updateReason NVARCHAR(500) NULL,             -- Lý do điều chỉnh thông tin lô (VD: Sửa lại số lượng do kiểm kê sai)
+
+    -- Ràng buộc Khóa ngoại (Foreign Keys)
     FOREIGN KEY (drugID) REFERENCES Drug(drugID),
     FOREIGN KEY (unitID) REFERENCES Unit(unitID),
     FOREIGN KEY (importedBy) REFERENCES [Users](userID),
-    UNIQUE (batchNumber, drugID)
+    FOREIGN KEY (updatedBy) REFERENCES [Users](userID),
+
+    -- Ràng buộc Duy nhất: Một loại thuốc không thể trùng mã số lô
+    CONSTRAINT UQ_Batch_Drug UNIQUE (batchNumber, drugID)
 );
 
 -- 2.7. Tồn kho chi tiết (Tính theo đơn vị nhỏ nhất)
@@ -493,7 +529,6 @@ CREATE TABLE Inventory (
     batchID INT NOT NULL,
     quantityInStock INT NOT NULL DEFAULT 0, -- Tồn theo đơn vị nhỏ nhất (VIÊN/ỐNG/ml)
     lastUpdated DATETIME DEFAULT GETDATE(),
-    status TINYINT DEFAULT 1, -- 1: Bình thường, 2: Sắp hết (<30 ngày), 0: Hết
     FOREIGN KEY (batchID) REFERENCES DrugBatch(batchID)
 );
 
@@ -507,7 +542,7 @@ CREATE TABLE Prescription (
     diagnosis NVARCHAR(500),
     treatmentCycle NVARCHAR(50),
     prescriptionDate DATETIME DEFAULT GETDATE(),
-    status TINYINT DEFAULT 0, -- 0: Mới kê, 1: Đã cấp phát, 2: Đã hủy
+    status VARCHAR(20) DEFAULT 'PENDING',  -- PENDING,DISPENSED
     notes NVARCHAR(500),
     FOREIGN KEY (sessionID) REFERENCES DiagnosisSession(sessionID),
     FOREIGN KEY (patientID) REFERENCES Patient(patientID),
@@ -531,6 +566,7 @@ CREATE TABLE PrescriptionDetail (
     dispensedAt DATETIME NULL,
     dispensedBy INT NULL, -- Dược sĩ xuất thuốc
     notes NVARCHAR(200),
+	status VARCHAR(20) DEFAULT 'PENDING',  -- PENDING,DISPENSED,CANCELLED
     FOREIGN KEY (prescriptionID) REFERENCES Prescription(prescriptionID),
     FOREIGN KEY (drugID) REFERENCES Drug(drugID),
     FOREIGN KEY (batchID) REFERENCES DrugBatch(batchID),
@@ -586,62 +622,63 @@ INSERT INTO DrugSubCategory (categoryID, subCategoryName, priorityLevel, require
 (2, N'Thuốc chống dị ứng', 2, 0, N'Dự phòng và điều trị phản ứng dị ứng khi truyền thuốc'),
 (2, N'Thuốc chống viêm', 2, 1, N'Chống viêm, chống dị ứng, giảm phù nề');
 
--- 3.4. Danh mục thuốc (Đã sửa lỗi cú pháp và bổ sung sellingPrice)
+-- 3.4. Danh mục thuốc 
 INSERT INTO Drug (
     drugCode, drugName, strength, strengthUnit, dosageForm,
-    routeOfAdministration, subCategoryID, baseUnitID, packaging, manufacturer,
-    countryOfOrigin, storageCondition, shelfLifeMonths, notes, createdBy, sellingPrice
+    routeOfAdministration, subCategoryID, baseUnitID, manufacturer,
+    countryOfOrigin, storageCondition, notes, status, 
+    createdAt, createdBy, updatedAt, updatedBy
 ) VALUES
 -- ========== NHÓM 1: THUỐC ĐIỀU TRỊ UNG THƯ (baseUnitID = 1: Viên) ==========
-('DRUG-001', N'Tamoxifen (Nolvadex)', '20', 'mg', N'Viên nén bao phim', N'Uống', 1, 1, N'Hộp 3 vỉ x 10 viên', 'AstraZeneca', N'Anh', N'15-25°C, tránh ẩm', 36, N'Uống sau bữa ăn', 10, 12000.00),
-('DRUG-002', N'Letrozole (Femara)', '2.5', 'mg', N'Viên nén bao phim', N'Uống', 1, 1, N'Hộp 3 vỉ x 10 viên', 'Novartis', N'Thụy Sĩ', N'15-30°C', 36, N'Uống xa bữa ăn', 10, 45000.00),
-('DRUG-003', N'Anastrozole (Arimidex)', '1', 'mg', N'Viên nén bao phim', N'Uống', 1, 1, N'Hộp 3 vỉ x 10 viên', 'AstraZeneca', N'Anh', N'15-30°C', 36, N'Uống xa bữa ăn', 10, 38000.00),
-('DRUG-004', N'Exemestane (Aromasin)', '25', 'mg', N'Viên nén bao phim', N'Uống', 1, 1, N'Hộp 3 vỉ x 10 viên', 'Pfizer', N'Mỹ', N'15-30°C', 36, N'Uống sau bữa ăn', 10, 52000.00),
-('DRUG-005', N'Imatinib (Glivec)', '400', 'mg', N'Viên nén bao phim', N'Uống', 2, 1, N'Hộp 3 vỉ x 10 viên', 'Novartis', N'Thụy Sĩ', N'15-30°C', 36, N'Uống trong bữa ăn, nhiều nước', 10, 280000.00),
-('DRUG-006', N'Erlotinib (Tarceva)', '150', 'mg', N'Viên nén bao phim', N'Uống', 2, 1, N'Hộp 3 vỉ x 10 viên', 'Roche', N'Thụy Sĩ', N'15-25°C', 36, N'Uống 1 giờ trước hoặc 2 giờ sau ăn', 10, 310000.00),
-('DRUG-007', N'Capecitabine (Xeloda)', '500', 'mg', N'Viên nén bao phim', N'Uống', 3, 1, N'Hộp 3 vỉ x 10 viên', 'Roche', N'Thụy Sĩ', N'15-30°C', 36, N'Uống trong vòng 30 phút sau ăn', 10, 65000.00),
-('DRUG-008', N'Cyclophosphamide (Endoxan)', '50', 'mg', N'Viên nén bao phim', N'Uống', 3, 1, N'Hộp 3 vỉ x 10 viên', 'Baxter', N'Mỹ', N'15-25°C', 36, N'Uống vào buổi sáng, nhiều nước', 10, 15000.00),
-('DRUG-009', N'Methotrexate', '2.5', 'mg', N'Viên nén', N'Uống', 3, 1, N'Hộp 3 vỉ x 10 viên', 'Pfizer', N'Mỹ', N'15-30°C', 36, N'Uống 1 lần/tuần theo chỉ định', 10, 8000.00),
-('DRUG-010', N'Thalidomide', '50', 'mg', N'Viên nén', N'Uống', 4, 1, N'Hộp 3 vỉ x 10 viên', N'Celgene', N'Mỹ', N'15-30°C', 24, N'Uống trước khi ngủ, cần tránh thai', 10, 95000.00),
+('DRUG-001', N'Tamoxifen (Nolvadex)', '20', 'mg', N'Viên nén bao phim', N'Uống', 1, 1, 'AstraZeneca', N'Anh', N'15-25°C, tránh ẩm', N'Uống sau bữa ăn', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-002', N'Letrozole (Femara)', '2.5', 'mg', N'Viên nén bao phim', N'Uống', 1, 1, 'Novartis', N'Thụy Sĩ', N'15-30°C', N'Uống xa bữa ăn', 'ACTIVE', GETDATE(), 14, NULL, NULL),
+('DRUG-003', N'Anastrozole (Arimidex)', '1', 'mg', N'Viên nén bao phim', N'Uống', 1, 1, 'AstraZeneca', N'Anh', N'15-30°C', N'Uống xa bữa ăn', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-004', N'Exemestane (Aromasin)', '25', 'mg', N'Viên nén bao phim', N'Uống', 1, 1, 'Pfizer', N'Mỹ', N'15-30°C', N'Uống sau bữa ăn', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-005', N'Imatinib (Glivec)', '400', 'mg', N'Viên nén bao phim', N'Uống', 2, 1, 'Novartis', N'Thụy Sĩ', N'15-30°C', N'Uống trong bữa ăn, nhiều nước', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-006', N'Erlotinib (Tarceva)', '150', 'mg', N'Viên nén bao phim', N'Uống', 2, 1, 'Roche', N'Thụy Sĩ', N'15-25°C', N'Uống 1 giờ trước hoặc 2 giờ sau ăn', 'ACTIVE', GETDATE(), 14, NULL, NULL),
+('DRUG-007', N'Capecitabine (Xeloda)', '500', 'mg', N'Viên nén bao phim', N'Uống', 3, 1, 'Roche', N'Thụy Sĩ', N'15-30°C', N'Uống trong vòng 30 phút sau ăn', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-008', N'Cyclophosphamide (Endoxan)', '50', 'mg', N'Viên nén bao phim', N'Uống', 3, 1, 'Baxter', N'Mỹ', N'15-25°C', N'Uống vào buổi sáng, nhiều nước', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-009', N'Methotrexate', '2.5', 'mg', N'Viên nén', N'Uống', 3, 1, 'Pfizer', N'Mỹ', N'15-30°C', N'Uống 1 lần/tuần theo chỉ định', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-010', N'Thalidomide', '50', 'mg', N'Viên nén', N'Uống', 4, 1, N'Celgene', N'Mỹ', N'15-30°C', N'Uống trước khi ngủ, cần tránh thai', 'ACTIVE', GETDATE(), 14, NULL, NULL),
 
 -- ========== NHÓM 2: THUỐC HỖ TRỢ (baseUnitID = 1: Viên) ==========
-('DRUG-011', N'Morphine SR (MST Continus)', '30', 'mg', N'Viên giải phóng kéo dài', N'Uống', 5, 1, N'Hộp 2 vỉ x 10 viên', 'Mundipharma', N'Anh', N'15-25°C', 36, N'Uống cách 12 giờ, không nghiền nát', 10, 25000.00),
-('DRUG-012', N'Tramadol (Tramal)', '50', 'mg', N'Viên nén', N'Uống', 5, 1, N'Hộp 2 vỉ x 10 viên', 'Grunenthal', N'Đức', N'15-30°C', 36, N'Uống khi đau, tối đa 400mg/ngày', 10, 8500.00),
-('DRUG-013', N'Paracetamol (Panadol)', '500', 'mg', N'Viên nén', N'Uống', 5, 1, N'Hộp 2 vỉ x 10 viên', N'GSK', N'Anh', N'15-30°C', 36, N'Uống khi đau hoặc sốt, tối đa 4g/ngày', 10, 1500.00),
-('DRUG-014', N'Ondansetron (Zofran)', '8', 'mg', N'Viên nén bao phim', N'Uống', 6, 1, N'Hộp 1 vỉ x 10 viên', 'GSK', N'Anh', N'15-30°C', 24, N'Uống 1 giờ trước hóa trị', 10, 35000.00),
-('DRUG-015', N'Metoclopramide (Primperan)', '10', 'mg', N'Viên nén', N'Uống', 6, 1, N'Hộp 3 vỉ x 10 viên', 'Sanofi', N'Pháp', N'15-30°C', 24, N'Uống 30 phút trước ăn', 10, 2000.00),
-('DRUG-016', N'Domperidone (Motilium)', '10', 'mg', N'Viên nén bao phim', N'Uống', 6, 1, N'Hộp 2 vỉ x 10 viên', 'Janssen', N'Bỉ', N'15-30°C', 24, N'Uống trước bữa ăn 15-30 phút', 10, 3500.00),
-('DRUG-017', N'Pantoprazole (Pantozol)', '40', 'mg', N'Viên nén bao phim', N'Uống', 7, 1, N'Hộp 2 vỉ x 7 viên', 'Takeda', N'Nhật', N'15-25°C', 36, N'Uống trước bữa ăn 30 phút', 10, 18000.00),
-('DRUG-018', N'Omeprazole (Losec)', '20', 'mg', N'Viên nén bao phim', N'Uống', 7, 1, N'Hộp 2 vỉ x 10 viên', 'AstraZeneca', N'Anh', N'15-25°C', 36, N'Uống trước bữa ăn 30 phút', 10, 12000.00),
-('DRUG-019', N'Cetirizine (Zyrtec)', '10', 'mg', N'Viên nén bao phim', N'Uống', 8, 1, N'Hộp 1 vỉ x 10 viên', 'UCB', N'Bỉ', N'15-30°C', 36, N'Uống 1 lần/ngày, có thể gây buồn ngủ', 10, 8000.00),
-('DRUG-020', N'Loratadine (Clarityn)', '10', 'mg', N'Viên nén', N'Uống', 8, 1, N'Hộp 1 vỉ x 10 viên', 'Bayer', N'Đức', N'15-30°C', 36, N'Uống 1 lần/ngày, không gây buồn ngủ', 10, 7500.00),
-('DRUG-021', N'Dexamethasone (Decadron)', '4', 'mg', N'Viên nén', N'Uống', 9, 1, N'Hộp 3 vỉ x 10 viên', 'Merck', N'Mỹ', N'15-25°C', 36, N'Uống theo phác đồ, giảm liều từ từ', 10, 3000.00),
-('DRUG-022', N'Methylprednisolone (Medrol)', '16', 'mg', N'Viên nén', N'Uống', 9, 1, N'Hộp 2 vỉ x 10 viên', 'Pfizer', N'Mỹ', N'15-30°C', 36, N'Uống theo chỉ định bác sĩ', 10, 4500.00),
-('DRUG-023', N'Prednisolone', '5', 'mg', N'Viên nén', N'Uống', 9, 1, N'Hộp 3 vỉ x 10 viên', N'Sanofi', N'Pháp', N'15-30°C', 36, N'Uống vào buổi sáng, giảm liều từ từ', 10, 1500.00),
+('DRUG-011', N'Morphine SR (MST Continus)', '30', 'mg', N'Viên giải phóng kéo dài', N'Uống', 5, 1, 'Mundipharma', N'Anh', N'15-25°C', N'Uống cách 12 giờ, không nghiền nát', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-012', N'Tramadol (Tramal)', '50', 'mg', N'Viên nén', N'Uống', 5, 1, 'Grunenthal', N'Đức', N'15-30°C', N'Uống khi đau, tối đa 400mg/ngày', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-013', N'Paracetamol (Panadol)', '500', 'mg', N'Viên nén', N'Uống', 5, 1, N'GSK', N'Anh', N'15-30°C', N'Uống khi đau hoặc sốt, tối đa 4g/ngày', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-014', N'Ondansetron (Zofran)', '8', 'mg', N'Viên nén bao phim', N'Uống', 6, 1, 'GSK', N'Anh', N'15-30°C', N'Uống 1 giờ trước hóa trị', 'ACTIVE', GETDATE(), 14, NULL, NULL),
+('DRUG-015', N'Metoclopramide (Primperan)', '10', 'mg', N'Viên nén', N'Uống', 6, 1, 'Sanofi', N'Pháp', N'15-30°C', N'Uống 30 phút trước ăn', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-016', N'Domperidone (Motilium)', '10', 'mg', N'Viên nén bao phim', N'Uống', 6, 1, 'Janssen', N'Bỉ', N'15-30°C', N'Uống trước bữa ăn 15-30 phút', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-017', N'Pantoprazole (Pantozol)', '40', 'mg', N'Viên nén bao phim', N'Uống', 7, 1, 'Takeda', N'Nhật', N'15-25°C', N'Uống trước bữa ăn 30 phút', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-018', N'Omeprazole (Losec)', '20', 'mg', N'Viên nén bao phim', N'Uống', 7, 1, 'AstraZeneca', N'Anh', N'15-25°C', N'Uống trước bữa ăn 30 phút', 'ACTIVE', GETDATE(), 14, NULL, NULL),
+('DRUG-019', N'Cetirizine (Zyrtec)', '10', 'mg', N'Viên nén bao phim', N'Uống', 8, 1, 'UCB', N'Bỉ', N'15-30°C', N'Uống 1 lần/ngày, có thể gây buồn ngủ', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-020', N'Loratadine (Clarityn)', '10', 'mg', N'Viên nén', N'Uống', 8, 1, 'Bayer', N'Đức', N'15-30°C', N'Uống 1 lần/ngày, không gây buồn ngủ', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-021', N'Dexamethasone (Decadron)', '4', 'mg', N'Viên nén', N'Uống', 9, 1, 'Merck', N'Mỹ', N'15-25°C', N'Uống theo phác đồ, giảm liều từ từ', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-022', N'Methylprednisolone (Medrol)', '16', 'mg', N'Viên nén', N'Uống', 9, 1, 'Pfizer', N'Mỹ', N'15-30°C', N'Uống theo chỉ định bác sĩ', 'ACTIVE', GETDATE(), 14, NULL, NULL),
+('DRUG-023', N'Prednisolone', '5', 'mg', N'Viên nén', N'Uống', 9, 1, N'Sanofi', N'Pháp', N'15-30°C', N'Uống vào buổi sáng, giảm liều từ từ', 'ACTIVE', GETDATE(), 15, NULL, NULl),
 
--- ========== NHÓM 2.6: VITAMIN VÀ KHOÁNG CHẤT (baseUnitID = 1: Viên) ==========
-('DRUG-024', N'Vitamin C', '500', 'mg', N'Viên sủi', N'Uống', 10, 1, N'Ống 10 viên', N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', 24, N'Hòa tan với nước, uống 1 viên/ngày', 10, 3000.00),
-('DRUG-025', N'Vitamin tổng hợp', 'Multivitamin', 'viên', N'Viên nén', N'Uống', 10, 1, N'Lọ 60 viên', N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', 24, N'Uống 1 viên/ngày sau bữa ăn', 10, 2500.00),
-('DRUG-026', N'Centrum (Vitamin tổng hợp)', 'Multivitamin', 'viên', N'Viên nén bao phim', N'Uống', 10, 1, N'Lọ 60 viên', 'Pfizer', N'Mỹ', N'15-30°C', 24, N'Uống 1 viên/ngày sau bữa ăn', 10, 11000.00),
-('DRUG-027', N'Calcium + Vitamin D3', '500', 'mg', N'Viên sủi', N'Uống', 10, 1, N'Ống 20 viên', N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', 24, N'Hòa tan trong nước, uống 1 viên/ngày', 10, 4000.00),
-('DRUG-028', N'Omega-3 (Fish Oil)', '1000', 'mg', N'Viên nang mềm', N'Uống', 10, 1, N'Lọ 30 viên', N'Công ty Dược Việt Nam', N'Việt Nam', N'15-25°C', 24, N'Uống sau bữa ăn, 1-2 viên/ngày', 10, 6000.00),
-('DRUG-029', N'Probiotics (Bioflora)', '10 tỷ CFU', 'CFU', N'Viên nang', N'Uống', 10, 1, N'Lọ 30 viên', N'Công ty Dược Việt Nam', N'Việt Nam', N'2-8°C', 18, N'Uống trước ăn 30 phút, bảo quản lạnh', 10, 15000.00),
-('DRUG-030', N'Magnesium', '300', 'mg', N'Viên nén', N'Uống', 10, 1, N'Lọ 60 viên', N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', 24, N'Uống 1 viên/ngày', 10, 3500.00),
+-- ========== NHÓM 3: VITAMIN VÀ KHOÁNG CHẤT (baseUnitID = 1: Viên) ==========
+('DRUG-024', N'Vitamin C', '500', 'mg', N'Viên sủi', N'Uống', 10, 1, N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', N'Hòa tan với nước, uống 1 viên/ngày', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-025', N'Vitamin tổng hợp', 'Multivitamin', 'viên', N'Viên nén', N'Uống', 10, 1, N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', N'Uống 1 viên/ngày sau bữa ăn', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-026', N'Centrum (Vitamin tổng hợp)', 'Multivitamin', 'viên', N'Viên nén bao phim', N'Uống', 10, 1, 'Pfizer', N'Mỹ', N'15-30°C', N'Uống 1 viên/ngày sau bữa ăn', 'ACTIVE', GETDATE(), 14, NULL, NULL),
+('DRUG-027', N'Calcium + Vitamin D3', '500', 'mg', N'Viên sủi', N'Uống', 10, 1, N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', N'Hòa tan trong nước, uống 1 viên/ngày', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-028', N'Omega-3 (Fish Oil)', '1000', 'mg', N'Viên nang mềm', N'Uống', 10, 1, N'Công ty Dược Việt Nam', N'Việt Nam', N'15-25°C', N'Uống sau bữa ăn, 1-2 viên/ngày', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-029', N'Probiotics (Bioflora)', '10 tỷ CFU', 'CFU', N'Viên nang', N'Uống', 10, 1, N'Công ty Dược Việt Nam', N'Việt Nam', N'2-8°C', N'Uống trước ăn 30 phút, bảo quản lạnh', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-030', N'Magnesium', '300', 'mg', N'Viên nén', N'Uống', 10, 1, N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', N'Uống 1 viên/ngày', 'ACTIVE', GETDATE(), 14, NULL, NULL),
 
--- ========== NHÓM TIEU HÓA & KHÁNG SINH UỐNG (baseUnitID = 1: Viên) ==========
-('DRUG-031', N'Bisacodyl (Dulcolax)', '5', 'mg', N'Viên nén bao phim', N'Uống', 11, 1, N'Hộp 2 vỉ x 10 viên', 'Boehringer', N'Đức', N'15-25°C', 36, N'Uống trước khi ngủ, tác dụng sau 6-12 giờ', 10, 3500.00),
-('DRUG-032', N'Loperamide (Imodium)', '2', 'mg', N'Viên nang', N'Uống', 12, 1, N'Hộp 1 vỉ x 10 viên', N'Janssen', N'Bỉ', N'15-30°C', 36, N'Uống sau mỗi lần đi tiêu lỏng, tối đa 8 viên/ngày', 10, 5000.00),
-('DRUG-033', N'Amoxicillin', '500', 'mg', N'Viên nang', N'Uống', 13, 1, N'Hộp 2 vỉ x 10 viên', N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', 24, N'Uống sau ăn, cách 8 giờ/lần', 10, 2000.00),
-('DRUG-034', N'Ciprofloxacin (Ciprobay)', '500', 'mg', N'Viên nén bao phim', N'Uống', 13, 1, N'Hộp 1 vỉ x 10 viên', 'Bayer', N'Đức', N'15-30°C', 36, N'Uống xa bữa ăn, nhiều nước', 10, 16000.00),
-('DRUG-035', N'Azithromycin (Zithromax)', '500', 'mg', N'Viên nén bao phim', N'Uống', 13, 1, N'Hộp 1 vỉ x 3 viên', 'Pfizer', N'Mỹ', N'15-30°C', 36, N'Uống 1 viên/ngày x 3 ngày', 10, 42000.00),
-('DRUG-036', N'Fluconazole (Diflucan)', '150', 'mg', N'Viên nang', N'Uống', 14, 1, N'Hộp 1 vỉ x 1 viên', 'Pfizer', N'Mỹ', N'15-30°C', 36, N'Uống 1 viên duy nhất, có thể lặp lại sau 72h', 10, 85000.00),
-('DRUG-037', N'Itraconazole (Sporanox)', '100', 'mg', N'Viên nang', N'Uống', 14, 1, N'Hộp 2 vỉ x 10 viên', 'Janssen', N'Bỉ', N'15-25°C', 36, N'Uống trong bữa ăn, nhiều nước', 10, 19000.00),
+-- ========== NHÓM 4: TIÊU HÓA & KHÁNG SINH UỐNG (baseUnitID = 1: Viên) ==========
+('DRUG-031', N'Bisacodyl (Dulcolax)', '5', 'mg', N'Viên nén bao phim', N'Uống', 11, 1, 'Boehringer', N'Đức', N'15-25°C', N'Uống trước khi ngủ, tác dụng sau 6-12 giờ', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-032', N'Loperamide (Imodium)', '2', 'mg', N'Viên nang', N'Uống', 12, 1, N'Janssen', N'Bỉ', N'15-30°C', N'Uống sau mỗi lần đi tiêu lỏng, tối đa 8 viên/ngày', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-033', N'Amoxicillin', '500', 'mg', N'Viên nang', N'Uống', 13, 1, N'Công ty Dược Việt Nam', N'Việt Nam', N'15-30°C', N'Uống sau ăn, cách 8 giờ/lần', 'ACTIVE', GETDATE(), 13, NULL, NULL),
+('DRUG-034', N'Ciprofloxacin (Ciprobay)', '500', 'mg', N'Viên nén bao phim', N'Uống', 13, 1, 'Bayer', N'Đức', N'15-30°C', N'Uống xa bữa ăn, nhiều nước', 'ACTIVE', GETDATE(), 14, NULL, NULL),
+('DRUG-035', N'Azithromycin (Zithromax)', '500', 'mg', N'Viên nén bao phim', N'Uống', 13, 1, 'Pfizer', N'Mỹ', N'15-30°C', N'Uống 1 viên/ngày x 3 ngày', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-036', N'Fluconazole (Diflucan)', '150', 'mg', N'Viên nang', N'Uống', 14, 1, 'Pfizer', N'Mỹ', N'15-30°C', N'Uống 1 viên duy nhất, có thể lặp lại sau 72h', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-037', N'Itraconazole (Sporanox)', '100', 'mg', N'Viên nang', N'Uống', 14, 1, 'Janssen', N'Bỉ', N'15-25°C', N'Uống trong bữa ăn, nhiều nước', 'ACTIVE', GETDATE(), 13, NULL, NULL),
 
--- ========== NHÓM THUỐC BÔI NGOÀI DA (baseUnitID = 6: Tuýp) ==========
-('DRUG-038', N'Clotrimazole (Canesten)', '10', 'mg/g', N'Kem bôi ngoài da', N'Bôi ngoài da', 14, 6, N'Tuýp 20g', 'Bayer', N'Đức', N'15-30°C', 36, N'Bôi 2-3 lần/ngày lên vùng da bị nhiễm', 10, 45000.00),
-('DRUG-039', N'Ketoconazole (Nizoral)', '2%', '%', N'Kem bôi ngoài da', N'Bôi ngoài da', 14, 6, N'Tuýp 10g', 'Janssen', N'Bỉ', N'15-30°C', 36, N'Thoa 1-2 lần/ngày, kéo dài 2-4 tuần', 10, 39000.00),
-('DRUG-040', N'Terbinafine (Lamisil)', '1%', '%', N'Kem bôi ngoài da', N'Bôi ngoài da', 14, 6, N'Tuýp 15g', 'Novartis', N'Thụy Sĩ', N'15-30°C', 36, N'Thoa 1 lần/ngày lên vùng da sạch, khô', 10, 68000.00),
-('DRUG-041', N'Miconazole (Daktarin)', '2%', '%', N'Gel bôi ngoài da', N'Bôi ngoài da', 14, 6, N'Tuýp 20g', 'Janssen', N'Bỉ', N'15-25°C', 36, N'Thoa 2 lần/ngày, tiếp tục 10 ngày sau khi hết triệu chứng', 10, 42000.00);
+-- ========== NHÓM 5: THUỐC BÔI NGOÀI DA (baseUnitID = 6: Tuýp) ==========
+('DRUG-038', N'Clotrimazole (Canesten)', '10', 'mg/g', N'Kem bôi ngoài da', N'Bôi ngoài da', 14, 6, 'Bayer', N'Đức', N'15-30°C', N'Bôi 2-3 lần/ngày lên vùng da bị nhiễm', 'ACTIVE', GETDATE(), 14, NULL, NULL),
+('DRUG-039', N'Ketoconazole (Nizoral)', '2%', '%', N'Kem bôi ngoài da', N'Bôi ngoài da', 14, 6, 'Janssen', N'Bỉ', N'15-30°C', N'Thoa 1-2 lần/ngày, kéo dài 2-4 tuần', 'ACTIVE', GETDATE(), 15, NULL, NULL),
+('DRUG-040', N'Terbinafine (Lamisil)', '1%', '%', N'Kem bôi ngoài da', N'Bôi ngoài da', 14, 6, 'Novartis', N'Thụy Sĩ', N'15-30°C', N'Thoa 1 lần/ngày lên vùng da sạch, khô', 'ACTIVE', GETDATE(), 16, NULL, NULL),
+('DRUG-041', N'Miconazole (Daktarin)', '2%', '%', N'Gel bôi ngoài da', N'Bôi ngoài da', 14, 6, 'Janssen', N'Bỉ', N'15-25°C', N'Thoa 2 lần/ngày, tiếp tục 10 ngày sau khi hết triệu chứng', 'ACTIVE', GETDATE(), 13, NULL, NULL);
 -- 3.5. Quy đổi đơn vị (Đã sửa chính xác drugID theo thứ tự bảng Drug từ 1 đến 41)
 INSERT INTO UnitConversion (drugID, largeUnitID, smallUnitID, conversionQuantity) VALUES
 -- ========== NHÓM 1: THUỐC ĐIỀU TRỊ UNG THƯ (ID: 1 - 10) ==========
@@ -700,89 +737,87 @@ INSERT INTO UnitConversion (drugID, largeUnitID, smallUnitID, conversionQuantity
 (40, 3, 6, 1),                 -- DRUG-040: Terbinafine (1 HỘP = 1 TUÝP)
 (41, 3, 6, 1);                 -- DRUG-041: Miconazole (1 HỘP = 1 TUÝP)
 
--- 3.6. Thêm tài khoản Dược sĩ
-INSERT INTO [Users] (roleID, userName, fullName, email, passwordHash, phoneNumber, status, lastChangePassTime, nationalID)
-VALUES
-(6, 'pharmacist', N'Dược sĩ Nguyễn Hoàng Anh', 'anh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0908889999', 'ACTIVE', GETDATE(), '089012345678'),
-(6, 'pharmacist_linh', N'Dược sĩ Trần Thị Linh', 'linh.pharmacist@pharmacy.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907776666', 'ACTIVE', GETDATE(), '090123456789'),
-(3, 'ultrasound', N'Bác sĩ siêu âm', 'ultrasound@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0911111111', 'ACTIVE', GETDATE(), '111111111111');
 
 -- ============================================================================
 -- 3.7. Nhập kho mẫu (Sử dụng mã lô dạng LOT-DRUG-XXX-MMYY)
 -- ============================================================================
-INSERT INTO DrugBatch (drugID, batchNumber, manufactureDate, expiryDate, unitID, quantity, importPrice, supplier, importedBy, notes) VALUES
--- NHÓM 1: THUỐC ĐIỀU TRỊ UNG THƯ (ID 1-10) -> Nhập theo HỘP (unitID = 3)
-(1,  'LOT-001-DRUG-001', '2025-01-01', '2027-12-31', 3, 50,  270000.00,  N'Công ty Dược XYZ',         11, N'Nhập 50 hộp Tamoxifen'),
-(2,  'LOT-002-DRUG-002', '2025-03-15', '2028-02-28', 3, 30,  1012500.00, N'Công ty Dược ABC',         11, N'Nhập 30 hộp Letrozole'),
-(3,  'LOT-003-DRUG-003', '2025-01-10', '2027-12-31', 3, 40,  855000.00,  N'AstraZeneca Việt Nam',     11, N'Nhập 40 hộp Anastrozole'),
-(4,  'LOT-004-DRUG-004', '2025-02-01', '2028-01-31', 3, 25,  1170000.00, N'Pfizer Việt Nam',          11, N'Nhập 25 hộp Exemestane'),
-(5,  'LOT-005-DRUG-005', '2025-02-15', '2028-02-15', 3, 20,  6300000.00, N'Novartis Việt Nam',        11, N'Nhập 20 hộp Imatinib'),
-(6,  'LOT-006-DRUG-006', '2025-03-01', '2028-03-01', 3, 15,  6975000.00, N'Roche Việt Nam',           11, N'Nhập 15 hộp Erlotinib'),
-(7,  'LOT-007-DRUG-007', '2025-04-10', '2028-04-10', 3, 60,  1462500.00, N'Roche Việt Nam',           11, N'Nhập 60 hộp Capecitabine'),
-(8,  'LOT-008-DRUG-008', '2025-01-20', '2027-12-31', 3, 80,  337500.00,  N'Baxter Việt Nam',          11, N'Nhập 80 hộp Cyclophosphamide'),
-(9,  'LOT-009-DRUG-009', '2025-02-18', '2028-02-18', 3, 100, 180000.00,  N'Pfizer Việt Nam',          11, N'Nhập 100 hộp Methotrexate'),
-(10, 'LOT-010-DRUG-010', '2025-03-05', '2027-03-05', 3, 30,  2137500.00, N'Celgene Việt Nam',         11, N'Nhập 30 hộp Thalidomide'),
+INSERT INTO DrugBatch (
+    drugID, batchNumber, manufactureDate, expiryDate, 
+    unitID, quantity, supplier, importDate, 
+    importedBy, status, notes, updatedAt, 
+    updatedBy, updateReason
+) VALUES
+-- NHÓM 1: THUỐC ĐIỀU TRỊ UNG THƯ (ID 1-10)
+(1,  'LOT-001-DRUG-001', '2025-01-01', '2027-12-31', 3, 50,  N'Công ty Dược XYZ',         GETDATE(), 13, 'ACTIVE', N'Nhập 50 hộp Tamoxifen',      NULL, NULL, NULL),
+(2,  'LOT-002-DRUG-002', '2025-03-15', '2028-02-28', 3, 30,  N'Công ty Dược ABC',         GETDATE(), 14, 'ACTIVE', N'Nhập 30 hộp Letrozole',     NULL, NULL, NULL),
+(3,  'LOT-003-DRUG-003', '2025-01-10', '2027-12-31', 3, 40,  N'AstraZeneca Việt Nam',     GETDATE(), 15, 'ACTIVE', N'Nhập 40 hộp Anastrozole',   NULL, NULL, NULL),
+(4,  'LOT-004-DRUG-004', '2025-02-01', '2028-01-31', 3, 25,  N'Pfizer Việt Nam',          GETDATE(), 16, 'ACTIVE', N'Nhập 25 hộp Exemestane',    NULL, NULL, NULL),
+(5,  'LOT-005-DRUG-005', '2025-02-15', '2028-02-15', 3, 20,  N'Novartis Việt Nam',        GETDATE(), 13, 'ACTIVE', N'Nhập 20 hộp Imatinib',      NULL, NULL, NULL),
+(6,  'LOT-006-DRUG-006', '2025-03-01', '2028-03-01', 3, 15,  N'Roche Việt Nam',           GETDATE(), 14, 'ACTIVE', N'Nhập 15 hộp Erlotinib',      NULL, NULL, NULL),
+(7,  'LOT-007-DRUG-007', '2025-04-10', '2028-04-10', 3, 60,  N'Roche Việt Nam',           GETDATE(), 15, 'ACTIVE', N'Nhập 60 hộp Capecitabine',  NULL, NULL, NULL),
+(8,  'LOT-008-DRUG-008', '2025-01-20', '2027-12-31', 3, 80,  N'Baxter Việt Nam',          GETDATE(), 16, 'ACTIVE', N'Nhập 80 hộp Cyclophosphamide', NULL, NULL, NULL),
+(9,  'LOT-009-DRUG-009', '2025-02-18', '2028-02-18', 3, 100, N'Pfizer Việt Nam',          GETDATE(), 13, 'ACTIVE', N'Nhập 100 hộp Methotrexate', NULL, NULL, NULL),
+(10, 'LOT-010-DRUG-010', '2025-03-05', '2027-03-05', 3, 30,  N'Celgene Việt Nam',         GETDATE(), 14, 'ACTIVE', N'Nhập 30 hộp Thalidomide',   NULL, NULL, NULL),
 
--- NHÓM 2.1 - 2.5: THUỐC HỖ TRỢ UỐNG (ID 11-23) -> Nhập theo HỘP (unitID = 3)
-(11, 'LOT-011-DRUG-011', '2025-04-01', '2028-03-31', 3, 25,  375000.00,  N'Công ty Dược Mundipharma', 11, N'Nhập 25 hộp Morphine'),
-(12, 'LOT-012-DRUG-012', '2025-05-01', '2028-04-30', 3, 50,  127500.00,  N'Grunenthal Việt Nam',      11, N'Nhập 50 hộp Tramadol'),
-(13, 'LOT-013-DRUG-013', '2025-06-10', '2028-06-10', 3, 200, 22500.00,   N'GSK Việt Nam',             11, N'Nhập 200 hộp Paracetamol'),
-(14, 'LOT-014-DRUG-014', '2025-05-20', '2027-04-30', 3, 100, 262500.00,  N'Công ty Dược GSK',         11, N'Nhập 100 hộp Ondansetron'),
-(15, 'LOT-015-DRUG-015', '2025-06-01', '2027-06-01', 3, 80,  45000.00,   N'Sanofi Việt Nam',          11, N'Nhập 80 hộp Metoclopramide'),
-(16, 'LOT-016-DRUG-016', '2025-07-01', '2027-07-01', 3, 70,  52500.00,   N'Janssen Việt Nam',         11, N'Nhập 70 hộp Domperidone'),
-(17, 'LOT-017-DRUG-017', '2025-09-01', '2028-08-31', 3, 50,  189000.00,  N'Công ty Dược Takeda',      11, N'Nhập 50 hộp Pantoprazole'),
-(18, 'LOT-018-DRUG-018', '2025-08-15', '2028-08-15', 3, 90,  180000.00,  N'AstraZeneca Việt Nam',     11, N'Nhập 90 hộp Omeprazole'),
-(19, 'LOT-019-DRUG-019', '2025-09-10', '2028-09-10', 3, 100, 60000.00,   N'UCB Việt Nam',             11, N'Nhập 100 hộp Cetirizine'),
-(20, 'LOT-020-DRUG-020', '2025-10-01', '2028-10-01', 3, 100, 56250.00,   N'Bayer Việt Nam',           11, N'Nhập 100 hộp Loratadine'),
-(21, 'LOT-021-DRUG-021', '2025-10-15', '2028-09-30', 3, 60,  67500.00,   N'Công ty Dược Merck',       11, N'Nhập 60 hộp Dexamethasone'),
-(22, 'LOT-022-DRUG-022', '2025-11-01', '2028-11-01', 3, 50,  67500.00,   N'Pfizer Việt Nam',          11, N'Nhập 50 hộp Methylprednisolone'),
-(23, 'LOT-023-DRUG-023', '2025-11-15', '2028-11-15', 3, 80,  33750.00,   N'Sanofi Việt Nam',          11, N'Nhập 80 hộp Prednisolone'),
+-- NHÓM 2.1 - 2.5: THUỐC HỖ TRỢ UỐNG (ID 11-23)
+(11, 'LOT-011-DRUG-011', '2025-04-01', '2028-03-31', 3, 25,  N'Công ty Dược Mundipharma', GETDATE(), 15, 'ACTIVE', N'Nhập 25 hộp Morphine',      NULL, NULL, NULL),
+(12, 'LOT-012-DRUG-012', '2025-05-01', '2028-04-30', 3, 50,  N'Grunenthal Việt Nam',      GETDATE(), 16, 'ACTIVE', N'Nhập 50 hộp Tramadol',      NULL, NULL, NULL),
+(13, 'LOT-013-DRUG-013', '2025-06-10', '2028-06-10', 3, 200, N'GSK Việt Nam',             GETDATE(), 13, 'ACTIVE', N'Nhập 200 hộp Paracetamol',  NULL, NULL, NULL),
+(14, 'LOT-014-DRUG-014', '2025-05-20', '2027-04-30', 3, 100, N'Công ty Dược GSK',         GETDATE(), 14, 'ACTIVE', N'Nhập 100 hộp Ondansetron',  NULL, NULL, NULL),
+(15, 'LOT-015-DRUG-015', '2025-06-01', '2027-06-01', 3, 80,  N'Sanofi Việt Nam',          GETDATE(), 15, 'ACTIVE', N'Nhập 80 hộp Metoclopramide', NULL, NULL, NULL),
+(16, 'LOT-016-DRUG-016', '2025-07-01', '2027-07-01', 3, 70,  N'Janssen Việt Nam',         GETDATE(), 16, 'ACTIVE', N'Nhập 70 hộp Domperidone',   NULL, NULL, NULL),
+(17, 'LOT-017-DRUG-017', '2025-09-01', '2028-08-31', 3, 50,  N'Công ty Dược Takeda',      GETDATE(), 13, 'ACTIVE', N'Nhập 50 hộp Pantoprazole',  NULL, NULL, NULL),
+(18, 'LOT-018-DRUG-018', '2025-08-15', '2028-08-15', 3, 90,  N'AstraZeneca Việt Nam',     GETDATE(), 14, 'ACTIVE', N'Nhập 90 hộp Omeprazole',    NULL, NULL, NULL),
+(19, 'LOT-019-DRUG-019', '2025-09-10', '2028-09-10', 3, 100, N'UCB Việt Nam',              GETDATE(), 15, 'ACTIVE', N'Nhập 100 hộp Cetirizine',   NULL, NULL, NULL),
+(20, 'LOT-020-DRUG-020', '2025-10-01', '2028-10-01', 3, 100, N'Bayer Việt Nam',            GETDATE(), 16, 'ACTIVE', N'Nhập 100 hộp Loratadine',   NULL, NULL, NULL),
+(21, 'LOT-021-DRUG-021', '2025-10-15', '2028-09-30', 3, 60,  N'Công ty Dược Merck',       GETDATE(), 13, 'ACTIVE', N'Nhập 60 hộp Dexamethasone', NULL, NULL, NULL),
+(22, 'LOT-022-DRUG-022', '2025-11-01', '2028-11-01', 3, 50,  N'Pfizer Việt Nam',          GETDATE(), 14, 'ACTIVE', N'Nhập 50 hộp Methylprednisolone', NULL, NULL, NULL),
+(23, 'LOT-023-DRUG-023', '2025-11-15', '2028-11-15', 3, 80,  N'Sanofi Việt Nam',          GETDATE(), 15, 'ACTIVE', N'Nhập 80 hộp Prednisolone',  NULL, NULL, NULL),
 
--- NHÓM 2.6: VITAMIN & KHOÁNG CHẤT (ID 24-30) -> Nhập theo ỐNG (unitID = 5) hoặc LỌ (unitID = 4)
-(24, 'LOT-024-DRUG-024', '2025-11-01', '2027-10-31', 5, 100, 22500.00,   N'Công ty Dược Việt Nam',    12, N'Nhập 100 ống Vitamin C'),
-(25, 'LOT-025-DRUG-025', '2026-01-01', '2028-12-31', 4, 30,  112500.00,  N'Công ty Dược Việt Nam',    12, N'Nhập 30 lọ Vitamin tổng hợp'),
-(26, 'LOT-026-DRUG-026', '2026-02-01', '2028-01-31', 4, 40,  495000.00,  N'Pfizer Việt Nam',          12, N'Nhập 40 lọ Centrum'),
-(27, 'LOT-027-DRUG-027', '2025-12-01', '2027-11-30', 5, 50,  60000.00,   N'Công ty Dược Việt Nam',    12, N'Nhập 50 ống Calcium + D3'),
-(28, 'LOT-028-DRUG-028', '2026-01-10', '2028-01-10', 4, 50,  135000.00,  N'Công ty Dược Việt Nam',    12, N'Nhập 50 lọ Omega-3'),
-(29, 'LOT-029-DRUG-029', '2026-02-15', '2027-08-15', 4, 40,  337500.00,  N'Công ty Dược Việt Nam',    12, N'Nhập 40 lọ Probiotics'),
-(30, 'LOT-030-DRUG-030', '2026-03-01', '2028-03-01', 4, 60,  157500.00,  N'Công ty Dược Việt Nam',    12, N'Nhập 60 lọ Magnesium'),
+-- NHÓM 2.6: VITAMIN & KHOÁNG CHẤT (ID 24-30)
+(24, 'LOT-024-DRUG-024', '2025-11-01', '2027-10-31', 5, 100, N'Công ty Dược Việt Nam',    GETDATE(), 16, 'ACTIVE', N'Nhập 100 ống Vitamin C',   NULL, NULL, NULL),
+(25, 'LOT-025-DRUG-025', '2026-01-01', '2028-12-31', 4, 30,  N'Công ty Dược Việt Nam',    GETDATE(), 13, 'ACTIVE', N'Nhập 30 lọ Vitamin tổng hợp', NULL, NULL, NULL),
+(26, 'LOT-026-DRUG-026', '2026-02-01', '2028-01-31', 4, 40,  N'Pfizer Việt Nam',          GETDATE(), 14, 'ACTIVE', N'Nhập 40 lọ Centrum',        NULL, NULL, NULL),
+(27, 'LOT-027-DRUG-027', '2025-12-01', '2027-11-30', 5, 50,  N'Công ty Dược Việt Nam',    GETDATE(), 15, 'ACTIVE', N'Nhập 50 ống Calcium + D3',  NULL, NULL, NULL),
+(28, 'LOT-028-DRUG-028', '2026-01-10', '2028-01-10', 4, 50,  N'Công ty Dược Việt Nam',    GETDATE(), 16, 'ACTIVE', N'Nhập 50 lọ Omega-3',        NULL, NULL, NULL),
+(29, 'LOT-029-DRUG-029', '2026-02-15', '2027-08-15', 4, 40,  N'Công ty Dược Việt Nam',    GETDATE(), 13, 'ACTIVE', N'Nhập 40 lọ Probiotics',     NULL, NULL, NULL),
+(30, 'LOT-030-DRUG-030', '2026-03-01', '2028-03-01', 4, 60,  N'Công ty Dược Việt Nam',    GETDATE(), 14, 'ACTIVE', N'Nhập 60 lọ Magnesium',      NULL, NULL, NULL),
 
--- NHÓM 2.7 - 2.8: THUỐC TIÊU HÓA (ID 31-32) -> Nhập theo HỘP (unitID = 3)
-(31, 'LOT-031-DRUG-031', '2026-03-10', '2029-03-10', 3, 50,  52500.00,   N'Boehringer Việt Nam',      12, N'Nhập 50 hộp Bisacodyl'),
-(32, 'LOT-032-DRUG-032', '2026-04-01', '2029-04-01', 3, 60,  37500.00,   N'Janssen Việt Nam',         12, N'Nhập 60 hộp Loperamide'),
+-- NHÓM 2.7 - 2.8: THUỐC TIÊU HÓA (ID 31-32)
+(31, 'LOT-031-DRUG-031', '2026-03-10', '2029-03-10', 3, 50,  N'Boehringer Việt Nam',      GETDATE(), 15, 'ACTIVE', N'Nhập 50 hộp Bisacodyl',     NULL, NULL, NULL),
+(32, 'LOT-032-DRUG-032', '2026-04-01', '2029-04-01', 3, 60,  N'Janssen Việt Nam',         GETDATE(), 16, 'ACTIVE', N'Nhập 60 hộp Loperamide',    NULL, NULL, NULL),
 
--- NHÓM 2.9 - 2.10: KHÁNG SINH & KHÁNG NẤM UỐNG (ID 33-37) -> Nhập theo HỘP (unitID = 3)
-(33, 'LOT-033-DRUG-033', '2026-04-15', '2028-04-15', 3, 100, 30000.00,   N'Công ty Dược Việt Nam',    12, N'Nhập 100 hộp Amoxicillin'),
-(34, 'LOT-034-DRUG-034', '2026-05-01', '2029-05-01', 3, 80,  120000.00,  N'Bayer Việt Nam',           12, N'Nhập 80 hộp Ciprofloxacin'),
-(35, 'LOT-035-DRUG-035', '2026-05-10', '2029-05-10', 3, 50,  94500.00,   N'Pfizer Việt Nam',          12, N'Nhập 50 hộp Azithromycin'),
-(36, 'LOT-036-DRUG-036', '2026-06-01', '2029-06-01', 3, 40,  63750.00,   N'Pfizer Việt Nam',          12, N'Nhập 40 hộp Fluconazole'),
-(37, 'LOT-037-DRUG-037', '2026-06-15', '2029-06-15', 3, 30,  285000.00,  N'Janssen Việt Nam',         12, N'Nhập 30 hộp Itraconazole'),
+-- NHÓM 2.9 - 2.10: KHÁNG SINH & KHÁNG NẤM UỐNG (ID 33-37)
+(33, 'LOT-033-DRUG-033', '2026-04-15', '2028-04-15', 3, 100, N'Công ty Dược Việt Nam',    GETDATE(), 13, 'ACTIVE', N'Nhập 100 hộp Amoxicillin', NULL, NULL, NULL),
+(34, 'LOT-034-DRUG-034', '2026-05-01', '2029-05-01', 3, 80,  N'Bayer Việt Nam',            GETDATE(), 14, 'ACTIVE', N'Nhập 80 hộp Ciprofloxacin', NULL, NULL, NULL),
+(35, 'LOT-035-DRUG-035', '2026-05-10', '2029-05-10', 3, 50,  N'Pfizer Việt Nam',          GETDATE(), 15, 'ACTIVE', N'Nhập 50 hộp Azithromycin',  NULL, NULL, NULL),
+(36, 'LOT-036-DRUG-036', '2026-06-01', '2029-06-01', 3, 40,  N'Pfizer Việt Nam',          GETDATE(), 16, 'ACTIVE', N'Nhập 40 hộp Fluconazole',   NULL, NULL, NULL),
+(37, 'LOT-037-DRUG-037', '2026-06-15', '2029-06-15', 3, 30,  N'Janssen Việt Nam',         GETDATE(), 13, 'ACTIVE', N'Nhập 30 hộp Itraconazole',  NULL, NULL, NULL),
 
--- NHÓM THUỐC BÔI (ID 38-41) -> Nhập theo HỘP (unitID = 3)
-(38, 'LOT-038-DRUG-038', '2026-07-01', '2029-07-01', 3, 50,  33750.00,   N'Bayer Việt Nam',           12, N'Nhập 50 hộp Clotrimazole'),
-(39, 'LOT-039-DRUG-039', '2026-07-10', '2029-07-10', 3, 40,  29250.00,   N'Janssen Việt Nam',         12, N'Nhập 40 hộp Ketoconazole'),
-(40, 'LOT-040-DRUG-040', '2026-08-01', '2029-08-01', 3, 30,  51000.00,   N'Novartis Việt Nam',        12, N'Nhập 30 hộp Terbinafine'),
-(41, 'LOT-041-DRUG-041', '2026-08-15', '2029-08-15', 3, 40,  31500.00,   N'Janssen Việt Nam',         12, N'Nhập 40 hộp Miconazole');
-
+-- NHÓM THUỐC BÔI (ID 38-41)
+(38, 'LOT-038-DRUG-038', '2026-07-01', '2029-07-01', 3, 50,  N'Bayer Việt Nam',            GETDATE(), 14, 'ACTIVE', N'Nhập 50 hộp Clotrimazole',  NULL, NULL, NULL),
+(39, 'LOT-039-DRUG-039', '2026-07-10', '2029-07-10', 3, 40,  N'Janssen Việt Nam',         GETDATE(), 15, 'ACTIVE', N'Nhập 40 hộp Ketoconazole',  NULL, NULL, NULL),
+(40, 'LOT-040-DRUG-040', '2026-08-01', '2029-08-01', 3, 30,  N'Novartis Việt Nam',        GETDATE(), 16, 'ACTIVE', N'Nhập 30 hộp Terbinafine',   NULL, NULL, NULL),
+(41, 'LOT-041-DRUG-041', '2026-08-15', '2029-08-15', 3, 40,  N'Janssen Việt Nam',         GETDATE(), 13, 'ACTIVE', N'Nhập 40 hộp Miconazole',    NULL, NULL, NULL);
 
 -- ============================================================================
 -- 3.8. Khởi tạo tồn kho mẫu (Giữ nguyên theo batchID 1 -> 41)
 -- ============================================================================
-INSERT INTO Inventory (batchID, quantityInStock, lastUpdated, status) VALUES
-(1,  1500, GETDATE(), 1), (2,  900,  GETDATE(), 1), (3,  1200, GETDATE(), 1),
-(4,  750,  GETDATE(), 1), (5,  600,  GETDATE(), 1), (6,  450,  GETDATE(), 1),
-(7,  1800, GETDATE(), 1), (8,  2400, GETDATE(), 1), (9,  3000, GETDATE(), 1),
-(10, 900,  GETDATE(), 1), (11, 500,  GETDATE(), 1), (12, 1000, GETDATE(), 1),
-(13, 4000, GETDATE(), 1), (14, 1000, GETDATE(), 1), (15, 2400, GETDATE(), 1),
-(16, 1400, GETDATE(), 1), (17, 700,  GETDATE(), 1), (18, 1800, GETDATE(), 1),
-(19, 1000, GETDATE(), 1), (20, 1000, GETDATE(), 1), (21, 1800, GETDATE(), 1),
-(22, 1000, GETDATE(), 1), (23, 2400, GETDATE(), 1), (24, 1000, GETDATE(), 1),
-(25, 1800, GETDATE(), 1), (26, 2400, GETDATE(), 1), (27, 1000, GETDATE(), 1),
-(28, 1500, GETDATE(), 1), (29, 1200, GETDATE(), 1), (30, 3600, GETDATE(), 1),
-(31, 1000, GETDATE(), 1), (32, 600,  GETDATE(), 1), (33, 2000, GETDATE(), 1),
-(34, 800,  GETDATE(), 1), (35, 150,  GETDATE(), 1), (36, 40,   GETDATE(), 1),
-(37, 600,  GETDATE(), 1), (38, 50,   GETDATE(), 1), (39, 40,   GETDATE(), 1),
-(40, 30,   GETDATE(), 1), (41, 40,   GETDATE(), 1);
+INSERT INTO Inventory (batchID, quantityInStock, lastUpdated) VALUES
+(1,  1500, GETDATE()), (2,  900,  GETDATE()), (3,  1200, GETDATE()),
+(4,  750,  GETDATE()), (5,  600,  GETDATE()), (6,  450,  GETDATE()),
+(7,  1800, GETDATE()), (8,  2400, GETDATE()), (9,  3000, GETDATE()),
+(10, 900,  GETDATE()), (11, 500,  GETDATE()), (12, 1000, GETDATE()),
+(13, 4000, GETDATE()), (14, 1000, GETDATE()), (15, 2400, GETDATE()),
+(16, 1400, GETDATE()), (17, 700,  GETDATE()), (18, 1800, GETDATE()),
+(19, 1000, GETDATE()), (20, 1000, GETDATE()), (21, 1800, GETDATE()),
+(22, 1000, GETDATE()), (23, 2400, GETDATE()), (24, 1000, GETDATE()),
+(25, 1800, GETDATE()), (26, 2400, GETDATE()), (27, 1000, GETDATE()),
+(28, 1500, GETDATE()), (29, 1200, GETDATE()), (30, 3600, GETDATE()),
+(31, 1000, GETDATE()), (32, 600,  GETDATE()), (33, 2000, GETDATE()),
+(34, 800,  GETDATE()), (35, 150,  GETDATE()), (36, 40,   GETDATE()),
+(37, 600,  GETDATE()), (38, 50,   GETDATE()), (39, 40,   GETDATE()),
+(40, 30,   GETDATE()), (41, 40,   GETDATE());
 
 -- ============================================================================
 -- 3.9. Log xuất nhập kho (Cập nhật ghi chú cho đồng bộ với mã lô mới)
@@ -832,50 +867,44 @@ INSERT INTO InventoryLog (batchID, userID, actionType, quantityChange, quantityB
 
 
 -- ============================================================================
--- BỔ SUNG: 3.10. Tạo đơn thuốc mẫu (Bác sĩ kê)
+-- BỔ SUNG: 3.10. Tạo đơn thuốc mẫu (Chỉ kê đơn cho các session 1, 2, 4 ĐÃ CÓ REVIEW)
 -- ============================================================================
-INSERT INTO Prescription (prescriptionCode, sessionID, patientID, doctorID, diagnosis, treatmentCycle, notes)
+INSERT INTO Prescription (prescriptionCode, sessionID, patientID, doctorID, diagnosis, treatmentCycle, status, notes)
 VALUES
-('RX-202607-003', 1, 1, 3, N'Ung thư vú giai đoạn II, sau phẫu thuật', N'Chu kỳ 3/6', N'Bệnh nhân có biểu hiện thiếu máu nhẹ, bổ sung vi chất'),
-('RX-202607-004', 2, 1, 5, N'Ung thư đại trực tràng giai đoạn IV, di căn gan', N'Chu kỳ 1/4', N'Theo dõi sát chức năng tiêu hóa và tình trạng nôn nghén'),
-('RX-202607-005', 3, 1, 4, N'Ung thư phổi tế bào nhỏ, nhiễm trùng đường hô hấp kèm theo', N'Chu kỳ 2/6', N'Kết hợp kháng sinh điều trị viêm phổi cấp'),
-('RX-202607-006', 4, 1, 3, N'Ung thư dạ dày giai đoạn III, đau xơ hóa vùng thượng vị', N'Điều trị giảm nhẹ', N'Bệnh nhân nuốt nghẹn, đau nhiều, cần bọc dạ dày kỹ'),
-('RX-202607-007', 5, 1, 5, N'Nhiễm nấm da diện rộng trên bệnh nhân suy giảm miễn dịch do hóa trị', N'Ngoại trú', N'Sử dụng kết hợp thuốc uống và thuốc bôi ngoài da');
+('RX-202607-001', 1, 1, 3, N'Ung thư vú giai đoạn II, sau phẫu thuật', N'Chu kỳ 3/6', 'PENDING', N'Bệnh nhân có biểu hiện thiếu máu nhẹ, bổ sung vi chất'),
+('RX-202607-002', 2, 2, 4, N'Ung thư đại trực tràng giai đoạn IV, di căn gan', N'Chu kỳ 1/4', 'PENDING', N'Theo dõi sát chức năng tiêu hóa và tình trạng nôn nghén'),
+('RX-202607-003', 4, 4, 3, N'Ung thư dạ dày giai đoạn III, đau xơ hóa vùng thượng vị', N'Điều trị giảm nhẹ', 'PENDING', N'Bệnh nhân nuốt nghẹn, đau nhiều, cần bọc dạ dày kỹ');
 
 -- ============================================================================
 -- BỔ SUNG: 3.11. Chi tiết đơn thuốc (Bác sĩ kê theo VIÊN)
 -- ============================================================================
-INSERT INTO PrescriptionDetail (prescriptionID, drugID, dosePerTime, timesPerDay, daysOfTreatment, quantityPrescribed, dispenseUnit, instruction, notes)
+INSERT INTO PrescriptionDetail (
+    prescriptionID, drugID, dosePerTime, timesPerDay, daysOfTreatment, 
+    quantityPrescribed, batchID, quantityDispensed, actualExpiryDate, 
+    dispenseUnit, instruction, dispensedAt, dispensedBy, notes, status
+)
 VALUES
--- Đơn 3 (PrescriptionID = 3): Phác đồ Anastrozole + Bổ sung Vitamin & Khoáng chất
-(3, 3,  1,   1, 30, 30, N'VIÊN', N'Uống vào một khung giờ cố định mỗi ngày', N'Anastrozole 1mg/ngày'),
-(3, 13, 1,   2, 5,  10, N'VIÊN', N'Uống khi có sốt hoặc đau xương > 38.5 độ', N'Paracetamol giảm đau sốt'),
-(3, 26, 1,   1, 30, 30, N'VIÊN', N'Uống sau ăn sáng', N'Centrum bổ sung đa vi chất'),
-(3, 30, 1,   2, 15, 30, N'VIÊN', N'Uống sáng và tối sau ăn', N'Magnesium giảm co thắt cơ'),
+-- ------------------------------------------------------------------------------------------------------------------------------------------------
+-- Đơn 1 (PrescriptionID = 1, SessionID = 1): Đã xuất thuốc hoàn tất (DISPENSED) bởi Dược sĩ
+-- ------------------------------------------------------------------------------------------------------------------------------------------------
+(1, 3,  1,   1, 30, 30, 1, 30, '2027-12-31', N'VIÊN', N'Uống vào một khung giờ cố định mỗi ngày', '2026-07-20 09:15:00', 13, N'Anastrozole 1mg/ngày', 'DISPENSED'),
+(1, 13, 1,   2, 5,  10, 2, 10, '2027-06-30', N'VIÊN', N'Uống khi có sốt hoặc đau xương > 38.5 độ', '2026-07-20 09:15:00', 13, N'Paracetamol giảm đau sốt', 'DISPENSED'),
+(1, 26, 1,   1, 30, 30, 3, 30, '2028-01-15', N'VIÊN', N'Uống sau ăn sáng', '2026-07-20 09:15:00', 13, N'Centrum bổ sung đa vi chất', 'DISPENSED'),
+(1, 30, 1,   2, 15, 30, 4, 30, '2027-10-20', N'VIÊN', N'Uống sáng và tối sau ăn', '2026-07-20 09:15:00', 13, N'Magnesium giảm co thắt cơ', 'DISPENSED'),
 
--- Đơn 4 (PrescriptionID = 4): Phác đồ Capecitabine + Chống nôn & Hỗ trợ tiêu hóa
-(4, 7,  1500,2, 14, 28, N'VIÊN', N'Uống trong vòng 30 phút sau bữa ăn sáng và tối', N'Capecitabine 500mg x 3 viên/lần'),
-(4, 15, 1,   3, 5,  15, N'VIÊN', N'Uống trước 3 bữa ăn 30 phút', N'Metoclopramide chống nôn'),
-(4, 18, 1,   1, 20, 20, N'VIÊN', N'Uống trước ăn sáng 30 phút', N'Omeprazole bảo vệ dạ dày'),
-(4, 29, 1,   2, 10, 20, N'VIÊN', N'Uống sau ăn 1 tiếng', N'Probiotics cân bằng men ruột'),
+-- ------------------------------------------------------------------------------------------------------------------------------------------------
+-- Đơn 2 (PrescriptionID = 2, SessionID = 2): Đã xuất thuốc hoàn tất (DISPENSED) bởi Dược sĩ
+-- ------------------------------------------------------------------------------------------------------------------------------------------------
+(2, 7,  1500,2, 14, 28, 5, 28, '2027-08-31', N'VIÊN', N'Uống trong vòng 30 phút sau bữa ăn sáng và tối', '2026-07-21 10:30:00', 14, N'Capecitabine 500mg x 3 viên/lần', 'DISPENSED'),
+(2, 15, 1,   3, 5,  15, 6, 15, '2027-05-15', N'VIÊN', N'Uống trước 3 bữa ăn 30 phút', '2026-07-21 10:30:00', 14, N'Metoclopramide chống nôn', 'DISPENSED'),
+(2, 18, 1,   1, 20, 20, 7, 20, '2028-03-10', N'VIÊN', N'Uống trước ăn sáng 30 phút', '2026-07-21 10:30:00', 14, N'Omeprazole bảo vệ dạ dày', 'DISPENSED'),
 
--- Đơn 5 (PrescriptionID = 5): Phác đồ Methotrexate + Kháng sinh đường hô hấp
-(5, 9,  2.5, 1, 7,  7,  N'VIÊN', N'Uống vào buổi sáng', N'Methotrexate điều trị ung thư'),
-(5, 22, 4,   2, 5,  10, N'VIÊN', N'Uống sau ăn no sáng và trưa', N'Methylprednisolone kháng viêm'),
-(5, 33, 1,   3, 7,  21, N'VIÊN', N'Uống cách nhau mỗi 8 tiếng', N'Amoxicillin 500mg kháng sinh hô hấp'),
-(5, 35, 1,   1, 3,  3,  N'VIÊN', N'Uống trước ăn 1 tiếng hoặc sau ăn 2 tiếng', N'Azithromycin 500mg phối hợp'),
-
--- Đơn 6 (PrescriptionID = 6): Đơn giảm nhẹ (Morphine + Giảm đau phối hợp + Chống táo bón)
-(1, 1, 30,  2, 15, 30, N'VIÊN', N'Uống cách mỗi 12 giờ cố định', N'Morphine SR 30mg giảm đau nền'),
-(1, 12, 1,   2, 10, 20, N'VIÊN', N'Uống xen kẽ khi có các cơn đau quặn cấp', N'Tramadol giảm đau bộc phát'),
-(1, 16, 1,   3, 7,  21, N'VIÊN', N'Uống trước ăn 15-30 phút', N'Domperidone giảm chướng bụng'),
-(1, 31, 2,   1, 5,  10, N'VIÊN', N'Uống vào buổi tối trước khi đi ngủ', N'Bisacodyl trị táo bón do Morphine'),
-
--- Đơn 7 (PrescriptionID = 7): Đơn kháng nấm (Fluconazole + Thuốc bôi phối hợp)
-(2, 36, 1,   1, 14, 14, N'VIÊN', N'Uống sau khi ăn no', N'Fluconazole 150mg kháng nấm hệ thống'),
-(2, 19, 1,   1, 10, 10, N'VIÊN', N'Uống vào buổi tối', N'Cetirizine giảm ngứa do dị ứng nấm'),
-(2, 38, 1,   2, 14, 2,  N'HỘP', N'Thoa một lớp mỏng lên vùng da bệnh x2 lần/ngày', N'Clotrimazole bôi tại chỗ (Kê theo hộp để phát)'),
-(2, 40, 1,   1, 14, 1,  N'HỘP', N'Thoa vào buổi tối sau khi vệ sinh sạch', N'Terbinafine bôi phối hợp (Kê theo hộp để phát)');
+-- ------------------------------------------------------------------------------------------------------------------------------------------------
+-- Đơn 3 (PrescriptionID = 3, SessionID = 4): Đang chờ nhà thuốc xuất (PENDING - Chưa gán lô, chưa xuất)
+-- ------------------------------------------------------------------------------------------------------------------------------------------------
+(3, 1,  30,  2, 15, 30, NULL, 0, NULL, N'VIÊN', N'Uống cách mỗi 12 giờ cố định', NULL, NULL, N'Morphine SR 30mg giảm đau nền', 'PENDING'),
+(3, 12, 1,   2, 10, 20, NULL, 0, NULL, N'VIÊN', N'Uống xen kẽ khi có các cơn đau quặn cấp', NULL, NULL, N'Tramadol giảm đau bộc phát', 'PENDING'),
+(3, 16, 1,   3, 7,  21, NULL, 0, NULL, N'VIÊN', N'Uống trước ăn 15-30 phút', NULL, NULL, N'Domperidone giảm chướng bụng', 'PENDING');
 
 GO
 
@@ -1198,3 +1227,6 @@ select * from Users order by createdAt desc
 
 
 SELECT drugID, drugCode FROM Drug ORDER BY drugID;
+
+
+select * from Drug

@@ -18,13 +18,15 @@ public class CreateDrugRequest {
     private String routeOfAdministration;
     private Integer subCategoryId;
     private Integer baseUnitId;
-    private String packaging;
     private String manufacturer;
     private String countryOfOrigin;
     private String storageCondition;
-    private Integer shelfLifeMonths;
+    private String updateReason;
     private List<Integer> conversionLargeUnitIds;
     private List<Integer> conversionSmallUnitIds;
     private List<Integer> conversionQuantities;
     private String notes;
 }
+
+
+

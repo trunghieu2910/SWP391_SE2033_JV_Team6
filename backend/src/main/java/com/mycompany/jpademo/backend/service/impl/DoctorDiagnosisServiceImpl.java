@@ -302,7 +302,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền thay đổi chế độ nhập triệu chứng của ca chẩn đoán này.");
         }
-        // Allow changing mode only if patient hasn't submitted yet
+        // Chỉ cho phép đổi chế độ nếu bệnh nhân chưa nộp kết quả
         if (session.getClinicalInputMode() != null &&
                 session.getSymptomResult() != null &&
                 session.getSymptomResult().getStatus() == SymptomResultStatus.COMPLETED) {
@@ -395,8 +395,6 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         review.setReviewedAt(LocalDateTime.now());
 
         reviewRepository.save(review);
-
-        session.setStatus(DiagnosisSessionStatus.COMPLETED);
         sessionRepository.save(session);
     }
 

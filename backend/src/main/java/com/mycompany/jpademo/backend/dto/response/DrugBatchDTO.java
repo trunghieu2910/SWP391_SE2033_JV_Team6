@@ -21,13 +21,15 @@ public class DrugBatchDTO {
     private String unitName;
     private Integer unitId;
     private Integer quantity;
-    private BigDecimal importPrice;
     private String supplier;
     private LocalDateTime importDate;
     private String importedBy;
-    private Byte status;
-    private Byte drugStatus;
+    private com.mycompany.jpademo.backend.enums.BatchStatus status;
+    private com.mycompany.jpademo.backend.enums.DrugStatus drugStatus;
     private String notes;
+    private String updatedBy;
+    private LocalDateTime updatedAt;
+    private String updateReason;
     private Integer quantityInStock;
     private Long daysUntilExpiry;
 }

@@ -197,18 +197,34 @@ function formatDate(dateStr) {
 }
 
 function validateDispenseForm(e) {
-    const batchId = document.getElementById('batchId').value;
-    const quantity = parseInt(document.getElementById('quantityDispensed').value, 10);
+    const actionStatusEl = document.getElementById('actionStatus');
+    const actionStatus = actionStatusEl ? actionStatusEl.value : 'DISPENSED';
+    const notesInput = document.getElementById('notes');
+    const notesVal = notesInput ? notesInput.value : '';
+
+    if (actionStatus === 'CANCELLED') {
+        if (!notesVal || notesVal.trim() === '') {
+            e.preventDefault();
+            alert('Vui lòng nhập lý do hủy cấp phát vào ghi chú trước khi xác nhận!');
+            return false;
+        }
+        return true;
+    }
+
+    const batchSelect = document.getElementById('batchId');
+    const batchId = batchSelect ? batchSelect.value : '';
+    const qtyInput = document.getElementById('quantityDispensed');
+    const quantity = qtyInput ? parseInt(qtyInput.value, 10) : 0;
 
     if (!batchId) {
         e.preventDefault();
-        alert('Vui long chon lo hang truoc khi cap phat.');
+        alert('Vui lòng chọn lô hàng trước khi cấp phát.');
         return false;
     }
 
     if (!quantity || quantity <= 0) {
         e.preventDefault();
-        alert('So luong cap phat phai lon hon 0.');
+        alert('Số lượng cấp phát phải lớn hơn 0.');
         return false;
     }
 
@@ -216,7 +232,7 @@ function validateDispenseForm(e) {
     const batch = batchData[batchId];
     if (batch && quantity > batch.quantityInStock) {
         e.preventDefault();
-        alert('So luong cap phat (' + quantity + ') vuot qua ton kho (' + batch.quantityInStock + ').');
+        alert('Số lượng cấp phát (' + quantity + ') vượt quá tồn kho (' + batch.quantityInStock + ').');
         return false;
     }
 

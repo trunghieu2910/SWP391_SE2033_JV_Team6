@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Trang chủ', 'dashboard')}">
 <body>
@@ -6,7 +6,7 @@
     <link rel="stylesheet" th:href="@{/css/pharmacist/dashboard.css}">
     <link rel="stylesheet" th:href="@{/css/pharmacist/reports.css}">
 
-    <!-- Quick Stats -->
+    <!-- Th?ng kê nhanh -->
     <section class="quick-stats" style="margin-bottom: 32px;">
         <div class="stat-card" th:if="${stats}">
             <div class="stat-icon primary">
@@ -49,9 +49,9 @@
         </div>
     </section>
 
-    <!-- Reports Section -->
+    <!-- Ph?n báo cáo -->
     <div class="container" style="padding: 0;">
-        <!-- Filter Section -->
+        <!-- Ph?n b? l?c -->
         <section class="filter-section card" style="padding: 24px; margin-bottom: 32px;">
             <form method="get" action="/pharmacist/dashboard" class="filter-form" style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
                 <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 180px;">
@@ -73,7 +73,7 @@
             </form>
         </section>
 
-        <!-- Inventory Log Report -->
+        <!-- Báo cáo nh?t ký kho -->
         <section class="report-section card" style="padding: 0; overflow: hidden;">
             <div style="padding: 24px 32px 12px 32px;">
                 <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--neutral-dark); display: flex; align-items: center; gap: 8px;">
@@ -94,7 +94,7 @@
                     </thead>
                     <tbody>
                         <th:block th:each="log, iterStat : ${logs}">
-                            <!-- Main row (4 cols + toggle icon) -->
+                            <!-- Dòng chính (4 c?t + icon m? r?ng) -->
                             <tr th:onclick="|toggleLogDetail('detail-' + ${iterStat.index})|"
                                 style="cursor: pointer;" class="log-main-row">
                                 <td style="text-align: center; color: var(--primary);">
@@ -109,7 +109,7 @@
                                 </td>
                                 <td th:text="${log.user.fullName}"></td>
                             </tr>
-                            <!-- Detail row (initially hidden) -->
+                            <!-- Dòng chi ti?t (M?c d?nh ?n) -->
                             <tr th:id="|detail-${iterStat.index}|" class="log-detail-row" style="display: none; background: #f8fafc;">
                                 <td colspan="5" style="padding: 16px 24px;">
                                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
@@ -141,7 +141,7 @@
                 Chưa có hoạt động kho nào trong khoảng thời gian được chọn.
             </div>
 
-            <!-- Pagination Controls -->
+            <!-- Các nút phân trang -->
             <div th:if="${totalPages != null && totalPages > 1}"
                  style="display: flex; justify-content: center; align-items: center; gap: 8px; padding: 20px 32px; border-top: 1px solid var(--border-color);">
                 <a th:if="${currentPage > 0}"

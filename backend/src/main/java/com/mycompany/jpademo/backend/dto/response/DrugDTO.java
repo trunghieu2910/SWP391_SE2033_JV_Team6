@@ -15,19 +15,22 @@ public class DrugDTO {
     private String strengthUnit;
     private String dosageForm;
     private String routeOfAdministration;
-    private String subCategoryName;
     private Integer subCategoryId;
+    private String subCategoryName;
     private Integer baseUnitId;
     private String baseUnitName;
-    private String packaging;
     private String manufacturer;
     private String countryOfOrigin;
     private String storageCondition;
-    private Integer shelfLifeMonths;
     private String notes;
-    private Byte status;
+    private com.mycompany.jpademo.backend.enums.DrugStatus status;
     private Integer totalQuantityInStock;
     private Integer totalBatches;
+    private Integer createdBy;
     private String createdByName;
     private String createdAt;
+    private Integer updatedBy;
+    private String updatedByName;
+    private String updatedAt;
+    private String updateReason;
 }

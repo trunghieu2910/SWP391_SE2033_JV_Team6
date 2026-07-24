@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Chi tiết thuốc', 'drugs')}">
 <body>
@@ -12,7 +12,7 @@
             </a>
         </header>
 
-        <!-- Drug Information Card -->
+        <!-- Th? thông tin Thu?c -->
         <section class="drug-info card" th:if="${drug}" style="margin-bottom: 32px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
                 <div>
@@ -20,15 +20,15 @@
                     <p style="color: var(--neutral-light); font-weight: 600; margin-top: 4px;" th:text="${drug.dosageForm} + ' | ' + ${drug.subCategoryName}">Dạng bào chế | Phân loại</p>
                 </div>
                 <div>
-                    <button type="button" class="btn" th:classappend="${drug.status == 1 ? 'btn-success' : 'btn-danger'}"
+                    <button type="button" class="btn" th:classappend="${drug.status != null and drug.status.name() == 'ACTIVE' ? 'btn-success' : 'btn-danger'}"
                             th:onclick="toggleDrugStatus([[${drug.drugId}]], [[${drug.status}]])">
-                        <i class="fas" th:classappend="${drug.status == 1 ? 'fa-check-circle' : 'fa-ban'}"></i>
-                        <span th:text="${drug.status == 1 ? 'Đang dùng' : 'Ngừng sử dụng'}">Trạng thái</span>
+                        <i class="fas" th:classappend="${drug.status != null and drug.status.name() == 'ACTIVE' ? 'fa-check-circle' : 'fa-ban'}"></i>
+                        <span th:text="${drug.status != null and drug.status.name() == 'ACTIVE' ? 'Đang dùng' : 'Ngừng sử dụng'}">Trạng thái</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Profile Info Grid -->
+            <!-- Lu?i thông tin Profile -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
                 <div style="display: flex; flex-direction: column; gap: 4px;">
                     <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã thuốc</span>
@@ -54,10 +54,7 @@
                     <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Điều kiện bảo quản</span>
                     <strong th:text="${drug.storageCondition != null ? drug.storageCondition : 'Bình thường'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Hạn sử dụng ghi trên nhãn</span>
-                    <strong th:text="${drug.shelfLifeMonths} + ' tháng'" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
-                </div>
+
                 <div style="display: flex; flex-direction: column; gap: 4px;">
                     <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Tổng số lô</span>
                     <strong th:text="${drug.totalBatches}" style="font-size: 1rem; color: var(--neutral-dark);">0</strong>
@@ -68,7 +65,7 @@
                 </div>
             </div>
 
-            <!-- Unit Conversion Display -->
+            <!-- Hi?n th? quy d?i don v? -->
             <div th:if="${conversions != null and not #lists.isEmpty(conversions)}" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
                 <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light); display: block; margin-bottom: 12px;">Thiết lập quy đổi</span>
                 <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
@@ -81,7 +78,7 @@
                 </div>
             </div>
 
-            <!-- Audit Trail -->
+            <!-- D?u v?t ki?m toán (L?ch s?) -->
             <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color); display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
                 <div style="display: flex; align-items: flex-start; gap: 12px; background: #f8fafc; border-radius: var(--radius); padding: 14px 18px;">
                     <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -102,23 +99,44 @@
                         <strong th:text="${drug.createdAt != null ? drug.createdAt : 'Không xác định'}" style="font-size: 0.95rem; color: var(--neutral-dark);">—</strong>
                     </div>
                 </div>
+                
+                <div style="display: flex; align-items: flex-start; gap: 12px; background: #f8fafc; border-radius: var(--radius); padding: 14px 18px;" th:if="${drug.updatedByName != null}">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #fef9c3; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-user-edit" style="color: #ca8a04; font-size: 0.85rem;"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light); display: block; margin-bottom: 2px;">Người sửa cuối</span>
+                        <strong th:text="${drug.updatedByName}" style="font-size: 0.95rem; color: var(--neutral-dark);">—</strong>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 12px; background: #f8fafc; border-radius: var(--radius); padding: 14px 18px;" th:if="${drug.updatedAt != null}">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #fef9c3; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-history" style="color: #ca8a04; font-size: 0.85rem;"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light); display: block; margin-bottom: 2px;">Cập nhật lần cuối</span>
+                        <strong th:text="${drug.updatedAt}" style="font-size: 0.95rem; color: var(--neutral-dark);">—</strong>
+                        <div th:if="${drug.updateReason != null and !drug.updateReason.isEmpty()}" style="font-size: 0.85rem; color: var(--neutral-light); margin-top: 4px; font-style: italic;" th:text="${'Lý do: ' + drug.updateReason}"></div>
+                    </div>
+                </div>
             </div>
 
-            <div th:if="${drug.status == 0}" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+            <div th:if="${drug.status != null and drug.status.name() == 'INACTIVE'}" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
                 <div style="background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
                     <i class="fas fa-exclamation-circle"></i> Không được chỉnh sửa: thuốc đã ngưng sử dụng
                 </div>
             </div>
 
-            <div th:if="${drug.status != 0}" style="display: flex; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+            <div th:if="${drug.status == null or drug.status.name() != 'INACTIVE'}" style="display: flex; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 24px;">
                 <button type="button" class="btn btn-warning" th:onclick="showEditForm()">
                     <i class="fas fa-edit"></i> Sửa thông tin thuốc
                 </button>
             </div>
         </section>
 
-        <!-- Edit Form Card (Initially Hidden) -->
-        <section th:if="${drug.status != 0}" id="editFormCard" class="card" style="display: none; margin-bottom: 32px;">
+        <!-- Th? form ch?nh s?a (M?c d?nh ?n) -->
+        <section th:if="${drug.status == null or drug.status.name() != 'INACTIVE'}" id="editFormCard" class="card" style="display: none; margin-bottom: 32px;">
             <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 24px;">
                 <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--neutral-dark);">Cập nhật thông tin thuốc</h2>
             </div>
@@ -157,19 +175,18 @@
                             <option value="Đường bôi ngoài da" th:selected="${drug.routeOfAdministration == 'Đường bôi ngoài da'}">Đường bôi ngoài da</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="editPackaging">Quy cách đóng gói *</label>
-                        <input type="text" id="editPackaging" name="packaging" th:value="${drug.packaging}" required>
-                    </div>
                 </div>
                 <div class="form-group">
                     <label for="editBaseUnitId">Đơn vị gốc kê đơn *</label>
-                    <select id="editBaseUnitId" name="baseUnitId" class="base-unit-select" required>
+                    <select id="editBaseUnitId" name="baseUnitId" class="base-unit-select" required th:disabled="${drug.totalBatches > 0}">
                         <option value="">-- Chọn đơn vị gốc --</option>
                         <option th:each="u : ${units}" th:value="${u.unitId}" th:text="${u.unitName}" th:selected="${u.unitId == drug.baseUnitId}"></option>
                     </select>
                 </div>
-                <div class="form-group unit-conversion-builder" data-drug-name-input="editDrugName">
+                <div th:if="${drug.totalBatches > 0}" style="font-size: 0.85rem; color: #b91c1c; margin-bottom: 12px; margin-top: -8px;">
+                    <i class="fas fa-lock"></i> Không thể sửa Đơn vị gốc và Quy đổi do thuốc đã có lô hàng nhập kho.
+                </div>
+                <div class="form-group unit-conversion-builder" data-drug-name-input="editDrugName" th:style="${drug.totalBatches > 0 ? 'pointer-events: none; opacity: 0.6;' : ''}">
                     <div class="unit-conversion-header">
                         <div>
                             <span class="unit-conversion-eyebrow">Cách hiển thị trực quan</span>
@@ -261,11 +278,7 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="editShelfLifeMonths">Thời hạn sử dụng (tháng) *</label>
-                        <input type="number" id="editShelfLifeMonths" name="shelfLifeMonths" th:value="${drug.shelfLifeMonths}" min="1" required>
-                    </div>
-                    <div class="form-group">
+                    <div class="form-group" style="width: 100%;">
                         <label for="editStorageCondition">Điều kiện bảo quản *</label>
                         <input type="text" id="editStorageCondition" name="storageCondition" th:value="${drug.storageCondition}" required>
                     </div>
@@ -286,7 +299,7 @@
             </form>
         </section>
 
-        <!-- Drug Batches Card -->
+        <!-- Th? các lô hàng Thu?c -->
         <section class="drug-batches card" style="padding: 0; overflow: hidden;">
             <div style="padding: 24px 32px 12px 32px; display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--neutral-dark);">Danh sách lô hàng nhập kho</h2>
@@ -312,8 +325,9 @@
                         <td th:text="${batch.quantityInStock}" style="font-weight: 700;">-</td>
                         <td th:text="${batch.supplier}">-</td>
                         <td>
-                            <span th:if="${batch.status == 1}" class="badge badge-success">Sẵn dùng</span>
-                            <span th:if="${batch.status == 0}" class="badge badge-danger">Hết hạn/Ngừng</span>
+                            <span th:if="${batch.status != null and batch.status.name() == 'ACTIVE'}" class="badge badge-success">Sẵn dùng</span>
+                            <span th:if="${batch.status != null and batch.status.name() == 'EXPIRED'}" class="badge badge-warning">Hết hạn</span>
+                            <span th:if="${batch.status != null and batch.status.name() == 'INACTIVE'}" class="badge badge-danger">Ngừng</span>
                         </td>
                     </tr>
                     <tr th:if="${batches == null or #lists.isEmpty(batches)}">
@@ -348,15 +362,15 @@
             if (editForm) {
                 editForm.addEventListener('submit', function(e) {
                     const required = ['editDrugName','editStrength','editStrengthUnit','editDosageForm',
-                        'editRouteOfAdministration','editPackaging','editSubCategoryId',
-                        'editManufacturer','editCountryOfOrigin','editShelfLifeMonths','editStorageCondition'];
+                        'editRouteOfAdministration','editSubCategoryId',
+                        'editManufacturer','editCountryOfOrigin','editStorageCondition'];
                     let missing = [];
                     const labels = {
                         editDrugName: 'Tên thuốc', editStrength: 'Hàm lượng',
                         editStrengthUnit: 'Đơn vị hàm lượng', editDosageForm: 'Dạng bào chế',
-                        editRouteOfAdministration: 'Đường dùng', editPackaging: 'Quy cách đóng gói',
+                        editRouteOfAdministration: 'Đường dùng',
                         editSubCategoryId: 'Phân nhóm thuốc', editManufacturer: 'Nhà sản xuất',
-                        editCountryOfOrigin: 'Nước sản xuất', editShelfLifeMonths: 'Thời hạn sử dụng',
+                        editCountryOfOrigin: 'Nước sản xuất',
                         editStorageCondition: 'Điều kiện bảo quản'
                     };
                     required.forEach(id => {
@@ -378,3 +392,4 @@
 </main>
 </body>
 </html>
+

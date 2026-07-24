@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Báo cáo & Thống kê', 'reports')}">
 <body>
@@ -6,7 +6,7 @@
     <link rel="stylesheet" th:href="@{/css/pharmacist/reports.css}">
 
     <div class="container">
-        <!-- Filter Section -->
+        <!-- Ph?n b? l?c -->
         <section class="filter-section card" style="padding: 24px; margin-bottom: 32px;">
             <form method="get" action="/pharmacist/reports" class="filter-form" style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
                 <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 180px;">
@@ -29,7 +29,7 @@
             </form>
         </section>
 
-        <!-- Expiring Drugs Report -->
+        <!-- Báo cáo thu?c s?p h?t h?n -->
         <section class="report-section card" style="padding: 0; overflow: hidden; margin-bottom: 32px;">
             <div style="padding: 24px 32px 12px 32px;">
                 <h2 style="font-size: 1.15rem; font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 8px;">
@@ -66,7 +66,7 @@
             </div>
         </section>
 
-        <!-- Inventory Log Report -->
+        <!-- Báo cáo nh?t ký kho -->
         <section class="report-section card" style="padding: 0; overflow: hidden;">
             <div style="padding: 24px 32px 12px 32px;">
                 <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--neutral-dark); display: flex; align-items: center; gap: 8px;">

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{doctor/layout :: main-layout(~{::main}, 'Quản lý ca chẩn đoán', 'sessions')}">
 <body>
@@ -113,7 +113,7 @@
       </table>
     </div>
 
-    <!-- Pagination -->
+    <!-- Phân trang -->
     <div class="pagination-bar" th:if="${sessions.totalPages > 1}">
       <div class="pagination-info">
         Trang <strong th:text="${sessions.number + 1}">1</strong> /

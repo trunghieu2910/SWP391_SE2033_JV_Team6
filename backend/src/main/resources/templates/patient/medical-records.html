@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{patient/layout :: main-layout(~{::main}, 'Hồ sơ bệnh án', 'records')}">
 <body>
@@ -57,7 +57,7 @@
             </div>
         </div>
 
-        <!-- Pagination -->
+        <!-- Phân trang -->
         <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
             <a th:if="${hasPrev}" th:href="@{/patient/medical-records(page=${currentPage - 1}, size=${pageSize})}"
                class="pagination-btn">← Trước</a>
@@ -84,3 +84,4 @@
 </main>
 </body>
 </html>
+

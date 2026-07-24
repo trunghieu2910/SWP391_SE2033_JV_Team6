@@ -70,8 +70,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceAlreadyExistsException("Số điện thoại đang được sử dụng.");
         }
 
-        Role patientRole = roleRepository.findByRoleName(RoleName.PATIENT)
-                .orElseThrow(() -> new ResourceNotFoundException("Role PATIENT không tồn tại."));
+
 
         PendingRegistrationStore.savePending(request.getUserName(), request);
 
@@ -82,6 +81,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    @LogActivity(action = "REGISTER", targetType = "Users", description = "Đăng ký tài khoản Bệnh nhân mới (Lễ tân tạo)")
     public void registerByReceptionist(RegisterRequest request) {
         if (userRepository.existsByUserName(request.getUserName())) {
             throw new ResourceAlreadyExistsException("Tên đăng nhập đã tồn tại.");
@@ -125,20 +125,25 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    @LogActivity(action = "REGISTER", targetType = "Users", description = "Đăng ký tài khoản Bệnh nhân mới (Bệnh nhân tự đăng ký)")
     public void verifyRegistrationOtp(OtpVerificationRequest request) {
+        //Lấy thông tin đăng ký tạm thời đã lưu ở bước trước đó từ PendingRegistrationStore.
         RegisterRequest registerRequest = PendingRegistrationStore.getPending(request.getUserName());
         if (registerRequest == null) {
             throw new ResourceNotFoundException("Thông tin đăng ký không tồn tại hoặc đã hết hạn.");
         }
 
+        //Xác thực mã OTP
         boolean valid = OtpUtil.verifyOtp(registerRequest.getEmail(), request.getOtp());
         if (!valid) {
             throw new InvalidOtpException("no");
         }
 
+        //check role patient đã tồn tại hay chưa
         Role patientRole = roleRepository.findByRoleName(RoleName.PATIENT)
                 .orElseThrow(() -> new ResourceNotFoundException("Role PATIENT không tồn tại."));
 
+        //Tạo và Lưu tài khoản Người dùng
         User user = new User();
         user.setUserName(registerRequest.getUserName());
         user.setFullName(registerRequest.getFullName());

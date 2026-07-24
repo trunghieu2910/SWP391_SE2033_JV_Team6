@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:fragment="main-layout(content, title, currentTab)" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} + ' - MedAI'">MedAI</title>
-    <!-- Google Fonts & FontAwesome -->
+    <!-- Font Google & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
     <!-- Patient Base CSS -->
@@ -57,7 +57,7 @@
         </div>
     </aside>
 
-    <!-- Main Content Wrapper -->
+    <!-- Khung n?i dung chính -->
     <div class="wrapper">
         <header class="top-bar">
             <h1 class="page-title" th:text="${title}">Tiêu đề trang</h1>
@@ -91,3 +91,4 @@
     </script>
 </body>
 </html>
+
