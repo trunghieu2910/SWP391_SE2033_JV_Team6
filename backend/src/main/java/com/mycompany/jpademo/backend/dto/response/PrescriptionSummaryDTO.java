@@ -20,7 +20,7 @@ public class PrescriptionSummaryDTO {
     private String patientName;
     private LocalDateTime prescriptionDate;
     private String diagnosis;
-    private Byte status;
+    private com.mycompany.jpademo.backend.enums.PrescriptionStatus status;
     private Integer totalItems;
     private Integer pendingItems;
     private Boolean isPending;

@@ -1,39 +1,39 @@
-/* Import History Styles */
+/* Batch List Styles */
 
-.import-history-table {
+.batch-list-table {
     background: white;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.import-history-table .table {
+.batch-list-table .table {
     margin: 0;
     width: 100%;
 }
 
-.import-history-table .table th {
+.batch-list-table .table th {
     background-color: #f8f9fa;
     font-weight: 600;
 }
 
-.import-history-table .table td {
+.batch-list-table .table td {
     padding: 12px 15px;
 }
 
-.import-history-table .table tbody tr:hover {
+.batch-list-table .table tbody tr:hover {
     background-color: #f9f9f9;
 }
 
-.import-history-toolbar {
+.batch-list-toolbar {
     display: grid;
     grid-template-columns: minmax(240px, 1fr) minmax(220px, 280px);
     gap: 12px;
     align-items: center;
 }
 
-.import-history-search,
-.import-history-sort {
+.batch-list-search,
+.batch-list-sort {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -44,14 +44,14 @@
     border-radius: 8px;
 }
 
-.import-history-search i,
-.import-history-sort i {
+.batch-list-search i,
+.batch-list-sort i {
     color: #64748b;
     flex: 0 0 auto;
 }
 
-.import-history-search input,
-.import-history-sort select {
+.batch-list-search input,
+.batch-list-sort select {
     width: 100%;
     min-width: 0;
     border: 0;
@@ -61,12 +61,12 @@
     font: inherit;
 }
 
-.import-history-sort select {
+.batch-list-sort select {
     cursor: pointer;
 }
 
 @media (max-width: 768px) {
-    .import-history-toolbar {
+    .batch-list-toolbar {
         grid-template-columns: 1fr;
     }
 }

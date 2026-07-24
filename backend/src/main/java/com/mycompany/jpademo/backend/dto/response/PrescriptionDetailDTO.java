@@ -37,4 +37,5 @@ public class PrescriptionDetailDTO {
     private String patientCccd;
     private LocalDate patientDob;
     private Boolean isPending;
+    private com.mycompany.jpademo.backend.enums.PrescriptionDetailStatus status;
 }

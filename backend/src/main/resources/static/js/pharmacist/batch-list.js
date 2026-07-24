@@ -1,11 +1,11 @@
-/* Import History JavaScript */
+/* Batch List JavaScript */
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeImportHistory();
 });
 
 function initializeImportHistory() {
-    // Initialize import history page
+    // Initialize batch list page
     initializeImportHistorySearchAndSort();
 }
 
@@ -129,5 +129,5 @@ function deleteBatch(batchId) {
 }
 
 function goToPage(pageNumber) {
-    window.location.href = `/pharmacist/import-history?page=${pageNumber}`;
+    window.location.href = `/pharmacist/batch-list?page=${pageNumber}`;
 }

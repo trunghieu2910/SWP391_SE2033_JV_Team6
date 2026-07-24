@@ -20,13 +20,13 @@ public interface DrugBatchRepository extends JpaRepository<DrugBatch, Integer> {
     @Query("SELECT db FROM DrugBatch db WHERE db.drug.drugId = :drugId")
     List<DrugBatch> findByDrugId(@Param("drugId") Integer drugId);
     
-    List<DrugBatch> findByStatus(Byte status);
+    List<DrugBatch> findByStatus(com.mycompany.jpademo.backend.enums.BatchStatus status);
     
-    @Query("SELECT db FROM DrugBatch db WHERE db.expiryDate BETWEEN :startDate AND :endDate AND db.status IN (1, 2) " +
+    @Query("SELECT db FROM DrugBatch db WHERE db.expiryDate BETWEEN :startDate AND :endDate AND db.status IN (com.mycompany.jpademo.backend.enums.BatchStatus.ACTIVE, com.mycompany.jpademo.backend.enums.BatchStatus.EXPIRED) " +
            "AND EXISTS (SELECT i FROM Inventory i WHERE i.batch.batchId = db.batchId AND i.quantityInStock > 0)")
     List<DrugBatch> findExpiringBatches(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
     
-    @Query("SELECT db FROM DrugBatch db WHERE db.expiryDate < :today AND db.status = 1")
+    @Query("SELECT db FROM DrugBatch db WHERE db.expiryDate < :today AND db.status = com.mycompany.jpademo.backend.enums.BatchStatus.ACTIVE")
     List<DrugBatch> findExpiredBatches(@Param("today") LocalDate today);
 
     @Query("SELECT db.batchNumber FROM DrugBatch db")

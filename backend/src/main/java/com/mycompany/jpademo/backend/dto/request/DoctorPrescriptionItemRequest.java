@@ -23,10 +23,4 @@ public class DoctorPrescriptionItemRequest {
 
     @NotBlank(message = "Cách sử dụng thuốc không được để trống")
     private String instruction;
-
-    private BigDecimal dosePerTime;
-
-    private Integer timesPerDay;
-
-    private Integer daysOfTreatment;
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:fragment="main-layout(content, title, currentTab)" lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -6,14 +6,14 @@
     <title th:text="${title} + ' - Dược sĩ | Cervical Dx'">Dược sĩ | Cervical Dx</title>
     <meta th:name="${_csrf.parameterName}" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-    <!-- Google Fonts & FontAwesome -->
+    <!-- Font Google & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
-    <!-- Base Layout CSS -->
+    <!-- CSS B? c?c co b?n -->
     <link rel="stylesheet" th:href="@{/css/pharmacist/layout.css}">
 </head>
 <body>
-    <!-- Sidebar -->
+    <!-- Thanh bên (Sidebar) -->
     <aside class="sidebar">
         <div class="sidebar-brand">
             <i class="fa-solid fa-house-medical"></i>
@@ -28,9 +28,9 @@
                 <i class="fa-solid fa-pills"></i>
                 <span>Quản lý thuốc</span>
             </a>
-            <a th:href="@{/pharmacist/import-history}" class="nav-item" th:classappend="${currentTab == 'import' ? 'active' : ''}">
+            <a th:href="@{/pharmacist/batch-list}" class="nav-item" th:classappend="${currentTab == 'batch-list' or currentTab == 'import' ? 'active' : ''}">
                 <i class="fa-solid fa-boxes-packing"></i>
-                <span>Quản lý kho</span>
+                <span>Quản lý lô hàng</span>
             </a>
             <a th:href="@{/pharmacist/dispense-list}" class="nav-item" th:classappend="${currentTab == 'dispense' ? 'active' : ''}">
                 <i class="fa-solid fa-receipt"></i>
@@ -46,7 +46,7 @@
             </a>
         </nav>
 
-        <!-- User Profile & Logout -->
+        <!-- H? so ngu?i dùng & Ðang xu?t -->
         <div class="sidebar-bottom">
             <div class="sidebar-user-profile">
                 <div class="sidebar-user-avatar" th:text="${userFullName != null ? userFullName.substring(0, 1).toUpperCase() : 'D'}">D</div>
@@ -62,16 +62,16 @@
         </div>
     </aside>
 
-    <!-- Main Content Wrapper -->
+    <!-- Khung n?i dung chính -->
     <div class="wrapper">
-        <!-- Topbar -->
+        <!-- Thanh trên cùng (Topbar) -->
         <header class="topbar">
             <div class="topbar-left">
                 <h1 th:text="${title}">Trang chủ</h1>
             </div>
         </header>
 
-        <!-- Flash Messages -->
+        <!-- Thông báo ch?p nhoáng (Flash) -->
         <div th:if="${success}" class="alert alert-success">
             <i class="fa-regular fa-circle-check"></i>
             <span th:text="${success}"></span>
@@ -83,11 +83,11 @@
             <button type="button" class="alert-close" onclick="closeAlert(this)">&times;</button>
         </div>
 
-        <!-- Dynamic Content -->
+        <!-- N?i dung d?ng -->
         <div th:replace="${content}"></div>
     </div>
 
-    <!-- Logout Modal -->
+    <!-- C?a s? Ðang xu?t (Modal) -->
     <div id="logoutModal" class="logout-modal" style="display: none;">
         <div class="logout-modal-overlay" onclick="closeLogoutModal()"></div>
         <div class="logout-modal-content">
@@ -110,7 +110,7 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- K?ch b?n (Scripts) -->
     <script>
         function confirmLogout(event) {
             event.preventDefault();

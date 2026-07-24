@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.PrescriptionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -45,8 +46,9 @@ public class Prescription {
     @Column(name = "prescriptionDate", nullable = false, updatable = false)
     private LocalDateTime prescriptionDate;
 
-    @Column(name = "status")
-    private Byte status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private PrescriptionStatus status;
 
     @Column(name = "notes", length = 500)
     private String notes;

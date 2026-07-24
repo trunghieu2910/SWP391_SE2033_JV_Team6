@@ -30,6 +30,4 @@ public class Inventory {
     @Column(name = "lastUpdated", nullable = false)
     private LocalDateTime lastUpdated;
 
-    @Column(name = "status")
-    private Byte status;
 }

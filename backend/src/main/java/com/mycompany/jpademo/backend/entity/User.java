@@ -36,7 +36,7 @@ public class User {
     @Column(name = "phoneNumber", length = 20, unique = true)
     private String phoneNumber;
 
-    @Enumerated(EnumType.STRING)
+    @jakarta.persistence.Convert(converter = com.mycompany.jpademo.backend.converter.UserStatusConverter.class)
     @Column(name = "status", length = 50)
     private UserStatus status;
 

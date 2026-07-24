@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Quản lý tồn kho', 'inventory')}">
 <body>
@@ -10,9 +10,9 @@
             <h1><i class="fas fa-boxes-stacked"></i> Kiểm kê & Quản lý tồn kho</h1>
         </header>
 
-        <!-- Alerts Section -->
+        <!-- Ph?n c?nh báo -->
         <section class="alerts-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
-            <!-- Expiring Soon Box -->
+            <!-- H?p S?p h?t h?n -->
             <div class="alert-subsection card" style="margin-bottom: 0;">
                 <h2 style="font-size: 1.1rem; font-weight: 800; color: #b45309; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-hourglass-half"></i> Thuốc sắp hết hạn (7 ngày)
@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <!-- Low Stock Box -->
+            <!-- H?p S?p h?t hàng -->
             <div class="alert-subsection card" style="margin-bottom: 0;">
                 <h2 style="font-size: 1.1rem; font-weight: 800; color: #991b1b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-triangle-exclamation"></i> Cảnh báo tồn kho thấp (< 50)
@@ -73,7 +73,7 @@
             </div>
         </section>
 
-        <!-- Full Inventory Card -->
+        <!-- Th? toàn b? t?n kho -->
         <section class="inventory-section card" style="padding: 0; overflow: hidden;">
             <div style="padding: 24px 24px 12px 24px;">
                 <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--neutral-dark);">Báo cáo tồn kho chi tiết</h2>
@@ -116,7 +116,6 @@
                         <th>Đơn vị lớn</th>
                         <th>Đơn vị nhỏ</th>
                         <th>Cập nhật cuối</th>
-                        <th>Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryTableBody">
@@ -128,14 +127,9 @@
                         <td th:text="|${inventory.quantityInLargeUnit} ${inventory.largeUnitName}|" style="font-weight: 700; color: var(--primary);">-</td>
                         <td th:text="|${inventory.quantityInStock} ${inventory.smallUnitName}|" style="font-weight: 700;">-</td>
                         <td th:text="${inventory.lastUpdated != null ? #temporals.format(inventory.lastUpdated, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
-                        <td>
-                            <span th:if="${inventory.status == 1}" class="badge badge-success">Hoạt động</span>
-                            <span th:if="${inventory.status == 0}" class="badge badge-danger" style="background-color:#6b7280; color:white;">Khóa</span>
-                            <span th:if="${inventory.status == 2}" class="badge badge-warning" style="background-color: #eab308; color: white;">Hết hạn</span>
-                        </td>
                     </tr>
                     <tr id="inventoryEmptyRow" style="display: none;">
-                        <td colspan="8" class="text-center">
+                        <td colspan="7" class="text-center">
                             Không tìm thấy thuốc hoặc số lô phù hợp.
                         </td>
                     </tr>
@@ -165,3 +159,4 @@
 </main>
 </body>
 </html>
+

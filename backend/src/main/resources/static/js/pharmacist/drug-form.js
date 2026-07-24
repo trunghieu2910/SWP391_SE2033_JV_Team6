@@ -198,9 +198,7 @@ function validateDrugForm(e) {
         { name: 'baseUnitId', label: 'Đơn vị gốc kê đơn' },
         { name: 'manufacturer', label: 'Nhà sản xuất' },
         { name: 'countryOfOrigin', label: 'Nước sản xuất' },
-        { name: 'storageCondition', label: 'Điều kiện bảo quản' },
-        { name: 'shelfLifeMonths', label: 'Thời hạn sử dụng' },
-        { name: 'packaging', label: 'Quy cách đóng gói' }
+        { name: 'storageCondition', label: 'Điều kiện bảo quản' }
     ];
     const missing = [];
 
@@ -235,6 +233,8 @@ function findInvalidConversionRow(form) {
     const steps = builder.querySelectorAll('.unit-conversion-step');
     const baseUnitSelect = form.querySelector('[name="baseUnitId"]');
     let lastSmallUnit = '';
+    let hasValidRow = false;
+    
     for (const step of steps) {
         const largeUnit = step.querySelector('.unit-conversion-large-unit')?.value;
         const smallUnit = step.querySelector('.unit-conversion-small-unit')?.value;
@@ -255,6 +255,11 @@ function findInvalidConversionRow(form) {
         }
 
         lastSmallUnit = smallUnit;
+        hasValidRow = true;
+    }
+
+    if (!hasValidRow) {
+        return 'Vui lòng thiết lập ít nhất một bước quy đổi đơn vị (Cách hiển thị trực quan).';
     }
 
     if (lastSmallUnit && baseUnitSelect?.value && lastSmallUnit !== baseUnitSelect.value) {

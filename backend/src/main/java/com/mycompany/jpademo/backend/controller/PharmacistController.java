@@ -32,7 +32,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
-// OpenPDF imports
+// Import thư viện OpenPDF
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -91,7 +91,7 @@ public class PharmacistController {
         }
     }
 
-    // ==================== DRUG MANAGEMENT ====================
+    // ==================== QUẢN LÝ THUỐC ====================
     @GetMapping("/drug-list")
     public String getDrugList(
             @PageableDefault(size = 10) Pageable pageable,
@@ -173,14 +173,15 @@ public class PharmacistController {
     public String updateDrug(
             @PathVariable Integer drugId,
             @ModelAttribute CreateDrugRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         try {
-            pharmacistService.updateDrug(drugId, request);
+            pharmacistService.updateDrug(drugId, request, userDetails.getUser().getUserId());
             redirectAttributes.addFlashAttribute("success", "Cập nhật thuốc thành công");
             return "redirect:/pharmacist/drug-detail/" + drugId;
         } catch (Exception e) {
             log.error("Error updating drug", e);
-            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật thuốc");
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật thuốc: " + e.getMessage());
             return "redirect:/pharmacist/drug-detail/" + drugId;
         }
     }
@@ -188,7 +189,7 @@ public class PharmacistController {
     @PostMapping("/drug-status/{drugId}")
     public ResponseEntity<?> updateDrugStatus(
             @PathVariable Integer drugId,
-            @RequestParam Byte status) {
+            @RequestParam com.mycompany.jpademo.backend.enums.DrugStatus status) {
         try {
             pharmacistService.updateDrugStatus(drugId, status);
             return ResponseEntity.ok(java.util.Map.of("success", true, "message", "Cập nhật trạng thái thành công"));
@@ -198,9 +199,9 @@ public class PharmacistController {
         }
     }
 
-    // ==================== IMPORT MANAGEMENT ====================
-    @GetMapping("/import-history")
-    public String getImportHistory(
+    // ==================== QUẢN LÝ LÔ HÀNG ====================
+    @GetMapping({"/batch-list", "/import-history"})
+    public String getBatchList(
             @PageableDefault(size = 10) Pageable pageable,
             Model model) {
         try {
@@ -208,14 +209,14 @@ public class PharmacistController {
             model.addAttribute("batches", batches);
             model.addAttribute("currentPage", pageable.getPageNumber());
             model.addAttribute("totalPages", batches.getTotalPages());
-            return "pharmacist/import-history";
+            return "pharmacist/batch-list";
         } catch (Exception e) {
-            log.error("Error loading import history", e);
-            model.addAttribute("error", "Lỗi khi tải lịch sử nhập kho: " + e.getMessage());
+            log.error("Error loading batch list", e);
+            model.addAttribute("error", "Lỗi khi tải danh sách lô hàng: " + e.getMessage());
             model.addAttribute("batches", Page.empty());
             model.addAttribute("currentPage", 0);
             model.addAttribute("totalPages", 0);
-            return "pharmacist/import-history";
+            return "pharmacist/batch-list";
         }
     }
 
@@ -247,7 +248,7 @@ public class PharmacistController {
         try {
             pharmacistService.createDrugBatch(request, userDetails.getUser().getUserId());
             redirectAttributes.addFlashAttribute("success", "Nhập kho thành công");
-            return "redirect:/pharmacist/import-history";
+            return "redirect:/pharmacist/batch-list";
         } catch (Exception e) {
             log.error("Error importing drug", e);
             redirectAttributes.addFlashAttribute("error", "Lỗi khi nhập kho: " + e.getMessage());
@@ -269,7 +270,6 @@ public class PharmacistController {
                 .expiryDate(batch.getExpiryDate())
                 .unitId(batch.getUnitId())
                 .quantity(batch.getQuantity())
-                .importPrice(batch.getImportPrice())
                 .supplier(batch.getSupplier())
                 .notes(batch.getNotes())
                 .build());
@@ -277,7 +277,7 @@ public class PharmacistController {
         } catch (Exception e) {
             log.error("Error loading batch detail", e);
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy lô hàng: " + e.getMessage());
-            return "redirect:/pharmacist/import-history";
+            return "redirect:/pharmacist/batch-list";
         }
     }
 
@@ -298,7 +298,7 @@ public class PharmacistController {
         }
     }
 
-    // ==================== DISPENSING MANAGEMENT ====================
+    // ==================== QUẢN LÝ CẤP PHÁT THUỐC ====================
     @GetMapping("/dispense-list")
     public String getDispenseList(Model model) {
         try {
@@ -338,7 +338,7 @@ public class PharmacistController {
             model.addAttribute("prescriptionId", prescriptionId);
             model.addAttribute("details", details);
 
-            // Add dispensing pharmacist details if available
+            // Thêm chi tiết Dược sĩ cấp phát nếu có
             PrescriptionDetailDTO dispensedDetail = details.stream()
                 .filter(d -> d.getDispensedByUser() != null)
                 .findFirst()
@@ -395,7 +395,7 @@ public class PharmacistController {
         }
     }
 
-    // ==================== INVENTORY MANAGEMENT ====================
+    // ==================== QUẢN LÝ TỒN KHO ====================
     @GetMapping("/inventory")
     public String getInventory(
             @RequestParam(required = false) String search,
@@ -442,7 +442,7 @@ public class PharmacistController {
         }
     }
 
-    // ==================== REPORTS ====================
+    // ==================== BÁO CÁO ====================
     @GetMapping("/reports")
     public String getReports(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -486,7 +486,7 @@ public class PharmacistController {
             PdfWriter.getInstance(document, response.getOutputStream());
             document.open();
 
-            // Set up fonts for Vietnamese (Unicode) using Tahoma or Arial from Windows
+            // Thiết lập font chữ tiếng Việt (Unicode) sử dụng Tahoma hoặc Arial từ Windows
             Font fontTitle;
             Font fontSub;
             Font fontHeader;
@@ -498,32 +498,32 @@ public class PharmacistController {
                 fontHeader = new Font(bf, 9, Font.BOLD, java.awt.Color.WHITE);
                 fontBody = new Font(bf, 8, Font.NORMAL, java.awt.Color.BLACK);
             } catch (Exception e) {
-                // Fallback to standard Helvetica if font file not found
+                // Dự phòng sử dụng Helvetica mặc định nếu không tìm thấy file font
                 fontTitle = new Font(Font.HELVETICA, 16, Font.BOLD);
                 fontSub = new Font(Font.HELVETICA, 10, Font.ITALIC);
                 fontHeader = new Font(Font.HELVETICA, 9, Font.BOLD);
                 fontBody = new Font(Font.HELVETICA, 8, Font.NORMAL);
             }
 
-            // Title
+            // Tiêu đề
             Paragraph title = new Paragraph("BÁO CÁO NHẬT KÝ HOẠT ĐỘNG KHO", fontTitle);
             title.setAlignment(Element.ALIGN_CENTER);
             title.setSpacingAfter(5);
             document.add(title);
 
-            // Subtitle / Date range
+            // Phụ đề / Khoảng thời gian
             Paragraph subtitle = new Paragraph("Từ ngày: " + startDate.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) + 
                                                 " - Đến ngày: " + endDate.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), fontSub);
             subtitle.setAlignment(Element.ALIGN_CENTER);
             subtitle.setSpacingAfter(20);
             document.add(subtitle);
 
-            // Create Table
-            PdfPTable table = new PdfPTable(8); // 8 columns
+            // Tạo Bảng
+            PdfPTable table = new PdfPTable(8); // 8 cột
             table.setWidthPercentage(100);
             table.setWidths(new float[]{1.5f, 2.0f, 1.2f, 1.0f, 1.0f, 1.0f, 1.5f, 1.8f});
 
-            // Headers
+            // Tiêu đề các cột
             String[] headers = {"Ngày thực hiện", "Thuốc", "Hoạt động", "Thay đổi", "Tồn trước", "Tồn sau", "Dược sĩ", "Ghi chú"};
             for (String header : headers) {
                 PdfPCell cell = new PdfPCell(new Phrase(header, fontHeader));
@@ -534,16 +534,16 @@ public class PharmacistController {
                 table.addCell(cell);
             }
 
-            // Rows
+            // Dữ liệu các dòng
             java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             for (InventoryLog log : logs) {
-                // 1. Date
+                // 1. Ngày giờ
                 table.addCell(createPdfCell(log.getPerformedAt() != null ? log.getPerformedAt().format(dtf) : "-", fontBody, Element.ALIGN_CENTER));
                 
-                // 2. Drug
+                // 2. Tên thuốc
                 table.addCell(createPdfCell(log.getBatch().getDrug().getDrugName(), fontBody, Element.ALIGN_LEFT));
                 
-                // 3. Action type
+                // 3. Loại thao tác
                 String action = switch (log.getActionType()) {
                     case "IMPORT" -> "Nhập kho";
                     case "DISPENSE" -> "Xuất đơn";
@@ -552,20 +552,20 @@ public class PharmacistController {
                 };
                 table.addCell(createPdfCell(action, fontBody, Element.ALIGN_CENTER));
                 
-                // 4. Change
+                // 4. Số lượng thay đổi
                 String change = (log.getQuantityChange() > 0 ? "+" : "") + log.getQuantityChange();
                 table.addCell(createPdfCell(change, fontBody, Element.ALIGN_RIGHT));
                 
-                // 5. Before
+                // 5. Tồn đầu
                 table.addCell(createPdfCell(String.valueOf(log.getQuantityBefore()), fontBody, Element.ALIGN_RIGHT));
                 
-                // 6. After
+                // 6. Tồn cuối
                 table.addCell(createPdfCell(String.valueOf(log.getQuantityAfter()), fontBody, Element.ALIGN_RIGHT));
                 
-                // 7. Pharmacist
+                // 7. Dược sĩ
                 table.addCell(createPdfCell(log.getUser().getFullName(), fontBody, Element.ALIGN_LEFT));
                 
-                // 8. Notes
+                // 8. Ghi chú
                 table.addCell(createPdfCell(log.getNotes() != null ? log.getNotes() : "-", fontBody, Element.ALIGN_LEFT));
             }
 
@@ -583,7 +583,7 @@ public class PharmacistController {
         return cell;
     }
 
-    // ==================== REST API FOR AJAX ====================
+    // ==================== REST API CHO AJAX ====================
 
     /**
      * API tra ve danh sach lo hang con hang cho mot thuoc.
@@ -604,7 +604,7 @@ public class PharmacistController {
         }
     }
 
-    // ==================== PROFILE ====================
+    // ==================== HỒ SƠ CÁ NHÂN ====================
     @GetMapping("/profile")
     public String profilePage(Model model,
                               @AuthenticationPrincipal CustomUserDetails userDetails,

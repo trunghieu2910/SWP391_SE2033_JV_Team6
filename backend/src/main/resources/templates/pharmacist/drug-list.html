@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Quản lý thuốc', 'drugs')}">
 <body>
@@ -13,7 +13,7 @@
             </a>
         </header>
 
-        <!-- Search & Filter -->
+        <!-- Tìm ki?m & B? l?c -->
         <section class="search-filter card" style="margin-bottom: 24px; padding: 20px;">
             <form method="get" action="/pharmacist/drug-list" class="search-form" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 <input type="text" name="search" class="form-control" style="flex: 1; min-width: 250px;" 
@@ -56,7 +56,7 @@
             </form>
         </section>
 
-        <!-- Drug List Table -->
+        <!-- B?ng danh sách Thu?c -->
         <section class="drug-list card" style="padding: 0;">
             <div class="table-responsive" style="margin-top: 0;">
             <table class="table">
@@ -84,8 +84,8 @@
                         <td th:text="${drug.manufacturer}">-</td>
                         <td style="text-align:center; font-weight: 700;" th:text="${drug.totalQuantityInStock}">-</td>
                         <td style="text-align:center">
-                            <span th:if="${drug.status == 1}" class="badge badge-success">Đang dùng</span>
-                            <span th:if="${drug.status == 0}" class="badge badge-danger">Ngừng</span>
+                            <span th:if="${drug.status != null and drug.status.name() == 'ACTIVE'}" class="badge badge-success">Đang dùng</span>
+                            <span th:if="${drug.status != null and drug.status.name() == 'INACTIVE'}" class="badge badge-danger">Ngừng</span>
                         </td>
                     </tr>
                     <tr id="drugListEmptyRow" style="display: none;">
@@ -105,7 +105,7 @@
             </div>
         </section>
 
-        <!-- Pagination -->
+        <!-- Phân trang -->
         <nav th:if="${totalPages > 1}" class="pagination">
             <ul>
                 <li th:if="${currentPage > 0}">
@@ -125,3 +125,4 @@
 </main>
 </body>
 </html>
+

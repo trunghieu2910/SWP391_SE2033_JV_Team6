@@ -1,4 +1,30 @@
 // ============================================
+// ACCORDION TOGGLE (Global scope so inline onclick always finds it)
+// ============================================
+window.toggleAccordion = function(id) {
+    const body = document.getElementById(id);
+    if (!body) return;
+    const icon = document.getElementById(id.replace('Accordion', 'Icon'));
+
+    const computedDisplay = window.getComputedStyle(body).display;
+    const isHidden = (body.style.display === 'none' || computedDisplay === 'none');
+
+    if (isHidden) {
+        body.style.display = 'block';
+        if (icon) {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        }
+    } else {
+        body.style.display = 'none';
+        if (icon) {
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        }
+    }
+};
+
+// ============================================
 // TOAST: tự động tắt sau 5 giây
 // ============================================
 document.addEventListener('DOMContentLoaded', function () {
@@ -39,26 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
         }, 4500);
     });
-
-    // ============================================
-    // ACCORDION TOGGLE
-    // ============================================
-    window.toggleAccordion = function(id) {
-        const body = document.getElementById(id);
-        if (!body) return;
-        const icon = document.getElementById(id.replace('Accordion', 'Icon'));
-
-        const computedDisplay = window.getComputedStyle(body).display;
-        const isHidden = (body.style.display === 'none' || computedDisplay === 'none');
-
-        if (isHidden) {
-            body.style.display = 'block';
-            if (icon) icon.className = 'fa-solid fa-chevron-up accordion-icon';
-        } else {
-            body.style.display = 'none';
-            if (icon) icon.className = 'fa-solid fa-chevron-down accordion-icon';
-        }
-    };
 
     // ============================================
     // TỰ ĐỘNG MỞ LẠI KHUNG "XÉT NGHIỆM Y TẾ" SAU KHI
