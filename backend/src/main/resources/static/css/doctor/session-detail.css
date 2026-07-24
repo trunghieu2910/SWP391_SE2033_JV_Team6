@@ -152,7 +152,7 @@
 /* ============================================================ */
 .detail-container {
     display: grid;
-    grid-template-columns: 3fr 7fr;
+    grid-template-columns: 320px 755px;
     gap: 24px;
     margin-bottom: 24px;
     align-items: flex-start;
@@ -1568,6 +1568,125 @@
     color: var(--neutral-500);
     cursor: not-allowed;
     opacity: 0.7;
+}
+
+/* ============================================================ */
+/* ===== PRESCRIPTION CARDS (thay bảng bằng thẻ dọc) ===== */
+/* ============================================================ */
+.prescription-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.prescription-row {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 16px;
+    background: #fff;
+}
+.prescription-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border-color);
+}
+.row-badge {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--primary);
+}
+.btn-remove-row {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: none;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+.btn-remove-row:hover { background: #fecaca; }
+
+.prescription-field { margin-bottom: 14px; }
+.prescription-field:last-child { margin-bottom: 0; }
+.prescription-field label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--neutral-dark);
+    margin-bottom: 6px;
+}
+.prescription-field label .required { color: var(--danger); }
+.prescription-field-qty { max-width: 260px; }
+
+.custom-drug-dropdown-wrapper { position: relative; }
+.drug-search-box { position: relative; }
+.drug-search-box .form-control.drug-search-input {
+    width: 100%;
+    padding-right: 30px;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+.dropdown-arrow-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+.drug-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    z-index: 9999;
+}
+.drug-option-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+}
+.drug-option-item:hover { background: #f8fafc; }
+.drug-option-name { font-weight: 700; color: #0284c7; font-size: 0.875rem; }
+.drug-option-meta {
+    font-size: 0.775rem;
+    color: var(--neutral-light);
+    margin-top: 2px;
+    display: flex;
+    gap: 12px;
+}
+.no-drug-found {
+    display: none;
+    padding: 12px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.quantity-input-group { display: flex; align-items: center; gap: 8px; }
+.quantity-input-group .quantity-input { width: 100px; }
+.unit-badge {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 /* ============================================================ */
