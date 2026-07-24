@@ -31,10 +31,7 @@
             <form th:action="@{/receptionist/patients/create}" th:object="${registerRequest}" method="POST" id="createPatientForm" aria-labelledby="form-heading">
                 <h3 id="form-heading" class="visually-hidden">Thông tin chi tiết tài khoản bệnh nhân</h3>
                 
-                <div th:if="${error != null}" class="alert alert-danger" role="alert">
-                    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-                    <span th:text="${error}"></span>
-                </div>
+           
 
                 <fieldset>
                     <div class="form-row">
@@ -48,9 +45,8 @@
                             <label for="gender">Giới tính <span aria-hidden="true" style="color: red;">*</span></label>
                             <select id="gender" th:field="*{gender}" required aria-required="true">
                                 <option value="">-- Chọn giới tính --</option>
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option>
+                                <option value="Male">Nam</option>
+                                <option value="Female">Nữ</option>
                             </select>
                             <span class="error-message" role="alert" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></span>
                         </div>
