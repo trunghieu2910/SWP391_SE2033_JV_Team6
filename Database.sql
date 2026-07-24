@@ -36,7 +36,7 @@ CREATE TABLE [Users]
     passwordHash VARCHAR(255) NOT NULL,
     phoneNumber  VARCHAR(20),
     certificateUrl VARCHAR(255),
-    status       VARCHAR(20), -- ACTIVE , INACTIVE , BANNED
+    status       VARCHAR(20), -- ACTIVE  , BANNED
     lastChangePassTime DATETIME,
 	lastLogoutTime DATETIME,
     createdAt    DATETIME     DEFAULT GETDATE(),
@@ -174,7 +174,7 @@ CREATE TABLE MedicalImageDetails (
     imageUrl NVARCHAR(255) NOT NULL,
     aiImageUrl NVARCHAR(255),
     confidenceScore FLOAT,
-    technicalConclusion NVARCHAR(MAX),
+    ultrasoundConclusion NVARCHAR(MAX),
     imgResultConclusion NVARCHAR(255),
     uploadedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (medicalImageID) REFERENCES MedicalImage (medicalImageID)
@@ -247,20 +247,20 @@ GO
 
 -- ROLE
 INSERT INTO [Role] (roleName)
-VALUES (N'ADMIN'), (N'DOCTOR'), (N'TECHNICAL'), (N'PATIENT'), (N'RECEPTIONIST'),(N'PHARMACIST');
+VALUES (N'ADMIN'), (N'DOCTOR'), (N'ULTRASOUND_DOCTOR'), (N'PATIENT'), (N'RECEPTIONIST'),(N'PHARMACIST');
 
 -- USERS
 INSERT INTO [Users]
 (roleID, username, fullName, email, passwordHash, phoneNumber, status, lastChangePassTime, nationalID)
 VALUES
-(4, 'patient_nam', N'Phạm Thùy Linh', 'namvipnhatgt@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445466', 'INACTIVE', GETDATE(), '043678901234'),
+(4, 'patient_nam', N'Phạm Thùy Linh', 'namvipnhatgt@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445466', 'ACTIVE', GETDATE(), '043678901234'),
 (1, 'admin_system', N'Quản trị viên', 'luugiang205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0999999999', 'ACTIVE', GETDATE(), '001234567890'),
 (2, 'dr_nguyen', N'Bác sĩ Nguyễn Văn Tùng', 'likey2404@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0912345678', 'ACTIVE', GETDATE(), '012345678901'),
 (2, 'dr_tran', N'Bác sĩ Trần Thị Mai', 'mai.tran@hospital.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0987654321', 'ACTIVE', GETDATE(), '023456789012'),
 (4, 'patient_hoang', N'Lê Minh Hoàng', 'hoang.le@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0901112233', 'ACTIVE', GETDATE(), '034567890123'),
 (4, 'patient_linh', N'Phạm Thùy Linh', 'linh.pham@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0904445566', 'ACTIVE', GETDATE(), '045678901234'),
 (4, 'patient_huong', N'Nguyễn Thu Hương', 'huong.nguyen@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0905556677', 'ACTIVE', GETDATE(), '056789012345'),
-(4, 'patient_lan', N'Trần Thị Lan', 'lan.tran@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0906667788', 'INACTIVE', GETDATE(), '067890123456'),
+(4, 'patient_lan', N'Trần Thị Lan', 'lan.tran@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0906667788', 'ACTIVE', GETDATE(), '067890123456'),
 (4, 'patient_my', N'Đỗ Thanh Mỹ', 'my.do@email.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0907778899', 'BANNED', GETDATE(), '078901234567'),
 (5, 'rp_linh', N'Nguyễn Thị Huyền Linh', 'LinhNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887776', 'ACTIVE', GETDATE(), '098765432109'),
 (5, 'rp_ly', N'Nguyễn Thị Ly', 'LyNguyen205@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '0998887676', 'ACTIVE', GETDATE(), '098765432009'),
