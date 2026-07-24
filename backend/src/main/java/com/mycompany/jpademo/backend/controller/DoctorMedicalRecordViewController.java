@@ -5,6 +5,7 @@ import com.mycompany.jpademo.backend.dto.response.MedicalRecordResponse;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.MedicalRecordService;
 import com.mycompany.jpademo.backend.service.interfaces.PdfService;
+import com.mycompany.jpademo.backend.repository.PrescriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +36,7 @@ public class DoctorMedicalRecordViewController {
 
     private final MedicalRecordService medicalRecordService;
     private final PdfService pdfService;
+    private final PrescriptionRepository prescriptionRepository;
 
     private static final int DEFAULT_PAGE_SIZE = 9;
 
@@ -52,8 +54,8 @@ public class DoctorMedicalRecordViewController {
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(required = false, defaultValue = "") String status,
             @RequestParam(required = false, defaultValue = "") String diseaseType,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,  // ← THÊM
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,    // ← THÊM
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "0") int page,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
@@ -118,6 +120,7 @@ public class DoctorMedicalRecordViewController {
                 medicalRecordService.getMedicalRecordDetail(sessionId, false);
 
         model.addAttribute("record", detail);
+        model.addAttribute("prescription", prescriptionRepository.findBySessionSessionId(sessionId).orElse(null));
         
         if (userDetails != null && userDetails.getUser() != null) {
             model.addAttribute("doctorName", userDetails.getUser().getFullName());

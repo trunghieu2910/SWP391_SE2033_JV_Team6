@@ -82,49 +82,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void registerByReceptionist(RegisterRequest request) {
-        if (userRepository.existsByUserName(request.getUserName())) {
-            throw new ResourceAlreadyExistsException("Tên đăng nhập đã tồn tại.");
-        }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResourceAlreadyExistsException("Email đang được sử dụng.");
-        }
-        if (userRepository.existsByNationalID(request.getNationalID())) {
-            throw new ResourceAlreadyExistsException("Số CMND/CCCD đã tồn tại.");
-        }
-        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new ResourceAlreadyExistsException("Số điện thoại đang được sử dụng.");
-        }
-
-        Role patientRole = roleRepository.findByRoleName(RoleName.PATIENT)
-                .orElseThrow(() -> new ResourceNotFoundException("Role PATIENT không tồn tại."));
-
-        User user = new User();
-        user.setUserName(request.getUserName());
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setNationalID(request.getNationalID());
-        // Lễ tân tạo thì ACTIVE luôn
-        user.setStatus(UserStatus.ACTIVE);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setRole(patientRole);
-
-        userRepository.save(user);
-
-        Patient patient = new Patient();
-        patient.setGender(request.getGender());
-        patient.setDob(request.getDob());
-        patient.setAddress(request.getAddress());
-        patient.setUser(user);
-        
-        patientRepository.save(patient);
-        // KHÔNG GỬI OTP EMAIL
-    }
-
-    @Override
-    @Transactional
     public void verifyRegistrationOtp(OtpVerificationRequest request) {
         RegisterRequest registerRequest = PendingRegistrationStore.getPending(request.getUserName());
         if (registerRequest == null) {

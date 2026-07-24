@@ -40,6 +40,7 @@ public class ReceptionistCreatePatientController {
         }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("registerRequest", request);
             return "receptionist/create-patient";
         }
 

@@ -17,29 +17,20 @@ import java.util.Optional;
 @Repository
 public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSession, Integer> {
 
+    /**
+     * [Role: Lễ tân]
+     * Chức năng: Đếm số lượng ca khám của một bác sĩ đang ở trạng thái khác với trạng thái truyền vào (ví dụ: đếm các ca chưa COMPLETED).
+     * Mục đích: Lễ tân dùng để xem số lượng ca bệnh đang chờ xử lý của bác sĩ để phân bổ bệnh nhân cho hợp lý.
+     */
     long countByUserUserIdAndStatusNot(Integer userId, DiagnosisSessionStatus status);
 
-    // ===== QUERIES CHO MedicalRecord (dùng JOIN qua SymptomResult theo DB mới) =====
-    @Query(value = """
-        SELECT
-            ds.sessionID AS id,
-            COALESCE(u.fullName, '') AS patientName,
-            dt.name AS diagnosis,
-            ds.createdAt AS visitDate,
-            s.symptomName AS symptoms,
-            r.treatmentPlan AS prescription,
-            r.doctorAdvice AS doctorNotes
-        FROM DiagnosisSession ds
-        LEFT JOIN Patient p ON ds.patientID = p.patientID
-        LEFT JOIN Users u ON p.userID = u.userID
-        LEFT JOIN Review r ON r.sessionID = ds.sessionID
-        LEFT JOIN DiseaseType dt ON r.diseaseTypeID = dt.diseaseTypeID
-        LEFT JOIN SymptomResult sr ON sr.sessionID = ds.sessionID
-        LEFT JOIN SymptomDetails sd ON sd.symptomResultID = sr.symptomResultID
-        LEFT JOIN Symptom s ON sd.symptomID = s.symptomID
-        """, nativeQuery = true)
-    List<Map<String, Object>> findAllMedicalRecords();
 
+
+    /**
+     * [Role: Bệnh nhân]
+     * Chức năng: Lấy danh sách toàn bộ hồ sơ bệnh án của một bệnh nhân cụ thể.
+     * Mục đích: Hiển thị lịch sử khám bệnh cho Bệnh nhân trong màn hình "Hồ sơ bệnh án" của họ.
+     */
     @Query(value = """
         SELECT
             ds.sessionID AS id,
@@ -64,7 +55,12 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
         """, nativeQuery = true)
     List<Map<String, Object>> findMedicalRecordsByPatientId(@Param("patientId") Integer patientId);
 
-    // ===== QUERY CHO MedicalRecord với filter + pagination (từ folder 'sua') =====
+    // ===== QUERY CHO MedicalRecord với filter + pagination  =====
+    /**
+     * [Role: Bác sĩ / Admin]
+     * Chức năng: Tìm kiếm và lọc danh sách hồ sơ bệnh án (bao gồm phân trang và nhiều tiêu chí lọc như tên, CCCD, trạng thái, khoảng thời gian).
+     * Mục đích: Hiển thị danh sách hồ sơ bệnh án tổng hợp trên giao diện quản lý của Bác sĩ hoặc Admin.
+     */
     @Query(value = "SELECT " +
             "s.sessionID as id, " +
             "s.isShared as isShared, " +
@@ -87,8 +83,8 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "JOIN [Users] du ON s.userID = du.userID " +
             "LEFT JOIN Review r ON s.sessionID = r.sessionID " +
             "LEFT JOIN DiseaseType dt ON r.diseaseTypeID = dt.diseaseTypeID " +
-            "WHERE (:keyword IS NULL OR u.fullName COLLATE Latin1_General_CI_AI\n" +
-            "LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%')) " +
+            "WHERE (:keyword IS NULL OR u.fullName COLLATE Latin1_General_CI_AI " +
+            "LIKE CONCAT('%', :keyword, '%') OR u.nationalID LIKE CONCAT('%', :keyword, '%') OR CAST(s.sessionID AS VARCHAR(25)) LIKE CONCAT('%', :keyword, '%')) " +
             "  AND (:status IS NULL OR s.status = :status) " +
             "  AND (:isShared IS NULL OR s.isShared = :isShared) " +
             "  AND (:diseaseType IS NULL OR dt.name = :diseaseType) " +
@@ -104,43 +100,20 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);       
 
-    @Query(value = """
-    SELECT ds.* FROM DiagnosisSession ds
-    LEFT JOIN Patient p ON ds.patientID = p.patientID
-    LEFT JOIN [Users] u ON p.userID = u.userID
-    WHERE ds.userID = :doctorId
-      AND (:keyword IS NULL OR 
-           u.fullName COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR 
-           u.nationalID LIKE CONCAT('%', :keyword, '%'))
-    """,
-            countQuery = """
-    SELECT COUNT(*) FROM DiagnosisSession ds
-    LEFT JOIN Patient p ON ds.patientID = p.patientID
-    LEFT JOIN [Users] u ON p.userID = u.userID
-    WHERE ds.userID = :doctorId
-      AND (:keyword IS NULL OR 
-           u.fullName COLLATE SQL_Latin1_General_CP1_CI_AI LIKE CONCAT('%', :keyword, '%') OR 
-           u.nationalID LIKE CONCAT('%', :keyword, '%'))
-    """,
-            nativeQuery = true)
-    Page<DiagnosisSession> searchByDoctorWithKeyword(
-            @Param("doctorId") Integer doctorId,
-            @Param("keyword") String keyword,
-            Pageable pageable);
 
+    /**
+     * [Role: Hệ thống / Backend]
+     * Chức năng: Tìm tất cả các phiên khám cơ bản của một bệnh nhân (truy vấn Entity cơ bản).
+     */
     List<DiagnosisSession> findByPatientPatientId(Integer patientId);
 
-    @Query(value = """
-    SELECT 
-        FORMAT(createdAt, 'yyyy-MM') as month,
-        COUNT(*) as count
-    FROM DiagnosisSession 
-    WHERE createdAt >= DATEADD(month, -6, GETDATE())
-    GROUP BY FORMAT(createdAt, 'yyyy-MM')
-    ORDER BY month ASC
-    """, nativeQuery = true)
-    List<Object[]> getDiagnosisSessionsByMonth();
 
+
+    /**
+     * [Role: Bác sĩ / Kỹ thuật viên / Lễ tân]
+     * Chức năng: Lấy chi tiết một ca khám kèm theo thông tin Bệnh nhân, User (bệnh nhân) và Bác sĩ phụ trách.
+     * Mục đích: Dùng FETCH JOIN để tối ưu hiệu suất (tránh lỗi N+1 query) khi cần lấy thông tin tổng quan của ca khám.
+     */
     @Query("SELECT ds FROM DiagnosisSession ds " +
             "LEFT JOIN FETCH ds.patient p " +
             "LEFT JOIN FETCH p.user pu " +
@@ -148,6 +121,11 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "WHERE ds.sessionId = :sessionId")
     Optional<DiagnosisSession> findSessionWithDetails(@Param("sessionId") Integer sessionId);
 
+    /**
+     * [Role: Bác sĩ]
+     * Chức năng: Lấy danh sách phiên khám của bệnh nhân kèm theo thông tin chi tiết về kết quả triệu chứng ban đầu.
+     * Mục đích: Tránh N+1 query, dùng để xem nhanh các triệu chứng cũ của bệnh nhân trong các lần khám trước.
+     */
     @Query("SELECT DISTINCT ds FROM DiagnosisSession ds " +
             "LEFT JOIN FETCH ds.symptomResult sr " +
             "LEFT JOIN FETCH sr.symptomDetails sd " +
@@ -155,6 +133,11 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "WHERE ds.patient.patientId = :patientId")
     List<DiagnosisSession> findByPatientPatientIdWithDetails(@Param("patientId") Integer patientId);
 
+    /**
+     * [Role: Bác sĩ]
+     * Chức năng: Lấy danh sách ca chẩn đoán được giao cho một bác sĩ cụ thể, hỗ trợ lọc theo trạng thái và thời gian.
+     * Mục đích: Hiển thị danh sách các ca bệnh đang chờ xử lý, đang xử lý hoặc đã hoàn thành trên màn hình làm việc chính của Bác sĩ.
+     */
     @Query("SELECT ds FROM DiagnosisSession ds " +
             "WHERE ds.user.userId = :doctorId " +
             "AND (:keyword IS NULL OR LOWER(ds.patient.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
@@ -169,26 +152,24 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
 
-    @Query(value = """
-    SELECT 
-        FORMAT(createdAt, 'yyyy-MM') as month,
-        COUNT(*) as count
-    FROM DiagnosisSession 
-    WHERE (:startDate IS NULL OR createdAt >= :startDate)
-      AND (:endDate IS NULL OR createdAt <= :endDate)
-    GROUP BY FORMAT(createdAt, 'yyyy-MM')
-    ORDER BY month ASC
-    """, nativeQuery = true)
-    List<Object[]> getDiagnosisSessionsByMonthWithFilter(
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
 
 
+
+    /**
+     * [Role: Admin]
+     * Chức năng: Đếm tổng số lượng ca khám trong một khoảng thời gian cụ thể.
+     * Mục đích: Hiển thị số liệu thống kê tổng quan (ví dụ: Tổng số phiên khám tháng này) trên Dashboard của Admin.
+     */
     @Query("SELECT COUNT(ds) FROM DiagnosisSession ds WHERE " +
             "(CAST(:startDate AS timestamp) IS NULL OR ds.createdAt >= :startDate) AND " +
             "(CAST(:endDate AS timestamp) IS NULL OR ds.createdAt <= :endDate)")
     long countSessionsWithDateFilter(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
+    /**
+     * [Role: Admin]
+     * Chức năng: Nhóm và đếm số lượng phiên khám theo từng tháng.
+     * Mục đích: Lấy dữ liệu để vẽ biểu đồ thống kê xu hướng số lượng ca khám hàng tháng cho Admin.
+     */
     @Query("SELECT FUNCTION('FORMAT', d.createdAt, 'MM/yyyy') as month, COUNT(d) as count " +
             "FROM DiagnosisSession d " +
             "WHERE (:start IS NULL OR d.createdAt >= :start) " +
@@ -198,8 +179,13 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     List<Object[]> getMonthlyDiagnosisSessions(@Param("start") LocalDateTime start,
                                                @Param("end") LocalDateTime end);
 
-    List<DiagnosisSession> findByStatusOrderByCreatedAtDesc(DiagnosisSessionStatus status);
+
     
+    /**
+     * [Role: Kỹ thuật viên (Xét nghiệm / Siêu âm)]
+     * Chức năng: Lấy danh sách phiên khám đang ở trong một danh sách các trạng thái nhất định (ví dụ PENDING, PROCESSING).
+     * Mục đích: Lấy ra các ca bệnh đang chờ hoặc đang được thực hiện các chỉ định cận lâm sàng.
+     */
     List<DiagnosisSession> findByStatusInOrderByCreatedAtDesc(List<DiagnosisSessionStatus> statuses);
 
     // [Nguyen The Hieu]: Bước 1 - Repository: Đếm số ca khám của một bác sĩ dựa theo một trạng thái (status) cụ thể.
@@ -222,6 +208,11 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
 
     // ===== QUERIES ĐẾM SỐ LƯỢNG CHO TRANG THỐNG KÊ (CHÍNH XÁC - KHÔNG PHỤ THUỘC PHÂN TRANG) =====
 
+    /**
+     * [Role: Bác sĩ / Admin]
+     * Chức năng: Đếm tổng số lượng hồ sơ bệnh án phù hợp với bộ lọc tìm kiếm (không phụ thuộc vào số lượng phân trang).
+     * Mục đích: Trả về con số chính xác để làm tổng số bản ghi (Total Elements) hỗ trợ việc phân trang trên giao diện.
+     */
     @Query(value = "SELECT COUNT(s.sessionID) " +
             "FROM DiagnosisSession s " +
             "JOIN Patient p ON s.patientID = p.patientID " +
@@ -242,6 +233,11 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
+    /**
+     * [Role: Admin]
+     * Chức năng: Đếm tổng số lượng hồ sơ bệnh án đã có kết luận chẩn đoán bệnh (diseaseType IS NOT NULL).
+     * Mục đích: Phục vụ cho tính năng báo cáo thống kê tỷ lệ các ca khám đã hoàn tất việc chẩn đoán thành công.
+     */
     @Query(value = "SELECT COUNT(s.sessionID) " +
             "FROM DiagnosisSession s " +
             "JOIN Patient p ON s.patientID = p.patientID " +
