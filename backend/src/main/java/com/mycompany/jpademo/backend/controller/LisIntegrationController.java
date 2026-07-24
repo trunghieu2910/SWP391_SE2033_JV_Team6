@@ -4,6 +4,7 @@ import com.mycompany.jpademo.backend.dto.request.LisResultRequest;
 import com.mycompany.jpademo.backend.entity.LabResult;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
+import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.repository.LabResultRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.impl.LisMockDataProvider;
@@ -12,6 +13,7 @@ import com.mycompany.jpademo.backend.service.interfaces.LisIntegrationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,7 @@ import java.util.List;
  * external LIS/HIS system — every lab result now comes exclusively from
  * the canned mock dataset in LisMockDataProvider.
  */
+@Slf4j
 @RestController
 @RequestMapping("/doctor/lis")
 @RequiredArgsConstructor
@@ -65,9 +68,11 @@ public class LisIntegrationController {
         // request param — closes the "mismatched test type" data-integrity gap.
         LabResult labResult = labResultRepository.findById(labResultId).orElse(null);
 
-        if (labResult == null) {
+        if (labResult == null
+                || !labResult.getDiagnosisSession().getSessionId().equals(sessionId)) {
             httpRequest.getSession().setAttribute("flashError",
-                    "Không tìm thấy xét nghiệm với labResultId: " + labResultId);
+                    "Không tìm thấy xét nghiệm với labResultId: " + labResultId
+                            + " trong phiên khám #" + sessionId);
             httpResponse.sendRedirect("/doctor/sessions/" + sessionId + "?openLab=true");
             return;
         }
@@ -87,11 +92,15 @@ public class LisIntegrationController {
         lisRequest.setTestResults(mockResults);
 
         try {
-            // NEW: single-purpose call, no more "source" distinction
             lisIntegrationService.receiveLabResults(lisRequest);
             httpRequest.getSession().setAttribute("flashSuccess", "Đã nhận kết quả xét nghiệm thành công!");
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException | UnauthorizedActionException | BadRequestException e) {
             httpRequest.getSession().setAttribute("flashError", e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("Unexpected error while simulating LIS result for labResultId={}, sessionId={}",
+                    labResultId, sessionId, e);
+            httpRequest.getSession().setAttribute("flashError",
+                    "Đã xảy ra lỗi hệ thống khi xử lý xét nghiệm. Vui lòng thử lại sau.");
         }
 
         httpResponse.sendRedirect("/doctor/sessions/" + sessionId + "?openLab=true");

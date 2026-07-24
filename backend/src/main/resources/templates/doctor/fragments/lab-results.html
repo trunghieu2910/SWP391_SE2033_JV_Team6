@@ -35,7 +35,6 @@
                         <span class="lab-status" th:switch="${lab.status.name()}">
                             <span th:case="'PENDING'" class="status-pending">Chờ xử lý</span>
                             <span th:case="'COMPLETED'" class="status-completed">Hoàn thành</span>
-                            <span th:case="'CANCELED'" class="status-canceled">Đã hủy</span>
                             <span th:case="*" class="status-unknown"><span th:text="${lab.status}">UNKNOWN</span></span>
                         </span>
                     </div>

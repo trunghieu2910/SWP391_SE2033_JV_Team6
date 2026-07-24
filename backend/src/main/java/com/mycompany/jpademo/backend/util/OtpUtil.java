@@ -2,15 +2,16 @@ package com.mycompany.jpademo.backend.util;
 
 import com.mycompany.jpademo.backend.cache.OtpData;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class OtpUtil {
 
     private static final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
+
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     /** How long a generated OTP stays valid before it must be re-requested. */
     private static final int OTP_EXPIRE_MINUTES = 2;
@@ -26,8 +27,7 @@ public class OtpUtil {
 
     /** Generates a random 6-digit numeric OTP code. */
     public static String generateOtp(){
-        Random random = new Random();
-        int otp = 100000 + random.nextInt(900000);
+        int otp = 100000 + secureRandom.nextInt(900000);
         return String.valueOf(otp);
     }
 
@@ -65,8 +65,6 @@ public class OtpUtil {
             return false;
         }
 
-        // ── MỚI: nếu đã sai quá số lần cho phép, khóa OTP này luôn,
-        //          buộc người dùng phải bấm "Gửi lại" để lấy mã mới ──
         if (otpData.getFailedAttempts() >= MAX_OTP_ATTEMPTS) {
             otpStorage.remove(email);
             return false;

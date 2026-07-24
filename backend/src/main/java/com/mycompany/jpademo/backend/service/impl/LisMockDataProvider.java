@@ -42,7 +42,7 @@ public class LisMockDataProvider {
         ));
 
         mockData.put("Định tuýp HPV nguy cơ cao", List.of(
-                item("Kiểm soát chất lượng (Internal Control)", "Đạt", null),
+                item("Kiểm chứng nội bộ (IC)", "Đạt", null),
                 item("Tuýp 16", "Positive", null),
                 item("Tuýp 18", "Negative", null),
                 item("Tuýp 31", "Positive", null),

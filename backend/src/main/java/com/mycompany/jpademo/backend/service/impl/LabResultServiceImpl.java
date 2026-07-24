@@ -123,32 +123,30 @@ public class LabResultServiceImpl implements LabResultService {
     @Override
     public List<LabResultResponse> getLabResultsBySession(Integer sessionId) {
 
-        DiagnosisSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Không tìm thấy phiên khám với ID: " + sessionId));
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
         String role = currentUser.getUser().getRole().getRoleName().name();
         Integer currentUserId = currentUser.getUser().getUserId();
 
+        DiagnosisSession session = sessionRepository.findById(sessionId).orElse(null);
+
         if (role.equals("PATIENT")) {
-            // Kiểm tra phiên khám có thuộc về bệnh nhân này không
-            Integer ownerUserId = session.getPatient().getUser().getUserId();
-            if (!ownerUserId.equals(currentUserId)) {
-                throw new UnauthorizedActionException(
-                        "Bạn không có quyền xem xét nghiệm của phiên khám này");
+            if (session == null
+                    || !session.getPatient().getUser().getUserId().equals(currentUserId)) {
+                throw new ResourceNotFoundException(
+                        "Không tìm thấy phiên khám hoặc bạn không có quyền truy cập");
             }
 
-            // Kiểm tra isShared — nếu false thì chặn bệnh nhân
             if (!Boolean.TRUE.equals(session.getIsShared())) {
                 throw new UnauthorizedActionException(
                         "Phiên khám này chưa được chia sẻ với bệnh nhân");
             }
-        } else if (!role.equals("DOCTOR")) {
-            // DOCTOR được phép xem chéo (hội chẩn/bàn giao ca) — chỉ chặn
-            // các role không liên quan đến chuyên môn y tế: ADMIN, PHARMACIST,
-            // RECEPTIONIST, ULTRASOUND_DOCTOR
+        } else if (role.equals("DOCTOR")) {
+            if (session == null) {
+                throw new ResourceNotFoundException(
+                        "Không tìm thấy phiên khám với ID: " + sessionId);
+            }
+        } else {
             throw new UnauthorizedActionException(
                     "Vai trò của bạn không được phép xem xét nghiệm y tế của bệnh nhân");
         }

@@ -6,6 +6,7 @@ import com.mycompany.jpademo.backend.entity.LabResult;
 import com.mycompany.jpademo.backend.entity.LabResultParameter;
 import com.mycompany.jpademo.backend.entity.Parameter;
 import com.mycompany.jpademo.backend.enums.LabResultStatus;
+import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
 import com.mycompany.jpademo.backend.repository.LabResultParameterRepository;
@@ -73,24 +74,29 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
 
         List<LabResultParameter> savedParameters = new ArrayList<>();
 
-        for (LisResultRequest.TestResultItem item : request.getTestResults()) {
-            Parameter parameter = parameterRepository
-                    .findByParameterNameIgnoreCase(item.getTestName())
-                    .orElseGet(() -> {
-                        Parameter newParam = Parameter.builder()
-                                .parameterName(item.getTestName())
-                                .unit(item.getUnit() != null ? item.getUnit() : null)
-                                .build();
-                        return parameterRepository.save(newParam);
-                    });
+        try {
+            for (LisResultRequest.TestResultItem item : request.getTestResults()) {
+                Parameter parameter = parameterRepository
+                        .findByParameterNameIgnoreCase(item.getTestName())
+                        .orElseGet(() -> {
+                            Parameter newParam = Parameter.builder()
+                                    .parameterName(item.getTestName())
+                                    .unit(item.getUnit() != null ? item.getUnit() : null)
+                                    .build();
+                            return parameterRepository.save(newParam);
+                        });
 
-            LabResultParameter lrp = LabResultParameter.builder()
-                    .labResult(labResult)
-                    .parameter(parameter)
-                    .value(item.getResultValue())
-                    .build();
+                LabResultParameter lrp = LabResultParameter.builder()
+                        .labResult(labResult)
+                        .parameter(parameter)
+                        .value(item.getResultValue())
+                        .build();
 
-            savedParameters.add(labResultParameterRepository.save(lrp));
+                savedParameters.add(labResultParameterRepository.save(lrp));
+            }
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new BadRequestException(
+                    "Xét nghiệm này vừa được xử lý xong (có thể do bấm trùng). Vui lòng tải lại trang.");
         }
 
         labResult.setStatus(LabResultStatus.COMPLETED);

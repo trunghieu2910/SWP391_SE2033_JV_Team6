@@ -4,9 +4,10 @@ import com.mycompany.jpademo.backend.dto.request.LisResultRequest;
 import com.mycompany.jpademo.backend.dto.response.LabResultResponse;
 
 /**
- * Entry point shared by both the real LIS webhook and the
- * UI "simulate result" action for applying incoming lab result
- * values to a pending LabResult.
+ * Applies simulated lab result values (from LisMockDataProvider) to a
+ * pending LabResult on behalf of the doctor who triggered the
+ * "Lấy kết quả giả lập" action. This project no longer integrates
+ * with a real external LIS/HIS system.
  */
 public interface LisIntegrationService {
 

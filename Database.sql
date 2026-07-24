@@ -67,7 +67,8 @@ CREATE TABLE Parameter
 (
     parameterID   INT IDENTITY (1,1) PRIMARY KEY,
     parameterName NVARCHAR(100) NOT NULL,
-    unit          NVARCHAR(50)
+    unit          NVARCHAR(50),
+	CONSTRAINT UQ_Parameter_Name UNIQUE (parameterName)
 );
 
 -- ==========================================
@@ -149,7 +150,8 @@ CREATE TABLE LabResultParameter
     parameterID          INT NOT NULL,
     value                NVARCHAR(MAX),
     FOREIGN KEY (labResultID) REFERENCES LabResult (labResultID),
-    FOREIGN KEY (parameterID) REFERENCES Parameter (parameterID)
+    FOREIGN KEY (parameterID) REFERENCES Parameter (parameterID),
+	CONSTRAINT UQ_LabResultParameter_LabResult_Parameter UNIQUE (labResultID, parameterID)
 );
 
 CREATE TABLE MedicalImage

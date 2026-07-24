@@ -91,4 +91,18 @@ public class ResetPasswordJwtService {
             return false;
         }
     }
+
+    public boolean isResetPasswordToken(String token) {
+        try {
+            String type = Jwts.parser()
+                    .verifyWith(getSignKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get("type", String.class);
+            return "RESET_PASSWORD".equals(type);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

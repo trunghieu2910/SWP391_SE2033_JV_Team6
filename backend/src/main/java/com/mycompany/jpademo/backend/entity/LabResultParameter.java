@@ -22,7 +22,7 @@ public class LabResultParameter {
     @Column(name = "labResultParameterID")
     private Integer labResultParameterId;
 
-    @Column(name = "value", nullable = false, length = 100)
+    @Column(name = "value", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String value;
 
     @ManyToOne(fetch = FetchType.LAZY)

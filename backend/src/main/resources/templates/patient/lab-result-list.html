@@ -33,7 +33,6 @@
             <span th:switch="${lab.status.name()}">
                 <span th:case="'PENDING'"   class="badge" style="background-color: #fffbeb; color: #b45309; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700;">Chờ xử lý</span>
                 <span th:case="'COMPLETED'" class="badge" style="background-color: #f0fdf4; color: #16a34a; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700;">Hoàn thành</span>
-                <span th:case="'CANCELED'"  class="badge" style="background-color: #fef2f2; color: #ef4444; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700;">Đã hủy</span>
                 <span th:case="*"           class="badge" style="background-color: #f1f5f9; color: #94a3b8; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700;" th:text="${lab.status}"></span>
             </span>
         </summary>

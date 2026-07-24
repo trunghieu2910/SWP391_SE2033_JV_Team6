@@ -119,7 +119,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
      */
     @Override
     public ResponseEntity<ApiResponse> resetPassword(ResetPasswordRequest request) {
-        if (!resetPasswordJwtService.isValid(request.getResetToken())){
+
+        if (!resetPasswordJwtService.isValid(request.getResetToken())
+                || !resetPasswordJwtService.isResetPasswordToken(request.getResetToken())) {
             throw new InvalidResetTokenException();
         }
 
