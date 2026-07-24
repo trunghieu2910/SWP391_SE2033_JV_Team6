@@ -20,6 +20,11 @@
         <h2>Cervical Dx</h2>
     </div>
     <nav class="sidebar-nav">
+        <a th:href="@{/doctor/statistics}" class="nav-item" th:classappend="${currentTab == 'statistics' ? 'active' : ''}">
+            <i class="fa-solid fa-chart-bar"></i>
+            <span>Thống kê chẩn đoán</span>
+        </a>
+        
         <a th:href="@{/doctor/sessions}" class="nav-item" th:classappend="${currentTab == 'sessions' ? 'active' : ''}">
             <i class="fa-solid fa-clipboard-list"></i>
             <span>Quản lý ca chẩn đoán</span>
@@ -28,11 +33,6 @@
         <a th:href="@{/doctor/medical-records}" class="nav-item" th:classappend="${currentTab == 'medical-records' ? 'active' : ''}">
             <i class="fa-solid fa-file-medical"></i>
             <span>Xem hồ sơ bệnh án</span>
-        </a>
-
-        <a th:href="@{/doctor/statistics}" class="nav-item" th:classappend="${currentTab == 'statistics' ? 'active' : ''}">
-            <i class="fa-solid fa-chart-bar"></i>
-            <span>Thống kê chẩn đoán</span>
         </a>
     </nav>
 
