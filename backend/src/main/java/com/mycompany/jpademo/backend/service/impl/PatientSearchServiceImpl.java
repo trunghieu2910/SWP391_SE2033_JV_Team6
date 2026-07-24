@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class PatientSearchServiceImpl implements PatientSearchService {
+
     private final PatientRepository patientRepository;
 
     @Override
@@ -25,7 +26,7 @@ public class PatientSearchServiceImpl implements PatientSearchService {
             patients = patientRepository.findAll();
         } else {
             // Tìm kiếm theo tên hoặc nationalID
-            patients = patientRepository.findByUserFullNameContainingIgnoreCaseOrUserNationalIDContainingIgnoreCase(keyword, keyword);
+            patients = patientRepository.findByUserFullNameContainingIgnoreCaseOrUserNationalIDContainingIgnoreCaseOrUserPhoneNumberContainingIgnoreCase(keyword, keyword, keyword);
         }
 
         return patients.stream()

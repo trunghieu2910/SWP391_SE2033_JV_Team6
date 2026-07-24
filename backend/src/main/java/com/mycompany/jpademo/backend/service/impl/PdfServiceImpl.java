@@ -3,20 +3,29 @@ package com.mycompany.jpademo.backend.service.impl;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import com.mycompany.jpademo.backend.dto.response.MedicalRecordDetailResponse;
+import com.mycompany.jpademo.backend.entity.Prescription;
+import com.mycompany.jpademo.backend.entity.PrescriptionDetail;
+import com.mycompany.jpademo.backend.repository.PrescriptionRepository;
 import com.mycompany.jpademo.backend.service.interfaces.PdfService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PdfServiceImpl implements PdfService {
+
+    private final PrescriptionRepository prescriptionRepository;
 
     @Override
     public byte[] generateMedicalRecordPdf(MedicalRecordDetailResponse record, boolean isPatientView) {
+        Prescription prescription = prescriptionRepository.findBySessionSessionId(record.getSessionID()).orElse(null);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 36, 36, 36, 36);
 
@@ -253,15 +262,16 @@ public class PdfServiceImpl implements PdfService {
                     if (img.getDetails() != null && !img.getDetails().isEmpty()) {
                         for (int i = 0; i < img.getDetails().size(); i++) {
                             MedicalRecordDetailResponse.ImageDetailDTO detail = img.getDetails().get(i);
-                            
+                            // PHÂN QUYỀN BÁC SĨ / BỆNH NHÂN ĐỐI VỚI HÌNH ẢNH Y KHOA:
                             if (isPatientView) {
-                                // Bệnh nhân chỉ xem Ảnh kết luận (KTV khoanh), không cần fallback sang Ảnh gốc
+                                // 1. NẾU LÀ BỆNH NHÂN: Chỉ xuất ra "Ảnh kết luận" (là ảnh đã được bác sĩ/KTV khoanh vùng, đánh dấu).
+                                // Bệnh nhân không được xem Ảnh gốc hay Ảnh AI.
                                 String url = detail.getImgResultConclusion();
                                 if (url != null && !url.trim().isEmpty()) {
                                     addImageToPdf(document, url, "Ảnh kết luận", normalFont, italicFont);
                                 }
                             } else {
-                                // Bác sĩ xem tất cả các ảnh có sẵn
+                                // 2. NẾU LÀ BÁC SĨ: Bác sĩ được quyền xem toàn bộ tất cả các loại ảnh (Ảnh gốc, Ảnh AI, Ảnh kết luận).
                                 if (detail.getImageUrl() != null && !detail.getImageUrl().trim().isEmpty()) {
                                     addImageToPdf(document, detail.getImageUrl(), "Ảnh gốc", normalFont, italicFont);
                                 }
@@ -289,36 +299,94 @@ public class PdfServiceImpl implements PdfService {
             // VI. KẾT LUẬN BÁC SĨ (Conclusion Box)
             addConclusionCard(document, record, boldFont, normalFont, italicFont);
 
-            // VII. CHỮ KÝ XÁC NHẬN
-            document.add(new Paragraph(" ", normalFont)); // Spacing
-            PdfPTable signatureTable = new PdfPTable(2);
-            signatureTable.setWidthPercentage(100);
-            signatureTable.setSpacingBefore(20f);
+            // VII. ĐƠN THUỐC BÁC SĨ KÊ
+            addSectionHeader(document, "VII. ĐƠN THUỐC BÁC SĨ KÊ (PRESCRIPTION)", sectionHeaderFont);
             
-            PdfPCell signLeft = new PdfPCell();
-            signLeft.setBorder(Rectangle.NO_BORDER);
-            signLeft.setHorizontalAlignment(Element.ALIGN_CENTER);
-            Paragraph patientSignTitle = new Paragraph("BỆNH NHÂN / NGƯỜI ĐẠI DIỆN", boldFont);
-            patientSignTitle.setAlignment(Element.ALIGN_CENTER);
-            signLeft.addElement(patientSignTitle);
-            Paragraph patientSignDesc = new Paragraph("(Ký, ghi rõ họ tên)", italicFont);
-            patientSignDesc.setAlignment(Element.ALIGN_CENTER);
-            signLeft.addElement(patientSignDesc);
-            signatureTable.addCell(signLeft);
+            // PHÂN QUYỀN BÁC SĨ / BỆNH NHÂN ĐỐI VỚI ĐƠN THUỐC:
+            // - Nếu là Bệnh nhân (isPatientView = true) và bác sĩ CHƯA công bố hồ sơ (isShared = false): Ẩn bảng đơn thuốc đi.
+            if (isPatientView && (record.getIsShared() == null || !record.getIsShared())) {
+                Paragraph noPrescription = new Paragraph("Bác sĩ chưa công bố đơn thuốc cho ca chẩn đoán này.", italicFont);
+                noPrescription.setSpacingBefore(5f);
+                noPrescription.setSpacingAfter(10f);
+                document.add(noPrescription);
+            } else if (prescription != null && prescription.getDetails() != null && !prescription.getDetails().isEmpty()) {
+                Paragraph rxTitle = new Paragraph("Mã đơn thuốc: " + prescription.getPrescriptionCode() + 
+                        " | Ngày kê: " + (prescription.getPrescriptionDate() != null ? prescription.getPrescriptionDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "—"), boldFont);
+                rxTitle.setSpacingBefore(4f);
+                rxTitle.setSpacingAfter(6f);
+                document.add(rxTitle);
 
-            PdfPCell signRight = new PdfPCell();
-            signRight.setBorder(Rectangle.NO_BORDER);
-            signRight.setHorizontalAlignment(Element.ALIGN_CENTER);
-            Paragraph docSignTitle = new Paragraph("BÁC SĨ PHỤ TRÁCH BỆNH ÁN", boldFont);
-            docSignTitle.setAlignment(Element.ALIGN_CENTER);
-            signRight.addElement(docSignTitle);
-            Paragraph docSignDesc = new Paragraph("(Ký, ghi rõ họ tên)", italicFont);
-            docSignDesc.setAlignment(Element.ALIGN_CENTER);
-            signRight.addElement(docSignDesc);
-            signatureTable.addCell(signRight);
+                PdfPTable rxTable = new PdfPTable(5);
+                rxTable.setWidthPercentage(100);
+                rxTable.setWidths(new float[]{1f, 4f, 2f, 2f, 3f});
+                rxTable.setSpacingAfter(10f);
 
-            document.add(signatureTable);
+                rxTable.addCell(createTableHeaderCell("#", boldFont));
+                rxTable.addCell(createTableHeaderCell("Tên thuốc", boldFont));
+                rxTable.addCell(createTableHeaderCell("Số lượng", boldFont));
+                rxTable.addCell(createTableHeaderCell("Đơn vị", boldFont));
+                rxTable.addCell(createTableHeaderCell("Hướng dẫn sử dụng", boldFont));
 
+                List<PrescriptionDetail> rxDetails = prescription.getDetails();
+                for (int i = 0; i < rxDetails.size(); i++) {
+                    PrescriptionDetail detail = rxDetails.get(i);
+                    rxTable.addCell(createTableCell(String.valueOf(i + 1), normalFont, Element.ALIGN_CENTER));
+                    rxTable.addCell(createTableCell(detail.getDrug() != null ? detail.getDrug().getDrugName() : "—", normalFont, Element.ALIGN_LEFT));
+                    rxTable.addCell(createTableCell(String.valueOf(detail.getQuantityPrescribed()), boldFont, Element.ALIGN_CENTER));
+                    rxTable.addCell(createTableCell(detail.getDispenseUnit(), normalFont, Element.ALIGN_CENTER));
+                    rxTable.addCell(createTableCell(detail.getInstruction(), normalFont, Element.ALIGN_LEFT));
+                }
+                document.add(rxTable);
+            } else {
+                Paragraph noPrescription = new Paragraph("Không có đơn thuốc nào được kê cho phiên khám này.", italicFont);
+                noPrescription.setSpacingBefore(5f);
+                noPrescription.setSpacingAfter(10f);
+                document.add(noPrescription);
+            }
+            // PHÂN QUYỀN BÁC SĨ / BỆNH NHÂN ĐỐI VỚI CHỮ KÝ:
+            // Chỉ thêm khung chữ ký nếu người xuất file là Bác sĩ (!isPatientView). Bệnh nhân không có phần này.
+            if (!isPatientView) {
+                document.add(new Paragraph(" ", normalFont));
+                document.add(new Paragraph(" ", normalFont));
+
+                PdfPTable doctorSignatureTable = new PdfPTable(2);
+                doctorSignatureTable.setWidthPercentage(100);
+                doctorSignatureTable.setWidths(new float[]{6f, 4f});
+
+                PdfPCell emptyCell = new PdfPCell();
+                emptyCell.setBorder(Rectangle.NO_BORDER);
+                doctorSignatureTable.addCell(emptyCell);
+
+                PdfPCell signCell = new PdfPCell();
+                signCell.setBorder(Rectangle.NO_BORDER);
+                signCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+
+                Paragraph docSignTitle = new Paragraph("BÁC SĨ PHỤ TRÁCH", boldFont);
+                docSignTitle.setSpacingAfter(40f);
+                signCell.addElement(docSignTitle);
+
+                signCell.addElement(new Paragraph("Chữ ký: ................................", normalFont));
+
+                String docName = record.getDoctorFullName() != null ? record.getDoctorFullName() : "....................";
+                Paragraph namePara = new Paragraph("BS. " + docName, normalFont);
+                namePara.setSpacingBefore(4f);
+                signCell.addElement(namePara);
+
+                String dateStr;
+                if (prescription != null && prescription.getPrescriptionDate() != null) {
+                    dateStr = prescription.getPrescriptionDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                } else if (record.getReviewedAt() != null) {
+                    dateStr = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(record.getReviewedAt());
+                } else {
+                    dateStr = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date());
+                }
+                Paragraph signDatePara = new Paragraph("Ngày kê: " + dateStr, normalFont);
+                signDatePara.setSpacingBefore(4f);
+                signCell.addElement(signDatePara);
+
+                doctorSignatureTable.addCell(signCell);
+                document.add(doctorSignatureTable);
+            }
             document.close();
         } catch (DocumentException e) {
             throw new RuntimeException("Error during PDF generation: " + e.getMessage(), e);
@@ -451,23 +519,23 @@ public class PdfServiceImpl implements PdfService {
         cell.addElement(title);
         
         if (record.getReviewID() != null) {
-            cell.addElement(new Paragraph("🔬 Chẩn đoán cuối cùng:", boldFont));
+            cell.addElement(new Paragraph("Chẩn đoán cuối cùng:", boldFont));
             Paragraph diagPara = new Paragraph(record.getFinalDiagnosis(), normalFont);
             diagPara.setSpacingAfter(5f);
             cell.addElement(diagPara);
             
-            cell.addElement(new Paragraph("💊 Phác đồ điều trị & Đơn thuốc:", boldFont));
+            cell.addElement(new Paragraph("Phác đồ điều trị & Đơn thuốc:", boldFont));
             Paragraph treatPara = new Paragraph(record.getTreatmentPlan(), normalFont);
             treatPara.setSpacingAfter(5f);
             cell.addElement(treatPara);
             
-            cell.addElement(new Paragraph("💡 Hướng dẫn & Lời khuyên:", boldFont));
+            cell.addElement(new Paragraph("Hướng dẫn & Lời khuyên:", boldFont));
             Paragraph advicePara = new Paragraph(record.getDoctorAdvice(), normalFont);
             advicePara.setSpacingAfter(5f);
             cell.addElement(advicePara);
             
             if (record.getNote() != null && !record.getNote().trim().isEmpty()) {
-                cell.addElement(new Paragraph("📎 Ghi chú thêm:", boldFont));
+                cell.addElement(new Paragraph("Ghi chú thêm:", boldFont));
                 Paragraph notePara = new Paragraph(record.getNote(), normalFont);
                 notePara.setSpacingAfter(5f);
                 cell.addElement(notePara);
@@ -479,7 +547,7 @@ public class PdfServiceImpl implements PdfService {
             footerPara.setAlignment(Element.ALIGN_RIGHT);
             cell.addElement(footerPara);
         } else {
-            Paragraph noReview = new Paragraph("⏳ Chưa có kết luận chẩn đoán chính thức từ bác sĩ cho phiên khám này.", italicFont);
+            Paragraph noReview = new Paragraph("Chưa có kết luận chẩn đoán chính thức từ bác sĩ cho phiên khám này.", italicFont);
             cell.addElement(noReview);
         }
         
@@ -490,11 +558,6 @@ public class PdfServiceImpl implements PdfService {
     private void addImageToPdf(Document document, String url, String label, Font normalFont, Font italicFont) throws DocumentException {
         if (url == null || url.trim().isEmpty()) return;
 
-        // Chọn icon phù hợp với nhãn
-        String iconPrefix;
-        if (label.contains("gốc")) iconPrefix = "📷";
-        else if (label.contains("AI")) iconPrefix = "🤖";
-        else iconPrefix = "✏️";
 
         try {
             String imagePath = url;
@@ -516,7 +579,7 @@ public class PdfServiceImpl implements PdfService {
                 cell.setPadding(0);
 
                 // Nhãn nằm trên ảnh
-                Paragraph labelPara = new Paragraph(iconPrefix + "  " + label, normalFont);
+                Paragraph labelPara = new Paragraph(label, normalFont);
                 labelPara.setSpacingAfter(5f);
                 cell.addElement(labelPara);
 
@@ -529,7 +592,7 @@ public class PdfServiceImpl implements PdfService {
                 wrapper.addCell(cell);
                 document.add(wrapper);
             } else {
-                Paragraph labelPara = new Paragraph(iconPrefix + "  " + label, normalFont);
+                Paragraph labelPara = new Paragraph(label, normalFont);
                 labelPara.setSpacingBefore(6f);
                 document.add(labelPara);
                 Paragraph errorPara = new Paragraph("   (Không tìm thấy file hình ảnh thực tế trên hệ thống)", italicFont);

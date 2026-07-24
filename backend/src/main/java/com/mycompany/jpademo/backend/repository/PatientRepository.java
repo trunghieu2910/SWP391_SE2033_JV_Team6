@@ -13,5 +13,5 @@ public interface PatientRepository extends JpaRepository<Patient, Integer> {
 
     Optional<Patient> findByUser(User user);
 
-    List<Patient> findByUserFullNameContainingIgnoreCaseOrUserNationalIDContainingIgnoreCase(String fullName, String nationalId);
+    List<Patient> findByUserFullNameContainingIgnoreCaseOrUserNationalIDContainingIgnoreCaseOrUserPhoneNumberContainingIgnoreCase(String fullName, String nationalId, String phoneNumber);
 }
