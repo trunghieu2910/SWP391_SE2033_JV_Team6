@@ -216,11 +216,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
         systemLogRepository.save(log);
 
-        emailService.sendEmail(
-                savedUser.getEmail(),
-                "Tài khoản nhân viên đã được tạo",
-                EmailUtil.buildCreateStaffAccountTemplate(savedUser.getFullName(), savedUser.getUserName(), rawPassword)
-        );
+        sendCreateStaffEmail(savedUser, savedUser.getRole().getRoleName());
     }
 
     /** Initiates the creation of a doctor account by sending an OTP. */
@@ -279,11 +275,7 @@ public class AdminServiceImpl implements AdminService {
         String otp = OtpUtil.generateOtp();
         OtpUtil.saveOtp(adminEmail, otp);
 
-        emailService.sendEmail(
-                adminEmail,
-                "Mã xác thực OTP tạo tài khoản nhân viên",
-                EmailUtil.buildCreateStaffOtpForAdmin(admin.getFullName(), otp)
-        );
+        sendCreateStaffOtpEmail(admin, RoleName.valueOf(request.getRoleName()), otp);
 
         return InitiateCreateStaffResponse.builder()
                 .requestId(requestId)
@@ -452,11 +444,7 @@ public class AdminServiceImpl implements AdminService {
             User admin = userRepository.findByEmail(adminEmail)
                     .orElseThrow(() -> new UserNotFoundException("Không tìm thấy admin với email: " + adminEmail));
 
-            emailService.sendEmail(
-                    adminEmail,
-                    "Mã xác thực OTP mới - Tạo tài khoản nhân viên",
-                    EmailUtil.buildCreateStaffOtpForAdmin(admin.getFullName(), otp)
-            );
+            sendCreateStaffOtpEmail(admin, RoleName.valueOf(pending.getRoleName()), otp);
             response.put("success", true);
             response.put("message", "Đã gửi lại mã OTP mới. Vui lòng kiểm tra email.");
         } catch (Exception e) {
@@ -677,9 +665,9 @@ public class AdminServiceImpl implements AdminService {
                 return "Mở khóa";
             case "UPDATE_USER_STATUS":
                 return "Đổi trạng thái";
-            case "BLOCK_IP":
+            case "BLOCKED_IP":
                 return "Chặn IP";
-            case "UNBLOCK_IP":
+            case "UNBLOCKED_IP":
                 return "Mở khóa IP";
             case "PATIENT_NOTIFICATION":
                 return "Thông báo";
@@ -718,7 +706,7 @@ public class AdminServiceImpl implements AdminService {
     private SystemLogResponse mapToLogResponse(SystemLog log) {
         return SystemLogResponse.builder()
                 .logId(log.getLogId())
-                .action(log.getAction())
+                .action(mapActionToVietnamese(log.getAction()))
                 .description(log.getDescription())
                 .targetType(log.getTargetType())
                 .targetId(log.getTargetId())
@@ -784,6 +772,80 @@ public class AdminServiceImpl implements AdminService {
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported user status: " + userStatus);
+        }
+    }
+
+    private void sendCreateStaffEmail(User savedUser, RoleName roleName) {
+        switch (roleName) {
+            case DOCTOR:
+                emailService.sendEmail(savedUser.getEmail(),
+                        "Tài khoản Bác sĩ đã được tạo",
+                        EmailUtil.buildCreateDoctorAccountTemplate(
+                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                break;
+            case ADMIN:
+                emailService.sendEmail(savedUser.getEmail(),
+                        "Tài khoản Quản trị viên đã được tạo",
+                        EmailUtil.buildCreateAdminForAdmin(
+                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                break;
+            case PHARMACIST:
+                emailService.sendEmail(savedUser.getEmail(),
+                        "Tài khoản Dược sĩ đã được tạo",
+                        EmailUtil.buildCreatePharmacistForAdmin(
+                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                break;
+            case RECEPTIONIST:
+                emailService.sendEmail(savedUser.getEmail(),
+                        "Tài khoản Lễ tân đã được tạo",
+                        EmailUtil.buildCreateReceptionistForAdmin(
+                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                break;
+            case ULTRASOUND_DOCTOR:
+                emailService.sendEmail(savedUser.getEmail(),
+                        "Tài khoản Bác sĩ siêu âm đã được tạo",
+                        EmailUtil.buildCreateUltrasoundDoctorForAdmin(
+                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                break;
+            default:
+                throw new IllegalArgumentException("Không hỗ trợ gửi email cho người dùng với role " + savedUser.getRole().getRoleName());
+        }
+    }
+
+    private void sendCreateStaffOtpEmail(User admin, RoleName roleName, String otp) {
+        switch (roleName) {
+            case DOCTOR:
+                emailService.sendEmail(admin.getEmail(),
+                        "Mã xác thực OTP tạo tài khoản Bác sĩ",
+                        EmailUtil.buildCreateDoctorOtpForAdmin(
+                                admin.getFullName(), otp));
+                break;
+            case ADMIN:
+                emailService.sendEmail(admin.getEmail(),
+                        "Mã xác thực OTP tạo tài khoản Quản trị viên",
+                        EmailUtil.buildCreateAdminOtpForAdmin(
+                                admin.getFullName(), otp));
+                break;
+            case PHARMACIST:
+                emailService.sendEmail(admin.getEmail(),
+                        "Mã xác thực OTP tạo tài khoản Dược sĩ",
+                        EmailUtil.buildCreatePharmacistOtpForAdmin(
+                                admin.getFullName(), otp));
+                break;
+            case RECEPTIONIST:
+                emailService.sendEmail(admin.getEmail(),
+                        "Mã xác thực OTP tạo tài khoản Lễ tân",
+                        EmailUtil.buildCreateReceptionistOtpForAdmin(
+                                admin.getFullName(), otp));
+                break;
+            case ULTRASOUND_DOCTOR:
+                emailService.sendEmail(admin.getEmail(),
+                        "Mã xác thực OTP tạo tài khoản Bác sĩ siêu âm",
+                        EmailUtil.buildCreateUltrasoundDoctorOtpForAdmin(
+                                admin.getFullName(), otp));
+                break;
+            default:
+                throw new IllegalArgumentException("Không hỗ trợ gửi email cho người dùng với email " + admin.getEmail());
         }
     }
 
