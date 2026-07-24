@@ -93,14 +93,16 @@
                 </div>
                 <div class="info-pair">
                     <span class="info-lbl">Trạng thái</span>
-                    <span th:if="${record.status != null and record.status.name() == 'COMPLETED'}"
-                          class="badge badge-completed">
-                        <span class="badge-dot"></span>HOÀN THÀNH
-                    </span>
-                    <span th:unless="${record.status != null and record.status.name() == 'COMPLETED'}"
-                          class="badge badge-pending">
-                        <span class="badge-dot"></span>ĐANG XỬ LÝ
-                    </span>
+                    <div>
+                        <span th:if="${record.status != null and record.status.name() == 'COMPLETED'}"
+                              class="badge badge-completed">
+                            <span class="badge-dot"></span>HOÀN THÀNH
+                        </span>
+                        <span th:unless="${record.status != null and record.status.name() == 'COMPLETED'}"
+                              class="badge badge-pending">
+                            <span class="badge-dot"></span>ĐANG XỬ LÝ
+                        </span>
+                    </div>
                 </div>
                 <div class="info-pair">
                     <span class="info-lbl">Cân nặng</span>
@@ -129,8 +131,10 @@
                 </div>
                 <div class="info-pair">
                     <span class="info-lbl">Chia sẻ hồ sơ</span>
-                    <span th:if="${record.isShared}" class="badge badge-shared">🔗 Đã công bố</span>
-                    <span th:unless="${record.isShared}" class="badge badge-private">🔒 Chưa công bố</span>
+                    <div>
+                        <span th:if="${record.isShared}" class="badge badge-shared">🔗 Đã công bố</span>
+                        <span th:unless="${record.isShared}" class="badge badge-private">🔒 Chưa công bố</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -234,18 +238,23 @@
     </div>
 
     <!-- ══ 4. HÌNH ẢNH Y KHOA ══ -->
-    <div class="card" th:if="${record.medicalImages != null and record.medicalImages.size() > 0}">
+    <div class="card">
         <div class="sec-hdr">
             <div class="sec-hdr-left">
                 <div class="sec-icon"><i class="fa-solid fa-image"></i></div>
                 <span class="sec-title">Hình Ảnh Y Khoa</span>
             </div>
             <span class="sec-badge"
-                  th:text="${record.medicalImages.size() + ' chỉ định'}">0 chỉ định</span>
+                  th:text="${(record.medicalImages != null ? record.medicalImages.size() : 0) + ' chỉ định'}">0 chỉ định</span>
         </div>
         <div class="sec-inner">
-            <div class="lab-test-container">
-                <div class="lab-test-card" th:each="mi : ${record.medicalImages}">
+            <div th:if="${record.isShared}">
+                <p th:if="${record.medicalImages == null or record.medicalImages.isEmpty()}"
+                    style="font-size:12px; color:var(--text-xmuted); margin: 0;">
+                    Chưa có chỉ định hình ảnh nào.
+                </p>
+                <div th:if="${record.medicalImages != null and !record.medicalImages.isEmpty()}" class="lab-test-container">
+                    <div class="lab-test-card" th:each="mi : ${record.medicalImages}">
                     <div class="lab-test-header">
                         <div class="lab-test-name" th:text="${mi.imageType ?: 'Hình ảnh'}">Loại hình ảnh</div>
                         <span class="lab-status-badge"
@@ -283,6 +292,15 @@
                             Chưa có hình ảnh kết luận được tải lên
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div th:unless="${record.isShared}" style="text-align: center; padding: 40px 20px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                <div style="font-size:14px; font-weight:700; color:var(--text-secondary); margin-bottom: 8px;">
+                    Kết quả chưa được hiển thị
+                </div>
+                <div style="font-size:12px; color:var(--text-xmuted);">
+                    Kết quả sẽ được hiển thị đầy đủ khi phiên khám hoàn thành.
                 </div>
             </div>
         </div>
@@ -330,23 +348,32 @@
                         <div th:if="${record.isShared}" class="diagnosis-block bold" th:text="${record.finalDiagnosis ?: '—'}">—</div>
                     </div>
 
-                    <div class="info-grid info-grid-2">
-                        <!-- Treatment plan -->
-                        <div>
-                            <div class="info-lbl" style="margin-bottom:6px;">💊 Phác đồ điều trị</div>
-                            <div class="diagnosis-block normal" th:text="${record.treatmentPlan ?: '—'}">—</div>
+                    <!-- Chỉ hiện khi đã công bố -->
+                    <div th:if="${record.isShared}">
+                        <div class="info-grid info-grid-2">
+                            <!-- Treatment plan -->
+                            <div>
+                                <div class="info-lbl" style="margin-bottom:6px;">💊 Phác đồ điều trị</div>
+                                <div class="diagnosis-block normal" th:text="${record.treatmentPlan ?: '—'}">—</div>
+                            </div>
+                            <!-- Doctor advice -->
+                            <div>
+                                <div class="info-lbl" style="margin-bottom:6px;">💡 Lời khuyên bác sĩ</div>
+                                <div class="diagnosis-block normal" th:text="${record.doctorAdvice ?: '—'}">—</div>
+                            </div>
                         </div>
-                        <!-- Doctor advice -->
-                        <div>
-                            <div class="info-lbl" style="margin-bottom:6px;">💡 Lời khuyên bác sĩ</div>
-                            <div class="diagnosis-block normal" th:text="${record.doctorAdvice ?: '—'}">—</div>
+
+                        <!-- Additional note -->
+                        <div th:if="${record.note != null and record.note != ''}">
+                            <div class="info-lbl" style="margin-bottom:6px;">📎 Ghi chú thêm</div>
+                            <div class="diagnosis-block normal" th:text="${record.note}">—</div>
                         </div>
                     </div>
 
-                    <!-- Additional note -->
-                    <div th:if="${record.note != null and record.note != ''}">
-                        <div class="info-lbl" style="margin-bottom:6px;">📎 Ghi chú thêm</div>
-                        <div class="diagnosis-block normal" th:text="${record.note}">—</div>
+                    <!-- Ẩn khi chưa công bố -->
+                    <div th:unless="${record.isShared}"
+                         style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 14px 16px; color: #c2410c; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+                        🔒 Phác đồ điều trị, lời khuyên và ghi chú chưa được công bố.
                     </div>
                 </div>
             </div>
@@ -375,9 +402,9 @@
                   th:text="${prescription.status == 1 ? '✓ Đã cấp phát' : '⏳ Chờ cấp phát'}">Chờ cấp phát</span>
         </div>
         <div class="sec-inner">
-            <!-- Đã có đơn thuốc -->
-            <div th:if="${prescription != null and !#lists.isEmpty(prescription.details)}" style="display:flex; flex-direction:column; gap:16px;">
-                <div class="info-grid info-grid-3" style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <!-- Đã có đơn thuốc và đã công bố -->
+            <div th:if="${record.isShared and prescription != null and !#lists.isEmpty(prescription.details)}" style="display:flex; flex-direction:column; gap:16px;">
+                <div class="info-grid info-grid-2" style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
                     <div class="info-pair">
                         <span class="info-lbl">Mã đơn thuốc</span>
                         <span class="info-val mono accent" th:text="${prescription.prescriptionCode}">RX12345</span>
@@ -385,10 +412,6 @@
                     <div class="info-pair">
                         <span class="info-lbl">Ngày kê đơn</span>
                         <span class="info-val" th:text="${#temporals.format(prescription.prescriptionDate, 'dd/MM/yyyy HH:mm')}">22/07/2026</span>
-                    </div>
-                    <div class="info-pair">
-                        <span class="info-lbl">Chẩn đoán</span>
-                        <span class="info-val" th:text="${prescription.diagnosis ?: '—'}">—</span>
                     </div>
                 </div>
 
@@ -435,6 +458,14 @@
 
                 <div th:if="${prescription.notes != null and !#strings.isEmpty(prescription.notes)}" style="font-size: 0.875rem; color: #475569; background: #f8fafc; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #0284c7;">
                     <strong>Lời dặn chung của Bác sĩ:</strong> <span th:text="${prescription.notes}">—</span>
+                </div>
+            </div>
+
+            <!-- Đơn thuốc chưa được công bố -->
+            <div th:if="${!record.isShared and prescription != null and !#lists.isEmpty(prescription.details)}" class="no-review" style="padding: 24px; text-align: center;">
+                <span style="font-size:32px;">🔒</span>
+                <div style="font-size:14px; font-weight:600; color:var(--red); margin-top: 6px;">
+                    Bác sĩ chưa công bố đơn thuốc cho ca chẩn đoán này.
                 </div>
             </div>
 

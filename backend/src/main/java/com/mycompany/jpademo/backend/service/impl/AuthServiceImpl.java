@@ -136,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
         //Xác thực mã OTP
         boolean valid = OtpUtil.verifyOtp(registerRequest.getEmail(), request.getOtp());
         if (!valid) {
-            throw new InvalidOtpException("no");
+            throw new InvalidOtpException("OTP không hợp lệ.");
         }
 
         //check role patient đã tồn tại hay chưa

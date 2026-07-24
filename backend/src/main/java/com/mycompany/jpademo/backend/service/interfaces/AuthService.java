@@ -12,5 +12,5 @@ public interface AuthService {
 
     void resendRegistrationOtp(ResendOtpRequest request);
 
-    void registerByReceptionist(RegisterRequest request);
+
 }

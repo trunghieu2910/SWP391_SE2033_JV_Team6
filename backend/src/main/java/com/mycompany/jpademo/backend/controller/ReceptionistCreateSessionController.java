@@ -2,8 +2,12 @@ package com.mycompany.jpademo.backend.controller;
 
 import com.mycompany.jpademo.backend.dto.request.CreateDiagnosisSessionRequest;
 import com.mycompany.jpademo.backend.dto.response.DiagnosisSessionResponse;
+import com.mycompany.jpademo.backend.dto.response.DoctorWorkloadDto;
 import com.mycompany.jpademo.backend.dto.response.PatientSearchResponse;
+import com.mycompany.jpademo.backend.dto.response.UserResponse;
 import com.mycompany.jpademo.backend.entity.Patient;
+import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
+import com.mycompany.jpademo.backend.repository.DiagnosisSessionRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.DiagnosisSessionService;
 import com.mycompany.jpademo.backend.service.interfaces.PatientSearchService;
@@ -19,7 +23,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -31,6 +37,17 @@ public class ReceptionistCreateSessionController {
     private final PatientSearchService patientSearchService;
     private final UserService userService;
     private final DiagnosisSessionService diagnosisSessionService;
+    private final DiagnosisSessionRepository diagnosisSessionRepository;
+
+    private List<DoctorWorkloadDto> getDoctorsWithWorkload() {
+        return userService.getActiveDoctors().stream()
+                .map(doctor -> {
+                    long pendingCount = diagnosisSessionRepository.countByUserUserIdAndStatusNot(doctor.getUserId(), DiagnosisSessionStatus.COMPLETED);
+                    return new DoctorWorkloadDto(doctor, pendingCount);
+                })
+                .sorted(Comparator.comparingLong(DoctorWorkloadDto::getPendingCount))
+                .collect(Collectors.toList());
+    }
 
     @GetMapping("/create-session")
     public String createSessionPage(
@@ -42,7 +59,7 @@ public class ReceptionistCreateSessionController {
             Patient patient = patientSearchService.getPatientEntityById(patientId);
             if (patient != null) {
                 model.addAttribute("selectedPatient", patient);
-                model.addAttribute("doctors", userService.getActiveDoctors());
+                model.addAttribute("doctors", getDoctorsWithWorkload());
                 // Create an empty request object for the form
                 CreateDiagnosisSessionRequest request = new CreateDiagnosisSessionRequest();
                 request.setPatientId(patientId);
@@ -75,7 +92,7 @@ public class ReceptionistCreateSessionController {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("selectedPatient", patientSearchService.getPatientEntityById(request.getPatientId()));
-            model.addAttribute("doctors", userService.getActiveDoctors());
+            model.addAttribute("doctors", getDoctorsWithWorkload());
             return "receptionist/create-session";
         }
 
@@ -94,7 +111,7 @@ public class ReceptionistCreateSessionController {
             log.error("Error creating session", e);
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("selectedPatient", patientSearchService.getPatientEntityById(request.getPatientId()));
-            model.addAttribute("doctors", userService.getActiveDoctors());
+            model.addAttribute("doctors", getDoctorsWithWorkload());
             return "receptionist/create-session";
         }
     }

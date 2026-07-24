@@ -95,7 +95,7 @@ public class EmailUtil {
                 """.formatted(name, otp);
     }
 
-    public static String buildCreateStaffAccountTemplate(String name, String username, String password) {
+    public static String buildCreateDoctorAccountTemplate(String name, String username, String password) {
         return """
                 <html>
                 <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
@@ -127,7 +127,7 @@ public class EmailUtil {
                 """.formatted(name, username, password);
     }
 
-    public static String buildCreateStaffOtpForAdmin(String adminName, String otp) {
+    public static String buildCreateDoctorOtpForAdmin(String adminName, String otp) {
         return """
             <html>
             <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
@@ -160,6 +160,271 @@ public class EmailUtil {
             </html>
             """.formatted(adminName, otp);
     }
+
+    public static String buildCreateAdminForAdmin(String name, String username, String password) {
+        return """
+                <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                    <h2 style="color: #1565c0;">
+                        Tài khoản Quản trị viên đã được tạo
+                    </h2>
+                    <p>Xin chào <b>%s</b>,</p>
+                    <p>
+                        Tài khoản Quản trị viên của bạn đã được tạo thành công.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 5px;">
+                        <strong>Thông tin tài khoản:</strong>
+                        <p><strong>Tên đăng nhập:</strong> %s</p>
+                        <p><strong>Mật khẩu:</strong> %s</p>
+                    </div>
+                    <br>
+                    <p>
+                        Vui lòng đăng nhập và cập nhật thông tin cá nhân của bạn.
+                    </p>
+                    <br>
+                    <p>
+                        Trân trọng,<br>
+                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                    </p>
+                </div>
+                </body>
+                </html>
+                """.formatted(name, username, password);
+    }
+
+    public static String buildCreateAdminOtpForAdmin(String adminName, String otp) {
+        return """
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #1565c0;">Xác nhận tạo tài khoản Quản trị viên</h2>
+                <p>Xin chào <b>%s</b>,</p>
+                <p>
+                    Bạn vừa yêu cầu tạo tài khoản Quản trị viên.
+                </p>
+                <p>
+                    Vui lòng sử dụng mã OTP bên dưới để xác nhận thao tác này.
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
+                    <h1 style="color: #1565c0; letter-spacing: 6px; margin: 0;">%s</h1>
+                </div>
+                <p style="margin-top: 12px;">
+                    Mã OTP có hiệu lực trong <strong>2 phút</strong>. Không chia sẻ mã này với người khác.
+                </p>
+                <br>
+                <p>
+                    Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ bộ phận quản trị.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(adminName, otp);
+    }
+
+    public static String buildCreatePharmacistForAdmin(String name, String username, String password) {
+        return """
+                <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                    <h2 style="color: #1565c0;">
+                        Tài khoản Quản trị viên đã được tạo
+                    </h2>
+                    <p>Xin chào <b>%s</b>,</p>
+                    <p>
+                        Tài khoản Quản trị viên của bạn đã được tạo thành công.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 5px;">
+                        <strong>Thông tin tài khoản:</strong>
+                        <p><strong>Tên đăng nhập:</strong> %s</p>
+                        <p><strong>Mật khẩu:</strong> %s</p>
+                    </div>
+                    <br>
+                    <p>
+                        Vui lòng đăng nhập và cập nhật thông tin cá nhân của bạn.
+                    </p>
+                    <br>
+                    <p>
+                        Trân trọng,<br>
+                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                    </p>
+                </div>
+                </body>
+                </html>
+                """.formatted(name, username, password);
+    }
+
+    public static String buildCreatePharmacistOtpForAdmin(String adminName, String otp) {
+        return """
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #1565c0;">Xác nhận tạo tài khoản Dược sĩ</h2>
+                <p>Xin chào <b>%s</b>,</p>
+                <p>
+                    Bạn vừa yêu cầu tạo tài khoản Dược sĩ.
+                </p>
+                <p>
+                    Vui lòng sử dụng mã OTP bên dưới để xác nhận thao tác này.
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
+                    <h1 style="color: #1565c0; letter-spacing: 6px; margin: 0;">%s</h1>
+                </div>
+                <p style="margin-top: 12px;">
+                    Mã OTP có hiệu lực trong <strong>2 phút</strong>. Không chia sẻ mã này với người khác.
+                </p>
+                <br>
+                <p>
+                    Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ bộ phận quản trị.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(adminName, otp);
+    }
+
+    public static String buildCreateReceptionistForAdmin(String name, String username, String password) {
+        return """
+                <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                    <h2 style="color: #1565c0;">
+                        Tài khoản Lễ tân đã được tạo
+                    </h2>
+                    <p>Xin chào <b>%s</b>,</p>
+                    <p>
+                        Tài khoản Lễ tân của bạn đã được tạo thành công.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 5px;">
+                        <strong>Thông tin tài khoản:</strong>
+                        <p><strong>Tên đăng nhập:</strong> %s</p>
+                        <p><strong>Mật khẩu:</strong> %s</p>
+                    </div>
+                    <br>
+                    <p>
+                        Vui lòng đăng nhập và cập nhật thông tin cá nhân của bạn.
+                    </p>
+                    <br>
+                    <p>
+                        Trân trọng,<br>
+                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                    </p>
+                </div>
+                </body>
+                </html>
+                """.formatted(name, username, password);
+    }
+
+    public static String buildCreateReceptionistOtpForAdmin(String adminName, String otp) {
+        return """
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #1565c0;">Xác nhận tạo tài khoản Lễ tân</h2>
+                <p>Xin chào <b>%s</b>,</p>
+                <p>
+                    Bạn vừa yêu cầu tạo tài khoản Lễ tân.
+                </p>
+                <p>
+                    Vui lòng sử dụng mã OTP bên dưới để xác nhận thao tác này.
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
+                    <h1 style="color: #1565c0; letter-spacing: 6px; margin: 0;">%s</h1>
+                </div>
+                <p style="margin-top: 12px;">
+                    Mã OTP có hiệu lực trong <strong>2 phút</strong>. Không chia sẻ mã này với người khác.
+                </p>
+                <br>
+                <p>
+                    Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ bộ phận quản trị.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(adminName, otp);
+    }
+
+    public static String buildCreateUltrasoundDoctorForAdmin(String name, String username, String password) {
+        return """
+                <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+                <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                    <h2 style="color: #1565c0;">
+                        Tài khoản Bác sĩ siêu âm đã được tạo
+                    </h2>
+                    <p>Xin chào <b>%s</b>,</p>
+                    <p>
+                        Tài khoản Bác sĩ siêu âm của bạn đã được tạo thành công.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 5px;">
+                        <strong>Thông tin tài khoản:</strong>
+                        <p><strong>Tên đăng nhập:</strong> %s</p>
+                        <p><strong>Mật khẩu:</strong> %s</p>
+                    </div>
+                    <br>
+                    <p>
+                        Vui lòng đăng nhập và cập nhật thông tin cá nhân của bạn.
+                    </p>
+                    <br>
+                    <p>
+                        Trân trọng,<br>
+                        <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                    </p>
+                </div>
+                </body>
+                </html>
+                """.formatted(name, username, password);
+    }
+
+    public static String buildCreateUltrasoundDoctorOtpForAdmin(String adminName, String otp) {
+        return """
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px;">
+            <div style="max-width: 600px; margin: auto; background: white; border-radius: 10px; padding: 30px;">
+                <h2 style="color: #1565c0;">Xác nhận tạo tài khoản Bác sĩ siêu âm</h2>
+                <p>Xin chào <b>%s</b>,</p>
+                <p>
+                    Bạn vừa yêu cầu tạo tài khoản Bác sĩ siêu âm.
+                </p>
+                <p>
+                    Vui lòng sử dụng mã OTP bên dưới để xác nhận thao tác này.
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; text-align: center;">
+                    <h1 style="color: #1565c0; letter-spacing: 6px; margin: 0;">%s</h1>
+                </div>
+                <p style="margin-top: 12px;">
+                    Mã OTP có hiệu lực trong <strong>2 phút</strong>. Không chia sẻ mã này với người khác.
+                </p>
+                <br>
+                <p>
+                    Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ bộ phận quản trị.
+                </p>
+                <br>
+                <p>
+                    Trân trọng,<br>
+                    <strong>Hệ Thống Hỗ trợ Chẩn đoán bệnh ung thư tử cung</strong>
+                </p>
+            </div>
+            </body>
+            </html>
+            """.formatted(adminName, otp);
+    }
+
     public static String buildPasswordEmailTemplate(String fullName, String rawPassword) {
         return """
                 <html>

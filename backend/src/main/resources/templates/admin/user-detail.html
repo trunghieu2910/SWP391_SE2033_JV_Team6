@@ -216,27 +216,41 @@
 
         <div th:if="${!#lists.isEmpty(user.systemLogResponses)}" class="activity-timeline">
             <a th:each="log : ${user.systemLogResponses}"
-                 th:href="@{/admin/logs/{id}(id=${log.logId})}"
-                 class="timeline-item">
-                <div class="timeline-icon"
-                     th:classappend="${log.action == 'LOGIN' ? 'timeline-login' :
-                                    log.action == 'LOGOUT' ? 'timeline-logout' :
-                                    log.action == 'BAN_USER' ? 'timeline-ban' :
-                                    log.action == 'UNBAN_USER' ? 'timeline-unban' : 'timeline-other'}">
-                    <i th:class="${log.action == 'LOGIN' ? 'fa-solid fa-right-to-bracket' :
-                                 log.action == 'LOGOUT' ? 'fa-solid fa-right-from-bracket' :
-                                 log.action == 'BAN_USER' ? 'fa-solid fa-ban' :
-                                 log.action == 'UNBAN_USER' ? 'fa-solid fa-unlock' : 'fa-solid fa-pen-to-square'}"></i>
+               th:href="@{/admin/logs/{id}(id=${log.logId})}"
+               class="timeline-item">
+
+                <div class="timeline-icon" th:switch="${log.actionDisplay}">
+                    <i th:case="'Đăng nhập'"     class="fa-solid fa-right-to-bracket timeline-login"></i>
+                    <i th:case="'Đăng xuất'"     class="fa-solid fa-right-from-bracket timeline-logout"></i>
+                    <i th:case="'Khóa User'"     class="fa-solid fa-ban timeline-ban"></i>
+                    <i th:case="'Mở khóa'"       class="fa-solid fa-unlock timeline-unban"></i>
+                    <i th:case="'Tạo'"           class="fa-solid fa-plus timeline-create"></i>
+                    <i th:case="'Tạo nhắc nhở'"  class="fa-solid fa-plus timeline-create"></i>
+                    <i th:case="'Cập nhật'"      class="fa-solid fa-pen timeline-update"></i>
+                    <i th:case="'Đổi trạng thái'" class="fa-solid fa-pen timeline-update"></i>
+                    <i th:case="'Chặn IP'"       class="fa-solid fa-shield-halved timeline-block"></i>
+                    <i th:case="'Mở khóa IP'"    class="fa-solid fa-shield timeline-unblock"></i>
+                    <i th:case="'Thông báo'"     class="fa-solid fa-bell timeline-notification"></i>
+                    <i th:case="'Tạo ca khám'"   class="fa-solid fa-calendar-plus timeline-create-session"></i>
+                    <i th:case="'Tạo tài khoản'" class="fa-solid fa-user-plus timeline-create-session"></i>
+                    <i th:case="'Nhận kết quả'"  class="fa-solid fa-vial-circle-check timeline-receive"></i>
+                    <i th:case="'Xuất file pdf'" class="fa-solid fa-file-pdf timeline-export"></i>
+                    <i th:case="'Quên mật khẩu'" class="fa-solid fa-key timeline-forgot"></i>
+                    <i th:case="'Đổi mật khẩu'"  class="fa-solid fa-key timeline-forgot"></i>
+                    <i th:case="'Xác minh OTP'"  class="fa-solid fa-mobile-screen-button timeline-otp"></i>
+                    <i th:case="'Xóa'"           class="fa-solid fa-trash timeline-delete"></i>
+                    <i th:case="'Xoá nhắc nhở'"  class="fa-solid fa-trash timeline-delete"></i>
+                    <i th:case="'Xoá ảnh'"       class="fa-solid fa-trash timeline-delete"></i>
+                    <i th:case="'Đăng kí'"       class="fa-solid fa-user-check timeline-register"></i>
+                    <i th:case="'Nhập'"          class="fa-solid fa-clipboard-list timeline-input"></i>
+                    <i th:case="'Xem chẩn đoán'" class="fa-solid fa-notes-medical timeline-diagnosis"></i>
+                    <i th:case="'Yêu cầu'"       class="fa-solid fa-hand timeline-request"></i>
+                    <i th:case="*"               class="fa-solid fa-pen-to-square timeline-other"></i>
                 </div>
+
                 <div class="timeline-content">
                     <div class="timeline-header">
-                        <!-- MAP HÀNH ĐỘNG LOG -->
-                        <span class="timeline-action" th:text="${log.action == 'LOGIN' ? 'Đăng nhập' :
-                                                               log.action == 'LOGOUT' ? 'Đăng xuất' :
-                                                               log.action == 'BAN_USER' ? 'Khóa User' :
-                                                               log.action == 'UNBAN_USER' ? 'Mở khóa' :
-                                                               log.action == 'CREATE_DOCTOR' ? 'Tạo bác sĩ' :
-                                                               log.action}">LOGIN</span>
+                        <span class="timeline-action" th:text="${log.actionDisplay}">Đăng nhập</span>
                         <span class="timeline-time" th:text="${#temporals.format(log.performedAt, 'dd/MM/yyyy HH:mm:ss')}">30/06/2026 12:00:00</span>
                     </div>
                     <p class="timeline-desc" th:text="${log.description}">Mô tả hoạt động</p>

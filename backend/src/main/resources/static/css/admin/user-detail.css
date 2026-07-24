@@ -472,6 +472,21 @@
 .timeline-ban { background: #fee2e2; color: #dc2626; }
 .timeline-unban { background: #dcfce7; color: #16a34a; }
 .timeline-other { background: #e0f2fe; color: #0369a1; }
+.timeline-create { background: rgba(37, 99, 235, 0.1);  color: #2563eb; }
+.timeline-update { background: rgba(217, 119, 6, 0.1);  color: #d97706; }
+.timeline-block { background: rgba(220, 38, 38, 0.1);  color: #dc2626; }
+.timeline-unblock { background: rgba(6, 95, 70, 0.1);    color: #065f46; }
+.timeline-notification { background: rgba(67, 56, 202, 0.1);  color: #4338ca; }
+.timeline-create-session { background: rgba(91, 33, 182, 0.1);  color: #5b21b6; }
+.timeline-receive  { background: rgba(8, 145, 178, 0.1);  color: #0891b2; }
+.timeline-export { background: rgba(51, 65, 85, 0.1);   color: #334155; }
+.timeline-forgot { background: rgba(194, 65, 12, 0.1);  color: #c2410c; }
+.timeline-otp { background: rgba(109, 40, 217, 0.1); color: #6d28d9; }
+.timeline-delete { background: rgba(185, 28, 28, 0.1);  color: #b91c1c; }
+.timeline-register { background: rgba(37, 99, 235, 0.1);  color: #2563eb; }
+.timeline-input { background: rgba(14, 116, 144, 0.1); color: #0e7490; }
+.timeline-diagnosis { background: rgba(6, 95, 70, 0.1);    color: #065f46; }
+.timeline-request { background: rgba(161, 98, 7, 0.1);   color: #a16207; }
 
 .timeline-content {
     flex: 1;
