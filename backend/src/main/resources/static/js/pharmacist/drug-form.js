@@ -6,7 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeDrugForms() {
-    document.querySelectorAll('form').forEach(form => {
+    const forms = document.querySelectorAll('form:not([action*="/logout"]):not(.search-form):not(.filter-form)');
+    forms.forEach(form => {
         form.addEventListener('submit', validateDrugForm);
     });
 }
