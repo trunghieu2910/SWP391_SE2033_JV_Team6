@@ -218,7 +218,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
         if (session.getClinicalInputMode() == ClinicalInputMode.PATIENT
                 && (session.getSymptomResult() == null || session.getSymptomResult().getStatus() != SymptomResultStatus.COMPLETED)) {
-            throw new BadRequestException("Phiên khám này yêu cầu bệnh nhân gửi triệu chứng trước khi bác sĩ có thể chỉnh sửa.");
+            throw new BadRequestException("Ca khám này yêu cầu bệnh nhân gửi triệu chứng trước khi bác sĩ có thể chỉnh sửa.");
         }
 
         if (request.getHeight() != null) session.setHeight(request.getHeight());

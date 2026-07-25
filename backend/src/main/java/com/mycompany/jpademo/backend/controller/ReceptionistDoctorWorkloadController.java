@@ -3,6 +3,7 @@ package com.mycompany.jpademo.backend.controller;
 import com.mycompany.jpademo.backend.dto.response.DoctorWorkloadResponse;
 import com.mycompany.jpademo.backend.entity.DiagnosisSession;
 import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.repository.UserRepository;
 import com.mycompany.jpademo.backend.service.interfaces.DiagnosisSessionService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -91,10 +93,10 @@ public class ReceptionistDoctorWorkloadController {
             default: // ALL - Mặc định không set limit thời gian
                 break;
         }
-
+List<DiagnosisSessionStatus> statuses = Arrays.asList(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING);
         // Truyền xuống Service ở Bước 3 để lấy danh sách ca khám (đã lọc & phân trang)
         Page<DiagnosisSession> sessions = diagnosisSessionService.getSessionsByDoctor(
-                doctorId, startDateTime, endDateTime, PageRequest.of(page, size));
+                doctorId,statuses, startDateTime, endDateTime, PageRequest.of(page, size));
 
         model.addAttribute("sessions", sessions);
         model.addAttribute("dateFilter", dateFilter);

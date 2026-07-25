@@ -14,7 +14,7 @@
     <header class="page-header">
         <div class="page-header-info">
             <h2><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Tạo ca khám mới</h2>
-            <p>Tìm kiếm bệnh nhân, chọn bác sĩ và tạo phiên khám mới trên hệ thống.</p>
+            <p>Tìm kiếm bệnh nhân, chọn bác sĩ và tạo ca khám mới trên hệ thống.</p>
         </div>
     </header>
 
@@ -50,9 +50,9 @@
                 <div class="success-icon" aria-hidden="true">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
-                <h3 id="step3Title">Tạo phiên khám thành công!</h3>
+                <h3 id="step3Title">Tạo ca khám thành công!</h3>
                 <p class="success-session-id">Mã phiên: #<span th:text="${createdSessionId}"></span></p>
-                <p class="success-desc">Phiên khám đã được tạo và lưu vào hệ thống.</p>
+                <p class="success-desc">Ca khám đã được tạo và lưu vào hệ thống.</p>
                 <footer class="success-actions">
                     <a th:href="@{/receptionist/create-session}" class="btn-action btn-outline" style="text-decoration: none;">
                         <i class="fa-solid fa-plus" aria-hidden="true"></i> Tạo phiên mới
@@ -127,7 +127,7 @@
         <section th:if="${createdSessionId == null && selectedPatient != null}" class="create-card" aria-labelledby="step2Title">
             <header class="card-header">
                 <i class="fa-solid fa-user-check" aria-hidden="true"></i>
-                <h3 id="step2Title">Thông tin phiên khám</h3>
+                <h3 id="step2Title">Thông tin ca khám</h3>
             </header>
             <div class="card-body">
                 <!-- Selected Patient Info -->
@@ -182,7 +182,7 @@
                                         <span style="font-size: 0.9em; padding: 4px 10px; border-radius: 20px;" 
                                               th:styleappend="${workload.pendingCount > 5 ? 'background-color: #fee2e2; color: #991b1b;' : (workload.pendingCount > 0 ? 'background-color: #fef3c7; color: #92400e;' : 'background-color: #dcfce7; color: #166534;')}">
                                             <i class="fa-solid fa-clock-rotate-left"></i> 
-                                            <span th:text="${workload.pendingCount}">0</span> chờ xử lí
+                                            <span th:text="${workload.pendingCount}">0</span> Đang hoạt động
                                         </span>
                                     </div>
                                 </label>
@@ -234,8 +234,8 @@
                         <a th:href="@{/receptionist/create-session}" class="btn-action btn-outline" style="text-decoration: none; padding: 10px 20px; border: 1px solid #ddd; border-radius: 10px; color: #333; display: inline-flex; align-items: center; gap: 8px;">
                             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Quay lại
                         </a>
-                        <button type="submit" class="btn-action btn-primary" onclick="return confirm('Bạn có chắc chắn muốn tạo phiên khám?');" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <i class="fa-solid fa-check" aria-hidden="true"></i> Tạo phiên khám
+                        <button type="submit" class="btn-action btn-primary" onclick="return confirm('Bạn có chắc chắn muốn tạo ca khám?');" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <i class="fa-solid fa-check" aria-hidden="true"></i> Tạo ca khám
                         </button>
                     </footer>
                 </form>

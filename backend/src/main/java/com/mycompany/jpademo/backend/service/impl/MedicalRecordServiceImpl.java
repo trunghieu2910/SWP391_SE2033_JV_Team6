@@ -109,7 +109,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     public MedicalRecordDetailResponse getMedicalRecordDetail(Integer sessionID, boolean isPatient) {
         DiagnosisSession session = sessionRepository.findById(sessionID)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy mã phiên khám: " + sessionID));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy mã ca khám: " + sessionID));
 
         MedicalRecordDetailResponse detail = new MedicalRecordDetailResponse();
         detail.setSessionID(session.getSessionId());
@@ -146,7 +146,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             SymptomDetails firstDetail = symptomDetailsList.get(0);
             if (firstDetail.getSymptom() != null) {
                 detail.setSymptomName(firstDetail.getSymptom().getSymptomName());
-                detail.setSymptomDescription("Ghi nhận tại phiên khám");
+                detail.setSymptomDescription("Ghi nhận tại ca khám");
             }
         }
 
