@@ -26,8 +26,6 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
 
     long countByUserUserIdAndStatusNotIn(Integer userId, List<DiagnosisSessionStatus> statuses);
 
-
-
     /**
      * [Role: Bệnh nhân]
      * Chức năng: Lấy danh sách toàn bộ hồ sơ bệnh án của một bệnh nhân cụ thể.
@@ -167,19 +165,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "(CAST(:endDate AS timestamp) IS NULL OR ds.createdAt <= :endDate)")
     long countSessionsWithDateFilter(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-    /**
-     * [Role: Admin]
-     * Chức năng: Nhóm và đếm số lượng ca khám theo từng tháng.
-     * Mục đích: Lấy dữ liệu để vẽ biểu đồ thống kê xu hướng số lượng ca khám hàng tháng cho Admin.
-     */
-    @Query("SELECT FUNCTION('FORMAT', d.createdAt, 'MM/yyyy') as month, COUNT(d) as count " +
-            "FROM DiagnosisSession d " +
-            "WHERE (:start IS NULL OR d.createdAt >= :start) " +
-            "AND (:end IS NULL OR d.createdAt <= :end) " +
-            "GROUP BY FUNCTION('FORMAT', d.createdAt, 'MM/yyyy') " +
-            "ORDER BY month ASC")
-    List<Object[]> getMonthlyDiagnosisSessions(@Param("start") LocalDateTime start,
-                                               @Param("end") LocalDateTime end);
+
 
 
     

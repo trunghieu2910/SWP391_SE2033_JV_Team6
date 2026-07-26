@@ -128,11 +128,11 @@ public class SystemLogServiceImpl implements SystemLogService {
                 return "Mở khóa";
             case "UPDATE_USER_STATUS":
                 return "Đổi trạng thái";
-            case "BLOCK_IP":
+            case "BLOCKED_IP":
                 return "Chặn IP";
-            case "UNBLOCK_IP":
+            case "UNBLOCKED_IP":
                 return "Mở khóa IP";
-            case "PATIENT_NOTIFICATION":
+            case "PATIENT_NOTIFICATION": case "DOCTOR_NOTIFICATION":
                 return "Thông báo";
             case "FORGOT_PASSWORD":
                 return "Quên mật khẩu";
@@ -160,6 +160,8 @@ public class SystemLogServiceImpl implements SystemLogService {
                 return "Tạo ca khám";
             case "RECEPTIONIST_CREATE_PATIENT_ACCOUNT": case "CREATE_STAFF":
                 return "Tạo tài khoản";
+            case "PATIENT_SUBMIT":
+                return "Nộp";
             default:
                 return action;
         }

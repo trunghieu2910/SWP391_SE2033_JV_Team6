@@ -364,28 +364,28 @@ public class AdminServiceImpl implements AdminService {
                 sortMonthlyStats(userRegistrations);
             }
 
-            List<Object[]> sessionResults = requestLogRepository.getMonthlyRequestTrend(start, end);
-            List<MonthlyStats> diagnosisSessions = new ArrayList<>();
-            if (sessionResults != null && !sessionResults.isEmpty()) {
-                diagnosisSessions = sessionResults.stream()
+            List<Object[]> requestResults = requestLogRepository.getMonthlyRequestTrend(start, end);
+            List<MonthlyStats> requestTrends = new ArrayList<>();
+            if (requestResults != null && !requestResults.isEmpty()) {
+                requestTrends = requestResults.stream()
                         .map(row -> MonthlyStats.builder()
                                 .month(row[0].toString())
                                 .count(((Number) row[1]).longValue())
                                 .build())
                         .collect(Collectors.toList());
-                sortMonthlyStats(diagnosisSessions);
+                sortMonthlyStats(requestTrends);
             }
 
             return ChartStatsResponse.builder()
                     .userRegistrations(userRegistrations)
-                    .diagnosisSessions(diagnosisSessions)
+                    .requestTrends(requestTrends)
                     .build();
 
         } catch (Exception e) {
             log.error("Lỗi khi lấy chart stats: ", e);
             return ChartStatsResponse.builder()
                     .userRegistrations(new ArrayList<>())
-                    .diagnosisSessions(new ArrayList<>())
+                    .requestTrends(new ArrayList<>())
                     .build();
         }
     }
@@ -534,18 +534,6 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
-    /** Retrieves diagnosis sessions aggregated by month. */
-    private List<MonthlyStats> getMonthlyDiagnosisSessions(LocalDate startDate, LocalDate endDate) {
-        try {
-            LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
-            LocalDateTime end = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
-
-            List<Object[]> results = diagnosisSessionRepository.getMonthlyDiagnosisSessions(start, end);
-            return mapToMonthlyStats(results);
-        } catch (Exception e) {
-            return new ArrayList<>();
-        }
-    }
 
     /** Maps a user entity to a user search DTO. */
     private UserSearchDTO mapToUserSearchDTO(User user) {
@@ -670,7 +658,7 @@ public class AdminServiceImpl implements AdminService {
                 return "Chặn IP";
             case "UNBLOCKED_IP":
                 return "Mở khóa IP";
-            case "PATIENT_NOTIFICATION":
+            case "PATIENT_NOTIFICATION": case "DOCTOR_NOTIFICATION":
                 return "Thông báo";
             case "FORGOT_PASSWORD":
                 return "Quên mật khẩu";
@@ -698,6 +686,8 @@ public class AdminServiceImpl implements AdminService {
                 return "Tạo ca khám";
             case "RECEPTIONIST_CREATE_PATIENT_ACCOUNT": case "CREATE_STAFF":
                 return "Tạo tài khoản";
+            case "PATIENT_SUBMIT": case "DOCTOR_SUBMIT":
+                return "Nộp";
             default:
                 return action;
         }
@@ -922,11 +912,11 @@ public class AdminServiceImpl implements AdminService {
     private ChartStatsResponse ensureChartsNotNull(ChartStatsResponse charts) {
         List<MonthlyStats> userRegistrations = (charts != null && charts.getUserRegistrations() != null)
                 ? charts.getUserRegistrations() : new ArrayList<>();
-        List<MonthlyStats> diagnosisSessions = (charts != null && charts.getDiagnosisSessions() != null)
-                ? charts.getDiagnosisSessions() : new ArrayList<>();
+        List<MonthlyStats> requestTrends = (charts != null && charts.getRequestTrends() != null)
+                ? charts.getRequestTrends() : new ArrayList<>();
         return ChartStatsResponse.builder()
                 .userRegistrations(userRegistrations)
-                .diagnosisSessions(diagnosisSessions)
+                .requestTrends(requestTrends)
                 .build();
     }
 

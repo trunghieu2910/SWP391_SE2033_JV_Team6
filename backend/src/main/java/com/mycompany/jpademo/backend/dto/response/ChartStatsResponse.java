@@ -8,5 +8,5 @@ import java.util.List;
 @Builder
 public class ChartStatsResponse {
     private List<MonthlyStats> userRegistrations;
-    private List<MonthlyStats> diagnosisSessions;
+    private List<MonthlyStats> requestTrends;
 }

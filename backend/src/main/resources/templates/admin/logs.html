@@ -30,8 +30,8 @@
                         <option value="RECEPTIONIST_CREATE_PATIENT_ACCOUNT" th:selected="${param.action == 'RECEPTIONIST_CREATE_PATIENT_ACCOUNT'}">Tạo tài khoản bệnh nhân</option>
                     </optgroup>
                     <optgroup label="Bảo mật IP">
-                        <option value="BLOCK_IP" th:selected="${param.action == 'BLOCK_IP'}">Chặn IP</option>
-                        <option value="UNBLOCK_IP" th:selected="${param.action == 'UNBLOCK_IP'}">Mở khóa IP</option>
+                        <option value="BLOCKED_IP" th:selected="${param.action == 'BLOCK_IP'}">Chặn IP</option>
+                        <option value="UNBLOCKED_IP" th:selected="${param.action == 'UNBLOCK_IP'}">Mở khóa IP</option>
                     </optgroup>
                     <optgroup label="Khám bệnh">
                         <option value="RECEPTIONIST_CREATE_SESSION" th:selected="${param.action == 'RECEPTIONIST_CREATE_SESSION'}">Tạo ca khám</option>
@@ -61,6 +61,8 @@
                         <option value="UPDATE_REMINDER" th:selected="${param.action == 'UPDATE_REMINDER'}">Cập nhật nhắc nhở</option>
                         <option value="DELETE_REMINDER" th:selected="${param.action == 'DELETE_REMINDER'}">Xoá nhắc nhở</option>
                         <option value="PATIENT_NOTIFICATION" th:selected="${param.action == 'PATIENT_NOTIFICATION'}">Thông báo bệnh nhân</option>
+                        <option value="DOCTOR_NOTIFICATION" th:selected="${param.action == 'DOCTOR_NOTIFICATION'}">Thông báo bác sĩ</option>
+                        <option value="PATIENT_SUBMIT" th:selected="${param.action == 'PATIENT_SUBMIT'}">Bệnh nhân nộp triệu chứng</option>
                     </optgroup>
                 </select>
             </div>
@@ -135,6 +137,7 @@
                             <span th:case="'Xóa'" class="badge badge-delete">Xóa</span>
                             <span th:case="'Đăng kí'" class="badge badge-register">Đăng kí</span>
                             <span th:case="'Nhập'" class="badge badge-input">Nhập</span>
+                            <span th:case="'Nộp'" class="badge badge-input">Nộp</span>
                             <span th:case="'Tạo nhắc nhở'" class="badge badge-create">Tạo nhắc nhở</span>
                             <span th:case="'Xem chẩn đoán'" class="badge badge-diagnosis">Xem chẩn đoán</span>
                             <span th:case="'Xoá nhắc nhở'" class="badge badge-delete">Xoá nhắc nhở</span>

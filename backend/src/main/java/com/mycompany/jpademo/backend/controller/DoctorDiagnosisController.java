@@ -7,7 +7,6 @@ import com.mycompany.jpademo.backend.dto.response.DoctorSessionDetailResponse;
 import com.mycompany.jpademo.backend.dto.response.DoctorSessionResponse;
 import com.mycompany.jpademo.backend.dto.response.SymptomResponse;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
-import com.mycompany.jpademo.backend.repository.DiseaseTypeRepository;
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.DiseaseTypeService;
 import com.mycompany.jpademo.backend.service.interfaces.DoctorDiagnosisService;

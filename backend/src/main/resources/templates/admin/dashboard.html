@@ -170,10 +170,10 @@
                 <h3>Xu hướng truy cập</h3>
                 <a th:href="@{/admin/security}">Xem chi tiết</a>
             </div>
-            <div id="sessionChartContainer" style="min-height: 280px;">
-                <canvas id="sessionChart" style="max-height: 280px; width: 100%;"></canvas>
+            <div id="requestChartContainer" style="min-height: 280px;">
+                <canvas id="requestChart" style="max-height: 280px; width: 100%;"></canvas>
             </div>
-            <div id="sessionChartError" class="chart-error" style="display: none; text-align: center; padding: 40px; color: var(--neutral-light);">
+            <div id="requestChartError" class="chart-error" style="display: none; text-align: center; padding: 40px; color: var(--neutral-light);">
                 <i class="fa-solid fa-chart-line" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
                 <span>Chưa có dữ liệu truy cập</span>
             </div>
@@ -250,18 +250,18 @@
     <script th:inline="javascript">
         try {
             var userData = /*[[${charts.userRegistrations}]]*/ [];
-            var sessionData = /*[[${charts.diagnosisSessions}]]*/ [];
+            var requestData = /*[[${charts.requestTrends}]]*/ [];
 
             console.log('User Data:', userData);
-            console.log('Session Data:', sessionData);
+            console.log('Request Data:', requestData);
 
             window._userData = userData;
-            window._sessionData = sessionData;
+            window._requestData = requestData;
 
         } catch(e) {
             console.error('Lỗi lấy dữ liệu:', e);
             window._userData = [];
-            window._sessionData = [];
+            window._requestData = [];
         }
     </script>
 
