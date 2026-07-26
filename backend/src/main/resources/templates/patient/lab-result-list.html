@@ -5,7 +5,7 @@
 <main>
     <div class="page-header" style="margin-bottom: 20px;">
         <p class="page-subtitle" th:if="${session != null}" style="font-size: 14px; color: #64748b;">
-            Phiên khám #<span th:text="${session.sessionId}"></span> —
+            Ca khám #<span th:text="${session.sessionId}"></span> —
             Ngày tạo: <span th:text="${#temporals.format(session.createdAt, 'dd/MM/yyyy')}"></span>
         </p>
     </div>
@@ -15,7 +15,7 @@
     <div th:if="${#lists.isEmpty(labResults)}" class="empty-state">
         <span class="empty-state-icon">🔬</span>
         <h3>Chưa có kết quả xét nghiệm</h3>
-        <p>Phiên khám này chưa có chỉ định xét nghiệm nào.</p>
+        <p>Ca khám này chưa có chỉ định xét nghiệm nào.</p>
     </div>
 
     <!-- Accordion lists of lab results -->

@@ -23,7 +23,6 @@
                     <th scope="col">Bác sĩ</th>
                     <th scope="col" style="text-align:center;">Chờ xử lý</th>
                     <th scope="col" style="text-align:center;">Đang xử lý</th>
-                    <th scope="col" style="text-align:center;">Thất bại</th>
                     <th scope="col" style="text-align:center;">Tổng ca hoạt động</th>
                     <th scope="col">Thao tác</th>
                 </tr>
@@ -33,7 +32,6 @@
                     <td class="doctor-name" th:text="${w.doctorName}">Nguyễn Văn A</td>
                     <td class="count-cell pending" th:text="${w.pendingCount}">0</td>
                     <td class="count-cell processing" th:text="${w.processingCount}">0</td>
-                    <td class="count-cell failed" th:text="${w.failedCount}">0</td>
                     <td class="count-cell total" th:text="${w.totalActive}">0</td>
                     <td>
                         <a th:href="@{/receptionist/doctor-workload/{id}(id=${w.doctorId})}"

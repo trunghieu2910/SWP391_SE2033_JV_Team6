@@ -69,7 +69,7 @@ public class LisIntegrationServiceImpl implements LisIntegrationService {
         Integer ownerDoctorId = labResult.getDiagnosisSession().getUser().getUserId();
         if (!ownerDoctorId.equals(currentDoctorId)) {
             throw new UnauthorizedActionException(
-                    "Bạn không có quyền thao tác trên xét nghiệm của phiên khám này");
+                    "Bạn không có quyền thao tác trên xét nghiệm của ca khám này");
         }
 
         List<LabResultParameter> savedParameters = new ArrayList<>();

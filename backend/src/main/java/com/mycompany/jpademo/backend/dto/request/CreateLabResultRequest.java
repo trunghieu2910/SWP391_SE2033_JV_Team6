@@ -14,8 +14,8 @@ import lombok.Data;
 @Data
 public class CreateLabResultRequest {
 
-    @NotNull(message = "Mã phiên khám không được để trống")
-    @Positive(message = "Mã phiên khám phải là số dương")
+    @NotNull(message = "Mã ca khám không được để trống")
+    @Positive(message = "Mã ca khám phải là số dương")
     private Integer sessionId;
 
     @NotBlank(message = "Loại xét nghiệm không được để trống")

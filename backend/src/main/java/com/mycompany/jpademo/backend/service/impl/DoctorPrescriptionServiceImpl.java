@@ -90,7 +90,7 @@ public class DoctorPrescriptionServiceImpl implements DoctorPrescriptionService 
             throw new BadRequestException("Bác sĩ phải đưa ra kết luận chẩn đoán trước khi kê đơn thuốc cho bệnh nhân.");
         }
 
-        // Kiểm tra: Nếu phiên khám đã hoàn tất (COMPLETED), không cho phép sửa đổi
+        // Kiểm tra: Nếu ca khám đã hoàn tất (COMPLETED), không cho phép sửa đổi
         if (session.getStatus() == com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.COMPLETED) {
             throw new BadRequestException("Ca chẩn đoán này đã hoàn thành, không được phép chỉnh sửa đơn thuốc.");
         }

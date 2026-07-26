@@ -13,17 +13,17 @@
                 <div class="session-card-header">
                     <div class="session-card-title">
                         <span class="session-card-title-dot" th:classappend="${activeSession != null ? 'green' : 'blue'}"></span>
-                        <span>Phiên khám đang hoạt động</span>
+                        <span>Ca khám đang hoạt động</span>
                     </div>
                     <span th:if="${activeSession}" class="session-status-badge">
-                        CÓ PHIÊN KHÁM MỚI
+                        CÓ CA KHÁM MỚI
                     </span>
                 </div>
 
                 <div th:if="${activeSession != null}">
                     <div class="session-meta-grid">
                         <div class="session-meta-item">
-                            <span class="session-meta-label">Mã phiên khám</span>
+                            <span class="session-meta-label">Mã ca khám</span>
                             <span class="session-meta-value" th:text="'#' + ${activeSession.sessionId}">#10</span>
                         </div>
                         <div class="session-meta-item session-meta-item-right">
@@ -68,8 +68,8 @@
                 <!-- No Active Session -->
                 <div th:unless="${activeSession != null}" class="empty-state">
                     <div class="empty-state-icon">📋</div>
-                    <div class="empty-state-title">Không có phiên khám nào đang hoạt động.</div>
-                    <div class="empty-state-desc">Vui lòng liên hệ bác sĩ phụ trách để được tạo phiên khám mới trên hệ thống.</div>
+                    <div class="empty-state-title">Không có ca khám nào đang hoạt động.</div>
+                    <div class="empty-state-desc">Vui lòng liên hệ bác sĩ phụ trách để được tạo ca khám mới trên hệ thống.</div>
                 </div>
             </div>
 
@@ -86,7 +86,7 @@
                         
                         <div class="record-history-info">
                             <div class="record-history-meta">
-                                <span th:text="'PHIÊN KHÁM #' + ${record.id}"></span>
+                                <span th:text="'CA KHÁM #' + ${record.id}"></span>
                                 <span> • </span>
                                 <span th:text="${record.visitDate != null ? #dates.format(record.visitDate, 'dd/MM/yyyy') : 'Chưa có'}">29/06/2026</span>
                             </div>

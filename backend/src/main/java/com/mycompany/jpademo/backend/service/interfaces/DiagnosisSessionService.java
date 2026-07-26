@@ -8,6 +8,7 @@ import com.mycompany.jpademo.backend.dto.response.SymptomResultResponse;
 import com.mycompany.jpademo.backend.dto.request.CreatePatientSessionRequest;
 import com.mycompany.jpademo.backend.entity.DiagnosisSession;
 import com.mycompany.jpademo.backend.entity.User;
+import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -33,11 +34,12 @@ public interface DiagnosisSessionService {
 
     List<DiagnosisSessionResponse> getPendingUltrasoundSessions();
     List<DiagnosisSessionResponse> getCompletedUltrasoundSessions();
+    
 
     // [Nguyen The Hieu]: Bước 2 - Service: Khai báo hàm lấy danh sách tải của TẤT CẢ bác sĩ đang hoạt động (cho Màn hình 1)
     List<DoctorWorkloadResponse> getDoctorWorkloads();
 
     // [Nguyen The Hieu]: Bước 2 - Service: Khai báo hàm lấy chi tiết các ca khám của MỘT bác sĩ cụ thể, có hỗ trợ lọc ngày (cho Màn hình 2)
-    Page<DiagnosisSession> getSessionsByDoctor(Integer doctorId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<DiagnosisSession> getSessionsByDoctor(Integer doctorId, List<DiagnosisSessionStatus> statuses, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }
 

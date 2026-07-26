@@ -30,6 +30,22 @@ public class LabResultController {
     private final LabResultService labResultService;
     private final DiagnosisSessionRepository sessionRepository;
 
+    /** Renders the "add lab test" form pre-filled with the target session. */
+    @PreAuthorize("hasRole('DOCTOR')")
+    @GetMapping("/doctor/lab-results/create")
+    public String showCreateForm(@RequestParam("sessionId") Integer sessionId, Model model) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy ca khám với ID: " + sessionId));
+
+        CreateLabResultRequest form = new CreateLabResultRequest();
+        form.setSessionId(sessionId);
+
+        model.addAttribute("labResultForm", form);
+        model.addAttribute("session", session);
+        return "doctor/lab-result";
+    }
+
     /** Handles form submission for creating a new lab order; redirects back to the session detail page either way. */
     @PreAuthorize("hasRole('DOCTOR')")
     @PostMapping("/doctor/lab-results/create")
@@ -56,6 +72,34 @@ public class LabResultController {
         return "redirect:/doctor/sessions/" + form.getSessionId() + "?openLab=true";
     }
 
+    /** Doctor-facing list view of all lab results for a session. */
+    @PreAuthorize("hasRole('DOCTOR')")
+    @GetMapping("/doctor/lab-results/session/{sessionId}")
+    public String viewByDoctorSession(
+            @PathVariable Integer sessionId,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            List<LabResultResponse> results = labResultService.getLabResultsBySession(sessionId);
+            DiagnosisSession session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Không tìm thấy ca khám với ID: " + sessionId));
+
+            model.addAttribute("labResults", results);
+            model.addAttribute("session", session);
+            model.addAttribute("sessionId", sessionId);
+            return "doctor/lab-result-list";
+
+        } catch (ResourceNotFoundException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/doctor/patients";
+        } catch (UnauthorizedActionException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/doctor/patients";
+        }
+    }
+
     /** Patient-facing list view of their own lab results for a session (subject to the session being shared). */
     @PreAuthorize("hasRole('PATIENT')")
     @GetMapping("/patient/lab-results/session/{sessionId}")
@@ -68,7 +112,7 @@ public class LabResultController {
             List<LabResultResponse> results = labResultService.getLabResultsBySession(sessionId);
             DiagnosisSession session = sessionRepository.findById(sessionId)
                     .orElseThrow(() -> new ResourceNotFoundException(
-                            "Không tìm thấy phiên khám với ID: " + sessionId));
+                            "Không tìm thấy phiên ca với ID: " + sessionId));
 
             model.addAttribute("labResults", results);
             model.addAttribute("session", session);

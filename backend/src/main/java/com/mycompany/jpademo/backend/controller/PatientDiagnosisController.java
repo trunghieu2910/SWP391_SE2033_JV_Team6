@@ -38,7 +38,7 @@ public class PatientDiagnosisController {
                 .body(ApiResponse.<DiagnosisSessionResponse>builder()
                         .code(201)
                         .success(true)
-                        .message("Tạo phiên khám thành công")
+                        .message("Tạo ca khám thành công")
                         .data(response)
                         .build());
     }
@@ -51,7 +51,7 @@ public class PatientDiagnosisController {
         return ResponseEntity.ok(ApiResponse.<DiagnosisSessionResponse>builder()
                 .code(200)
                 .success(true)
-                .message("Lấy phiên khám đang hoạt động")
+                .message("Lấy ca khám đang hoạt động")
                 .data(resp)
                 .build());
     }
@@ -64,7 +64,7 @@ public class PatientDiagnosisController {
         return ResponseEntity.ok(ApiResponse.<java.util.List<DiagnosisSessionResponse>>builder()
                 .code(200)
                 .success(true)
-                .message("Lấy danh sách phiên khám")
+                .message("Lấy danh sách ca khám")
                 .data(list)
                 .build());
     }

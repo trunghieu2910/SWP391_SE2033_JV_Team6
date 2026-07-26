@@ -9,6 +9,7 @@ public class UserSearchDTO {
     private Integer userId;
     private String userName;
     private String fullName;
+    private String phoneNumber;
     private String email;
     private String roleName;
     private String status;

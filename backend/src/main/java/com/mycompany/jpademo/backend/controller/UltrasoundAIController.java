@@ -52,7 +52,7 @@ public class UltrasoundAIController {
             // 1. Kiểm tra session
             Optional<DiagnosisSession> sessionOpt = diagnosisSessionRepository.findById(sessionId);
             if (sessionOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body("Không tìm thấy phiên khám (Session ID: " + sessionId + ")");
+                return ResponseEntity.badRequest().body("Không tìm thấy ca khám (Session ID: " + sessionId + ")");
             }
 
             // Kiểm tra dung lượng file tối thiểu (10KB)

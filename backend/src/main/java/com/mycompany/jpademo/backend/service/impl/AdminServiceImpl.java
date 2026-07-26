@@ -554,6 +554,7 @@ public class AdminServiceImpl implements AdminService {
                 .userName(user.getUserName())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
                 .roleName(user.getRole().getRoleName().name())
                 .status(user.getStatus().name())
                 .build();

@@ -42,7 +42,8 @@ public class ReceptionistCreateSessionController {
     private List<DoctorWorkloadDto> getDoctorsWithWorkload() {
         return userService.getActiveDoctors().stream()
                 .map(doctor -> {
-                    long pendingCount = diagnosisSessionRepository.countByUserUserIdAndStatusNot(doctor.getUserId(), DiagnosisSessionStatus.COMPLETED);
+                    long pendingCount = diagnosisSessionRepository.countByUserUserIdAndStatusNotIn(
+                            doctor.getUserId(), java.util.List.of(DiagnosisSessionStatus.COMPLETED, DiagnosisSessionStatus.FAILED));
                     return new DoctorWorkloadDto(doctor, pendingCount);
                 })
                 .sorted(Comparator.comparingLong(DoctorWorkloadDto::getPendingCount))
@@ -54,7 +55,7 @@ public class ReceptionistCreateSessionController {
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "patientId", required = false) Integer patientId,
             Model model) {
-        
+
         if (patientId != null) {
             Patient patient = patientSearchService.getPatientEntityById(patientId);
             if (patient != null) {
@@ -69,7 +70,7 @@ public class ReceptionistCreateSessionController {
                 model.addAttribute("errorMessage", "Không tìm thấy bệnh nhân.");
             }
         }
-        
+
         if (keyword != null) {
             List<PatientSearchResponse> patients = patientSearchService.searchPatients(keyword);
             model.addAttribute("patients", patients);
@@ -101,12 +102,12 @@ public class ReceptionistCreateSessionController {
             if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
                 receptionistId = ((CustomUserDetails) authentication.getPrincipal()).getUser().getUserId();
             }
-            
+
             DiagnosisSessionResponse response = diagnosisSessionService.createSession(request, receptionistId);
-            redirectAttributes.addFlashAttribute("successMessage", "Tạo phiên khám thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "Tạo ca khám thành công!");
             redirectAttributes.addFlashAttribute("createdSessionId", response.getSessionId());
             return "redirect:/receptionist/create-session"; // Redirect to clear form and show success
-            
+
         } catch (Exception e) {
             log.error("Error creating session", e);
             model.addAttribute("errorMessage", e.getMessage());

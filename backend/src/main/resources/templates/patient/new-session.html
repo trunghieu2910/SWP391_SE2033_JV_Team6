@@ -8,7 +8,7 @@
     <div class="page-shell">
         <div class="page-header">
             <div>
-                <p class="eyebrow">Phiên khám hiện tại</p>
+                <p class="eyebrow">Ca khám hiện tại</p>
                 <h1>Khai báo triệu chứng lâm sàng</h1>
                 <p class="subtext">Điền các thông tin triệu chứng để bác sĩ có dữ liệu ban đầu cho chẩn đoán.</p>
             </div>
@@ -17,7 +17,7 @@
 
         <section class="summary-card" style="margin-bottom: 24px;">
             <div class="summary-list">
-                <div><span>Mã phiên khám</span><strong th:text="${activeSession.sessionId != null ? '#' + activeSession.sessionId : '—'}">#—</strong></div>
+                <div><span>Mã ca khám</span><strong th:text="${activeSession.sessionId != null ? '#' + activeSession.sessionId : '—'}">#—</strong></div>
                 <div><span>Ngày tạo</span><strong th:text="${activeSession.createdAt != null ? #temporals.format(activeSession.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">—</strong></div>
                 <div><span>Chế độ nhập triệu chứng</span>
                     <strong th:text="${activeSession.clinicalInputMode != null ? (activeSession.clinicalInputMode.name() == 'DOCTOR' ? 'Bác sĩ nhập' : 'Bệnh nhân nhập') : 'Chưa chọn'}">—</strong>

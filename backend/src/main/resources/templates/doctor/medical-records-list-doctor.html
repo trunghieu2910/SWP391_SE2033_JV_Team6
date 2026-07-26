@@ -20,7 +20,7 @@
             <div class="stat-icon blue"><i class="fa-solid fa-clipboard-list"></i></div>
             <div>
                 <div class="stat-num" th:text="${totalElements}">0</div>
-                <div class="stat-lbl">Tổng phiên khám</div>
+                <div class="stat-lbl">Tổng ca khám</div>
             </div>
         </div>
         <div class="stat-card">
@@ -147,7 +147,7 @@
             <!-- Card Body -->
             <div class="rec-body">
                 <div class="rec-row">
-                    <span class="rec-lbl">Mã phiên khám</span>
+                    <span class="rec-lbl">Mã ca khám</span>
                     <span class="rec-val code"
                           th:text="${rec.id != null ? '#S' + #numbers.formatInteger(rec.id, 4) : '#S0000'}">—</span>
                 </div>

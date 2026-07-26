@@ -105,7 +105,7 @@ public class DoctorMedicalRecordViewController {
     /**
      * Trang chi tiết hồ sơ bệnh án — maps to: GET /doctor/medical-records/{sessionId}
      *
-     * @param sessionId mã phiên khám
+     * @param sessionId mã ca khám
      * @param model     Thymeleaf model
      * @return          tên template "doctor/medical-records/detail"
      */
