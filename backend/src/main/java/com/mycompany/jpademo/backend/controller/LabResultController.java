@@ -30,41 +30,23 @@ public class LabResultController {
     private final LabResultService labResultService;
     private final DiagnosisSessionRepository sessionRepository;
 
-    /** Renders the "add lab test" form pre-filled with the target session. */
-    @PreAuthorize("hasRole('DOCTOR')")
-    @GetMapping("/doctor/lab-results/create")
-    public String showCreateForm(@RequestParam("sessionId") Integer sessionId, Model model) {
-        DiagnosisSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Không tìm thấy ca khám với ID: " + sessionId));
-
-        CreateLabResultRequest form = new CreateLabResultRequest();
-        form.setSessionId(sessionId);
-
-        model.addAttribute("labResultForm", form);
-        model.addAttribute("session", session);
-        return "doctor/lab-result";
-    }
-
     /** Handles form submission for creating a new lab order; redirects back to the session detail page either way. */
     @PreAuthorize("hasRole('DOCTOR')")
     @PostMapping("/doctor/lab-results/create")
     public String createLabResult(
             @Valid @ModelAttribute("labResultForm") CreateLabResultRequest form,
             BindingResult bindingResult,
-            Model model,
             RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("session",
-                    sessionRepository.findById(form.getSessionId()).orElse(null));
-            return "doctor/lab-result";
+            String firstError = bindingResult.getAllErrors().get(0).getDefaultMessage();
+            redirectAttributes.addFlashAttribute("error", firstError);
+            return "redirect:/doctor/sessions/" + form.getSessionId() + "?openLab=true";
         }
 
         try {
             labResultService.createLabResult(form);
-            redirectAttributes.addFlashAttribute("success",
-                    "Tạo chỉ định xét nghiệm thành công!");
+            redirectAttributes.addFlashAttribute("success", "Tạo chỉ định xét nghiệm thành công!");
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
