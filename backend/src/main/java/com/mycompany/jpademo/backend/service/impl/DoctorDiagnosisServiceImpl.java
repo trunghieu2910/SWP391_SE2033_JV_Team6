@@ -330,15 +330,6 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         List<MedicalImage> medicalImages = medicalImageRepository.findByDiagnosisSession_SessionId(sessionId);
         Review review = reviewRepository.findByDiagnosisSessionSessionId(sessionId).orElse(null);
 
-        // Tự động sửa trạng thái: nếu session đang PROCESSING nhưng đã có kết quả hình ảnh AI
-        // thì chuyển sang PENDING (chờ bác sĩ kết luận)
-        if (session.getStatus() == DiagnosisSessionStatus.PROCESSING && !medicalImages.isEmpty()) {
-            session.setStatus(DiagnosisSessionStatus.PENDING);
-            sessionRepository.save(session);
-            log.info("Auto-fixed session {} status: PROCESSING -> PENDING (has {} medical images)",
-                    sessionId, medicalImages.size());
-        }
-
         return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages, review);
     }
 
@@ -356,8 +347,6 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (session.getReview() != null) {
             throw new IllegalStateException("Ca chẩn đoán này đã có kết luận và không thể chỉnh sửa lại.");
         }
-
-
 
         User doctor = userRepository.findById(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ"));

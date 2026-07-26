@@ -1,19 +1,18 @@
-// dashboard.js
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Dashboard loaded');
 
     // Lấy dữ liệu từ window (đã được truyền từ backend)
     var userRegistrations = window._userData || [];
-    var diagnosisSessions = window._sessionData || [];
+    var requestTrends = window._requestData || [];
 
     console.log('📊 User Registrations:', userRegistrations);
-    console.log('📊 Diagnosis Sessions:', diagnosisSessions);
+    console.log('📊 Request Trends:', requestTrends);
     console.log('📊 User count:', userRegistrations.length);
-    console.log('📊 Session count:', diagnosisSessions.length);
+    console.log('📊 Request count:', requestTrends.length);
 
     // Vẽ biểu đồ
     createUserChart(userRegistrations);
-    createSessionChart(diagnosisSessions);
+    createRequestChart(requestTrends);
 });
 
 function createUserChart(data) {
@@ -129,12 +128,12 @@ function createUserChart(data) {
     }
 }
 
-function createSessionChart(data) {
-    var canvas = document.getElementById('sessionChart');
-    var errorEl = document.getElementById('sessionChartError');
+function createRequestChart(data) {
+    var canvas = document.getElementById('requestChart');
+    var errorEl = document.getElementById('requestChartError');
 
     if (!canvas) {
-        console.error('❌ Không tìm thấy canvas sessionChart');
+        console.error('❌ Không tìm thấy canvas requestChart');
         return;
     }
 
@@ -157,12 +156,12 @@ function createSessionChart(data) {
         counts.push(item.count || 0);
     });
 
-    console.log('📈 Session Months:', months);
-    console.log('📈 Session Counts:', counts);
+    console.log('📈 Request Months:', months);
+    console.log('📈 Request Counts:', counts);
 
     var hasData = counts.some(function(c) { return c > 0; });
     if (!hasData) {
-        console.warn('⚠️ Không có dữ liệu hợp lệ cho session chart');
+        console.warn('⚠️ Không có dữ liệu hợp lệ cho request chart');
         canvas.style.display = 'none';
         if (errorEl) {
             errorEl.style.display = 'block';
@@ -224,12 +223,12 @@ function createSessionChart(data) {
             }
         });
 
-        console.log('✅ Session chart created successfully');
+        console.log('✅ Request chart created successfully');
         canvas.style.display = 'block';
         if (errorEl) errorEl.style.display = 'none';
 
     } catch (e) {
-        console.error('❌ Lỗi tạo session chart:', e);
+        console.error('❌ Lỗi tạo request chart:', e);
         canvas.style.display = 'none';
         if (errorEl) {
             errorEl.style.display = 'block';
