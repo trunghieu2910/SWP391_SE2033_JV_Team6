@@ -12,18 +12,6 @@
         <div class="prescription-container" style="display: flex; flex-direction: column; gap: 20px;"
              th:with="isPrescriptionDisabled = ${sessionDetail.review == null or (sessionDetail.status != null and sessionDetail.status == 'COMPLETED')}">
 
-            <!-- Cảnh báo chưa có kết luận chẩn đoán -->
-            <div th:if="${sessionDetail.review == null}" class="alert alert-warning" style="background-color: #fffbe6; border: 1px solid #ffe58f; color: #d46b08; padding: 12px 16px; border-radius: 8px; font-weight: 600;">
-                <i class="fa-solid fa-triangle-exclamation" style="margin-right: 8px;"></i>
-                Vui lòng hoàn thành phần Kết luận chẩn đoán trước khi kê đơn thuốc cho bệnh nhân.
-            </div>
-
-            <!-- Thông báo ca chẩn đoán đã hoàn thành -> Không được phép chỉnh sửa đơn thuốc -->
-            <div th:if="${sessionDetail.status != null and sessionDetail.status == 'COMPLETED'}" class="alert alert-info" style="background-color: #f4f4f5; border: 1px solid #e4e4e7; color: #52525b; padding: 12px 16px; border-radius: 8px; font-weight: 600;">
-                <i class="fa-solid fa-lock" style="margin-right: 8px;"></i>
-                Ca chẩn đoán đã ở trạng thái hoàn thành. Đơn thuốc không được phép chỉnh sửa hoặc tạo mới.
-            </div>
-
             <!-- Thông báo trạng thái nếu ca đã có đơn thuốc -->
             <div th:if="${prescription != null}" class="prescription-status-info" style="display: flex; align-items: center; justify-content: space-between; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; color: #166534;">
                 <div>

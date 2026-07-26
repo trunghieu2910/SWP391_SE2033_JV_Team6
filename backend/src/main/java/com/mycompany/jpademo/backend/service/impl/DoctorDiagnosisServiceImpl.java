@@ -49,9 +49,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     private static final Map<DiagnosisSessionStatus, Set<DiagnosisSessionStatus>> ALLOWED_TRANSITIONS = Map.of(
             DiagnosisSessionStatus.PENDING,    EnumSet.of(DiagnosisSessionStatus.PROCESSING, DiagnosisSessionStatus.FAILED),
-            DiagnosisSessionStatus.PROCESSING, EnumSet.of(DiagnosisSessionStatus.COMPLETED, DiagnosisSessionStatus.FAILED),
-            DiagnosisSessionStatus.COMPLETED,  EnumSet.of(DiagnosisSessionStatus.PROCESSING),
-            DiagnosisSessionStatus.FAILED,     EnumSet.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING)
+            DiagnosisSessionStatus.PROCESSING, EnumSet.of(DiagnosisSessionStatus.COMPLETED, DiagnosisSessionStatus.FAILED)
     );
 
     private static final Map<String, String> SYSTEMIC_SYMPTOM_NAMES = Map.of(
@@ -136,7 +134,9 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (Boolean.TRUE.equals(session.getIsShared())) {
             throw new BadRequestException("Ca chẩn đoán đã được chia sẻ. Không thể cập nhật trạng thái.");
         }
-
+        if (DiagnosisSessionStatus.COMPLETED.equals(session.getStatus()) || DiagnosisSessionStatus.FAILED.equals(session.getStatus())) {
+            throw new BadRequestException("Không thể cập nhật trạng thái khi ca chẩn đoán này đã hoàn thành hoặc thất bại.");
+        }
         DiagnosisSessionStatus currentStatus = session.getStatus();
         if (currentStatus.equals(newStatus)) {
             throw new BadRequestException("Trạng thái mới đang trùng với trạng thái hiện tại.");
