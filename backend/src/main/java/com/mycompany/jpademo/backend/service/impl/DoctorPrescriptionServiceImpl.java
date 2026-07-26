@@ -3,6 +3,9 @@ package com.mycompany.jpademo.backend.service.impl;
 import com.mycompany.jpademo.backend.dto.request.CreateDoctorPrescriptionRequest;
 import com.mycompany.jpademo.backend.dto.request.DoctorPrescriptionItemRequest;
 import com.mycompany.jpademo.backend.entity.*;
+import com.mycompany.jpademo.backend.enums.DrugStatus;
+import com.mycompany.jpademo.backend.enums.PrescriptionStatus;
+import com.mycompany.jpademo.backend.enums.PrescriptionDetailStatus;
 import com.mycompany.jpademo.backend.exception.BadRequestException;
 import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.exception.UnauthorizedActionException;
@@ -32,10 +35,11 @@ public class DoctorPrescriptionServiceImpl implements DoctorPrescriptionService 
     private final DrugRepository drugRepository;
     private final UserRepository userRepository;
 
+    //Lấy danh sách thuốcở trạng thái active
     @Override
     @Transactional(readOnly = true)
     public List<Drug> getActiveDrugs() {
-        return drugRepository.findByStatus((byte) 1);
+        return drugRepository.findByStatus(DrugStatus.ACTIVE);
     }
 
     @Override
@@ -61,6 +65,7 @@ public class DoctorPrescriptionServiceImpl implements DoctorPrescriptionService 
         }
     }
 
+    //Lưu / Cập nhật Đơn Thuốc
     @Override
     @Transactional
     public Prescription savePrescription(Integer doctorId, CreateDoctorPrescriptionRequest request) {
@@ -75,21 +80,33 @@ public class DoctorPrescriptionServiceImpl implements DoctorPrescriptionService 
         DiagnosisSession session = sessionRepository.findById(request.getSessionId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán #" + request.getSessionId()));
 
+        //Validate: tránh bác sĩ này sửa đơn thuốc của bác sĩ khác.
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền kê đơn thuốc cho ca chẩn đoán này.");
+        }
+
+        // Kiểm tra: Bắt buộc phải có Đánh giá/Kết luận trước khi kê đơn thuốc
+        if (session.getReview() == null) {
+            throw new BadRequestException("Bác sĩ phải đưa ra kết luận chẩn đoán trước khi kê đơn thuốc cho bệnh nhân.");
+        }
+
+        // Kiểm tra: Nếu ca khám đã hoàn tất (COMPLETED), không cho phép sửa đổi
+        if (session.getStatus() == com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.COMPLETED) {
+            throw new BadRequestException("Ca chẩn đoán này đã hoàn thành, không được phép chỉnh sửa đơn thuốc.");
         }
 
         User doctor = userRepository.findById(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin bác sĩ."));
 
-        // Lấy thông tin đơn thuốc cũ nếu đã tồn tại
+        // Lấy thông tin đơn thuốc cũ nếu đã tồn tại và tạo mới đơn thuốc
         Prescription prescription = prescriptionRepository.findBySessionSessionId(request.getSessionId())
                 .orElseGet(() -> Prescription.builder()
+                        //Tạo mã thuốc
                         .prescriptionCode("RX" + request.getSessionId() + "-" + System.currentTimeMillis() % 100000)
                         .session(session)
                         .patient(session.getPatient())
                         .doctor(doctor)
-                        .status((byte) 0) // 0: Chờ cấp phát
+                        .status(PrescriptionStatus.PENDING) // PENDING: Chờ cấp phát
                         .prescriptionDate(LocalDateTime.now())
                         .build());
 
@@ -123,8 +140,8 @@ public class DoctorPrescriptionServiceImpl implements DoctorPrescriptionService 
             Drug drug = drugRepository.findById(itemReq.getDrugId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thuốc với ID: " + itemReq.getDrugId()));
 
-            // Kiểm tra trạng thái thuốc: Không cho kê thuốc ngưng hoạt động (status == 0)
-            if (drug.getStatus() == null || drug.getStatus() == 0) {
+            // Kiểm tra trạng thái thuốc: Không cho kê thuốc ngưng hoạt động
+            if (drug.getStatus() == null || drug.getStatus() == DrugStatus.INACTIVE) {
                 throw new BadRequestException("Thuốc \"" + drug.getDrugName() + "\" (Mã: " + drug.getDrugCode() + ") đã ngưng sử dụng, không thể kê đơn.");
             }
 
@@ -133,17 +150,19 @@ public class DoctorPrescriptionServiceImpl implements DoctorPrescriptionService 
             PrescriptionDetail detail = PrescriptionDetail.builder()
                     .prescription(prescription)
                     .drug(drug)
-                    .dosePerTime(itemReq.getDosePerTime() != null ? itemReq.getDosePerTime() : BigDecimal.ONE)
-                    .timesPerDay(itemReq.getTimesPerDay() != null ? itemReq.getTimesPerDay() : 1)
-                    .daysOfTreatment(itemReq.getDaysOfTreatment() != null ? itemReq.getDaysOfTreatment() : 1)
+                    .dosePerTime(BigDecimal.ONE)
+                    .timesPerDay(1)
+                    .daysOfTreatment(1)
                     .quantityPrescribed(itemReq.getQuantityPrescribed())
                     .dispenseUnit(baseUnitName)
                     .instruction(itemReq.getInstruction().trim())
+                    .status(PrescriptionDetailStatus.PENDING)
                     .build();
 
             prescription.getDetails().add(detail);
         }
 
+        //Tự động Insert toàn bộ các bản ghi trong prescription.getDetails() vào bảng prescription_details
         log.info("Lưu đơn thuốc cho ca chẩn đoán #{}, tổng số thuốc: {}", request.getSessionId(), prescription.getDetails().size());
         return prescriptionRepository.save(prescription);
     }

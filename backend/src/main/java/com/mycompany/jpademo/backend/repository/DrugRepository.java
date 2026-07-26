@@ -18,8 +18,8 @@ public interface DrugRepository extends JpaRepository<Drug, Integer> {
     @Query("SELECT d FROM Drug d WHERE d.subCategory.subCategoryId = :subCategoryId")
     Page<Drug> findBySubCategoryId(@Param("subCategoryId") Integer subCategoryId, Pageable pageable);
     
-    Page<Drug> findByStatus(Byte status, Pageable pageable);
-    java.util.List<Drug> findByStatus(Byte status);
+    Page<Drug> findByStatus(com.mycompany.jpademo.backend.enums.DrugStatus status, Pageable pageable);
+    java.util.List<Drug> findByStatus(com.mycompany.jpademo.backend.enums.DrugStatus status);
     
     @Query("SELECT d FROM Drug d WHERE d.drugName LIKE %:search% OR d.drugCode LIKE %:search%")
     Page<Drug> searchDrugs(@Param("search") String search, Pageable pageable);

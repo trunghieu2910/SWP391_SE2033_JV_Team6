@@ -99,14 +99,7 @@
             </div>
 
             <div class="form-row">
-                <div class="form-group">
-                    <label for="shelfLifeMonths">Thời hạn sử dụng (tháng) *</label>
-                    <input type="number" id="shelfLifeMonths" name="shelfLifeMonths" min="1" value="24" required>
-                </div>
-                <div class="form-group">
-                    <label for="packaging">Quy cách đóng gói *</label>
-                    <input type="text" id="packaging" name="packaging" placeholder="Ví dụ: Hộp 3 vỉ x 10 viên" required>
-                </div>
+
             </div>
 
             <div class="form-group">
@@ -177,7 +170,7 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
+            const form = document.querySelector('.form-container');
             if (form) {
                 form.addEventListener('submit', function(e) {
                     const fields = [
@@ -189,9 +182,7 @@
                         { id: 'subCategoryId', label: 'Phân nhóm thuốc' },
                         { id: 'manufacturer', label: 'Nhà sản xuất' },
                         { id: 'countryOfOrigin', label: 'Nước sản xuất' },
-                        { id: 'storageCondition', label: 'Điều kiện bảo quản' },
-                        { id: 'shelfLifeMonths', label: 'Thời hạn sử dụng' },
-                        { id: 'packaging', label: 'Quy cách đóng gói' }
+                        { id: 'storageCondition', label: 'Điều kiện bảo quản' }
                     ];
                     const missing = fields.filter(f => {
                         const el = document.getElementById(f.id);

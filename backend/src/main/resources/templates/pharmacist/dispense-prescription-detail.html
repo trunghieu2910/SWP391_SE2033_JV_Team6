@@ -15,7 +15,7 @@
             </div>
         </header>
 
-        <!-- Messages -->
+        <!-- Thông báo -->
         <div th:if="${success}" style="background: #ecfdf5; border: 1px solid #10b981; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-weight: 500;">
             <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
         </div>
@@ -23,7 +23,7 @@
             <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
         </div>
 
-        <!-- Patient Header Card -->
+        <!-- Th? header B?nh nhân -->
         <section class="card" style="margin-bottom: 32px; padding: 24px;">
             <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
                 Thông tin hành chính đơn thuốc
@@ -62,18 +62,11 @@
                     <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Trạng thái đơn</span>
                     <strong id="prescriptionStatusSummary" style="font-size: 1rem;">-</strong>
                 </div>
-                <div id="dispensedPharmacistNameContainer" style="display: none; flex-direction: column; gap: 4px;">
-                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Dược sĩ cấp phát</span>
-                    <strong th:text="${dispensedPharmacistName != null ? dispensedPharmacistName : '-'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
-                </div>
-                <div id="dispensedPharmacistIdContainer" style="display: none; flex-direction: column; gap: 4px;">
-                    <span style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--neutral-light);">Mã dược sĩ</span>
-                    <strong th:text="${dispensedPharmacistId != null ? dispensedPharmacistId : '-'}" style="font-size: 1rem; color: var(--neutral-dark);">-</strong>
-                </div>
+
             </div>
         </section>
 
-        <!-- Prescription Details Table -->
+        <!-- B?ng chi ti?t Ðon thu?c -->
         <section class="card dispense-detail-card">
             <div class="dispense-detail-card-header">
                 <h3>Danh sách thuốc cần phát</h3>
@@ -82,45 +75,65 @@
                 <table class="table dispense-detail-table">
                     <colgroup>
                         <col class="col-drug">
-                        <col class="col-dose">
-                        <col class="col-duration">
                         <col class="col-quantity">
                         <col class="col-dispensed">
+                        <col class="col-dispenser-id">
+                        <col class="col-dispenser">
+                        <col class="col-dispense-time">
                         <col class="col-status">
                         <col class="col-action">
                     </colgroup>
                     <thead>
                         <tr>
                             <th>Tên thuốc</th>
-                            <th>Liều dùng</th>
-                            <th>Thời gian sử dụng</th>
                             <th>Số lượng kê</th>
                             <th>Đã phát</th>
+                            <th>ID</th>
+                            <th>Dược sĩ cấp phát</th>
+                            <th>Thời gian cấp phát</th>
                             <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="item : ${details}" th:data-pending="${item.isPending}">
-                            <td class="drug-name-cell" th:text="${item.drugName}"></td>
-                            <td th:text="${item.dosePerTime} + ' mg, ' + ${item.timesPerDay} + ' lần/ngày'"></td>
-                            <td th:text="${item.daysOfTreatment} + ' ngày'"></td>
-                            <td class="number-cell" th:text="${item.quantityPrescribed}"></td>
-                            <td class="number-cell" th:text="${item.quantityDispensed != null ? item.quantityDispensed : 0}"></td>
-                            <td class="status-cell">
-                                <span th:if="${item.isPending}" class="badge badge-warning dispense-status-badge">Chờ cấp phát</span>
-                                <span th:if="!${item.isPending}" class="badge badge-success dispense-status-badge">Đã cấp phát</span>
-                            </td>
-                            <td class="action-cell">
-                                <a th:href="@{/pharmacist/dispense-form/{id}(id=${item.detailId})}"
-                                   class="btn btn-sm btn-primary dispense-action-btn" th:if="${item.isPending}">
-                                    <i class="fas fa-hand-holding-medical"></i> Cấp phát
-                                </a>
-                                <span th:unless="${item.isPending}" class="dispense-completed-text">
-                                    <i class="fas fa-check"></i> Hoàn thành
-                                </span>
-                            </td>
-                        </tr>
+                        <th:block th:each="item : ${details}">
+                            <tr th:data-pending="${item.isPending}">
+                                <td class="drug-name-cell" th:text="${item.drugName}"></td>
+                                <td class="number-cell" th:text="${item.quantityPrescribed}"></td>
+                                <td class="number-cell" th:text="${item.quantityDispensed != null ? item.quantityDispensed : 0}"></td>
+                                <td th:text="${item.dispensedByUserId != null ? item.dispensedByUserId : '-'}"></td>
+                                <td th:text="${item.dispensedByUser != null ? item.dispensedByUser : '-'}"></td>
+                                <td th:text="${item.dispensedAt != null ? #temporals.format(item.dispensedAt, 'dd/MM/yyyy HH:mm') : '-'}"></td>
+                                <td class="status-cell">
+                                    <span th:if="${item.status != null and item.status.name() == 'CANCELLED'}" class="badge badge-danger dispense-status-badge" style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 4px; font-weight: 700;">Đã hủy</span>
+                                    <span th:if="${item.isPending and (item.status == null or item.status.name() == 'PENDING')}" class="badge badge-warning dispense-status-badge">Chờ cấp phát</span>
+                                    <span th:if="${!item.isPending and item.status != null and item.status.name() == 'DISPENSED'}" class="badge badge-success dispense-status-badge">Đã cấp phát</span>
+                                </td>
+                                <td class="action-cell">
+                                    <a th:href="@{/pharmacist/dispense-form/{id}(id=${item.detailId})}"
+                                       class="btn btn-sm btn-primary dispense-action-btn" th:if="${item.isPending}">
+                                        <i class="fas fa-hand-holding-medical"></i> Xử lý
+                                    </a>
+                                    <span th:if="${item.status != null and item.status.name() == 'CANCELLED'}" class="dispense-completed-text" style="color: #dc2626; font-weight: 700; cursor: pointer;" th:attr="onclick='toggleReason(' + ${item.detailId} + ')'">
+                                        <i class="fas fa-ban"></i> Đã hủy <i class="fas fa-chevron-down" style="font-size: 0.8em; margin-left: 4px;"></i>
+                                    </span>
+                                    <span th:if="${!item.isPending and item.status != null and item.status.name() == 'DISPENSED'}" class="dispense-completed-text">
+                                        <i class="fas fa-check"></i> Hoàn thành
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr th:if="${item.status != null and item.status.name() == 'CANCELLED'}" th:id="'reason-row-' + ${item.detailId}" style="display: none; background-color: #fef2f2;">
+                                <td colspan="8" style="padding: 12px 16px; border-bottom: 1px solid #fee2e2; text-align: left;">
+                                    <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                        <i class="fas fa-info-circle" style="color: #ef4444; margin-top: 3px;"></i>
+                                        <div>
+                                            <strong style="color: #991b1b; display: block; margin-bottom: 4px; font-size: 0.9rem;">Lý do hủy:</strong>
+                                            <span style="color: #b91c1c; font-size: 0.9rem; white-space: pre-wrap;" th:text="${item.notes != null and !item.notes.isEmpty() ? item.notes : 'Không có ghi chú'}">Không có ghi chú</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
                     </tbody>
                 </table>
             </div>
@@ -140,18 +153,18 @@
             if (statusEl) {
                 statusEl.innerHTML = pendingCount > 0
                     ? '<span class="badge badge-warning">Chờ cấp phát</span>'
-                    : '<span class="badge badge-success">Đã cấp phát</span>';
+                    : '<span class="badge badge-success">Đã hoàn tất</span>';
             }
 
-            const pharmacistNameEl = document.getElementById('dispensedPharmacistNameContainer');
-            const pharmacistIdEl = document.getElementById('dispensedPharmacistIdContainer');
-            
-            if (pendingCount === 0 && pharmacistNameEl && pharmacistIdEl) {
-                pharmacistNameEl.style.display = 'flex';
-                pharmacistIdEl.style.display = 'flex';
-            }
+            window.toggleReason = function(id) {
+                const row = document.getElementById('reason-row-' + id);
+                if (row) {
+                    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+                }
+            };
         });
     </script>
 </main>
 </body>
 </html>
+

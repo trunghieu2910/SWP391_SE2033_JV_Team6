@@ -37,6 +37,7 @@ import com.mycompany.jpademo.backend.dto.request.CreatePatientSessionRequest;
 @RequiredArgsConstructor
 @Slf4j
 public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
+
     private final DiagnosisSessionRepository diagnosisSessionRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
@@ -47,7 +48,11 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
     private final MedicalImageRepository medicalImageRepository;
     private final SystemLogServiceImpl systemLogService;
     private final ApplicationEventPublisher eventPublisher;
+    // =========================================================================
+    // 1. RECEPTIONIST SCREEN (MÀN HÌNH LỄ TÂN)
+    // =========================================================================
 
+    // Màn hình Lễ tân: Tạo ca khám mới cho bệnh nhân
     @Override
     @Transactional
     public DiagnosisSessionResponse createSession(CreateDiagnosisSessionRequest request, Integer creatorId) {
@@ -59,22 +64,22 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
         User doctor = userRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bác sĩ không tồn tại"));
 
-        // Kiểm tra business rule: Bệnh nhân đã có phiên khám nào chưa, nếu phiên gần nhất chưa COMPLETED thì chặn
+        // Kiểm tra business rule: Bệnh nhân đã có ca khám nào chưa, nếu phiên gần nhất chưa COMPLETED thì chặn
         List<DiagnosisSession> existingSessions = diagnosisSessionRepository.findByPatientPatientId(patient.getPatientId());
         if (!existingSessions.isEmpty()) {
             existingSessions.sort((s1, s2) -> s2.getCreatedAt().compareTo(s1.getCreatedAt())); // Descending
             DiagnosisSession latestSession = existingSessions.get(0);
-            if (latestSession.getStatus() != DiagnosisSessionStatus.COMPLETED) {
-                throw new BadRequestException("Bệnh nhân này đang có một phiên khám chưa hoàn thành (Mã phiên: " + latestSession.getSessionId() + "). Không thể tạo mới.");
+            if (latestSession.getStatus() != DiagnosisSessionStatus.COMPLETED && latestSession.getStatus() != DiagnosisSessionStatus.FAILED)  {
+                throw new BadRequestException("Bệnh nhân này đang có một ca khám chưa hoàn thành (Mã phiên: " + latestSession.getSessionId() + "). Không thể tạo mới.");
             }
         }
 
         // Kiểm tra business rule: Bác sĩ không được có quá 10 ca chẩn đoán chưa hoàn tất
-        long incompleteDoctorSessions = diagnosisSessionRepository.countByUserUserIdAndStatusNot(doctor.getUserId(), DiagnosisSessionStatus.COMPLETED);
+        long incompleteDoctorSessions = diagnosisSessionRepository.countByUserUserIdAndStatusNotIn(doctor.getUserId(), List.of(DiagnosisSessionStatus.COMPLETED, DiagnosisSessionStatus.FAILED));
         if (incompleteDoctorSessions >= 10) {
             throw new BadRequestException("Bác sĩ này đang có " + incompleteDoctorSessions + " ca chẩn đoán chưa hoàn tất. Không thể nhận thêm ca mới (Tối đa 10 ca).");
         }
-        
+
         // Lấy thông tin người tạo (Lễ tân)
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Người tạo không tồn tại"));
@@ -92,17 +97,17 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
         DiagnosisSession savedSession = diagnosisSessionRepository.save(session);
 
         // NOTE: do NOT create SymptomResult here. It will be created when patient or doctor submits.
-
         // Ghi log
         systemLogService.logActivity("DiagnosisSession", savedSession.getSessionId(), "CREATE",
-                "Lễ tân " + creator.getFullName() + " tạo phiên khám mới cho bệnh nhân " + patient.getUser().getFullName() + ", chỉ định bác sĩ " + doctor.getFullName());
+                "Lễ tân " + creator.getFullName() + " tạo ca khám mới cho bệnh nhân " + patient.getUser().getFullName() + ", chỉ định bác sĩ " + doctor.getFullName());
 
         // Emit event để notify patient
         eventPublisher.publishEvent(new DiagnosisSessionCreatedEvent(savedSession.getSessionId(), patient.getUser().getUserId()));
 
         return mapToResponse(savedSession);
     }
-// The Hieu
+
+    // Màn hình Lễ tân: Thêm bệnh nhân vào ca khám (Logic tương tự tạo ca khám)
     @Override
     @Transactional
     public DiagnosisSessionResponse addPatientToSession(CreateDiagnosisSessionRequest request, Integer creatorId) {
@@ -110,149 +115,55 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
         return createSession(request, creatorId);
     }
 
+    // Màn hình Lễ tân: Xem danh sách bác sĩ và tải công việc (Màn hình 1)
+    // [Nguyen The Hieu]: Bước 3 - Service Impl: Triển khai logic tính toán danh sách tải bác sĩ (Màn hình lễ tân 1)
     @Override
-    @Transactional
-    public SymptomResultResponse submitSymptomForm(Integer sessionId, SubmitSymptomFormRequest request, Integer userId, String userRole) {
-        // Kiểm tra phiên khám tồn tại
-        DiagnosisSession session = diagnosisSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Phiên khám không tồn tại"));
+    public List<DoctorWorkloadResponse> getDoctorWorkloads() {
+        // Lấy tất cả bác sĩ đang có trạng thái ACTIVE
+        List<User> doctors = userRepository.findByRoleRoleNameAndStatus(
+                RoleName.DOCTOR, UserStatus.ACTIVE, Pageable.unpaged()).getContent();
 
-        // Kiểm tra quyền: nếu là bệnh nhân, phải là bệnh nhân của phiên này
-        if ("ROLE_PATIENT".equals(userRole)) {
-            if (!session.getPatient().getUser().getUserId().equals(userId)) {
-                throw new BadRequestException("Bạn không có quyền submit form cho phiên khám này");
-            }
-            if (session.getClinicalInputMode() == ClinicalInputMode.DOCTOR) {
-                throw new BadRequestException("Phiên khám này được bác sĩ nhập triệu chứng. Bạn không thể gửi biểu mẫu.");
-            }
-        }
+        // Với mỗi bác sĩ, gọi repository để đếm số lượng ca theo từng trạng thái (PENDING, PROCESSING, FAILED)
+        return doctors.stream().map(doctor -> {
+            long pending = diagnosisSessionRepository.countByUserUserIdAndStatus(
+                    doctor.getUserId(), DiagnosisSessionStatus.PENDING);
+            long processing = diagnosisSessionRepository.countByUserUserIdAndStatus(
+                    doctor.getUserId(), DiagnosisSessionStatus.PROCESSING);
 
-        // Lấy hoặc tạo SymptomResult nếu chưa tồn tại
-        SymptomResult symptomResult = symptomResultRepository.findByDiagnosisSessionSessionId(sessionId)
-            .orElseGet(() -> {
-                SymptomResult sr = new SymptomResult();
-                sr.setDiagnosisSession(session);
-                sr.setStatus(SymptomResultStatus.PENDING);
-                sr.setSymptomDetails(new java.util.ArrayList<>());
-                return sr;
-            });
+            // Đếm tổng số ca ĐANG HOẠT ĐỘNG (nghĩa là trạng thái khác COMPLETED và FAILED)
+            long totalActive = diagnosisSessionRepository.countByUserUserIdAndStatusNotIn(
+                    doctor.getUserId(), List.of(DiagnosisSessionStatus.COMPLETED, DiagnosisSessionStatus.FAILED));
 
-        // Xóa các SymptomDetails cũ
-        if ("ROLE_PATIENT".equals(userRole) && symptomResult.getStatus() == SymptomResultStatus.COMPLETED) {
-            throw new BadRequestException("Bạn đã gửi triệu chứng rồi, không thể chỉnh sửa lại.");
-        }
-        if (symptomResult.getSymptomDetails() != null && !symptomResult.getSymptomDetails().isEmpty()) {
-            symptomDetailsRepository.deleteAll(symptomResult.getSymptomDetails());
-        }
-
-        // Set thêm thông tin form triệu chứng
-        symptomResult.setMenopauseStatus(request.getMenopauseStatus());
-        symptomResult.setSymptomDuration(request.getSymptomDuration());
-        symptomResult.setSymptomProgressing(request.getSymptomProgressing());
-
-        // Save SymptomResult trước khi tạo SymptomDetails (để tránh transient entity error)
-        symptomResultRepository.save(symptomResult);
-
-        // Thêm SymptomDetails mới
-        List<Symptom> symptoms = symptomRepository.findAllById(request.getSymptoms());
-        List<SymptomDetails> symptomDetailsList = symptoms.stream()
-                .map(symptom -> SymptomDetails.builder()
-                        .symptomResult(symptomResult)
-                        .symptom(symptom)
-                        .build())
-                .collect(Collectors.toList());
-        symptomDetailsRepository.saveAll(symptomDetailsList);
-
-        // Khi bệnh nhân hoặc bác sĩ submit xong một lần thì
-        // SymptomResult là COMPLETED và DiagnosisSession chuyển sang PROCESSING.
-        symptomResult.setStatus(SymptomResultStatus.COMPLETED);
-        if (session.getStatus() == DiagnosisSessionStatus.PENDING) {
-            session.setStatus(DiagnosisSessionStatus.PROCESSING);
-        }
-
-        symptomResultRepository.save(symptomResult);
-
-        // Update weight, height trên session nếu bác sĩ thay đổi
-        session.setWeight(request.getWeight());
-        session.setHeight(request.getHeight());
-        diagnosisSessionRepository.save(session);
-
-        // Ghi log
-        String action = "ROLE_PATIENT".equals(userRole) ? "PATIENT_SUBMIT" : "DOCTOR_SUBMIT";
-        String description = "ROLE_PATIENT".equals(userRole)
-                ? "Bệnh nhân điền biểu mẫu triệu chứng"
-                : "Bác sĩ điền hộ biểu mẫu triệu chứng";
-        systemLogService.logActivity("SymptomResult", symptomResult.getSymptomResultId(), action, description);
-
-        // Emit event
-        if ("ROLE_PATIENT".equals(userRole)) {
-            eventPublisher.publishEvent(new SymptomFormSubmittedEvent(sessionId, userId));
-        }
-
-        return mapSymptomResultToResponse(symptomResult);
+            // Gói vào DTO và trả về
+            return DoctorWorkloadResponse.builder()
+                    .doctorId(doctor.getUserId())
+                    .doctorName(doctor.getFullName())
+                    .pendingCount(pending)
+                    .processingCount(processing)
+                    .totalActive(totalActive)
+                    .build();
+        }).collect(Collectors.toList());
     }
 
+    // Màn hình Lễ tân: Xem chi tiết danh sách ca khám của một bác sĩ cụ thể (Màn hình 2)
+    // [Nguyen The Hieu]: Bước 3 - Service Impl: Triển khai logic lấy chi tiết ca khám của một bác sĩ (Màn hình 2)
     @Override
-    public DiagnosisSessionResponse getSessionDetail(Integer sessionId) {
-        DiagnosisSession session = diagnosisSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Phiên khám không tồn tại"));
-        return mapToResponse(session);
+    public Page<DiagnosisSession> getSessionsByDoctor(Integer doctorId,
+            List<DiagnosisSessionStatus> statuses,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable) {
+        // Chỉ đơn giản là gọi xuống Repository method vừa tạo ở Bước 1
+        return diagnosisSessionRepository.findByDoctorIdWithDateFilter(
+                doctorId, statuses, startDate, endDate, pageable);
     }
 
-    @Override
-    public SymptomResultResponse getSymptomResult(Integer sessionId) {
-        SymptomResult symptomResult = symptomResultRepository.findByDiagnosisSessionSessionId(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Kết quả triệu chứng không tồn tại"));
-        return mapSymptomResultToResponse(symptomResult);
-    }
 
-    private DiagnosisSessionResponse mapToResponse(DiagnosisSession session) {
-        SymptomResultStatus symptomStatus = session.getSymptomResult() != null
-                ? session.getSymptomResult().getStatus()
-                : SymptomResultStatus.PENDING;
+    // =========================================================================
+    // 2. PATIENT SCREEN (MÀN HÌNH BỆNH NHÂN)
+    // =========================================================================
 
-        return DiagnosisSessionResponse.builder()
-                .sessionId(session.getSessionId())
-                .patientId(session.getPatient().getPatientId())
-                .patientName(session.getPatient().getUser().getFullName())
-                .weight(session.getWeight())
-                .height(session.getHeight())
-                .status(session.getStatus())
-                .symptomResultStatus(symptomStatus)
-                .clinicalInputMode(session.getClinicalInputMode())
-                .createdAt(session.getCreatedAt())
-                .symptomResult(session.getSymptomResult() != null ? mapSymptomResultToResponse(session.getSymptomResult()) : null)
-                .build();
-    }
-
-    private SymptomResultResponse mapSymptomResultToResponse(SymptomResult symptomResult) {
-        List<SymptomDetailResponse> symptomDetails = symptomResult.getSymptomDetails() != null
-                ? symptomResult.getSymptomDetails().stream()
-                .map(sd -> SymptomDetailResponse.builder()
-                        .symptomDetailId(sd.getSymptomDetailsId())
-                        .symptomId(sd.getSymptom().getSymptomId())
-                        .symptomName(sd.getSymptom().getSymptomName())
-                        .build())
-                .collect(Collectors.toList())
-                : List.of();
-
-        List<Integer> symptomIds = symptomDetails.stream()
-                .map(SymptomDetailResponse::getSymptomId)
-                .collect(Collectors.toList());
-
-        return SymptomResultResponse.builder()
-                .symptomResultId(symptomResult.getSymptomResultId())
-                .sessionId(symptomResult.getDiagnosisSession().getSessionId())
-                .status(symptomResult.getStatus())
-                .createdAt(symptomResult.getCreatedAt())
-                .symptomIds(symptomIds)
-                .menopauseStatus(symptomResult.getMenopauseStatus())
-                .symptomDuration(symptomResult.getSymptomDuration())
-                .symptomProgressing(symptomResult.getSymptomProgressing())
-                .symptomDetails(symptomDetails)
-                .build();
-    }
-
+    // Màn hình Bệnh nhân: Tự đăng ký ca khám
     @Override
     @Transactional
     public DiagnosisSessionResponse createSessionForPatient(CreatePatientSessionRequest request, User user) {
@@ -293,6 +204,7 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .build();
     }
 
+    // Màn hình Dashboard Bệnh nhân: Lấy ca khám đang hoạt động gần nhất
     @Override
     public DiagnosisSessionResponse getActiveSessionForPatient(User user) {
         Patient patient = patientRepository.findByUser(user)
@@ -317,6 +229,7 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
         return null;
     }
 
+    // Màn hình Lịch sử Bệnh nhân: Lấy toàn bộ lịch sử ca khám
     @Override
     public List<DiagnosisSessionResponse> getSessionsForPatient(User user) {
         Patient patient = patientRepository.findByUser(user)
@@ -335,11 +248,105 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                 .build()).toList();
     }
 
+
+    // =========================================================================
+    // 3. DOCTOR & PATIENT SHARED (MÀN HÌNH BÁC SĨ & BỆNH NHÂN)
+    // =========================================================================
+
+    // Màn hình Khai báo triệu chứng: Xử lý khi bệnh nhân hoặc bác sĩ gửi form triệu chứng
+    @Override
+    @Transactional
+    public SymptomResultResponse submitSymptomForm(Integer sessionId, SubmitSymptomFormRequest request, Integer userId, String userRole) {
+        // Kiểm tra ca khám tồn tại
+        DiagnosisSession session = diagnosisSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ca khám không tồn tại"));
+
+        // Kiểm tra quyền: nếu là bệnh nhân, phải là bệnh nhân của phiên này
+        if ("ROLE_PATIENT".equals(userRole)) {
+            if (!session.getPatient().getUser().getUserId().equals(userId)) {
+                throw new BadRequestException("Bạn không có quyền submit form cho ca khám này");
+            }
+            if (session.getClinicalInputMode() == ClinicalInputMode.DOCTOR) {
+                throw new BadRequestException("Ca khám này được bác sĩ nhập triệu chứng. Bạn không thể gửi biểu mẫu.");
+            }
+        }
+
+        // Lấy hoặc tạo SymptomResult nếu chưa tồn tại
+        SymptomResult symptomResult = symptomResultRepository.findByDiagnosisSessionSessionId(sessionId)
+                .orElseGet(() -> {
+                    SymptomResult sr = new SymptomResult();
+                    sr.setDiagnosisSession(session);
+                    sr.setStatus(SymptomResultStatus.PENDING);
+                    sr.setSymptomDetails(new java.util.ArrayList<>());
+                    return sr;
+                });
+
+        // Xóa các SymptomDetails cũ
+        if ("ROLE_PATIENT".equals(userRole) && symptomResult.getStatus() == SymptomResultStatus.COMPLETED) {
+            throw new BadRequestException("Bạn đã gửi triệu chứng rồi, không thể chỉnh sửa lại.");
+        }
+        if (symptomResult.getSymptomDetails() != null && !symptomResult.getSymptomDetails().isEmpty()) {
+            symptomDetailsRepository.deleteAll(symptomResult.getSymptomDetails());
+        }
+
+        // Set thêm thông tin form triệu chứng
+        symptomResult.setMenopauseStatus(request.getMenopauseStatus());
+        symptomResult.setSymptomDuration(request.getSymptomDuration());
+        symptomResult.setSymptomProgressing(request.getSymptomProgressing());
+
+        // Save SymptomResult trước khi tạo SymptomDetails (để tránh transient entity error)
+        symptomResultRepository.save(symptomResult);
+
+        // Thêm SymptomDetails mới
+        List<Symptom> symptoms = symptomRepository.findAllById(request.getSymptoms());
+        List<SymptomDetails> symptomDetailsList = symptoms.stream()
+                .map(symptom -> SymptomDetails.builder()
+                .symptomResult(symptomResult)
+                .symptom(symptom)
+                .build())
+                .collect(Collectors.toList());
+        symptomDetailsRepository.saveAll(symptomDetailsList);
+
+        // Khi bệnh nhân hoặc bác sĩ submit xong một lần thì
+        // SymptomResult là COMPLETED và DiagnosisSession chuyển sang PROCESSING.
+        symptomResult.setStatus(SymptomResultStatus.COMPLETED);
+        if (session.getStatus() == DiagnosisSessionStatus.PENDING) {
+            session.setStatus(DiagnosisSessionStatus.PROCESSING);
+        }
+
+        symptomResultRepository.save(symptomResult);
+
+        // Update weight, height trên session nếu bác sĩ thay đổi
+        session.setWeight(request.getWeight());
+        session.setHeight(request.getHeight());
+        diagnosisSessionRepository.save(session);
+
+        // Ghi log
+        String action = "ROLE_PATIENT".equals(userRole) ? "PATIENT_SUBMIT" : "DOCTOR_SUBMIT";
+        String description = "ROLE_PATIENT".equals(userRole)
+                ? "Bệnh nhân điền biểu mẫu triệu chứng"
+                : "Bác sĩ điền hộ biểu mẫu triệu chứng";
+        systemLogService.logActivity("SymptomResult", symptomResult.getSymptomResultId(), action, description);
+
+        // Emit event
+        if ("ROLE_PATIENT".equals(userRole)) {
+            eventPublisher.publishEvent(new SymptomFormSubmittedEvent(sessionId, userId));
+        }
+
+        return mapSymptomResultToResponse(symptomResult);
+    }
+
+
+    // =========================================================================
+    // 4. ULTRASOUND DOCTOR SCREEN (MÀN HÌNH BÁC SĨ SIÊU ÂM)
+    // =========================================================================
+
+    // Màn hình Bác sĩ siêu âm: Danh sách ca chờ chụp siêu âm
     @Override
     @Transactional(readOnly = true)
     public List<DiagnosisSessionResponse> getPendingUltrasoundSessions() {
         var sessions = diagnosisSessionRepository.findByStatusInOrderByCreatedAtDesc(
-            List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING)
+                List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING)
         );
         // Lọc những session có ít nhất 1 hình ảnh siêu âm đang chờ xử lý (PENDING)
         var filteredSessions = sessions.stream().filter(s -> {
@@ -352,7 +359,7 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
             }
             return false;
         }).collect(Collectors.toList());
-        
+
         return filteredSessions.stream().map(s -> {
             String types = "";
             if (s.getMedicalImages() != null) {
@@ -363,26 +370,27 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                         .collect(Collectors.joining(", "));
             }
             return DiagnosisSessionResponse.builder()
-                .sessionId(s.getSessionId())
-                .patientId(s.getPatient() != null ? s.getPatient().getPatientId() : null)
-                .patientName((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getFullName() : "Không xác định")
-                .patientCccd((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getNationalID() : "Không xác định")
-                .status(s.getStatus())
-                .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
-                .clinicalInputMode(s.getClinicalInputMode())
-                .createdAt(s.getCreatedAt())
-                .imageType(types)
-                .build();
+                    .sessionId(s.getSessionId())
+                    .patientId(s.getPatient() != null ? s.getPatient().getPatientId() : null)
+                    .patientName((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getFullName() : "Không xác định")
+                    .patientCccd((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getNationalID() : "Không xác định")
+                    .status(s.getStatus())
+                    .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
+                    .clinicalInputMode(s.getClinicalInputMode())
+                    .createdAt(s.getCreatedAt())
+                    .imageType(types)
+                    .build();
         }).toList();
     }
 
+    // Màn hình Bác sĩ siêu âm: Danh sách ca đã chụp siêu âm xong
     @Override
     @Transactional(readOnly = true)
     public List<DiagnosisSessionResponse> getCompletedUltrasoundSessions() {
         var sessions = diagnosisSessionRepository.findByStatusInOrderByCreatedAtDesc(
-            List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING, DiagnosisSessionStatus.COMPLETED)
+                List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING, DiagnosisSessionStatus.COMPLETED)
         );
-        
+
         return sessions.stream().filter(s -> {
             if (s.getMedicalImages() != null) {
                 for (var image : s.getMedicalImages()) {
@@ -403,7 +411,7 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                         }
                     }
                 }
-                
+
                 types = s.getMedicalImages().stream()
                         .filter(img -> img.getStatus() == MedicalImageStatus.COMPLETED)
                         .map(MedicalImage::getImageType)
@@ -411,21 +419,95 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                         .collect(Collectors.joining(", "));
             }
             return DiagnosisSessionResponse.builder()
-                .sessionId(s.getSessionId())
-                .patientId(s.getPatient() != null ? s.getPatient().getPatientId() : null)
-                .patientName((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getFullName() : "Không xác định")
-                .patientCccd((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getNationalID() : "Không xác định")
-                .status(s.getStatus())
-                .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
-                .clinicalInputMode(s.getClinicalInputMode())
-                .createdAt(s.getCreatedAt())
-                .medicalImageDetailsId(imageId)
-                .imageType(types)
-                .build();
+                    .sessionId(s.getSessionId())
+                    .patientId(s.getPatient() != null ? s.getPatient().getPatientId() : null)
+                    .patientName((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getFullName() : "Không xác định")
+                    .patientCccd((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getNationalID() : "Không xác định")
+                    .status(s.getStatus())
+                    .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
+                    .clinicalInputMode(s.getClinicalInputMode())
+                    .createdAt(s.getCreatedAt())
+                    .medicalImageDetailsId(imageId)
+                    .imageType(types)
+                    .build();
         }).collect(Collectors.toList());
     }
 
-    // Inner event classes
+
+    // =========================================================================
+    // 5. COMMON / HELPER METHODS (HÀM DÙNG CHUNG)
+    // =========================================================================
+
+    // Dùng chung: Lấy chi tiết một ca khám
+    @Override
+    public DiagnosisSessionResponse getSessionDetail(Integer sessionId) {
+        DiagnosisSession session = diagnosisSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ca khám không tồn tại"));
+        return mapToResponse(session);
+    }
+
+    // Dùng chung: Lấy kết quả triệu chứng của một ca
+    @Override
+    public SymptomResultResponse getSymptomResult(Integer sessionId) {
+        SymptomResult symptomResult = symptomResultRepository.findByDiagnosisSessionSessionId(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Kết quả triệu chứng không tồn tại"));
+        return mapSymptomResultToResponse(symptomResult);
+    }
+
+    // Hàm chuyển đổi Entity sang DTO
+    private DiagnosisSessionResponse mapToResponse(DiagnosisSession session) {
+        SymptomResultStatus symptomStatus = session.getSymptomResult() != null
+                ? session.getSymptomResult().getStatus()
+                : SymptomResultStatus.PENDING;
+
+        return DiagnosisSessionResponse.builder()
+                .sessionId(session.getSessionId())
+                .patientId(session.getPatient().getPatientId())
+                .patientName(session.getPatient().getUser().getFullName())
+                .weight(session.getWeight())
+                .height(session.getHeight())
+                .status(session.getStatus())
+                .symptomResultStatus(symptomStatus)
+                .clinicalInputMode(session.getClinicalInputMode())
+                .createdAt(session.getCreatedAt())
+                .symptomResult(session.getSymptomResult() != null ? mapSymptomResultToResponse(session.getSymptomResult()) : null)
+                .build();
+    }
+
+    // Hàm chuyển đổi Entity triệu chứng sang DTO
+    private SymptomResultResponse mapSymptomResultToResponse(SymptomResult symptomResult) {
+        List<SymptomDetailResponse> symptomDetails = symptomResult.getSymptomDetails() != null
+                ? symptomResult.getSymptomDetails().stream()
+                        .map(sd -> SymptomDetailResponse.builder()
+                        .symptomDetailId(sd.getSymptomDetailsId())
+                        .symptomId(sd.getSymptom().getSymptomId())
+                        .symptomName(sd.getSymptom().getSymptomName())
+                        .build())
+                        .collect(Collectors.toList())
+                : List.of();
+
+        List<Integer> symptomIds = symptomDetails.stream()
+                .map(SymptomDetailResponse::getSymptomId)
+                .collect(Collectors.toList());
+
+        return SymptomResultResponse.builder()
+                .symptomResultId(symptomResult.getSymptomResultId())
+                .sessionId(symptomResult.getDiagnosisSession().getSessionId())
+                .status(symptomResult.getStatus())
+                .createdAt(symptomResult.getCreatedAt())
+                .symptomIds(symptomIds)
+                .menopauseStatus(symptomResult.getMenopauseStatus())
+                .symptomDuration(symptomResult.getSymptomDuration())
+                .symptomProgressing(symptomResult.getSymptomProgressing())
+                .symptomDetails(symptomDetails)
+                .build();
+    }
+
+
+    // =========================================================================
+    // 6. EVENTS (CÁC SỰ KIỆN NỘI BỘ)
+    // =========================================================================
+
     public static class DiagnosisSessionCreatedEvent {
         private Integer sessionId;
         private Integer patientUserId;
@@ -442,50 +524,6 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
         public Integer getPatientUserId() {
             return patientUserId;
         }
-    }
-
-    // ==================== DOCTOR WORKLOAD (for Receptionist) ====================
-
-    // [Nguyen The Hieu]: Bước 3 - Service Impl: Triển khai logic tính toán danh sách tải bác sĩ (Màn hình 1)
-    @Override
-    public List<DoctorWorkloadResponse> getDoctorWorkloads() {
-        // Lấy tất cả bác sĩ đang có trạng thái ACTIVE
-        List<User> doctors = userRepository.findByRoleRoleNameAndStatus(
-                RoleName.DOCTOR, UserStatus.ACTIVE, Pageable.unpaged()).getContent();
-
-        // Với mỗi bác sĩ, gọi repository để đếm số lượng ca theo từng trạng thái (PENDING, PROCESSING, FAILED)
-        return doctors.stream().map(doctor -> {
-            long pending = diagnosisSessionRepository.countByUserUserIdAndStatus(
-                    doctor.getUserId(), DiagnosisSessionStatus.PENDING);
-            long processing = diagnosisSessionRepository.countByUserUserIdAndStatus(
-                    doctor.getUserId(), DiagnosisSessionStatus.PROCESSING);
-            long failed = diagnosisSessionRepository.countByUserUserIdAndStatus(
-                    doctor.getUserId(), DiagnosisSessionStatus.FAILED);
-            // Đếm tổng số ca ĐANG HOẠT ĐỘNG (nghĩa là trạng thái khác COMPLETED)
-            long totalActive = diagnosisSessionRepository.countByUserUserIdAndStatusNot(
-                    doctor.getUserId(), DiagnosisSessionStatus.COMPLETED);
-
-            // Gói vào DTO và trả về
-            return DoctorWorkloadResponse.builder()
-                    .doctorId(doctor.getUserId())
-                    .doctorName(doctor.getFullName())
-                    .pendingCount(pending)
-                    .processingCount(processing)
-                    .failedCount(failed)
-                    .totalActive(totalActive)
-                    .build();
-        }).collect(Collectors.toList());
-    }
-
-    // [Nguyen The Hieu]: Bước 3 - Service Impl: Triển khai logic lấy chi tiết ca khám của một bác sĩ (Màn hình 2)
-    @Override
-    public Page<DiagnosisSession> getSessionsByDoctor(Integer doctorId,
-                                                      LocalDateTime startDate,
-                                                      LocalDateTime endDate,
-                                                      Pageable pageable) {
-        // Chỉ đơn giản là gọi xuống Repository method vừa tạo ở Bước 1
-        return diagnosisSessionRepository.findByDoctorIdWithDateFilter(
-                doctorId, startDate, endDate, pageable);
     }
 
     public static class SymptomFormSubmittedEvent {

@@ -6,6 +6,10 @@ import com.mycompany.jpademo.backend.dto.request.ImportDrugBatchRequest;
 import java.math.BigDecimal;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.entity.*;
+import com.mycompany.jpademo.backend.enums.BatchStatus;
+import com.mycompany.jpademo.backend.enums.DrugStatus;
+import com.mycompany.jpademo.backend.enums.PrescriptionDetailStatus;
+import com.mycompany.jpademo.backend.enums.PrescriptionStatus;
 import com.mycompany.jpademo.backend.repository.*;
 import com.mycompany.jpademo.backend.service.interfaces.PharmacistService;
 import lombok.RequiredArgsConstructor;
@@ -39,23 +43,27 @@ public class PharmacistServiceImpl implements PharmacistService {
     private final UnitRepository unitRepository;
     private final UnitConversionRepository unitConversionRepository;
 
-    // ========================== DASHBOARD ==========================
+    // ========================== BẢNG ĐIỀU KHIỂN ==========================
 
     @Override
     public PharmacistDashboardDTO getDashboardStats() {
+        //Thống kê tổng số lượng (Thuốc & Lô thuốc)
         int totalDrugs = (int) drugRepository.count();
         int totalBatches = (int) drugBatchRepository.count();
 
-        List<Prescription> pendingPrescriptions = prescriptionRepository.findByStatus((byte) 0);
+        //Đơn thuốc đang chờ xử lý
+        List<Prescription> pendingPrescriptions = prescriptionRepository.findByStatus(PrescriptionStatus.PENDING);
         int pendingCount = pendingPrescriptions.size();
 
+        //Thuốc sắp hết hạn (trong 7 ngày tới)
         LocalDate sevenDaysFromNow = LocalDate.now().plusDays(7);
         List<DrugBatch> expiringBatches = drugBatchRepository.findExpiringBatches(LocalDate.now(), sevenDaysFromNow);
         int expiringCount = expiringBatches.size();
 
-        // FIX: Dung countLowStock truc tiep
+        //Thuốc sắp hết hàng (Low Stock)
         long lowStockCount = inventoryRepository.countLowStock();
 
+        //Đóng gói dữ liệu trả về
         return PharmacistDashboardDTO.builder()
             .totalDrugs(totalDrugs)
             .pendingPrescriptions(pendingCount)
@@ -66,32 +74,37 @@ public class PharmacistServiceImpl implements PharmacistService {
             .build();
     }
 
-    // ========================== DRUG MANAGEMENT ==========================
+    // ========================== QUẢN LÝ THUỐC ==========================
 
+    //Lấy danh sách thuốc có phân trang
     @Override
     public Page<DrugDTO> getDrugList(Pageable pageable) {
         Page<Drug> drugs = drugRepository.findAll(pageable);
         return drugs.map(this::convertToDrugDTO);
     }
 
+    //Tìm kiếm thuốc theo từ khóa
     @Override
     public Page<DrugDTO> searchDrugs(String search, Pageable pageable) {
         Page<Drug> drugs = drugRepository.searchDrugs(search, pageable);
         return drugs.map(this::convertToDrugDTO);
     }
 
+    //Lấy tất cả thuốc đang hoạt động
     @Override
     public List<DrugDTO> getAllActiveDrugs() {
-        List<Drug> drugs = drugRepository.findByStatus((byte) 1);
+        List<Drug> drugs = drugRepository.findByStatus(DrugStatus.ACTIVE);
         return drugs.stream().map(this::convertToDrugDTO).collect(java.util.stream.Collectors.toList());
     }
 
+    //Lọc thuốc theo danh mục con
     @Override
     public Page<DrugDTO> getDrugsByCategory(Integer subCategoryId, Pageable pageable) {
         Page<Drug> drugs = drugRepository.findBySubCategoryId(subCategoryId, pageable);
         return drugs.map(this::convertToDrugDTO);
     }
 
+    //Lấy danh sách đơn vị quy đổi của thuốc
     @Override
     public List<DrugConversionDTO> getDrugConversions(Integer drugId) {
         if (drugId == null) {
@@ -102,6 +115,7 @@ public class PharmacistServiceImpl implements PharmacistService {
             .collect(Collectors.toList());
     }
 
+    //Xem chi tiết một loại thuốc
     @Override
     public DrugDTO getDrugDetail(Integer drugId) {
         Drug drug = drugRepository.findById(drugId)
@@ -109,9 +123,16 @@ public class PharmacistServiceImpl implements PharmacistService {
         return convertToDrugDTO(drug);
     }
 
+    //Tạo thuốc mới
     @Override
     @Transactional
     public DrugDTO createDrug(CreateDrugRequest request, Integer pharmacistId) {
+        validateDrugRequest(request);
+        
+        if (request.getBaseUnitId() == null) {
+            throw new RuntimeException("Vui lòng chọn Đơn vị gốc kê đơn.");
+        }
+
         User pharmacist = userRepository.findById(pharmacistId)
             .orElseThrow(() -> new RuntimeException("User not found: " + pharmacistId));
 
@@ -130,19 +151,17 @@ public class PharmacistServiceImpl implements PharmacistService {
             .routeOfAdministration(request.getRouteOfAdministration())
             .subCategory(subCategory)
             .baseUnit(baseUnit)
-            .packaging(request.getPackaging())
             .manufacturer(request.getManufacturer())
             .countryOfOrigin(request.getCountryOfOrigin())
             .storageCondition(request.getStorageCondition())
-            .shelfLifeMonths(request.getShelfLifeMonths())
             .notes(request.getNotes())
-            .status((byte) 1)
+            .status(DrugStatus.ACTIVE)
             .createdByUser(pharmacist)
             .build();
 
         Drug savedDrug = drugRepository.save(drug);
 
-        // Save Unit Conversions
+        // Lưu thiết lập quy đổi đơn vị
         saveUnitConversions(savedDrug, request);
 
         log.info("Drug created: {}", savedDrug.getDrugCode());
@@ -151,20 +170,31 @@ public class PharmacistServiceImpl implements PharmacistService {
 
     @Override
     @Transactional
-    public DrugDTO updateDrug(Integer drugId, CreateDrugRequest request) {
+    public DrugDTO updateDrug(Integer drugId, CreateDrugRequest request, Integer pharmacistId) {
+        validateDrugRequest(request);
+        
         Drug drug = drugRepository.findById(drugId)
             .orElseThrow(() -> new RuntimeException("Drug not found: " + drugId));
 
-        // Block edit if drug is discontinued (status = 0)
-        if (drug.getStatus() != null && drug.getStatus() == 0) {
+        // Chặn chỉnh sửa nếu thuốc đã Ngừng dùng (status == INACTIVE)
+        if (drug.getStatus() == DrugStatus.INACTIVE) {
             throw new RuntimeException("Không thể sửa thông tin thuốc đã Ngừng dùng.");
         }
 
         DrugSubCategory subCategory = drugSubCategoryRepository.findById(request.getSubCategoryId())
             .orElseThrow(() -> new RuntimeException("SubCategory not found: " + request.getSubCategoryId()));
 
-        Unit baseUnit = unitRepository.findById(request.getBaseUnitId())
-            .orElseThrow(() -> new RuntimeException("Base Unit not found: " + request.getBaseUnitId()));
+        boolean hasBatches = drug.getBatches() != null && !drug.getBatches().isEmpty();
+        
+        if (hasBatches) {
+            if (request.getBaseUnitId() != null && !drug.getBaseUnit().getUnitId().equals(request.getBaseUnitId())) {
+                throw new RuntimeException("Không thể sửa Đơn vị gốc kê đơn vì thuốc đã có lô hàng nhập kho.");
+            }
+        } else {
+            Unit baseUnit = unitRepository.findById(request.getBaseUnitId())
+                .orElseThrow(() -> new RuntimeException("Base Unit not found: " + request.getBaseUnitId()));
+            drug.setBaseUnit(baseUnit);
+        }
 
         drug.setDrugName(request.getDrugName());
         drug.setStrength(request.getStrength());
@@ -172,22 +202,22 @@ public class PharmacistServiceImpl implements PharmacistService {
         drug.setDosageForm(request.getDosageForm());
         drug.setRouteOfAdministration(request.getRouteOfAdministration());
         drug.setSubCategory(subCategory);
-        drug.setBaseUnit(baseUnit);
-        drug.setPackaging(request.getPackaging());
         drug.setManufacturer(request.getManufacturer());
         drug.setCountryOfOrigin(request.getCountryOfOrigin());
         drug.setStorageCondition(request.getStorageCondition());
-        drug.setShelfLifeMonths(request.getShelfLifeMonths());
         drug.setNotes(request.getNotes());
+
+        User pharmacist = userRepository.findById(pharmacistId)
+            .orElseThrow(() -> new RuntimeException("User not found: " + pharmacistId));
+        drug.setUpdatedByUser(pharmacist);
 
         Drug updatedDrug = drugRepository.save(drug);
 
-        // Update Unit Conversions
-        // First delete existing
-        List<UnitConversion> existingConversions = unitConversionRepository.findByDrugId(drugId);
-        unitConversionRepository.deleteAll(existingConversions);
-        // Then save new
-        saveUnitConversions(updatedDrug, request);
+        if (!hasBatches) {
+            updatedDrug.getConversions().clear();
+            drugRepository.flush();
+            saveUnitConversions(updatedDrug, request);
+        }
 
         log.info("Drug updated: {}", updatedDrug.getDrugCode());
         return convertToDrugDTO(updatedDrug);
@@ -219,44 +249,62 @@ public class PharmacistServiceImpl implements PharmacistService {
         }
     }
 
+    private void validateDrugRequest(CreateDrugRequest request) {
+        if (request.getDrugName() == null || request.getDrugName().trim().isEmpty() ||
+            request.getStrength() == null ||
+            request.getStrengthUnit() == null || request.getStrengthUnit().trim().isEmpty() ||
+            request.getDosageForm() == null || request.getDosageForm().trim().isEmpty() ||
+            request.getRouteOfAdministration() == null || request.getRouteOfAdministration().trim().isEmpty() ||
+            request.getSubCategoryId() == null ||
+            request.getManufacturer() == null || request.getManufacturer().trim().isEmpty() ||
+            request.getCountryOfOrigin() == null || request.getCountryOfOrigin().trim().isEmpty() ||
+            request.getStorageCondition() == null || request.getStorageCondition().trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng điền đầy đủ các thông tin bắt buộc.");
+        }
+
+        boolean hasValidConversion = false;
+        if (request.getConversionLargeUnitIds() != null && request.getConversionSmallUnitIds() != null && request.getConversionQuantities() != null) {
+            int size = Math.min(request.getConversionLargeUnitIds().size(), 
+                       Math.min(request.getConversionSmallUnitIds().size(), request.getConversionQuantities().size()));
+            for (int i = 0; i < size; i++) {
+                if (request.getConversionLargeUnitIds().get(i) != null &&
+                    request.getConversionSmallUnitIds().get(i) != null &&
+                    request.getConversionQuantities().get(i) != null &&
+                    request.getConversionQuantities().get(i) > 0) {
+                    hasValidConversion = true;
+                    break;
+                }
+            }
+        }
+        if (!hasValidConversion) {
+            throw new RuntimeException("Vui lòng thiết lập ít nhất một bước quy đổi đơn vị (Cách hiển thị trực quan).");
+        }
+    }
+
     @Override
     @Transactional
-    public void updateDrugStatus(Integer drugId, Byte status) {
+    public void updateDrugStatus(Integer drugId, DrugStatus status) {
         Drug drug = drugRepository.findById(drugId)
             .orElseThrow(() -> new RuntimeException("Drug not found: " + drugId));
         drug.setStatus(status);
         drugRepository.save(drug);
 
-        // Propagate status change to batches and inventories
-        if (status != null && status == 0) {
-            // Locking all batches and inventories of this drug
+        // Cập nhật trạng thái cho các lô hàng liên quan
+        if (status == DrugStatus.INACTIVE) {
+            // Khóa tất cả các lô hàng của thuốc này
             List<DrugBatch> batches = drugBatchRepository.findByDrugId(drugId);
             for (DrugBatch batch : batches) {
-                batch.setStatus((byte) 0);
+                batch.setStatus(BatchStatus.INACTIVE);
                 drugBatchRepository.save(batch);
-                
-                Optional<Inventory> invOpt = inventoryRepository.findByBatch_BatchId(batch.getBatchId());
-                if (invOpt.isPresent()) {
-                    Inventory inv = invOpt.get();
-                    inv.setStatus((byte) 0);
-                    inventoryRepository.save(inv);
-                }
             }
-        } else if (status != null && status == 1) {
-            // Reactivate active batches of this drug if they are not expired
+        } else if (status == DrugStatus.ACTIVE) {
+            // Kích hoạt lại các lô hàng chưa hết hạn của thuốc này
             LocalDate today = LocalDate.now();
             List<DrugBatch> batches = drugBatchRepository.findByDrugId(drugId);
             for (DrugBatch batch : batches) {
                 if (batch.getExpiryDate().isAfter(today)) {
-                    batch.setStatus((byte) 1);
+                    batch.setStatus(BatchStatus.ACTIVE);
                     drugBatchRepository.save(batch);
-                    
-                    Optional<Inventory> invOpt = inventoryRepository.findByBatch_BatchId(batch.getBatchId());
-                    if (invOpt.isPresent()) {
-                        Inventory inv = invOpt.get();
-                        inv.setStatus((byte) 1);
-                        inventoryRepository.save(inv);
-                    }
                 }
             }
         }
@@ -274,7 +322,7 @@ public class PharmacistServiceImpl implements PharmacistService {
                     int id = Integer.parseInt(numStr);
                     existingIds.add(id);
                 } catch (NumberFormatException e) {
-                    // Ignore non-numeric drug codes
+                    // Bỏ qua các mã thuốc không phải là số
                 }
             }
         }
@@ -297,7 +345,7 @@ public class PharmacistServiceImpl implements PharmacistService {
                         int stt = Integer.parseInt(parts[1]);
                         existingStts.add(stt);
                     } catch (NumberFormatException e) {
-                        // Ignore non-numeric STT parts
+                        // Bỏ qua các phần tử STT không phải là số
                     }
                 }
             }
@@ -309,7 +357,7 @@ public class PharmacistServiceImpl implements PharmacistService {
         return String.format("%03d", nextStt);
     }
 
-    // ========================== DRUG BATCH MANAGEMENT ==========================
+    // ========================== QUẢN LÝ LÔ HÀNG ==========================
 
     @Override
     public Page<DrugBatchDTO> getDrugBatches(Pageable pageable) {
@@ -320,20 +368,20 @@ public class PharmacistServiceImpl implements PharmacistService {
     @Override
     @Transactional
     public DrugBatchDTO createDrugBatch(ImportDrugBatchRequest request, Integer pharmacistId) {
-        // Validate required fields (except notes)
+        // Kiểm tra các trường bắt buộc (ngoại trừ ghi chú)
         if (request.getDrugId() == null || request.getBatchNumber() == null || request.getBatchNumber().trim().isEmpty() ||
             request.getManufactureDate() == null || request.getExpiryDate() == null || request.getUnitId() == null ||
-            request.getQuantity() == null || request.getImportPrice() == null || request.getSupplier() == null || request.getSupplier().trim().isEmpty()) {
+            request.getQuantity() == null || request.getSupplier() == null || request.getSupplier().trim().isEmpty()) {
             throw new RuntimeException("Vui lòng điền đầy đủ tất cả các trường bắt buộc (ngoại trừ ghi chú).");
         }
 
-        // Validate manufacture date
+        // Kiểm tra tính hợp lệ của ngày sản xuất
         LocalDate today = LocalDate.now();
         if (!request.getManufactureDate().isBefore(today)) {
             throw new RuntimeException("Ngày sản xuất phải nhỏ hơn ngày hiện tại (ngày trong quá khứ).");
         }
 
-        // Validate expiry date
+        // Kiểm tra tính hợp lệ của hạn sử dụng
         if (!request.getExpiryDate().isAfter(today)) {
             throw new RuntimeException("Hạn sử dụng phải lớn hơn ngày hiện tại (ngày trong tương lai).");
         }
@@ -341,22 +389,17 @@ public class PharmacistServiceImpl implements PharmacistService {
             throw new RuntimeException("Hạn sử dụng phải lớn hơn ngày sản xuất.");
         }
 
-        // Validate quantity
+        // Kiểm tra số lượng nhập
         if (request.getQuantity() <= 0) {
             throw new RuntimeException("Số lượng nhập phải là số nguyên dương lớn hơn 0.");
         }
 
-        // Validate import price
-        if (request.getImportPrice().compareTo(BigDecimal.ZERO) <= 0 ||
-            request.getImportPrice().remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) {
-            throw new RuntimeException("Đơn giá nhập phải là số nguyên dương lớn hơn 0.");
-        }
 
         Drug drug = drugRepository.findById(request.getDrugId())
             .orElseThrow(() -> new RuntimeException("Drug not found: " + request.getDrugId()));
 
-        // Block import if drug is discontinued (status = 0)
-        if (drug.getStatus() != null && drug.getStatus() == 0) {
+        // Chặn nhập lô hàng nếu thuốc đã Ngừng dùng (status == INACTIVE)
+        if (drug.getStatus() == DrugStatus.INACTIVE) {
             throw new RuntimeException("Không thể nhập kho thuốc '"
                 + drug.getDrugName() + "' vì thuốc này đã Ngừng dùng.");
         }
@@ -374,10 +417,9 @@ public class PharmacistServiceImpl implements PharmacistService {
             .expiryDate(request.getExpiryDate())
             .unit(unit)
             .quantity(request.getQuantity())
-            .importPrice(request.getImportPrice())
             .supplier(request.getSupplier())
             .importedByUser(pharmacist)
-            .status((byte) 1)
+            .status(BatchStatus.ACTIVE)
             .notes(request.getNotes())
             .build();
 
@@ -388,7 +430,6 @@ public class PharmacistServiceImpl implements PharmacistService {
         Inventory inventory = Inventory.builder()
             .batch(savedBatch)
             .quantityInStock(quantityInSmallUnit)
-            .status((byte) 1)
             .build();
         inventoryRepository.save(inventory);
 
@@ -421,13 +462,18 @@ public class PharmacistServiceImpl implements PharmacistService {
     @Override
     @Transactional
     public DrugBatchDTO updateDrugBatch(Integer batchId, ImportDrugBatchRequest request, Integer pharmacistId) {
-        // Validate required fields (except notes)
-        if (request.getQuantity() == null || request.getImportPrice() == null || request.getSupplier() == null || request.getSupplier().trim().isEmpty() ||
+        // Kiểm tra các trường bắt buộc
+        if (request.getQuantity() == null || request.getSupplier() == null || request.getSupplier().trim().isEmpty() ||
             request.getManufactureDate() == null || request.getExpiryDate() == null || request.getUnitId() == null) {
-            throw new RuntimeException("Vui lòng điền đầy đủ tất cả các trường bắt buộc (ngoại trừ ghi chú).");
+            throw new RuntimeException("Vui lòng điền đầy đủ tất cả các trường bắt buộc.");
         }
 
-        // Validate dates
+        // Kiểm tra ghi chú (Bắt buộc phải có lý do cập nhật)
+        if (request.getNotes() == null || request.getNotes().trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng nhập ghi chú (lý do sửa đổi) khi chỉnh sửa thông tin lô hàng.");
+        }
+
+        // Kiểm tra tính hợp lệ của ngày tháng
         if (request.getManufactureDate().isAfter(LocalDate.now()) || request.getManufactureDate().isEqual(LocalDate.now())) {
             throw new RuntimeException("Ngày sản xuất phải là ngày trong quá khứ.");
         }
@@ -443,18 +489,13 @@ public class PharmacistServiceImpl implements PharmacistService {
             throw new RuntimeException("Số lượng nhập phải là số nguyên dương lớn hơn 0.");
         }
 
-        // Validate import price
-        if (request.getImportPrice().compareTo(BigDecimal.ZERO) <= 0 ||
-            request.getImportPrice().remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0) {
-            throw new RuntimeException("Đơn giá nhập phải là số nguyên dương lớn hơn 0.");
-        }
 
         DrugBatch batch = drugBatchRepository.findById(batchId)
             .orElseThrow(() -> new RuntimeException("Lô hàng không tồn tại: " + batchId));
 
-        // Block edit if drug is discontinued
+        // Chặn chỉnh sửa nếu thuốc đã Ngừng dùng
         Drug drug = batch.getDrug();
-        if (drug.getStatus() != null && drug.getStatus() == 0) {
+        if (drug.getStatus() == DrugStatus.INACTIVE) {
             throw new RuntimeException("không được chỉnh sửa: lô hàng có thuốc đã ngưng sử dụng");
         }
 
@@ -464,7 +505,7 @@ public class PharmacistServiceImpl implements PharmacistService {
         Inventory inventory = inventoryRepository.findByBatch_BatchId(batchId)
             .orElseThrow(() -> new RuntimeException("Không tìm thấy tồn kho cho lô hàng này."));
 
-        // Look up and assign new unit
+        // Tìm kiếm và gán đơn vị mới
         Unit unit = unitRepository.findById(request.getUnitId())
             .orElseThrow(() -> new RuntimeException("Đơn vị tính không hợp lệ: " + request.getUnitId()));
 
@@ -483,24 +524,23 @@ public class PharmacistServiceImpl implements PharmacistService {
 
         int newStock = currentStock + (newSmallQty - oldSmallQty);
 
-        // Update batch fields
+        // Cập nhật thông tin lô hàng
         batch.setManufactureDate(request.getManufactureDate());
         batch.setExpiryDate(request.getExpiryDate());
         batch.setUnit(unit);
         batch.setQuantity(request.getQuantity());
-        batch.setImportPrice(request.getImportPrice());
         batch.setSupplier(request.getSupplier());
         batch.setNotes(request.getNotes());
+        batch.setUpdateReason(request.getUpdateReason());
+        batch.setUpdatedByUser(pharmacist);
+        batch.setUpdatedAt(LocalDateTime.now());
         drugBatchRepository.save(batch);
 
-        // Update inventory fields
+        // Cập nhật thông tin tồn kho
         inventory.setQuantityInStock(newStock);
-        if (drug.getStatus() != null && drug.getStatus() == 0) {
-            inventory.setStatus((byte) 0);
-        }
         inventoryRepository.save(inventory);
 
-        // Log the change
+        // Ghi log thay đổi
         InventoryLog logEntry = InventoryLog.builder()
             .batch(batch)
             .user(pharmacist)
@@ -631,24 +671,17 @@ public class PharmacistServiceImpl implements PharmacistService {
         return batches.stream().map(this::convertToDrugBatchDTO).collect(Collectors.toList());
     }
 
-    // ========================== INVENTORY MANAGEMENT ==========================
+    // ========================== QUẢN LÝ TỒN KHO ==========================
 
     @Override
     @Transactional
     public Page<InventoryDTO> getInventory(String keyword, String unit, Pageable pageable) {
-        // Auto update expired batches and inventories (status = 2) when viewing inventory
+        // Tự động cập nhật lô hàng hết hạn (status = EXPIRED) khi xem tồn kho
         LocalDate today = LocalDate.now();
         List<DrugBatch> expiredBatches = drugBatchRepository.findExpiredBatches(today);
         for (DrugBatch batch : expiredBatches) {
-            batch.setStatus((byte) 2);
+            batch.setStatus(BatchStatus.EXPIRED);
             drugBatchRepository.save(batch);
-            
-            Optional<Inventory> invOpt = inventoryRepository.findByBatch_BatchId(batch.getBatchId());
-            if (invOpt.isPresent()) {
-                Inventory inv = invOpt.get();
-                inv.setStatus((byte) 2);
-                inventoryRepository.save(inv);
-            }
         }
 
         Page<Inventory> inventories = inventoryRepository.searchInventory(
@@ -716,7 +749,7 @@ public class PharmacistServiceImpl implements PharmacistService {
         log.info("Inventory adjusted for batch {}: {} -> {}", batchId, oldQuantity, newQuantity);
     }
 
-    // ========================== DISPENSING ==========================
+    // ========================== CẤP PHÁT THUỐC ==========================
 
     @Override
     public Page<PrescriptionDetailDTO> getPendingPrescriptions(Pageable pageable) {
@@ -733,7 +766,7 @@ public class PharmacistServiceImpl implements PharmacistService {
     @Override
     public List<PrescriptionSummaryDTO> getPendingPrescriptionsSummary() {
         List<PrescriptionDetail> details = prescriptionDetailRepository.findAllDispensePrescriptions();
-        // Group by prescriptionId
+        // Nhóm theo ID Đơn thuốc (prescriptionId)
         java.util.Map<Integer, List<PrescriptionDetail>> grouped = details.stream()
             .collect(java.util.stream.Collectors.groupingBy(
                 d -> d.getPrescription().getPrescriptionId()
@@ -753,7 +786,7 @@ public class PharmacistServiceImpl implements PharmacistService {
                 .patientName(first.getPrescription().getPatient().getUser().getFullName())
                 .prescriptionDate(first.getPrescription().getPrescriptionDate())
                 .diagnosis(first.getPrescription().getDiagnosis())
-                .status(first.getPrescription().getStatus())
+                .status(pending > 0 ? first.getPrescription().getStatus() : PrescriptionStatus.DISPENSED)
                 .totalItems(items.size())
                 .pendingItems((int) pending)
                 .isPending(pending > 0)
@@ -787,16 +820,41 @@ public class PharmacistServiceImpl implements PharmacistService {
         PrescriptionDetail detail = prescriptionDetailRepository.findById(request.getDetailId())
             .orElseThrow(() -> new RuntimeException("PrescriptionDetail not found: " + request.getDetailId()));
 
-        Inventory inventory = inventoryRepository.findByBatchId(request.getBatchId())
-            .orElseThrow(() -> new RuntimeException("Inventory not found for batchId: " + request.getBatchId()));
-
         User pharmacist = userRepository.findById(pharmacistId)
             .orElseThrow(() -> new RuntimeException("User not found: " + pharmacistId));
 
-        Byte drugStatus = inventory.getBatch().getDrug().getStatus();
-        Byte batchStatus = inventory.getBatch().getStatus();
-        if ((drugStatus != null && drugStatus == 0) || (batchStatus != null && batchStatus == 0)) {
-            throw new RuntimeException("Thuốc hoặc lô hàng này đang ở trạng thái ngưng sử dụng, không được phép phát thuốc.");
+        if (request.getActionStatus() == PrescriptionDetailStatus.CANCELLED) {
+            if (request.getNotes() == null || request.getNotes().trim().isEmpty()) {
+                throw new RuntimeException("Vui lòng nhập ghi chú (lý do hủy) khi thay đổi trạng thái thành Hủy.");
+            }
+            detail.setStatus(PrescriptionDetailStatus.CANCELLED);
+            detail.setNotes(request.getNotes().trim());
+            detail.setDispensedAt(LocalDateTime.now());
+            detail.setDispensedByUser(pharmacist);
+            prescriptionDetailRepository.save(detail);
+
+            Prescription prescription = detail.getPrescription();
+            boolean allFinished = prescription.getDetails().stream()
+                .allMatch(d -> d.getStatus() == PrescriptionDetailStatus.DISPENSED || d.getStatus() == PrescriptionDetailStatus.CANCELLED || (d.getQuantityDispensed() != null && d.getQuantityDispensed() > 0));
+            if (allFinished) {
+                prescription.setStatus(PrescriptionStatus.DISPENSED);
+                prescriptionRepository.save(prescription);
+            }
+            log.info("Prescription detail {} cancelled by pharmacist {}", request.getDetailId(), pharmacistId);
+            return;
+        }
+
+        if (request.getBatchId() == null) {
+            throw new RuntimeException("Vui lòng chọn lô hàng khi cấp phát thuốc.");
+        }
+
+        Inventory inventory = inventoryRepository.findByBatchId(request.getBatchId())
+            .orElseThrow(() -> new RuntimeException("Inventory not found for batchId: " + request.getBatchId()));
+
+        DrugStatus drugStatus = inventory.getBatch().getDrug().getStatus();
+        BatchStatus batchStatus = inventory.getBatch().getStatus();
+        if (drugStatus == DrugStatus.INACTIVE || batchStatus == BatchStatus.INACTIVE || batchStatus == BatchStatus.EXPIRED) {
+            throw new RuntimeException("Thuốc hoặc lô hàng này đang ở trạng thái ngưng sử dụng hoặc hết hạn, không được phép phát thuốc.");
         }
 
         if (request.getQuantityDispensed() > inventory.getQuantityInStock()) {
@@ -804,7 +862,7 @@ public class PharmacistServiceImpl implements PharmacistService {
                 + inventory.getQuantityInStock() + ", Can: " + request.getQuantityDispensed());
         }
 
-        // Convert the dispensed quantity from prescription unit to base unit
+        // Quy đổi số lượng cấp phát từ đơn vị kê đơn sang đơn vị gốc
         int factor = 1;
         String dispenseUnitName = detail.getDispenseUnit();
         if (dispenseUnitName != null && !dispenseUnitName.trim().isEmpty()) {
@@ -822,22 +880,23 @@ public class PharmacistServiceImpl implements PharmacistService {
                 + inventory.getQuantityInStock() + ", Can: " + dispensedQuantityInSmallUnit);
         }
 
-        // Cap nhat chi tiet don thuoc
+        // Cập nhật chi tiết đơn thuốc
         detail.setBatch(inventory.getBatch());
         detail.setQuantityDispensed(request.getQuantityDispensed());
         detail.setActualExpiryDate(inventory.getBatch().getExpiryDate());
         detail.setDispensedAt(LocalDateTime.now());
         detail.setDispensedByUser(pharmacist);
         detail.setNotes(request.getNotes());
+        detail.setStatus(PrescriptionDetailStatus.DISPENSED);
         prescriptionDetailRepository.save(detail);
 
-        // Cap nhat ton kho
+        // Cập nhật tồn kho
         int oldQuantity = inventory.getQuantityInStock();
         int newQuantity = oldQuantity - dispensedQuantityInSmallUnit;
         inventory.setQuantityInStock(newQuantity);
         inventoryRepository.save(inventory);
 
-        // Ghi log xuat kho
+        // Ghi log xuất kho
         InventoryLog logEntry = InventoryLog.builder()
             .batch(inventory.getBatch())
             .user(pharmacist)
@@ -851,14 +910,14 @@ public class PharmacistServiceImpl implements PharmacistService {
             .build();
         inventoryLogRepository.save(logEntry);
 
-        // FIX: Neu tat ca chi tiet da cap phat het, cap nhat trang thai Prescription -> 1
+        // Nếu tất cả chi tiết đã cấp phát hết, cập nhật trạng thái Đơn thuốc -> ĐÃ CẤP PHÁT (DISPENSED)
         Prescription prescription = detail.getPrescription();
         boolean allDispensed = prescription.getDetails().stream()
-            .allMatch(d -> d.getQuantityDispensed() != null && d.getQuantityDispensed() > 0);
+            .allMatch(d -> d.getStatus() == PrescriptionDetailStatus.DISPENSED || (d.getQuantityDispensed() != null && d.getQuantityDispensed() > 0));
         if (allDispensed) {
-            prescription.setStatus((byte) 1);
+            prescription.setStatus(PrescriptionStatus.DISPENSED);
             prescriptionRepository.save(prescription);
-            log.info("Prescription {} fully dispensed -> status=1", prescription.getPrescriptionCode());
+            log.info("Prescription {} fully dispensed -> status=DISPENSED", prescription.getPrescriptionCode());
         }
 
         log.info("Drug dispensed: detail={} | qty={} | batch={}",
@@ -886,7 +945,7 @@ public class PharmacistServiceImpl implements PharmacistService {
             .collect(Collectors.toList());
     }
 
-    // ========================== REPORTS ==========================
+    // ========================== BÁO CÁO ==========================
 
     @Override
     public List<InventoryLog> getInventoryLog(LocalDate startDate, LocalDate endDate) {
@@ -902,7 +961,7 @@ public class PharmacistServiceImpl implements PharmacistService {
         return inventoryLogRepository.findByPerformedAtBetween(start, end, pageable);
     }
 
-    // ========================== PRIVATE HELPERS ==========================
+    // ========================== HÀM HỖ TRỢ NỘI BỘ ==========================
 
 
     private DrugDTO convertToDrugDTO(Drug drug) {
@@ -919,17 +978,19 @@ public class PharmacistServiceImpl implements PharmacistService {
             .routeOfAdministration(drug.getRouteOfAdministration())
             .subCategoryName(drug.getSubCategory().getSubCategoryName())
             .subCategoryId(drug.getSubCategory().getSubCategoryId())
-            .packaging(drug.getPackaging())
             .manufacturer(drug.getManufacturer())
             .countryOfOrigin(drug.getCountryOfOrigin())
             .storageCondition(drug.getStorageCondition())
-            .shelfLifeMonths(drug.getShelfLifeMonths())
             .notes(drug.getNotes())
             .status(drug.getStatus())
             .totalQuantityInStock(totalQty)
             .totalBatches(drug.getBatches() != null ? drug.getBatches().size() : 0)
             .createdByName(drug.getCreatedByUser() != null ? drug.getCreatedByUser().getFullName() : null)
             .createdAt(drug.getCreatedAt() != null ? drug.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : null)
+            .updatedBy(drug.getUpdatedByUser() != null ? drug.getUpdatedByUser().getUserId() : null)
+            .updatedByName(drug.getUpdatedByUser() != null ? drug.getUpdatedByUser().getFullName() : null)
+            .updatedAt(drug.getUpdatedAt() != null ? drug.getUpdatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : null)
+
             .build();
     }
 
@@ -951,13 +1012,15 @@ public class PharmacistServiceImpl implements PharmacistService {
             .unitName(getSanitizedUnitName(batch.getUnit()))
             .unitId(batch.getUnit().getUnitId())
             .quantity(batch.getQuantity())
-            .importPrice(batch.getImportPrice())
             .supplier(batch.getSupplier())
             .importDate(batch.getImportDate())
             .importedBy(batch.getImportedByUser().getFullName())
             .status(batch.getStatus())
             .drugStatus(batch.getDrug().getStatus())
             .notes(batch.getNotes())
+            .updatedBy(batch.getUpdatedByUser() != null ? batch.getUpdatedByUser().getFullName() : null)
+            .updatedAt(batch.getUpdatedAt())
+            .updateReason(batch.getUpdateReason())
             .quantityInStock(inv != null ? inv.getQuantityInStock() : 0)
             .daysUntilExpiry(daysUntilExpiry)
             .build();
@@ -982,7 +1045,6 @@ public class PharmacistServiceImpl implements PharmacistService {
             .drugName(inventory.getBatch().getDrug().getDrugName())
             .quantityInStock(inventory.getQuantityInStock())
             .lastUpdated(inventory.getLastUpdated())
-            .status(inventory.getStatus())
             .daysUntilExpiry(daysUntilExpiry)
             .isExpiringSoon(isExpiringSoon)
             .isLowStock(isLowStock)
@@ -1055,7 +1117,8 @@ public class PharmacistServiceImpl implements PharmacistService {
             .patientName(detail.getPrescription().getPatient().getUser().getFullName())
             .patientCccd(detail.getPrescription().getPatient().getUser().getNationalID())
             .patientDob(detail.getPrescription().getPatient().getDob())
-            .isPending(detail.getQuantityDispensed() == null || detail.getQuantityDispensed() == 0)
+            .isPending(detail.getStatus() == null || detail.getStatus() == PrescriptionDetailStatus.PENDING)
+            .status(detail.getStatus() != null ? detail.getStatus() : (detail.getQuantityDispensed() != null && detail.getQuantityDispensed() > 0 ? PrescriptionDetailStatus.DISPENSED : PrescriptionDetailStatus.PENDING))
             .build();
     }
 }

@@ -17,12 +17,12 @@ public interface PrescriptionDetailRepository extends JpaRepository<Prescription
         return findByPrescription_PrescriptionId(prescriptionId);
     }
 
-    @Query("SELECT pd FROM PrescriptionDetail pd WHERE pd.prescription.status = 0 AND (pd.quantityDispensed IS NULL OR pd.quantityDispensed = 0)")
+    @Query("SELECT pd FROM PrescriptionDetail pd WHERE pd.prescription.status = com.mycompany.jpademo.backend.enums.PrescriptionStatus.PENDING AND (pd.status IS NULL OR pd.status = com.mycompany.jpademo.backend.enums.PrescriptionDetailStatus.PENDING) AND pd.prescription.session.status = com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.COMPLETED")
     List<PrescriptionDetail> findPendingDispenses();
 
     @Query("SELECT pd FROM PrescriptionDetail pd WHERE pd.quantityDispensed > 0 ORDER BY pd.dispensedAt DESC")
     List<PrescriptionDetail> findDispensedDetails();
 
-    @Query("SELECT pd FROM PrescriptionDetail pd WHERE pd.prescription.status IN (0, 1) ORDER BY pd.prescription.prescriptionDate DESC")
+    @Query("SELECT pd FROM PrescriptionDetail pd WHERE pd.prescription.status IN (com.mycompany.jpademo.backend.enums.PrescriptionStatus.PENDING, com.mycompany.jpademo.backend.enums.PrescriptionStatus.DISPENSED) AND pd.prescription.session.status = com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.COMPLETED ORDER BY pd.prescription.prescriptionDate DESC")
     List<PrescriptionDetail> findAllDispensePrescriptions();
 }

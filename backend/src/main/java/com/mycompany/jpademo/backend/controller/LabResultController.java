@@ -36,7 +36,7 @@ public class LabResultController {
     public String showCreateForm(@RequestParam("sessionId") Integer sessionId, Model model) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Không tìm thấy phiên khám với ID: " + sessionId));
+                        "Không tìm thấy ca khám với ID: " + sessionId));
 
         CreateLabResultRequest form = new CreateLabResultRequest();
         form.setSessionId(sessionId);
@@ -84,7 +84,7 @@ public class LabResultController {
             List<LabResultResponse> results = labResultService.getLabResultsBySession(sessionId);
             DiagnosisSession session = sessionRepository.findById(sessionId)
                     .orElseThrow(() -> new ResourceNotFoundException(
-                            "Không tìm thấy phiên khám với ID: " + sessionId));
+                            "Không tìm thấy ca khám với ID: " + sessionId));
 
             model.addAttribute("labResults", results);
             model.addAttribute("session", session);
@@ -112,7 +112,7 @@ public class LabResultController {
             List<LabResultResponse> results = labResultService.getLabResultsBySession(sessionId);
             DiagnosisSession session = sessionRepository.findById(sessionId)
                     .orElseThrow(() -> new ResourceNotFoundException(
-                            "Không tìm thấy phiên khám với ID: " + sessionId));
+                            "Không tìm thấy phiên ca với ID: " + sessionId));
 
             model.addAttribute("labResults", results);
             model.addAttribute("session", session);

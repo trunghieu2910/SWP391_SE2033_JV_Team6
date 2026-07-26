@@ -24,6 +24,8 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
      */
     long countByUserUserIdAndStatusNot(Integer userId, DiagnosisSessionStatus status);
 
+    long countByUserUserIdAndStatusNotIn(Integer userId, List<DiagnosisSessionStatus> statuses);
+
 
 
     /**
@@ -103,7 +105,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
 
     /**
      * [Role: Hệ thống / Backend]
-     * Chức năng: Tìm tất cả các phiên khám cơ bản của một bệnh nhân (truy vấn Entity cơ bản).
+     * Chức năng: Tìm tất cả các ca khám cơ bản của một bệnh nhân (truy vấn Entity cơ bản).
      */
     List<DiagnosisSession> findByPatientPatientId(Integer patientId);
 
@@ -123,7 +125,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
 
     /**
      * [Role: Bác sĩ]
-     * Chức năng: Lấy danh sách phiên khám của bệnh nhân kèm theo thông tin chi tiết về kết quả triệu chứng ban đầu.
+     * Chức năng: Lấy danh sách ca khám của bệnh nhân kèm theo thông tin chi tiết về kết quả triệu chứng ban đầu.
      * Mục đích: Tránh N+1 query, dùng để xem nhanh các triệu chứng cũ của bệnh nhân trong các lần khám trước.
      */
     @Query("SELECT DISTINCT ds FROM DiagnosisSession ds " +
@@ -158,7 +160,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     /**
      * [Role: Admin]
      * Chức năng: Đếm tổng số lượng ca khám trong một khoảng thời gian cụ thể.
-     * Mục đích: Hiển thị số liệu thống kê tổng quan (ví dụ: Tổng số phiên khám tháng này) trên Dashboard của Admin.
+     * Mục đích: Hiển thị số liệu thống kê tổng quan (ví dụ: Tổng số ca khám tháng này) trên Dashboard của Admin.
      */
     @Query("SELECT COUNT(ds) FROM DiagnosisSession ds WHERE " +
             "(CAST(:startDate AS timestamp) IS NULL OR ds.createdAt >= :startDate) AND " +
@@ -167,7 +169,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
 
     /**
      * [Role: Admin]
-     * Chức năng: Nhóm và đếm số lượng phiên khám theo từng tháng.
+     * Chức năng: Nhóm và đếm số lượng ca khám theo từng tháng.
      * Mục đích: Lấy dữ liệu để vẽ biểu đồ thống kê xu hướng số lượng ca khám hàng tháng cho Admin.
      */
     @Query("SELECT FUNCTION('FORMAT', d.createdAt, 'MM/yyyy') as month, COUNT(d) as count " +
@@ -183,7 +185,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
     
     /**
      * [Role: Kỹ thuật viên (Xét nghiệm / Siêu âm)]
-     * Chức năng: Lấy danh sách phiên khám đang ở trong một danh sách các trạng thái nhất định (ví dụ PENDING, PROCESSING).
+     * Chức năng: Lấy danh sách ca khám đang ở trong một danh sách các trạng thái nhất định (ví dụ PENDING, PROCESSING).
      * Mục đích: Lấy ra các ca bệnh đang chờ hoặc đang được thực hiện các chỉ định cận lâm sàng.
      */
     List<DiagnosisSession> findByStatusInOrderByCreatedAtDesc(List<DiagnosisSessionStatus> statuses);
@@ -197,11 +199,13 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             "LEFT JOIN FETCH ds.patient p " +
             "LEFT JOIN FETCH p.user pu " +
             "WHERE ds.user.userId = :doctorId " +
+            "AND (:statuses IS NULL OR ds.status IN :statuses) " +
             "AND (:startDate IS NULL OR ds.createdAt >= :startDate) " +
             "AND (:endDate IS NULL OR ds.createdAt <= :endDate) " +
             "ORDER BY ds.createdAt DESC")
     Page<DiagnosisSession> findByDoctorIdWithDateFilter(
             @Param("doctorId") Integer doctorId,
+            @Param("statuses") List<DiagnosisSessionStatus> statuses,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);

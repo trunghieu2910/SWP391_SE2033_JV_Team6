@@ -14,8 +14,8 @@ import java.util.Optional;
 @Repository
 public interface PrescriptionRepository extends JpaRepository<Prescription, Integer> {
     Optional<Prescription> findByPrescriptionCode(String prescriptionCode);
-    List<Prescription> findByStatus(Byte status);
-    Page<Prescription> findByStatus(Byte status, Pageable pageable);
+    List<Prescription> findByStatus(com.mycompany.jpademo.backend.enums.PrescriptionStatus status);
+    Page<Prescription> findByStatus(com.mycompany.jpademo.backend.enums.PrescriptionStatus status, Pageable pageable);
 
     // FIX: Dung @Query thay vi method name de tranh loi 'No property id found for type Patient'
     @Query("SELECT p FROM Prescription p WHERE p.patient.patientId = :patientId")

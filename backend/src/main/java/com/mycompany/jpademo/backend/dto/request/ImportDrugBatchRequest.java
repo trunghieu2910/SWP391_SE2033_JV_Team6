@@ -18,7 +18,10 @@ public class ImportDrugBatchRequest {
     private Integer unitId;
     private Integer quantity;
     private String packagingChain;
-    private BigDecimal importPrice;
     private String supplier;
     private String notes;
+    private String updateReason;
 }
+
+
+

@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.PrescriptionDetailStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -65,4 +66,8 @@ public class PrescriptionDetail {
 
     @Column(name = "notes", length = 200)
     private String notes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private PrescriptionDetailStatus status;
 }

@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.entity;
 
+import com.mycompany.jpademo.backend.enums.DrugStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -46,9 +47,6 @@ public class Drug {
     @JoinColumn(name = "baseUnitID", nullable = false)
     private Unit baseUnit;
 
-    @Column(name = "packaging", length = 100)
-    private String packaging;
-
     @Column(name = "manufacturer", length = 100)
     private String manufacturer;
 
@@ -58,14 +56,12 @@ public class Drug {
     @Column(name = "storageCondition", length = 200)
     private String storageCondition;
 
-    @Column(name = "shelfLifeMonths")
-    private Integer shelfLifeMonths;
-
     @Column(name = "notes", length = 500)
     private String notes;
 
-    @Column(name = "status")
-    private Byte status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private DrugStatus status;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
@@ -74,6 +70,16 @@ public class Drug {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "createdBy")
     private User createdByUser;
+
+    @org.hibernate.annotations.UpdateTimestamp
+    @Column(name = "updatedAt")
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updatedBy")
+    private User updatedByUser;
+
+
 
     @OneToMany(mappedBy = "drug", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UnitConversion> conversions;

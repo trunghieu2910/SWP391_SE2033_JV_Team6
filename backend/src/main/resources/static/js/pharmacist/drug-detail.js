@@ -13,8 +13,9 @@ function updateDrug(drugId) {
 }
 
 function toggleDrugStatus(drugId, currentStatus) {
-    const newStatus = currentStatus === 1 ? 0 : 1;
-    const statusText = newStatus === 1 ? 'đang dùng' : 'ngừng';
+    const isCurrentlyActive = currentStatus === 'ACTIVE' || currentStatus === 1 || currentStatus === '1';
+    const newStatus = isCurrentlyActive ? 'INACTIVE' : 'ACTIVE';
+    const statusText = newStatus === 'ACTIVE' ? 'đang dùng' : 'ngừng';
     
     if (confirm(`Bạn chắc chắn muốn chuyển trạng thái thuốc này thành ${statusText}?`)) {
         fetch(`/pharmacist/drug-status/${drugId}?status=${newStatus}`, {

@@ -106,15 +106,15 @@ public class PdfServiceImpl implements PdfService {
 
             document.add(patientTable);
 
-            // II. THÔNG TIN PHIÊN KHÁM
-            addSectionHeader(document, "II. THÔNG TIN PHIÊN KHÁM (VISIT INFORMATION)", sectionHeaderFont);
+            // II. THÔNG TIN CA KHÁM
+            addSectionHeader(document, "II. THÔNG TIN CA KHÁM (VISIT INFORMATION)", sectionHeaderFont);
             PdfPTable sessionTable = new PdfPTable(4);
             sessionTable.setWidthPercentage(100);
             sessionTable.setWidths(new float[]{2f, 3f, 2f, 3f});
             sessionTable.setSpacingBefore(5f);
             sessionTable.setSpacingAfter(10f);
 
-            sessionTable.addCell(createLabelCell("Mã phiên khám:", boldFont));
+            sessionTable.addCell(createLabelCell("Mã ca khám:", boldFont));
             sessionTable.addCell(createValueCell("#S" + String.format("%04d", record.getSessionID()), normalFont));
             sessionTable.addCell(createLabelCell("Bác sĩ phụ trách:", boldFont));
             sessionTable.addCell(createValueCell(record.getDoctorFullName(), normalFont));
@@ -189,7 +189,7 @@ public class PdfServiceImpl implements PdfService {
                     document.add(symList);
                 }
             } else {
-                Paragraph noSymptoms = new Paragraph("Chưa ghi nhận triệu chứng lâm sàng cho phiên khám này.", italicFont);
+                Paragraph noSymptoms = new Paragraph("Chưa ghi nhận triệu chứng lâm sàng cho ca khám này.", italicFont);
                 noSymptoms.setSpacingBefore(5f);
                 noSymptoms.setSpacingAfter(10f);
                 document.add(noSymptoms);
@@ -338,7 +338,7 @@ public class PdfServiceImpl implements PdfService {
                 }
                 document.add(rxTable);
             } else {
-                Paragraph noPrescription = new Paragraph("Không có đơn thuốc nào được kê cho phiên khám này.", italicFont);
+                Paragraph noPrescription = new Paragraph("Không có đơn thuốc nào được kê cho ca khám này.", italicFont);
                 noPrescription.setSpacingBefore(5f);
                 noPrescription.setSpacingAfter(10f);
                 document.add(noPrescription);
@@ -547,7 +547,7 @@ public class PdfServiceImpl implements PdfService {
             footerPara.setAlignment(Element.ALIGN_RIGHT);
             cell.addElement(footerPara);
         } else {
-            Paragraph noReview = new Paragraph("Chưa có kết luận chẩn đoán chính thức từ bác sĩ cho phiên khám này.", italicFont);
+            Paragraph noReview = new Paragraph("Chưa có kết luận chẩn đoán chính thức từ bác sĩ cho ca khám này.", italicFont);
             cell.addElement(noReview);
         }
         

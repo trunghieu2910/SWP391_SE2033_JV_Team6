@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Quản lý kho', 'import')}">
+      th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Quản lý lô hàng', 'batch-list')}">
 <body>
 <main>
-    <link rel="stylesheet" th:href="@{/css/pharmacist/import-history.css}">
+    <link rel="stylesheet" th:href="@{/css/pharmacist/batch-list.css}">
 
     <div class="container">
         <header class="page-header" style="margin-bottom: 24px;">
-            <h1><i class="fas fa-boxes-stacked"></i> Quản lý kho thuốc</h1>
+            <h1><i class="fas fa-boxes-stacked"></i> Quản lý lô hàng</h1>
             <a href="/pharmacist/drug-import" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Nhập lô hàng mới
             </a>
@@ -15,12 +15,12 @@
 
         <section class="card" style="padding: 0; overflow: hidden;">
             <div style="padding: 24px 24px 12px 24px;">
-                <div class="import-history-toolbar">
-                    <div class="import-history-search">
+                <div class="batch-list-toolbar">
+                    <div class="batch-list-search">
                         <i class="fas fa-search"></i>
                         <input type="text" id="importHistorySearchInput" placeholder="Tìm theo tên thuốc hoặc số lô thuốc">
                     </div>
-                    <div class="import-history-sort">
+                    <div class="batch-list-sort">
                         <i class="fas fa-arrow-up-wide-short"></i>
                         <select id="importHistorySortSelect">
                             <option value="">-- Sắp xếp --</option>
@@ -38,9 +38,9 @@
                         <th>Số lô</th>
                         <th>Ngày SX</th>
                         <th>HSD</th>
-                        <th>Giá nhập (đ)</th>
                         <th>Nhà cung cấp</th>
                         <th>Thời gian nhập</th>
+                        <th>Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody id="importHistoryTableBody">
@@ -49,9 +49,13 @@
                         <td th:text="${batch.batchNumber}" style="font-weight: 600;">-</td>
                         <td th:text="${#temporals.format(batch.manufactureDate, 'dd/MM/yyyy')}">-</td>
                         <td th:text="${#temporals.format(batch.expiryDate, 'dd/MM/yyyy')}">-</td>
-                        <td th:text="${batch.importPrice != null ? #numbers.formatDecimal(batch.importPrice, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">-</td>
                         <td th:text="${batch.supplier}">-</td>
                         <td th:text="${#temporals.format(batch.importDate, 'dd/MM/yyyy HH:mm')}">-</td>
+                        <td>
+                            <span th:if="${batch.status != null and batch.status.name() == 'ACTIVE'}" class="badge badge-success">Sẵn dùng</span>
+                            <span th:if="${batch.status != null and batch.status.name() == 'EXPIRED'}" class="badge badge-warning" style="background-color: #eab308; color: white;">Hết hạn</span>
+                            <span th:if="${batch.status != null and batch.status.name() == 'INACTIVE'}" class="badge badge-danger">Ngừng</span>
+                        </td>
                     </tr>
                     <tr id="importHistoryEmptyRow" style="display: none;">
                         <td colspan="7" style="text-align: center; color: var(--neutral-light); padding: 32px;">
@@ -68,24 +72,25 @@
             </div>
         </section>
 
-        <!-- Pagination -->
+        <!-- Phân trang -->
         <nav th:if="${totalPages > 1}" class="pagination">
             <ul>
                 <li th:if="${currentPage > 0}">
-                    <a th:href="@{/pharmacist/import-history(page=${currentPage-1})}">Trước</a>
+                    <a th:href="@{/pharmacist/batch-list(page=${currentPage-1})}">Trước</a>
                 </li>
                 <li th:each="i : ${#numbers.sequence(0, totalPages-1)}" 
                     th:classappend="${i == currentPage} ? 'active'">
-                    <a th:href="@{/pharmacist/import-history(page=${i})}" th:text="${i+1}">1</a>
+                    <a th:href="@{/pharmacist/batch-list(page=${i})}" th:text="${i+1}">1</a>
                 </li>
                 <li th:if="${currentPage < totalPages-1}">
-                    <a th:href="@{/pharmacist/import-history(page=${currentPage+1})}">Sau</a>
+                    <a th:href="@{/pharmacist/batch-list(page=${currentPage+1})}">Sau</a>
                 </li>
             </ul>
         </nav>
     </div>
 
-    <script th:src="@{/js/pharmacist/import-history.js}"></script>
+    <script th:src="@{/js/pharmacist/batch-list.js}"></script>
 </main>
 </body>
 </html>
+

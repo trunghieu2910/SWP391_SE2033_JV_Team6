@@ -12,4 +12,5 @@ public class DispenseDrugRequest {
     private Integer batchId;
     private Integer quantityDispensed;
     private String notes;
+    private com.mycompany.jpademo.backend.enums.PrescriptionDetailStatus actionStatus;
 }

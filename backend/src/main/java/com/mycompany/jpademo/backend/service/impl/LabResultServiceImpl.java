@@ -58,7 +58,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         DiagnosisSession session = sessionRepository.findById(request.getSessionId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Không tìm thấy phiên khám với ID: " + request.getSessionId()));
+                        "Không tìm thấy ca khám với ID: " + request.getSessionId()));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
@@ -66,7 +66,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         if (!session.getUser().getUserId().equals(currentDoctorId)) {
             throw new UnauthorizedActionException(
-                    "Bạn không có quyền tạo xét nghiệm cho phiên khám này");
+                    "Bạn không có quyền tạo xét nghiệm cho ca khám này");
         }
 
         // chặn testType rác không nằm trong danh sách hỗ trợ
@@ -77,7 +77,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         if (session.getStatus() == DiagnosisSessionStatus.COMPLETED) {
             throw new BadRequestException(
-                    "Không thể tạo xét nghiệm cho phiên khám đã hoàn thành");
+                    "Không thể tạo xét nghiệm cho ca khám đã hoàn thành");
         }
 
         boolean alreadyExists = labResultRepository
@@ -85,7 +85,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         if (alreadyExists) {
             throw new BadRequestException(
-                    "Phiên khám này đã có xét nghiệm loại \"" + request.getTestType() + "\". " +
+                    "Ca khám này đã có xét nghiệm loại \"" + request.getTestType() + "\". " +
                             "Vui lòng chọn loại xét nghiệm khác.");
         }
 
@@ -98,7 +98,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         systemLogService.logActivity("LabResult", labResult.getLabResultId(), "CREATE_LAB_RESULT",
                 "Bác sĩ tạo chỉ định xét nghiệm \"" + labResult.getTestType()
-                        + "\" cho phiên khám #" + session.getSessionId());
+                        + "\" cho ca khám #" + session.getSessionId());
 
         return mapToLabResultResponse(labResult, Collections.emptyList());
     }
@@ -115,7 +115,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Không tìm thấy phiên khám với ID: " + sessionId));
+                        "Không tìm thấy ca khám với ID: " + sessionId));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails currentUser = (CustomUserDetails) auth.getPrincipal();
@@ -123,17 +123,17 @@ public class LabResultServiceImpl implements LabResultService {
         Integer currentUserId = currentUser.getUser().getUserId();
 
         if (role.equals("PATIENT")) {
-            // Kiểm tra phiên khám có thuộc về bệnh nhân này không
+            // Kiểm tra ca khám có thuộc về bệnh nhân này không
             Integer ownerUserId = session.getPatient().getUser().getUserId();
             if (!ownerUserId.equals(currentUserId)) {
                 throw new UnauthorizedActionException(
-                        "Bạn không có quyền xem xét nghiệm của phiên khám này");
+                        "Bạn không có quyền xem xét nghiệm của ca khám này");
             }
 
             // Kiểm tra isShared — nếu false thì chặn bệnh nhân
             if (!Boolean.TRUE.equals(session.getIsShared())) {
                 throw new UnauthorizedActionException(
-                        "Phiên khám này chưa được chia sẻ với bệnh nhân");
+                        "Ca khám này chưa được chia sẻ với bệnh nhân");
             }
         } else if (!role.equals("DOCTOR")) {
             // DOCTOR được phép xem chéo (hội chẩn/bàn giao ca) — chỉ chặn
@@ -223,7 +223,7 @@ public class LabResultServiceImpl implements LabResultService {
 
         if (!session.getUser().getUserId().equals(currentDoctorId)) {
             throw new UnauthorizedActionException(
-                    "Bạn không có quyền xóa xét nghiệm của phiên khám này");
+                    "Bạn không có quyền xóa xét nghiệm của ca khám này");
         }
 
         if (labResult.getStatus() != LabResultStatus.PENDING) {
@@ -243,6 +243,6 @@ public class LabResultServiceImpl implements LabResultService {
 
         systemLogService.logActivity("LabResult", labResult.getLabResultId(), "DELETE_LAB_RESULT",
                 "Bác sĩ xóa chỉ định xét nghiệm \"" + labResult.getTestType()
-                        + "\" cho phiên khám #" + session.getSessionId());
+                        + "\" cho ca khám #" + session.getSessionId());
     }
 }

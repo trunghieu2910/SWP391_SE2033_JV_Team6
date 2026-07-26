@@ -64,28 +64,32 @@
 }
 
 .dispense-detail-table .col-drug {
-    width: 22%;
-}
-
-.dispense-detail-table .col-dose {
-    width: 18%;
-}
-
-.dispense-detail-table .col-duration {
-    width: 13%;
+    width: 20%;
 }
 
 .dispense-detail-table .col-quantity,
 .dispense-detail-table .col-dispensed {
-    width: 10%;
+    width: 9%;
+}
+
+.dispense-detail-table .col-dispenser-id {
+    width: 9%;
+}
+
+.dispense-detail-table .col-dispenser {
+    width: 15%;
+}
+
+.dispense-detail-table .col-dispense-time {
+    width: 15%;
 }
 
 .dispense-detail-table .col-status {
-    width: 13%;
+    width: 11%;
 }
 
 .dispense-detail-table .col-action {
-    width: 14%;
+    width: 12%;
 }
 
 .drug-name-cell {

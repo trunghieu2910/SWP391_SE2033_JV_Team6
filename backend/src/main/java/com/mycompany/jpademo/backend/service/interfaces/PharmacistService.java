@@ -23,8 +23,8 @@ public interface PharmacistService {
     Page<DrugDTO> getDrugsByCategory(Integer subCategoryId, Pageable pageable);
     DrugDTO getDrugDetail(Integer drugId);
     DrugDTO createDrug(CreateDrugRequest request, Integer pharmacistId);
-    DrugDTO updateDrug(Integer drugId, CreateDrugRequest request);
-    void updateDrugStatus(Integer drugId, Byte status);
+    DrugDTO updateDrug(Integer drugId, CreateDrugRequest request, Integer pharmacistId);
+    void updateDrugStatus(Integer drugId, com.mycompany.jpademo.backend.enums.DrugStatus status);
     String generateNextDrugCode();
     String generateNextBatchStt();
     List<Unit> getAllUnits();

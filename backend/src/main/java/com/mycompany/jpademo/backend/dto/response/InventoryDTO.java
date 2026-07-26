@@ -17,7 +17,6 @@ public class InventoryDTO {
     private String drugName;
     private Integer quantityInStock;
     private LocalDateTime lastUpdated;
-    private Byte status;
     private Long daysUntilExpiry;
     private Boolean isExpiringSoon;
     private Boolean isLowStock;

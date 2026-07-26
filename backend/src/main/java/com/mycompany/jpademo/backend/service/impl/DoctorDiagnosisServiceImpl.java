@@ -218,7 +218,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
         if (session.getClinicalInputMode() == ClinicalInputMode.PATIENT
                 && (session.getSymptomResult() == null || session.getSymptomResult().getStatus() != SymptomResultStatus.COMPLETED)) {
-            throw new BadRequestException("Phiên khám này yêu cầu bệnh nhân gửi triệu chứng trước khi bác sĩ có thể chỉnh sửa.");
+            throw new BadRequestException("Ca khám này yêu cầu bệnh nhân gửi triệu chứng trước khi bác sĩ có thể chỉnh sửa.");
         }
 
         if (request.getHeight() != null) session.setHeight(request.getHeight());
@@ -302,7 +302,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền thay đổi chế độ nhập triệu chứng của ca chẩn đoán này.");
         }
-        // Allow changing mode only if patient hasn't submitted yet
+        // Chỉ cho phép đổi chế độ nếu bệnh nhân chưa nộp kết quả
         if (session.getClinicalInputMode() != null &&
                 session.getSymptomResult() != null &&
                 session.getSymptomResult().getStatus() == SymptomResultStatus.COMPLETED) {
@@ -395,8 +395,6 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         review.setReviewedAt(LocalDateTime.now());
 
         reviewRepository.save(review);
-
-        session.setStatus(DiagnosisSessionStatus.COMPLETED);
         sessionRepository.save(session);
     }
 

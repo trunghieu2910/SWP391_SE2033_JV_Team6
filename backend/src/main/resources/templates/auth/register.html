@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng ký tài khoản - MedAI</title>
-    <!-- Google Fonts & FontAwesome -->
+    <!-- Font Google & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/auth/auth.css}" />
 </head>
 <body>
 <div class="login-page">
-    <!-- Left panel (Branding) -->
+    <!-- Khung bên trái (Thuong hi?u) -->
     <div class="login-left">
         <div class="login-left-content">
             <div class="login-logo">+</div>
@@ -22,7 +22,7 @@
         </div>
     </div>
     
-    <!-- Right panel (Registration Form) -->
+    <!-- Khung bên ph?i (Form dang ký) -->
     <div class="login-right">
         <div class="login-card card" style="max-width: 680px;">
             <div class="login-card-header">
@@ -30,7 +30,7 @@
                 <p>Điền đầy đủ thông tin bên dưới để tạo tài khoản bệnh nhân mới.</p>
             </div>
 
-            <!-- Messages -->
+            <!-- Thông báo -->
             <div th:if="${successMessage}" class="alert alert-success">
                 <span>✓</span>
                 <span th:text="${successMessage}"></span>
@@ -40,7 +40,7 @@
                 <span th:text="${error}"></span>
             </div>
 
-            <!-- Form -->
+            <!-- Bi?u m?u -->
             <form id="registerForm" th:action="@{/auth/register}" th:object="${registerRequest}" method="post">
                 
                 <!-- Họ và tên (Full width) -->
@@ -158,7 +158,7 @@
     </div>
 </div>
 
-<!-- Scripts -->
+<!-- K?ch b?n (Scripts) -->
 <script th:src="@{/js/auth/auth.js}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -298,3 +298,4 @@
 </script>
 </body>
 </html>
+

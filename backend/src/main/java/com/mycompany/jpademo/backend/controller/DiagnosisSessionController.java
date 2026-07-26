@@ -94,7 +94,7 @@ public class DiagnosisSessionController {
     }
 
     /**
-     * Lấy chi tiết phiên khám
+     * Lấy chi tiết ca khám
      */
     @GetMapping("/{sessionId}")
         @PreAuthorize("hasAnyRole('DOCTOR','PATIENT')")
@@ -104,7 +104,7 @@ public class DiagnosisSessionController {
         return ResponseEntity.ok(
                 ApiResponse.<DiagnosisSessionResponse>builder()
                         .code(200)
-                        .message("Lấy chi tiết phiên khám thành công")
+                        .message("Lấy chi tiết ca khám thành công")
                         .data(response)
                         .build()
         );

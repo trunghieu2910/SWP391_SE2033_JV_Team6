@@ -131,10 +131,9 @@ function validateImportForm(e) {
     const expDateVal = document.getElementById('expiryDate').value;
     const unitId = document.getElementById('unitId').value;
     const quantityVal = document.getElementById('quantity').value;
-    const importPriceVal = document.getElementById('importPrice').value;
     const supplier = document.getElementById('supplier').value;
 
-    if (!drugId || !batchNumber || !mfgDateVal || !expDateVal || !unitId || !quantityVal || !importPriceVal || !supplier) {
+    if (!drugId || !batchNumber || !mfgDateVal || !expDateVal || !unitId || !quantityVal || !supplier) {
         e.preventDefault();
         alert('Vui lòng điền tất cả các trường bắt buộc (ngoại trừ ghi chú)');
         return false;
@@ -164,17 +163,10 @@ function validateImportForm(e) {
     }
 
     const quantity = parseInt(quantityVal, 10);
-    const importPrice = parseFloat(importPriceVal);
 
     if (isNaN(quantity) || quantity <= 0 || !Number.isInteger(quantity)) {
         e.preventDefault();
         alert('Số lượng nhập phải là số nguyên dương lớn hơn 0');
-        return false;
-    }
-
-    if (isNaN(importPrice) || importPrice <= 0 || !Number.isInteger(importPrice)) {
-        e.preventDefault();
-        alert('Đơn giá nhập phải là số nguyên dương lớn hơn 0');
         return false;
     }
 
