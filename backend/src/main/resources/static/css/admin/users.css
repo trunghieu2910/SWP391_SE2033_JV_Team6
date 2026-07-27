@@ -407,6 +407,21 @@ th {
     border-color: var(--primary);
 }
 
+.page-btn.page-ellipsis {
+    border: none;
+    background: transparent;
+    color: var(--neutral-light);
+    cursor: default;
+    pointer-events: none;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+}
+
+.page-btn.page-ellipsis:hover {
+    background: transparent;
+    border-color: transparent;
+}
+
 /* ===== MODAL ===== */
 .modal {
     position: fixed;
