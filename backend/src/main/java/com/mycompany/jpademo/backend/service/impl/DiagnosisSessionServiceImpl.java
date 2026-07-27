@@ -88,8 +88,6 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
         DiagnosisSession session = DiagnosisSession.builder()
                 .patient(patient)
                 .user(doctor)
-                .weight(request.getWeight())
-                .height(request.getHeight())
                 .status(DiagnosisSessionStatus.PENDING)
                 .clinicalInputMode(request.getClinicalInputMode())
                 .build();
@@ -107,13 +105,6 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
         return mapToResponse(savedSession);
     }
 
-    // Màn hình Lễ tân: Thêm bệnh nhân vào ca khám (Logic tương tự tạo ca khám)
-    @Override
-    @Transactional
-    public DiagnosisSessionResponse addPatientToSession(CreateDiagnosisSessionRequest request, Integer creatorId) {
-        // Tương tự như createSession
-        return createSession(request, creatorId);
-    }
 
     // Màn hình Lễ tân: Xem danh sách bác sĩ và tải công việc (Màn hình 1)
     // [Nguyen The Hieu]: Bước 3 - Service Impl: Triển khai logic tính toán danh sách tải bác sĩ (Màn hình lễ tân 1)

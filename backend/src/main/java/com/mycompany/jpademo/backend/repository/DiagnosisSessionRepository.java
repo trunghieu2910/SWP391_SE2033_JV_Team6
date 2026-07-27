@@ -35,6 +35,7 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
         SELECT
             ds.sessionID AS id,
             ds.isShared AS isShared,
+            ds.status AS status,
             COALESCE(u.fullName, '') AS patientName,
             dt.name AS diagnosis,
             ds.createdAt AS visitDate,
