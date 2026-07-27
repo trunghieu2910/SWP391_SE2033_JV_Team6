@@ -300,15 +300,26 @@ public class PharmacistController {
 
     // ==================== QUẢN LÝ CẤP PHÁT THUỐC ====================
     @GetMapping("/dispense-list")
-    public String getDispenseList(Model model) {
+    public String getDispenseList(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "10") int size,
+            Model model) {
         try {
-            List<PrescriptionSummaryDTO> prescriptions = pharmacistService.getPendingPrescriptionsSummary();
-            model.addAttribute("prescriptions", prescriptions);
+            org.springframework.data.domain.Page<com.mycompany.jpademo.backend.dto.response.PrescriptionSummaryDTO> prescriptionsPage = pharmacistService.getPendingPrescriptionsSummary(keyword, status, fromDate, toDate, page, size);
+            model.addAttribute("prescriptions", prescriptionsPage);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("status", status);
+            model.addAttribute("fromDate", fromDate);
+            model.addAttribute("toDate", toDate);
             return "pharmacist/dispense-list";
         } catch (Exception e) {
             log.error("Error loading dispense list", e);
             model.addAttribute("error", "Lỗi khi tải danh sách cấp phát: " + e.getMessage());
-            model.addAttribute("prescriptions", java.util.Collections.emptyList());
+            model.addAttribute("prescriptions", org.springframework.data.domain.Page.empty());
             return "pharmacist/dispense-list";
         }
     }
@@ -406,12 +417,14 @@ public class PharmacistController {
             Page<InventoryDTO> inventories = pharmacistService.getInventory(search, smallUnit, pageable);
             List<InventoryDTO> expiringItems = pharmacistService.getExpiringInventory();
             List<InventoryDTO> lowStockItems = pharmacistService.getLowStockInventory();
+            List<String> units = pharmacistService.getDistinctSmallUnits();
             
             model.addAttribute("search", search);
             model.addAttribute("smallUnit", smallUnit);
             model.addAttribute("inventories", inventories);
             model.addAttribute("expiringItems", expiringItems);
             model.addAttribute("lowStockItems", lowStockItems);
+            model.addAttribute("units", units);
             model.addAttribute("currentPage", pageable.getPageNumber());
             model.addAttribute("totalPages", inventories.getTotalPages());
             return "pharmacist/inventory";

@@ -12,29 +12,34 @@
 
         <section class="card" style="padding: 0; overflow: hidden;">
             <div class="dispense-filter-panel">
-                <div class="dispense-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="dispenseSearchInput" placeholder="Tìm theo tên bệnh nhân, CCCD nếu có">
-                </div>
-                <div class="dispense-filter-field">
-                    <i class="fas fa-filter"></i>
-                    <select id="dispenseStatusFilter">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="pending">Chờ cấp phát</option>
-                        <option value="completed">Đã cấp phát</option>
-                    </select>
-                </div>
-                <div class="dispense-filter-field">
-                    <span>Từ</span>
-                    <input type="date" id="dispenseDateFrom">
-                </div>
-                <div class="dispense-filter-field">
-                    <span>Đến</span>
-                    <input type="date" id="dispenseDateTo">
-                </div>
-                <button type="button" class="btn btn-secondary dispense-clear-filter" id="dispenseClearFilter">
-                    <i class="fas fa-rotate-left"></i> Xóa lọc
-                </button>
+                <form id="filterForm" action="/pharmacist/dispense-list" method="get" style="display: contents;">
+                    <div class="dispense-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="keyword" id="dispenseSearchInput" placeholder="Tìm theo tên bệnh nhân, CCCD nếu có" th:value="${keyword}">
+                    </div>
+                    <div class="dispense-filter-field">
+                        <i class="fas fa-filter"></i>
+                        <select name="status" id="dispenseStatusFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="pending" th:selected="${status == 'pending'}">Chờ cấp phát</option>
+                            <option value="completed" th:selected="${status == 'completed'}">Đã cấp phát</option>
+                        </select>
+                    </div>
+                    <div class="dispense-filter-field">
+                        <span>Từ</span>
+                        <input type="date" name="fromDate" id="dispenseDateFrom" th:value="${fromDate}">
+                    </div>
+                    <div class="dispense-filter-field">
+                        <span>Đến</span>
+                        <input type="date" name="toDate" id="dispenseDateTo" th:value="${toDate}">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="height: 38px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <i class="fas fa-search"></i> Lọc
+                    </button>
+                    <button type="button" class="btn btn-secondary dispense-clear-filter" id="dispenseClearFilter" style="height: 38px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <i class="fas fa-rotate-left"></i> Xóa lọc
+                    </button>
+                </form>
             </div>
             <div class="table-responsive" style="margin-top: 0;">
             <table class="table">
@@ -49,7 +54,7 @@
                     </tr>
                 </thead>
                 <tbody id="dispenseListTableBody">
-                    <tr th:each="prescription : ${prescriptions}"
+                    <tr th:each="prescription : ${prescriptions.content}"
                         th:onclick="|window.location.href='/pharmacist/dispense-prescription/' + ${prescription.prescriptionId}|"
                         style="cursor: pointer;"
                         title="Nhấp để xem chi tiết đơn thuốc">
@@ -69,7 +74,7 @@
                             Không tìm thấy đơn thuốc phù hợp.
                         </td>
                     </tr>
-                    <tr th:if="${prescriptions == null or #lists.isEmpty(prescriptions)}">
+                    <tr th:if="${prescriptions == null or #lists.isEmpty(prescriptions.content)}">
                         <td colspan="6" style="text-align: center; color: var(--neutral-light); padding: 32px;">
                             <i class="fas fa-check-circle" style="font-size: 2rem; color: var(--success); display: block; margin-bottom: 8px;"></i>
                             Không có đơn thuốc nào đang chờ cấp phát.
@@ -77,6 +82,39 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div th:if="${prescriptions != null and prescriptions.totalPages > 1}" class="pagination-container" style="display: flex; justify-content: center; margin-top: 20px; margin-bottom: 20px;">
+                <ul class="pagination" style="display: flex; list-style: none; padding: 0; gap: 8px;">
+                    <li th:class="${prescriptions.first ? 'page-item disabled' : 'page-item'}">
+                        <a th:href="@{/pharmacist/dispense-list(page=0, keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate})}" class="page-link" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;" th:style="${prescriptions.first ? 'pointer-events: none; color: #ccc;' : 'padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;'}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li th:class="${prescriptions.hasPrevious() ? 'page-item' : 'page-item disabled'}">
+                        <a th:href="@{/pharmacist/dispense-list(page=${prescriptions.number - 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate})}" class="page-link" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;" th:style="${!prescriptions.hasPrevious() ? 'pointer-events: none; color: #ccc;' : 'padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;'}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    <th:block th:with="
+                        start=${prescriptions.number gt 2 ? (prescriptions.number + 2 lt prescriptions.totalPages ? prescriptions.number - 2 : (prescriptions.totalPages - 5 lt 0 ? 0 : prescriptions.totalPages - 5)) : 0},
+                        end=${prescriptions.number + 2 lt prescriptions.totalPages ? (prescriptions.number lt 2 ? (prescriptions.totalPages gt 5 ? 4 : prescriptions.totalPages - 1) : prescriptions.number + 2) : prescriptions.totalPages - 1}">
+                        <li th:each="i : ${#numbers.sequence(start, end)}" th:class="${prescriptions.number == i ? 'page-item active' : 'page-item'}">
+                            <a th:href="@{/pharmacist/dispense-list(page=${i}, keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate})}" th:text="${i + 1}" class="page-link" th:style="${prescriptions.number == i ? 'padding: 8px 12px; border: 1px solid #2563eb; background-color: #2563eb; color: white; border-radius: 4px; text-decoration: none;' : 'padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;'}"></a>
+                        </li>
+                    </th:block>
+                    <li th:class="${prescriptions.hasNext() ? 'page-item' : 'page-item disabled'}">
+                        <a th:href="@{/pharmacist/dispense-list(page=${prescriptions.number + 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate})}" class="page-link" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;" th:style="${!prescriptions.hasNext() ? 'pointer-events: none; color: #ccc;' : 'padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;'}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li th:class="${prescriptions.last ? 'page-item disabled' : 'page-item'}">
+                        <a th:href="@{/pharmacist/dispense-list(page=${prescriptions.totalPages - 1}, keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate})}" class="page-link" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;" th:style="${prescriptions.last ? 'pointer-events: none; color: #ccc;' : 'padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;'}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </section>
     </div>

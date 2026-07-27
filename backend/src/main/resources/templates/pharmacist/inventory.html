@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{pharmacist/layout :: main-layout(~{::main}, 'Quản lý tồn kho', 'inventory')}">
 <body>
@@ -86,11 +86,7 @@
                         <i class="fas fa-filter"></i>
                         <select name="smallUnit" id="inventoryUnitFilter" onchange="this.form.submit()">
                             <option value="">-- Tất cả đơn vị --</option>
-                            <option value="Viên" th:selected="${smallUnit == 'Viên'}">Viên</option>
-                            <option value="Vỉ" th:selected="${smallUnit == 'Vỉ'}">Vỉ</option>
-                            <option value="Lọ" th:selected="${smallUnit == 'Lọ'}">Lọ</option>
-                            <option value="Ống" th:selected="${smallUnit == 'Ống'}">Ống</option>
-                            <option value="Tuýp" th:selected="${smallUnit == 'Tuýp'}">Tuýp</option>
+                            <option th:each="u : ${units}" th:value="${u}" th:text="${u}" th:selected="${smallUnit == u}"></option>
                         </select>
                     </div>
                     <div class="inventory-sort">

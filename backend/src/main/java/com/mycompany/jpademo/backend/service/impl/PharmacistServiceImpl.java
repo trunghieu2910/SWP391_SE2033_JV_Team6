@@ -777,8 +777,8 @@ public class PharmacistServiceImpl implements PharmacistService {
         }
 
         Page<Inventory> inventories = inventoryRepository.searchInventory(
-            keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : null,
-            unit != null && !unit.trim().isEmpty() ? unit.trim() : null,
+            keyword != null && !keyword.trim().isEmpty() ? keyword.trim() : "",
+            unit != null && !unit.trim().isEmpty() ? unit.trim() : "",
             pageable
         );
         return inventories.map(this::convertToInventoryDTO);
@@ -841,6 +841,11 @@ public class PharmacistServiceImpl implements PharmacistService {
         log.info("Inventory adjusted for batch {}: {} -> {}", batchId, oldQuantity, newQuantity);
     }
 
+    @Override
+    public List<String> getDistinctSmallUnits() {
+        return inventoryRepository.findDistinctSmallUnits();
+    }
+
     // ========================== CẤP PHÁT THUỐC ==========================
 
     @Override
@@ -856,35 +861,52 @@ public class PharmacistServiceImpl implements PharmacistService {
     }
 
     @Override
-    public List<PrescriptionSummaryDTO> getPendingPrescriptionsSummary() {
-        List<PrescriptionDetail> details = prescriptionDetailRepository.findAllDispensePrescriptions();
-        // Nhóm theo ID Đơn thuốc (prescriptionId)
-        java.util.Map<Integer, List<PrescriptionDetail>> grouped = details.stream()
-            .collect(java.util.stream.Collectors.groupingBy(
-                d -> d.getPrescription().getPrescriptionId()
-            ));
+    public org.springframework.data.domain.Page<PrescriptionSummaryDTO> getPendingPrescriptionsSummary(
+            String keyword, String status, LocalDate fromDate, LocalDate toDate, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        
+        String safeKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+        String safeStatus = (status != null && !status.trim().isEmpty()) ? status.trim() : null;
+        LocalDateTime startDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : null;
+        
+        org.springframework.data.domain.Page<Prescription> prescriptionPage = prescriptionRepository.filterDispensePrescriptionsPage(
+                safeKeyword, safeStatus, startDateTime, endDateTime, pageable);
 
-        return grouped.entrySet().stream().map(entry -> {
-            List<PrescriptionDetail> items = entry.getValue();
-            PrescriptionDetail first = items.get(0);
+        return prescriptionPage.map(p -> {
+            List<PrescriptionDetail> items = prescriptionDetailRepository.findByPrescription_PrescriptionId(p.getPrescriptionId());
+            if (items == null || items.isEmpty()) {
+                return PrescriptionSummaryDTO.builder()
+                    .prescriptionId(p.getPrescriptionId())
+                    .prescriptionCode(p.getPrescriptionCode())
+                    .patientName(p.getPatient().getUser().getFullName())
+                    .prescriptionDate(p.getPrescriptionDate())
+                    .diagnosis(p.getDiagnosis())
+                    .status(p.getStatus())
+                    .totalItems(0)
+                    .pendingItems(0)
+                    .isPending(false)
+                    .build();
+            }
+
             List<PrescriptionDetailDTO> dtos = items.stream()
                 .map(this::convertToPrescriptionDetailDTO)
                 .collect(Collectors.toList());
             long pending = dtos.stream().filter(d -> Boolean.TRUE.equals(d.getIsPending())).count();
 
             return PrescriptionSummaryDTO.builder()
-                .prescriptionId(first.getPrescription().getPrescriptionId())
-                .prescriptionCode(first.getPrescription().getPrescriptionCode())
-                .patientName(first.getPrescription().getPatient().getUser().getFullName())
-                .prescriptionDate(first.getPrescription().getPrescriptionDate())
-                .diagnosis(first.getPrescription().getDiagnosis())
-                .status(pending > 0 ? first.getPrescription().getStatus() : PrescriptionStatus.DISPENSED)
+                .prescriptionId(p.getPrescriptionId())
+                .prescriptionCode(p.getPrescriptionCode())
+                .patientName(p.getPatient().getUser().getFullName())
+                .prescriptionDate(p.getPrescriptionDate())
+                .diagnosis(p.getDiagnosis())
+                .status(pending > 0 ? p.getStatus() : com.mycompany.jpademo.backend.enums.PrescriptionStatus.DISPENSED)
                 .totalItems(items.size())
                 .pendingItems((int) pending)
                 .isPending(pending > 0)
                 .details(dtos)
                 .build();
-        }).collect(Collectors.toList());
+        });
     }
 
     //@Override

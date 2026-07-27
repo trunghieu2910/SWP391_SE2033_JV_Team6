@@ -41,19 +41,25 @@ public class MedicationReminderController {
     public String newReminder(@org.springframework.web.bind.annotation.RequestParam(required = false) String note,
                               Model model,
                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        //Lấy thông tin người dùng
         ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
         Patient patient = getPatient(userDetails);
 
+        //Tạo dữ liệu cho form
         if (!model.containsAttribute("reminderRequest")) {
             MedicationReminderRequest req = new MedicationReminderRequest();
+            //Gán ghi chú nếu có
             if (note != null && !note.isBlank()) {
-                req.setNote(note.trim());
+                req.setNote(note.trim()); 
             }
+            //Đưa form sang View
             model.addAttribute("reminderRequest", req);
         }
 
+        //Lấy tất cả nhắc uống thuốc của bệnh nhân theo patientId
         List<MedicationReminderResponse> reminders = reminderService.getAllReminders(patient.getPatientId());
 
+        //Truyền dữ liệu sang giao diện
         model.addAttribute("profile", profile);
         model.addAttribute("reminders", reminders);
 
@@ -119,6 +125,7 @@ public class MedicationReminderController {
         }
 
         int count = 0;
+        //Vòng lặp tạo lời nhắc độc lập cho khung giờ khác nhau
         for (java.time.LocalTime time : timesList) {
             MedicationReminderRequest singleReq = MedicationReminderRequest.builder()
                     .note(reminderRequest.getNote())

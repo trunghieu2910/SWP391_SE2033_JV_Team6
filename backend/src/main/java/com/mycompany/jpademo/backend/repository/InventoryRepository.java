@@ -14,11 +14,14 @@ import java.util.Optional;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
     @Query("SELECT i FROM Inventory i WHERE " +
-           "(:keyword IS NULL OR LOWER(i.batch.drug.drugName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(i.batch.batchNumber) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
-           "(:unit IS NULL OR LOWER(i.batch.drug.baseUnit.unitName) LIKE LOWER(CONCAT('%', :unit, '%')))")
+           "(LOWER(i.batch.drug.drugName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(i.batch.batchNumber) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(LOWER(i.batch.drug.baseUnit.unitName) LIKE LOWER(CONCAT('%', :unit, '%')))")
     Page<Inventory> searchInventory(@Param("keyword") String keyword, @Param("unit") String unit, Pageable pageable);
 
     Optional<Inventory> findByBatch_BatchId(Integer batchId);
+
+    @Query("SELECT DISTINCT i.batch.drug.baseUnit.unitName FROM Inventory i WHERE i.batch.drug.baseUnit IS NOT NULL ORDER BY i.batch.drug.baseUnit.unitName")
+    List<String> findDistinctSmallUnits();
 
     // Tìm inventory theo batchId (alias cho findByBatch_BatchId)
     default Optional<Inventory> findByBatchId(Integer batchId) {

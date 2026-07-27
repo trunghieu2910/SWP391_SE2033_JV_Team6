@@ -26,4 +26,22 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Inte
 
     @Query("SELECT p FROM Prescription p WHERE p.session.sessionId = :sessionId")
     Optional<Prescription> findBySessionSessionId(@Param("sessionId") Integer sessionId);
+
+    @Query("SELECT p FROM Prescription p WHERE p.status IN (com.mycompany.jpademo.backend.enums.PrescriptionStatus.PENDING, com.mycompany.jpademo.backend.enums.PrescriptionStatus.DISPENSED) AND p.session.status = com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.COMPLETED ORDER BY p.prescriptionDate DESC")
+    Page<Prescription> findAllDispensePrescriptionsPage(Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.session.status = com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.COMPLETED " +
+           "AND (:keyword IS NULL OR LOWER(p.patient.user.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR p.patient.user.nationalID LIKE CONCAT('%', :keyword, '%')) " +
+           "AND (cast(:fromDate as timestamp) IS NULL OR p.prescriptionDate >= :fromDate) " +
+           "AND (cast(:toDate as timestamp) IS NULL OR p.prescriptionDate <= :toDate) " +
+           "AND (:status IS NULL " +
+           "     OR (:status = 'pending' AND p.status = com.mycompany.jpademo.backend.enums.PrescriptionStatus.PENDING) " +
+           "     OR (:status = 'completed' AND p.status = com.mycompany.jpademo.backend.enums.PrescriptionStatus.DISPENSED)) " +
+           "ORDER BY p.prescriptionDate DESC")
+    Page<Prescription> filterDispensePrescriptionsPage(
+        @Param("keyword") String keyword,
+        @Param("status") String status,
+        @Param("fromDate") java.time.LocalDateTime fromDate,
+        @Param("toDate") java.time.LocalDateTime toDate,
+        Pageable pageable);
 }

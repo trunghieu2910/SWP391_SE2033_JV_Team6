@@ -19,7 +19,7 @@ public class AuthController {
     private final AuthService authService;
 
     // ==================== REGISTER ====================
-    
+    //Hiển thị trang đăng ký
     @GetMapping("/register")
     public String showRegisterPage(Model model) {
         model.addAttribute("registerRequest", new RegisterRequest());

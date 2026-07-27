@@ -45,10 +45,12 @@ public interface PharmacistService {
     List<InventoryDTO> getExpiringInventory();
     InventoryDTO getInventoryByBatch(Integer batchId);
     void adjustInventory(Integer batchId, Integer quantityChange, String reason, Integer pharmacistId);
+    List<String> getDistinctSmallUnits();
 
     // Prescription & Dispensing
     Page<PrescriptionDetailDTO> getPendingPrescriptions(Pageable pageable);
-    List<PrescriptionSummaryDTO> getPendingPrescriptionsSummary();
+    org.springframework.data.domain.Page<PrescriptionSummaryDTO> getPendingPrescriptionsSummary(
+            String keyword, String status, LocalDate fromDate, LocalDate toDate, int page, int size);
     List<PrescriptionDetailDTO> getPrescriptionDetailsByPrescriptionId(Integer prescriptionId);
     PrescriptionDetailDTO getPrescriptionDetail(Integer detailId);
     void dispenseDrug(DispenseDrugRequest request, Integer pharmacistId);

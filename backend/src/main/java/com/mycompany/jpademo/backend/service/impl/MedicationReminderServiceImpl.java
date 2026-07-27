@@ -30,6 +30,7 @@ public class MedicationReminderServiceImpl implements MedicationReminderService 
 
     @Override
     @Transactional
+    //Nhận lệnh từ controller và ghi xuống database
     public MedicationReminderResponse createReminder(Integer patientId, MedicationReminderRequest request) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bệnh nhân."));
