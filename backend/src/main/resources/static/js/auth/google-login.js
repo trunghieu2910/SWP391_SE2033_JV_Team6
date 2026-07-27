@@ -4,8 +4,8 @@ import { getAuth, GoogleAuthProvider, signInWithPopup }
 
 const firebaseConfig = {
     apiKey:     "AIzaSyBsuqfI_y3b0bwCxcrRjK0g5HnvxZv1Y7M",
-    authDomain: "medai-diagnosis.firebaseapp.com",
-    projectId:  "medai-diagnosis",
+    authDomain: "medai-diagnosis-5efd5.firebaseapp.com",
+    projectId:  "medai-diagnosis-5efd5",
     appId:      "1:729588417542:web:72a39833ec14496358ef87",
 };
 

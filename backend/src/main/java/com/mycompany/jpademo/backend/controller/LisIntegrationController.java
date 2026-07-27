@@ -71,8 +71,7 @@ public class LisIntegrationController {
         if (labResult == null
                 || !labResult.getDiagnosisSession().getSessionId().equals(sessionId)) {
             httpRequest.getSession().setAttribute("flashError",
-                    "Không tìm thấy xét nghiệm với labResultId: " + labResultId
-                            + " trong phiên khám #" + sessionId);
+                    "Không tìm thấy xét nghiệm tương ứng trong phiên khám #" + sessionId);
             httpResponse.sendRedirect("/doctor/sessions/" + sessionId + "?openLab=true");
             return;
         }

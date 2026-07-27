@@ -6,6 +6,8 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.mycompany.jpademo.backend.exception.UnauthorizedException;
 import com.mycompany.jpademo.backend.service.interfaces.FirebaseService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class FirebaseServiceImpl implements FirebaseService {
+
+    private static final Logger log = LoggerFactory.getLogger(FirebaseServiceImpl.class);
 
     /**
      * {@inheritDoc}
@@ -29,14 +33,23 @@ public class FirebaseServiceImpl implements FirebaseService {
      */
     public FirebaseToken verifyIdToken(String idToken) {
         if (FirebaseApp.getApps().isEmpty()) {
-            throw new UnauthorizedException("Firebase is not configured. Please set GOOGLE_APPLICATION_CREDENTIALS or add firebase-service-account.json to classpath.");
+            String msg = "Firebase is not configured. Please set GOOGLE_APPLICATION_CREDENTIALS or add firebase-service-account.json to classpath.";
+            log.error("❌ {}", msg);
+            throw new UnauthorizedException(msg);
         }
 
         try {
             FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
             return firebaseAuth.verifyIdToken(idToken, true);
         } catch (FirebaseAuthException e) {
-            throw new UnauthorizedException("Invalid Firebase token");
+            // Log detailed error info for debugging
+            log.error("❌ Firebase authentication error during ID token verification", e);
+            log.error("   Error Code: {}", e.getErrorCode());
+            log.error("   Error Message: {}", e.getMessage());
+            if (e.getCause() != null) {
+                log.error("   Root Cause: {}", e.getCause().getMessage());
+            }
+            throw new UnauthorizedException("Invalid Firebase token: " + e.getMessage());
         }
     }
 }

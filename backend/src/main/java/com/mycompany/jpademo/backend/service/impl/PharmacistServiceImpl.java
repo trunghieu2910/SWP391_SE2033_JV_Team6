@@ -407,6 +407,24 @@ public class PharmacistServiceImpl implements PharmacistService {
         Unit unit = unitRepository.findById(request.getUnitId())
             .orElseThrow(() -> new RuntimeException("Unit not found: " + request.getUnitId()));
 
+        // Validate unit must be in drug's unit conversions or base unit
+        List<UnitConversion> conversions = unitConversionRepository.findByDrugId(drug.getDrugId());
+        boolean isUnitValid = false;
+        if (drug.getBaseUnit().getUnitId().equals(unit.getUnitId())) {
+            isUnitValid = true;
+        } else {
+            for (UnitConversion conv : conversions) {
+                if ((conv.getLargeUnit() != null && conv.getLargeUnit().getUnitId().equals(unit.getUnitId())) ||
+                        (conv.getSmallUnit() != null && conv.getSmallUnit().getUnitId().equals(unit.getUnitId()))) {
+                    isUnitValid = true;
+                    break;
+                }
+            }
+        }
+        if (!isUnitValid) {
+            throw new RuntimeException("Đơn vị nhập không hợp lệ. Phải chọn đúng những đơn vị đã được ghi trong thiết lập quy đổi của thuốc.");
+        }
+
         User pharmacist = userRepository.findById(pharmacistId)
             .orElseThrow(() -> new RuntimeException("User not found: " + pharmacistId));
 
@@ -508,6 +526,24 @@ public class PharmacistServiceImpl implements PharmacistService {
         // Tìm kiếm và gán đơn vị mới
         Unit unit = unitRepository.findById(request.getUnitId())
             .orElseThrow(() -> new RuntimeException("Đơn vị tính không hợp lệ: " + request.getUnitId()));
+
+        // Validate unit must be in drug's unit conversions or base unit
+        List<UnitConversion> conversions = unitConversionRepository.findByDrugId(drug.getDrugId());
+        boolean isUnitValid = false;
+        if (drug.getBaseUnit().getUnitId().equals(unit.getUnitId())) {
+            isUnitValid = true;
+        } else {
+            for (UnitConversion conv : conversions) {
+                if ((conv.getLargeUnit() != null && conv.getLargeUnit().getUnitId().equals(unit.getUnitId())) ||
+                        (conv.getSmallUnit() != null && conv.getSmallUnit().getUnitId().equals(unit.getUnitId()))) {
+                    isUnitValid = true;
+                    break;
+                }
+            }
+        }
+        if (!isUnitValid) {
+            throw new RuntimeException("Đơn vị nhập không hợp lệ. Phải chọn đúng những đơn vị đã được ghi trong thiết lập quy đổi của thuốc.");
+        }
 
         int newSmallQty = calculateSmallUnitQuantityFromRequest(drug, unit, request.getQuantity(), request.getPackagingChain());
         int oldSmallQty = calculateSmallUnitQuantity(drug.getDrugId(), batch.getUnit().getUnitId(), batch.getQuantity());

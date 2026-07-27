@@ -66,6 +66,25 @@ public class GlobalExceptionHandler {
         return "redirect:/auth/login";
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public Object handleUnauthorizedException(
+            UnauthorizedException e,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+
+        if (isApiRequest(request)) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.builder()
+                            .success(false)
+                            .message(e.getMessage())
+                            .build());
+        }
+
+        redirectAttributes.addFlashAttribute("error", e.getMessage());
+        return "redirect:/auth/login";
+    }
+
     @ExceptionHandler(InvalidOtpException.class)
     public String handleInvalidOtp(InvalidOtpException e,
                                    RedirectAttributes redirectAttributes,

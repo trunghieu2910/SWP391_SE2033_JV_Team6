@@ -102,7 +102,7 @@ public class LabResultServiceImpl implements LabResultService {
             // Two concurrent requests raced past the existsBy... check above;
             // the DB-level UNIQUE constraint is the final authority here.
             throw new BadRequestException(
-                    "Phiên khám này đã có xét nghiệm loại \"" + request.getTestType() + "\". " +
+                    "Ca khám này đã có xét nghiệm loại \"" + request.getTestType() + "\". " +
                             "Vui lòng chọn loại xét nghiệm khác.");
         }
 

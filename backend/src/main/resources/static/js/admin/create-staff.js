@@ -121,20 +121,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // === ROLE CHANGE LOGIC ===
         const roleSelect = document.getElementById('roleName');
         const fileGroup = document.querySelector('.file-group');
-        
+
         if (roleSelect && fileGroup && fileInput) {
-            roleSelect.addEventListener('change', function() {
-                if (this.value === 'DOCTOR') {
-                    fileGroup.style.display = 'block';
-                    fileInput.setAttribute('required', 'required');
-                } else {
-                    fileGroup.style.display = 'none';
-                    fileInput.removeAttribute('required');
-                    removeFile();
-                }
-            });
-            // Trigger change on load to set initial state
-            roleSelect.dispatchEvent(new Event('change'));
+            // Certificate luôn bắt buộc, không phụ thuộc vào role được chọn
+            fileGroup.style.display = 'block';
+            fileInput.setAttribute('required', 'required');
         }
 
         // === Resend OTP ===
