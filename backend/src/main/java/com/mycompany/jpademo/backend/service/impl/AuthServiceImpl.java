@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 
         String otp = OtpUtil.generateOtp();
         OtpUtil.saveOtp(request.getEmail(), otp);
-        emailService.sendOtpEmail(request.getEmail(), request.getFullName(), otp);
+        emailService.sendRegistrationOtpEmail(request.getEmail(), request.getFullName(), otp);
     }
 
     @Transactional
@@ -175,7 +175,7 @@ public class AuthServiceImpl implements AuthService {
 
         String otp = OtpUtil.generateOtp();
         OtpUtil.saveOtp(registerRequest.getEmail(), otp);
-        emailService.sendOtpEmail(registerRequest.getEmail(), registerRequest.getFullName(), otp);
+        emailService.sendRegistrationOtpEmail(registerRequest.getEmail(), registerRequest.getFullName(), otp);
     }
 
 }
