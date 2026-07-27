@@ -105,6 +105,11 @@ public class MedicationReminderController {
 
         if (timesList.isEmpty()) {
             bindingResult.rejectValue("scheduledTime", "error.scheduledTime", "Vui lòng chọn ít nhất một khung giờ nhắc");
+        } else {
+            long distinctCount = timesList.stream().distinct().count();
+            if (distinctCount < timesList.size()) {
+                bindingResult.rejectValue("scheduledTime", "error.scheduledTime", "Bạn không được chọn các khung giờ giống nhau.");
+            }
         }
 
         if (bindingResult.hasErrors()) {
@@ -150,6 +155,11 @@ public class MedicationReminderController {
 
         if (timesList.isEmpty()) {
             bindingResult.rejectValue("scheduledTime", "error.scheduledTime", "Vui lòng chọn ít nhất một khung giờ nhắc");
+        } else {
+            long distinctCount = timesList.stream().distinct().count();
+            if (distinctCount < timesList.size()) {
+                bindingResult.rejectValue("scheduledTime", "error.scheduledTime", "Bạn không được chọn các khung giờ giống nhau.");
+            }
         }
 
         if (bindingResult.hasErrors()) {

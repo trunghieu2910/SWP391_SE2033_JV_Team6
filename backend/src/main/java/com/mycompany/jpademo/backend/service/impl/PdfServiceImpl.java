@@ -303,9 +303,9 @@ public class PdfServiceImpl implements PdfService {
             addSectionHeader(document, "VII. ĐƠN THUỐC BÁC SĨ KÊ (PRESCRIPTION)", sectionHeaderFont);
             
             // PHÂN QUYỀN BÁC SĨ / BỆNH NHÂN ĐỐI VỚI ĐƠN THUỐC:
-            // - Nếu là Bệnh nhân (isPatientView = true) và bác sĩ CHƯA công bố hồ sơ (isShared = false): Ẩn bảng đơn thuốc đi.
-            if (isPatientView && (record.getIsShared() == null || !record.getIsShared())) {
-                Paragraph noPrescription = new Paragraph("Bác sĩ chưa công bố đơn thuốc cho ca chẩn đoán này.", italicFont);
+            // - Nếu là Bệnh nhân (isPatientView = true) và trạng thái ca khám chưa hoàn thành: Ẩn bảng đơn thuốc đi.
+            if (isPatientView && record.getStatus() != com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus.COMPLETED) {
+                Paragraph noPrescription = new Paragraph("Ca khám chưa hoàn thành, chưa thể xem đơn thuốc.", italicFont);
                 noPrescription.setSpacingBefore(5f);
                 noPrescription.setSpacingAfter(10f);
                 document.add(noPrescription);

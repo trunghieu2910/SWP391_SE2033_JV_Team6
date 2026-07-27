@@ -37,6 +37,13 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public void sendRegistrationOtpEmail(String to, String fullName, String otp) {
+        String subject = "Mã OTP xác nhận đăng ký";
+        String body = EmailUtil.buildRegistrationOtpEmailTemplate(fullName, otp);
+        buildAndSendEmail(to, subject, body);
+    }
+
+    @Override
     public void sendPasswordEmail(String toEmail, String fullName, String rawPassword) {
         String subject = "[MedicalDiagnosis] Thông tin tài khoản của bạn";
         String body = EmailUtil.buildPasswordEmailTemplate(fullName, rawPassword);

@@ -310,6 +310,16 @@ public class PatientController {
             isShared = numberValue.intValue() == 1;
         }
 
+        DiagnosisSessionStatus status = null;
+        Object rawStatus = row.get("status");
+        if (rawStatus != null) {
+            try {
+                status = DiagnosisSessionStatus.valueOf(rawStatus.toString());
+            } catch (IllegalArgumentException ignored) {
+                // Nếu giá trị status không hợp lệ, để null
+            }
+        }
+
         return MedicalRecordResponse.builder()
                 .id(row.get("id") != null ? ((Number) row.get("id")).intValue() : null)
                 .patientName((String) row.get("patientName"))
@@ -322,6 +332,7 @@ public class PatientController {
                 .nationalID((String) row.get("nationalID"))
                 .gender((String) row.get("gender"))
                 .doctorFullName((String) row.get("doctorFullName"))
+                .status(status)
                 .build();
     }
 }

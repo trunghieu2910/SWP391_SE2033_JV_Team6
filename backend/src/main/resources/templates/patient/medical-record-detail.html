@@ -402,8 +402,8 @@
                   th:text="${prescription.status == 1 ? '✓ Đã cấp phát' : '⏳ Chờ cấp phát'}">Chờ cấp phát</span>
         </div>
         <div class="sec-inner">
-            <!-- Đã có đơn thuốc và đã công bố -->
-            <div th:if="${record.isShared and prescription != null and !#lists.isEmpty(prescription.details)}" style="display:flex; flex-direction:column; gap:16px;">
+            <!-- Đã có đơn thuốc và ca khám đã hoàn thành -->
+            <div th:if="${record.status.name() == 'COMPLETED' and prescription != null and !#lists.isEmpty(prescription.details)}" style="display:flex; flex-direction:column; gap:16px;">
                 <div class="info-grid info-grid-2" style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
                     <div class="info-pair">
                         <span class="info-lbl">Mã đơn thuốc</span>
@@ -461,11 +461,11 @@
                 </div>
             </div>
 
-            <!-- Đơn thuốc chưa được công bố -->
-            <div th:if="${!record.isShared and prescription != null and !#lists.isEmpty(prescription.details)}" class="no-review" style="padding: 24px; text-align: center;">
+            <!-- Đơn thuốc của ca khám chưa hoàn thành -->
+            <div th:if="${record.status.name() != 'COMPLETED' and prescription != null and !#lists.isEmpty(prescription.details)}" class="no-review" style="padding: 24px; text-align: center;">
                 <span style="font-size:32px;">🔒</span>
                 <div style="font-size:14px; font-weight:600; color:var(--red); margin-top: 6px;">
-                    Bác sĩ chưa công bố đơn thuốc cho ca chẩn đoán này.
+                    Ca khám chưa hoàn thành, chưa thể xem đơn thuốc.
                 </div>
             </div>
 

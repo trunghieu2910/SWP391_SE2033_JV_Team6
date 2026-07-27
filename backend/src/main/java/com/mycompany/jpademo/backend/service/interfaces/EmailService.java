@@ -5,5 +5,7 @@ public interface EmailService {
 
     void sendOtpEmail(String to, String fullName, String otp);
 
+    void sendRegistrationOtpEmail(String to, String fullName, String otp);
+
     void sendPasswordEmail(String toEmail, String fullName, String rawPassword);
 }
