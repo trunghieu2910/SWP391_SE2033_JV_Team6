@@ -3,10 +3,10 @@ import { getAuth, GoogleAuthProvider, signInWithPopup }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey:     "AIzaSyBsuqfI_y3b0bwCxcrRjK0g5HnvxZv1Y7M",
+    apiKey:     "AIzaSyBQZMaY2_1gdl-LynAG6k5TDmLXobd7_xw",
     authDomain: "medai-diagnosis-5efd5.firebaseapp.com",
     projectId:  "medai-diagnosis-5efd5",
-    appId:      "1:729588417542:web:72a39833ec14496358ef87",
+    appId:      "1:172414625801:web:c2390692e107c4f27a30d8",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -52,6 +52,7 @@ document.getElementById("googleLoginBtn").addEventListener("click", async () => 
             window.location.href = "/auth/login?error=invalid";
         }
     } catch (err) {
+        console.error(">>> LỖI THỰC SỰ TỪ FIREBASE:", err); // In lỗi ra Console
         if (err.code === "auth/popup-closed-by-user") return;
         window.location.href = "/auth/login?error=invalid";
     }
