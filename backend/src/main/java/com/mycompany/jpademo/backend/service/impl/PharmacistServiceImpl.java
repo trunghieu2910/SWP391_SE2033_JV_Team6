@@ -127,11 +127,10 @@ public class PharmacistServiceImpl implements PharmacistService {
     @Override
     @Transactional
     public DrugDTO createDrug(CreateDrugRequest request, Integer pharmacistId) {
-        validateDrugRequest(request);
-        
         if (request.getBaseUnitId() == null) {
             throw new RuntimeException("Vui lòng chọn Đơn vị gốc kê đơn.");
         }
+        validateDrugRequest(request, request.getBaseUnitId());
 
         User pharmacist = userRepository.findById(pharmacistId)
             .orElseThrow(() -> new RuntimeException("User not found: " + pharmacistId));
@@ -171,10 +170,11 @@ public class PharmacistServiceImpl implements PharmacistService {
     @Override
     @Transactional
     public DrugDTO updateDrug(Integer drugId, CreateDrugRequest request, Integer pharmacistId) {
-        validateDrugRequest(request);
-        
         Drug drug = drugRepository.findById(drugId)
             .orElseThrow(() -> new RuntimeException("Drug not found: " + drugId));
+
+        Integer baseUnitIdToValidate = request.getBaseUnitId() != null ? request.getBaseUnitId() : drug.getBaseUnit().getUnitId();
+        validateDrugRequest(request, baseUnitIdToValidate);
 
         // Chặn chỉnh sửa nếu thuốc đã Ngừng dùng (status == INACTIVE)
         if (drug.getStatus() == DrugStatus.INACTIVE) {
@@ -249,7 +249,7 @@ public class PharmacistServiceImpl implements PharmacistService {
         }
     }
 
-    private void validateDrugRequest(CreateDrugRequest request) {
+    private void validateDrugRequest(CreateDrugRequest request, Integer baseUnitId) {
         if (request.getDrugName() == null || request.getDrugName().trim().isEmpty() ||
             request.getStrength() == null ||
             request.getStrengthUnit() == null || request.getStrengthUnit().trim().isEmpty() ||
@@ -261,23 +261,79 @@ public class PharmacistServiceImpl implements PharmacistService {
             request.getStorageCondition() == null || request.getStorageCondition().trim().isEmpty()) {
             throw new RuntimeException("Vui lòng điền đầy đủ các thông tin bắt buộc.");
         }
+        
+        try {
+            double strengthValue = Double.parseDouble(request.getStrength().trim());
+            if (strengthValue < 0) {
+                throw new RuntimeException("Hàm lượng thuốc không được nhập số âm.");
+            }
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Hàm lượng thuốc phải là một số hợp lệ.");
+        }
+
+        if (baseUnitId == null) {
+            throw new RuntimeException("Vui lòng chọn Đơn vị gốc kê đơn.");
+        }
 
         boolean hasValidConversion = false;
+        java.util.Map<Integer, Integer> conversionMap = new java.util.HashMap<>();
+        java.util.Set<Integer> allSmallUnits = new java.util.HashSet<>();
+        java.util.Set<Integer> allUsedUnits = new java.util.HashSet<>();
+
         if (request.getConversionLargeUnitIds() != null && request.getConversionSmallUnitIds() != null && request.getConversionQuantities() != null) {
             int size = Math.min(request.getConversionLargeUnitIds().size(), 
                        Math.min(request.getConversionSmallUnitIds().size(), request.getConversionQuantities().size()));
             for (int i = 0; i < size; i++) {
-                if (request.getConversionLargeUnitIds().get(i) != null &&
-                    request.getConversionSmallUnitIds().get(i) != null &&
-                    request.getConversionQuantities().get(i) != null &&
-                    request.getConversionQuantities().get(i) > 0) {
+                Integer largeUnitId = request.getConversionLargeUnitIds().get(i);
+                Integer smallUnitId = request.getConversionSmallUnitIds().get(i);
+                Integer qty = request.getConversionQuantities().get(i);
+                
+                if (largeUnitId != null && smallUnitId != null && qty != null && qty > 0) {
                     hasValidConversion = true;
-                    break;
+                    if (conversionMap.containsKey(largeUnitId)) {
+                        throw new RuntimeException("Đơn vị quy đổi lớn (cái trên) không được trùng lặp.");
+                    }
+                    if (!allSmallUnits.add(smallUnitId)) {
+                        throw new RuntimeException("Đơn vị quy đổi nhỏ (cái dưới) không được trùng lặp. Các đơn vị phải tạo thành một chuỗi duy nhất.");
+                    }
+                    if (largeUnitId.equals(smallUnitId)) {
+                        throw new RuntimeException("Đơn vị quy đổi lớn và nhỏ không được giống nhau.");
+                    }
+                    conversionMap.put(largeUnitId, smallUnitId);
+                    allUsedUnits.add(largeUnitId);
+                    allUsedUnits.add(smallUnitId);
                 }
             }
         }
+        
         if (!hasValidConversion) {
-            throw new RuntimeException("Vui lòng thiết lập ít nhất một bước quy đổi đơn vị (Cách hiển thị trực quan).");
+            throw new RuntimeException("Vui lòng thiết lập ít nhất một bước quy đổi đơn vị.");
+        }
+
+        if (conversionMap.containsKey(baseUnitId)) {
+            throw new RuntimeException("Đơn vị gốc (Base Unit) phải là đơn vị nhỏ nhất, không thể là đơn vị lớn (cái trên) để quy đổi tiếp.");
+        }
+
+        for (Integer unitId : allUsedUnits) {
+            if (unitId.equals(baseUnitId)) {
+                continue;
+            }
+            Integer current = unitId;
+            java.util.Set<Integer> visited = new java.util.HashSet<>();
+            boolean reachedBase = false;
+            while (current != null) {
+                if (current.equals(baseUnitId)) {
+                    reachedBase = true;
+                    break;
+                }
+                if (!visited.add(current)) {
+                    throw new RuntimeException("Phát hiện vòng lặp trong quy đổi đơn vị.");
+                }
+                current = conversionMap.get(current);
+            }
+            if (!reachedBase) {
+                throw new RuntimeException("Lỗi cấu hình: Các đơn vị quy đổi phải nối tiếp nhau và liên kết trực tiếp tới Đơn vị gốc (VD: Hộp -> Vỉ -> Viên). Không được để đứt quãng (VD: Hộp -> Vỉ, Lọ -> Viên).");
+            }
         }
     }
 
