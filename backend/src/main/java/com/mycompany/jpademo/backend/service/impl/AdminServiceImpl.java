@@ -180,7 +180,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
         systemLogRepository.save(log);
 
-        sendCreateStaffEmail(savedUser, savedUser.getRole().getRoleName());
+        sendCreateStaffEmail(savedUser, savedUser.getRole().getRoleName(), rawPassword);
     }
 
     /** Initiates the creation of a doctor account by sending an OTP. */
@@ -729,37 +729,37 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
-    private void sendCreateStaffEmail(User savedUser, RoleName roleName) {
+    private void sendCreateStaffEmail(User savedUser, RoleName roleName, String password) {
         switch (roleName) {
             case DOCTOR:
                 emailService.sendEmail(savedUser.getEmail(),
                         "Tài khoản Bác sĩ đã được tạo",
                         EmailUtil.buildCreateDoctorAccountTemplate(
-                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                                savedUser.getFullName(), savedUser.getUserName(), password));
                 break;
             case ADMIN:
                 emailService.sendEmail(savedUser.getEmail(),
                         "Tài khoản Quản trị viên đã được tạo",
                         EmailUtil.buildCreateAdminForAdmin(
-                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                                savedUser.getFullName(), savedUser.getUserName(), password));
                 break;
             case PHARMACIST:
                 emailService.sendEmail(savedUser.getEmail(),
                         "Tài khoản Dược sĩ đã được tạo",
                         EmailUtil.buildCreatePharmacistForAdmin(
-                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                                savedUser.getFullName(), savedUser.getUserName(), password));
                 break;
             case RECEPTIONIST:
                 emailService.sendEmail(savedUser.getEmail(),
                         "Tài khoản Lễ tân đã được tạo",
                         EmailUtil.buildCreateReceptionistForAdmin(
-                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                                savedUser.getFullName(), savedUser.getUserName(), password));
                 break;
             case ULTRASOUND_DOCTOR:
                 emailService.sendEmail(savedUser.getEmail(),
                         "Tài khoản Bác sĩ siêu âm đã được tạo",
                         EmailUtil.buildCreateUltrasoundDoctorForAdmin(
-                                savedUser.getFullName(), savedUser.getUserName(), savedUser.getPasswordHash()));
+                                savedUser.getFullName(), savedUser.getUserName(), password));
                 break;
             default:
                 throw new IllegalArgumentException("Không hỗ trợ gửi email cho người dùng với role " + savedUser.getRole().getRoleName());
