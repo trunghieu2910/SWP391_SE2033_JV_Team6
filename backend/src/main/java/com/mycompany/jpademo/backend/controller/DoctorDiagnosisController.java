@@ -231,27 +231,7 @@ public class DoctorDiagnosisController {
         return "redirect:/doctor/sessions/" + sessionId;
     }
 
-    /** Cancels/deletes a pending medical imaging order from a session. */
-    @PostMapping("/{sessionId}/medical-images/retake")
-    public String retakeMedicalImage(
-            @PathVariable Integer sessionId,
-            @RequestParam String originalImageType,
-            @RequestParam(required = false) String retakeReason,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
-        try {
-            Integer doctorId = userDetails.getUser().getUserId();
-            String newImageType = "[CHỤP LẠI] " + originalImageType;
-            if (retakeReason != null && !retakeReason.isBlank()) {
-                newImageType += " - Lý do: " + retakeReason.trim();
-            }
-            doctorDiagnosisService.createMedicalImage(doctorId, sessionId, newImageType);
-            redirectAttributes.addFlashAttribute("success", "Đã gửi yêu cầu siêu âm lại đến bác sĩ siêu âm!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-        }
-        return "redirect:/doctor/sessions/" + sessionId;
-    }
+
 
     @PostMapping("/{sessionId}/medical-images/{imageId}/delete")
     public String deleteMedicalImage(
