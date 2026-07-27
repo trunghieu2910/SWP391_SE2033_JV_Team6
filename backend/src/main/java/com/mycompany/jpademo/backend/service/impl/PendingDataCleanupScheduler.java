@@ -25,9 +25,9 @@ public class PendingDataCleanupScheduler {
         Path root = Paths.get(System.getProperty("user.dir"));
         Path uploadDir;
         if (root.getFileName().toString().equals("backend")) {
-            uploadDir = root.resolve(Paths.get("src", "main", "resources", "static", "images", "certificate"));
+            uploadDir = root.resolve(Paths.get("uploads", "certificates"));
         } else {
-            uploadDir = root.resolve(Paths.get("backend", "src", "main", "resources", "static", "images", "certificate"));
+            uploadDir = root.resolve(Paths.get("uploads", "certificates"));
         }
 
         List<String> orphanFiles = PendingStaffStore.cleanupExpiredAndGetOrphanFiles();
