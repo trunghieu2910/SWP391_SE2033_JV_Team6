@@ -5,9 +5,13 @@ import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyPendingStaffRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
 import com.mycompany.jpademo.backend.enums.UserStatus;
+import com.mycompany.jpademo.backend.exception.BadRequestException;
+import com.mycompany.jpademo.backend.exception.ResourceNotFoundException;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
 import com.mycompany.jpademo.backend.util.OtpUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +19,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,9 +28,13 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
+
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +44,7 @@ import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.mycompany.jpademo.backend.entity.User;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * Author: GiangLTHE194888
@@ -81,22 +91,28 @@ public class AdminController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            Model model) {
-        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+            LocalDateTime endDateTime = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
 
-        Page<UserResponse> users = adminService.getUser(keyword, role, status, startDateTime, endDateTime, pageable);
-        List<String> roles = adminService.getRoleName();
-        List<String> userStatus = adminService.getUserStatus();
-        model.addAttribute("users", users);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("role", role);
-        model.addAttribute("status", status);
-        model.addAttribute("roles", roles);
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("endDate", endDate);
-        model.addAttribute("statuses", userStatus);
-        return "admin/users";
+            Page<UserResponse> users = adminService.getUser(keyword, role, status, startDateTime, endDateTime, pageable);
+            List<String> roles = adminService.getRoleName();
+            List<String> userStatus = adminService.getUserStatus();
+            model.addAttribute("users", users);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("role", role);
+            model.addAttribute("status", status);
+            model.addAttribute("roles", roles);
+            model.addAttribute("startDate", startDate);
+            model.addAttribute("endDate", endDate);
+            model.addAttribute("statuses", userStatus);
+            return "admin/users";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/users";
+        }
     }
 
     /** Retrieves details of a specific user. */
@@ -134,7 +150,7 @@ public class AdminController {
             if (isUpdated) {
                 redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
             } else {
-                redirectAttributes.addFlashAttribute("error", "Không thể cập nhật trạng thái. Vui lòng kiểm tra lại.");
+                redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công, nhưng gửi email thông báo cho người dùng đã thất bại.");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -279,13 +295,30 @@ public class AdminController {
 
     /** Downloads or views a doctor's certificate file. */
     @GetMapping("/users/{id}/certificate")
-    public ResponseEntity<Resource> viewStaffCertificate(@PathVariable Integer id) {
-        CertificateFileResponse certificate = adminService.getStaffCertificate(id);
+    public ResponseEntity<Resource> viewStaffCertificate(
+            @PathVariable Integer id,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        try {
+            CertificateFileResponse certificate = adminService.getStaffCertificate(id);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + certificate.getDisplayName() + "\"")
+                    .contentType(certificate.getMediaType())
+                    .body(certificate.getResource());
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            String targetPath = "/admin/users/" + id;
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + certificate.getDisplayName() + "\"")
-                .contentType(certificate.getMediaType())
-                .body(certificate.getResource());
+            FlashMap flashMap = new FlashMap();
+            flashMap.put("error", e.getMessage());
+            flashMap.setTargetRequestPath(targetPath);
+
+            FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
+            flashMapManager.saveOutputFlashMap(flashMap, request, response);
+
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(targetPath))
+                    .build();
+        }
     }
 }

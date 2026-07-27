@@ -74,62 +74,18 @@ public class AdminServiceImpl implements AdminService {
     public Page<UserResponse> getUser(String keyword, String role, UserStatus status,
                                       LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
 
-        Page<User> users;
-        boolean hasKeyword = keyword != null && !keyword.isBlank();
-        boolean hasRole = role != null && !role.isBlank();
-        boolean hasStatus = status != null;
-        boolean hasDateFilter = startDate != null && endDate != null;
-        if (hasDateFilter) {
-            if (hasKeyword && hasRole && hasStatus) {
-                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatusAndCreatedAtBetween(
-                        keyword, keyword, RoleName.valueOf(role), status, startDate, endDate, pageable);
-            } else if (hasKeyword && hasRole) {
-                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndCreatedAtBetween(
-                        keyword, keyword, RoleName.valueOf(role), startDate, endDate, pageable);
-            } else if (hasKeyword && hasStatus) {
-                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndStatusAndCreatedAtBetween(
-                        keyword, keyword, status, startDate, endDate, pageable);
-            } else if (hasRole && hasStatus) {
-                users = userRepository.findByRoleRoleNameAndStatusAndCreatedAtBetween(
-                        RoleName.valueOf(role), status, startDate, endDate, pageable);
-            } else if (hasKeyword) {
-                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndCreatedAtBetween(
-                        keyword, keyword, startDate, endDate, pageable);
-            } else if (hasRole) {
-                users = userRepository.findByRoleRoleNameAndCreatedAtBetween(
-                        RoleName.valueOf(role), startDate, endDate, pageable);
-            } else if (hasStatus) {
-                users = userRepository.findByStatusAndCreatedAtBetween(
-                        status, startDate, endDate, pageable);
-            } else {
-                users = userRepository.findByCreatedAtBetween(startDate, endDate, pageable);
+        String trimmedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword;
+
+        RoleName roleName = null;
+        if (role != null && !role.isBlank()) {
+            if (!isValidEnum(RoleName.class, role)) {
+                throw new BadRequestException("Vai trò không hợp lệ: " + role);
             }
-        } else {
-            if (hasKeyword && hasRole && hasStatus) {
-                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatus(
-                        keyword, keyword, RoleName.valueOf(role), status, pageable);
-            } else if (hasKeyword && hasRole) {
-                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleName(
-                        keyword, keyword, RoleName.valueOf(role), pageable);
-            } else if (hasKeyword && hasStatus) {
-                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndStatus(
-                        keyword, keyword, status, pageable);
-            } else if (hasRole && hasStatus) {
-                users = userRepository.findByRoleRoleNameAndStatus(
-                        RoleName.valueOf(role), status, pageable);
-            } else if (hasKeyword) {
-                users = userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                        keyword, keyword, pageable);
-            } else if (hasRole) {
-                users = userRepository.findByRoleRoleName(
-                        RoleName.valueOf(role), pageable);
-            } else if (hasStatus) {
-                users = userRepository.findByStatus(
-                        status, pageable);
-            } else {
-                users = userRepository.findAll(pageable);
-            }
+            roleName = RoleName.valueOf(role.toUpperCase()); // toUpperCase để chấp nhận cả "doctor" lẫn "DOCTOR"
         }
+
+        Page<User> users = userRepository.searchUsers(
+                trimmedKeyword, roleName, status, startDate, endDate, pageable);
 
         return users.map(this::mapToUserResponse);
     }
@@ -150,8 +106,16 @@ public class AdminServiceImpl implements AdminService {
         }
         user.setStatus(request.getStatus());
         userRepository.save(user);
-        sendStatusEmail(user, request.getStatus(), request.getReason(), admin);
-        return true;
+        boolean emailSent = true;
+        try {
+            sendStatusEmail(user, request.getStatus(), request.getReason(), admin);
+        } catch (Exception e) {
+            emailSent = false;
+            log.warn("Cập nhật trạng thái thành công nhưng gửi email thất bại cho user {}: {}",
+                    user.getUserId(), e.getMessage());
+        }
+
+        return emailSent;
     }
 
     /** Verifies the OTP and finalizes doctor creation. */
@@ -242,7 +206,7 @@ public class AdminServiceImpl implements AdminService {
         if (request.getCertificateFile() != null && !request.getCertificateFile().isEmpty()) {
             try {
                 String customName = request.getUserName() + "_" + System.currentTimeMillis();
-                certificateStoredFileName = SecureFileUploadUtil.validateAndGenerateCustomFileName(request.getCertificateFile(), customName);
+                certificateStoredFileName = SecureFileUploadUtil.generateSafeCustomFileName(request.getCertificateFile(), customName);
                 
                 Path root = Paths.get(System.getProperty("user.dir"));
                 Path uploadDir;
@@ -454,13 +418,6 @@ public class AdminServiceImpl implements AdminService {
         return response;
     }
 
-    /** Retrieves the current admin user entity. */
-    @Override
-    public User getAdminUser() {
-        return userRepository.findFirstByRoleRoleName(RoleName.ADMIN)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy admin trong hệ thống"));
-    }
-
     /** Retrieves a doctor's certificate resource and metadata. */
     @Override
     public CertificateFileResponse getStaffCertificate(Integer userId) {
@@ -627,6 +584,10 @@ public class AdminServiceImpl implements AdminService {
             case "CREATE_LAB_RESULT":
                 return "Tạo";
 
+            case "FAILED_UPDATE_USER_STATUS": case "FAILED_CREATE_STAFF":
+            case "FAILED_BLOCKED_IP": case "FAILED_UNBLOCKED_IP":
+                return "Thất bại";
+
             // Nhóm Cập nhật
             case "UPDATE_SESSION_STATUS":
             case "UPDATE_SESSION_SHARE":
@@ -674,6 +635,8 @@ public class AdminServiceImpl implements AdminService {
                 return "Tạo nhắc nhở";
             case "VIEW_DIAGNOSIS_SESSIONS":
                 return "Xem chẩn đoán";
+            case "ACCESS_MEDICAL_RECORD":
+                return "Xem bệnh án";
             case "DELETE_REMINDER":
                 return "Xoá nhắc nhở";
             case "REQUEST_MEDICAL_IMAGE":
@@ -929,5 +892,11 @@ public class AdminServiceImpl implements AdminService {
             case ".pdf" -> MediaType.APPLICATION_PDF;
             default -> MediaType.APPLICATION_OCTET_STREAM; // không xảy ra vì đã whitelist lúc upload
         };
+    }
+
+    //The helper can be used universally for all enums in the system.
+    private static <E extends Enum<E>> boolean isValidEnum(Class<E> enumClass, String value) {
+        return Arrays.stream(enumClass.getEnumConstants())
+                .anyMatch(e -> e.name().equalsIgnoreCase(value));
     }
 }

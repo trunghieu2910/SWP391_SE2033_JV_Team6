@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const remainingInput = document.getElementById('remainingTime');
         let initialSeconds = remainingInput ? parseInt(remainingInput.value) : 120;
-        if (isNaN(initialSeconds) || initialSeconds <= 0) {
+        if (isNaN(initialSeconds)) {
             initialSeconds = 120;
         }
 
@@ -60,10 +60,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const startTimer = (seconds) => {
             if (isStarted) return;
             clearInterval(interval);
-            let time = seconds || 120;
+            let time = seconds;
+            if (time < 0) time = 0;
             updateDisplay(time);
             isStarted = true;
             const btn = document.getElementById('resendOtpBtn');
+            
+            if (time <= 0) {
+                timerEl.textContent = '00:00';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Gửi lại mã OTP';
+                }
+                isStarted = false;
+                return;
+            }
+
             if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Gửi lại mã OTP'; }
             document.getElementById('resendMessage').style.display = 'none';
 

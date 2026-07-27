@@ -296,7 +296,7 @@ INSERT INTO Symptom (symptomName) VALUES
 -- 4. Triệu chứng tiêu hóa
 (N'Táo bón kéo dài'), (N'Đầy bụng'), (N'Chướng bụng'), (N'Buồn nôn'),
 -- 5. Yếu tố nguy cơ
-(N'Tiền sử gia đình mắc ung thư phụ khoa'), (N'Béo phì'), (N'Đái tháo đường'), (N'Tăng huyết áp'), (N'Hội chứng buồng trứng đa nanoc (PCOS)'), (N'Điều trị estrogen kéo dài');
+(N'Tiền sử gia đình ung thư phụ khoa'), (N'Béo phì'), (N'Đái tháo đường'), (N'Tăng huyết áp'), (N'Hội chứng buồng trứng đa nang (PCOS)'), (N'Điều trị hormone estrogen kéo dài');
 
 -- Parameter
 INSERT INTO Parameter (parameterName, unit)

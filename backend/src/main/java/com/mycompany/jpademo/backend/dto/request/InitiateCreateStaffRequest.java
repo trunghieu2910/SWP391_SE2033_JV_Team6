@@ -1,5 +1,6 @@
 package com.mycompany.jpademo.backend.dto.request;
 
+import com.mycompany.jpademo.backend.validation.ValidFile;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -33,5 +34,6 @@ public class InitiateCreateStaffRequest {
     @Size(min = 9, max = 12, message = "National ID is required")
     private String nationalId;
 
+    @ValidFile(required = true, message = "Vui lòng đính kèm chứng chỉ/bằng cấp hợp lệ (PDF, JPG, PNG, tối đa 5MB)")
     private MultipartFile certificateFile;
 }
