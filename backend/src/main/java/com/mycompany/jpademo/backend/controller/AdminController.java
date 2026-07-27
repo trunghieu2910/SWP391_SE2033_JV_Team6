@@ -4,7 +4,6 @@ import com.mycompany.jpademo.backend.dto.request.InitiateCreateStaffRequest;
 import com.mycompany.jpademo.backend.dto.request.UpdateUserStatusRequest;
 import com.mycompany.jpademo.backend.dto.request.VerifyPendingStaffRequest;
 import com.mycompany.jpademo.backend.dto.response.*;
-import com.mycompany.jpademo.backend.enums.RoleName;
 import com.mycompany.jpademo.backend.enums.UserStatus;
 import com.mycompany.jpademo.backend.service.interfaces.AdminService;
 import com.mycompany.jpademo.backend.service.interfaces.SystemLogService;
@@ -222,7 +221,7 @@ public class AdminController {
         try {
             User adminUser = userDetails.getUser();
             adminService.verifyAndCreateStaff(request, adminUser);
-            redirectAttributes.addFlashAttribute("success", "Tạo tài khoản bác sĩ thành công!");
+            redirectAttributes.addFlashAttribute("success", "Tạo tài khoản nội bộ thành công!");
             return "redirect:/admin/users";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
