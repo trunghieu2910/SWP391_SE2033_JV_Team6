@@ -45,9 +45,6 @@ public interface AdminService {
     /** Resends the verification OTP code to the admin email. */
     Map<String, Object> resendOtp(String adminEmail);
 
-    /** Retrieves the current admin user entity. */
-    User getAdminUser();
-
     /** Retrieves a staff's certificate resource and metadata. */
     CertificateFileResponse getStaffCertificate(Integer userId);
 

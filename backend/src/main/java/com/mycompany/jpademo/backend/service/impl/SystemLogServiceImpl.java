@@ -119,6 +119,10 @@ public class SystemLogServiceImpl implements SystemLogService {
             case "DOCTOR_EXPORT_PDF_MEDICAL_RECORD":
                 return "Xuất file pdf";
 
+            case "FAILED_UPDATE_USER_STATUS": case "FAILED_CREATE_STAFF":
+            case "FAILED_BLOCKED_IP": case "FAILED_UNBLOCKED_IP":
+                return "Thất bại";
+
             // Các case riêng lẻ
             case "LOGOUT":
                 return "Đăng xuất";
@@ -148,6 +152,8 @@ public class SystemLogServiceImpl implements SystemLogService {
                 return "Tạo nhắc nhở";
             case "VIEW_DIAGNOSIS_SESSIONS":
                 return "Xem chẩn đoán";
+            case "ACCESS_MEDICAL_RECORD":
+                return "Xem bệnh án";
             case "DELETE_REMINDER":
                 return "Xoá nhắc nhở";
             case "REQUEST_MEDICAL_IMAGE":

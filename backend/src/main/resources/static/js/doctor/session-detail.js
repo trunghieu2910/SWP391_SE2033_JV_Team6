@@ -324,26 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // ============================================
-    // RETAKE ULTRASOUND MODAL FUNCTIONS
-    // ============================================
-    window.openRetakeModal = function() {
-        const modal = document.getElementById('retakeModal');
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-    };
 
-    window.closeRetakeModal = function() {
-        const modal = document.getElementById('retakeModal');
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = '';
-            const textarea = document.getElementById('retakeReason');
-            if (textarea) textarea.value = '';
-        }
-    };
 
     // ============================================
     // ADD LAB MODAL FUNCTIONS

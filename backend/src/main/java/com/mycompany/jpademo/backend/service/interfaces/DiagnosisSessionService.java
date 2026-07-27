@@ -18,7 +18,7 @@ import java.util.List;
 public interface DiagnosisSessionService {
     DiagnosisSessionResponse createSession(CreateDiagnosisSessionRequest request, Integer creatorId);
 
-    DiagnosisSessionResponse addPatientToSession(CreateDiagnosisSessionRequest request, Integer creatorId);
+
 
     SymptomResultResponse submitSymptomForm(Integer sessionId, SubmitSymptomFormRequest request, Integer userId, String userRole);
 

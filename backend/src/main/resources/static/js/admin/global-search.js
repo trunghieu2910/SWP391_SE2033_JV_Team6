@@ -64,6 +64,7 @@
         'PATIENT_FILL_CLINLCAL_SYMPTOMS_FORM': 'Nhập',
         'CREATE_REMINDER': 'Tạo nhắc nhở',
         'VIEW_DIAGNOSIS_SESSIONS': 'Xem chẩn đoán',
+        'ACCESS_MEDICAL_RECORD': 'Xem bệnh án',
         'DELETE_REMINDER': 'Xoá nhắc nhở',
         'REQUEST_MEDICAL_IMAGE': 'Yêu cầu',
         'DELETE_MEDICAL_IMAGE': 'Xoá ảnh',

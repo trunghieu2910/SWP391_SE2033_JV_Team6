@@ -22,12 +22,6 @@ public class CreateDiagnosisSessionRequest {
     @NotNull(message = "Vui lòng chọn bác sĩ")
     private Integer doctorId;
 
-    @Positive(message = "Cân nặng phải là số dương")
-    private Double weight;
-
-    @Positive(message = "Chiều cao phải là số dương")
-    private Double height;
-
     @NotNull(message = "Vui lòng chọn người nhập triệu chứng")
     @Builder.Default
     private ClinicalInputMode clinicalInputMode = ClinicalInputMode.PATIENT;

@@ -12,14 +12,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserStatusRequest  implements LoggableTarget {
-    @NotNull(message = "User ID cannot be null")
+    @NotNull(message = "User ID không thể bỏ trống")
     private Integer userId;
 
-    @NotNull(message = "Status cannot be null")
+    @NotNull(message = "Trạng thái không thể bỏ trống")
     private UserStatus status;
 
     @NotBlank(message = "Reason cannot be null")
-    @Size(min = 5, max = 255, message = "Reason must be between 5 and 255 characters")
+    @Size(min = 5, max = 255, message = "Lý do phải từ 5 đến 255 ký tự")
     private String reason;
 
     @Override

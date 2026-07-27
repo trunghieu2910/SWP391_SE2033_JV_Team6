@@ -32,6 +32,23 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             @Param("nationalId") String nationalId
     );
 
+    Page<User> findByRoleRoleNameAndStatus(RoleName roleName, UserStatus status, Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE " +
+            "(:keyword IS NULL OR " +
+            "  LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "  LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:role IS NULL OR u.role.roleName = :role) " +
+            "AND (:status IS NULL OR u.status = :status) " +
+            "AND (:startDate IS NULL OR :endDate IS NULL OR u.createdAt BETWEEN :startDate AND :endDate)")
+    Page<User> searchUsers(
+            @Param("keyword") String keyword,
+            @Param("role") RoleName role,
+            @Param("status") UserStatus status,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
+
     boolean existsByUserName(String userName);
 
     boolean existsByEmail(String email);
@@ -39,41 +56,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByPhoneNumber(String phoneNumber);
 
     boolean existsByNationalID(String nationalID);
-
-    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            String username, String email, Pageable pageable);
-
-    Page<User> findByRoleRoleNameAndStatus(RoleName roleName, UserStatus status, Pageable pageable);
-
-    Page<User> findByRoleRoleName(RoleName roleName, Pageable pageable);
-
-    Page<User> findByStatus(UserStatus status, Pageable pageable);
-
-    Page<User> findAll(Pageable pageable);
-
-    Long countByRoleRoleName(RoleName roleName);
-
-    Long countByStatus(UserStatus status);
-
-    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleName(
-            String username, String email, RoleName roleName, Pageable pageable);
-
-    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndStatus(
-            String username, String email, UserStatus status, Pageable pageable);
-
-    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatus(
-            String username, String email, RoleName roleName, UserStatus status, Pageable pageable);
-
-    @Query(value = """
-    SELECT 
-        FORMAT(createdAt, 'yyyy-MM') as month,
-        COUNT(*) as count
-    FROM Users 
-    WHERE createdAt >= DATEADD(month, -6, GETDATE())
-    GROUP BY FORMAT(createdAt, 'yyyy-MM')
-    ORDER BY month ASC
-    """, nativeQuery = true)
-    List<Object[]> getUserRegistrationsByMonth();
 
     @Query("SELECT u FROM User u " +
             "WHERE LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
@@ -103,20 +85,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("UPDATE User u SET u.lastLogoutTime = :logoutTime WHERE u.userId = :userId")
     void updateLastLogoutTime(@Param("userId") Integer userId, @Param("logoutTime") LocalDateTime logoutTime);
 
-    @Query(value = """
-    SELECT 
-        FORMAT(createdAt, 'yyyy-MM') as month,
-        COUNT(*) as count
-    FROM Users 
-    WHERE (:startDate IS NULL OR createdAt >= :startDate)
-      AND (:endDate IS NULL OR createdAt <= :endDate)
-    GROUP BY FORMAT(createdAt, 'yyyy-MM')
-    ORDER BY month ASC
-    """, nativeQuery = true)
-    List<Object[]> getUserRegistrationsByMonthWithFilter(
-            @Param("startDate") java.time.LocalDateTime startDate,
-            @Param("endDate") java.time.LocalDateTime endDate);
-
     @Query("SELECT u FROM User u WHERE " +
             "LOWER(u.userName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -132,30 +100,4 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             "ORDER BY month ASC")
     List<Object[]> getMonthlyUserRegistrations(@Param("start") LocalDateTime start,
                                                @Param("end") LocalDateTime end);
-
-    Optional<User> findFirstByRoleRoleName(RoleName roleName);
-
-    Page<User> findByCreatedAtBetween(
-            LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
-    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndCreatedAtBetween(
-            String userName, String email, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
-    Page<User> findByRoleRoleNameAndCreatedAtBetween(
-            RoleName roleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
-    Page<User> findByStatusAndCreatedAtBetween(
-            UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
-    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndCreatedAtBetween(
-            String userName, String email, RoleName roleName, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
-    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndStatusAndCreatedAtBetween(
-            String userName, String email, UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
-    Page<User> findByRoleRoleNameAndStatusAndCreatedAtBetween(
-            RoleName roleName, UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-
-    Page<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndRoleRoleNameAndStatusAndCreatedAtBetween(
-            String userName, String email, RoleName roleName, UserStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }

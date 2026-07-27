@@ -125,6 +125,10 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));
 
+        DiagnosisSessionStatus currentStatus = session.getStatus();
+        if (!ALLOWED_TRANSITIONS.getOrDefault(currentStatus, Set.of()).contains(newStatus)) {
+            throw new BadRequestException("Không thể chuyển trạng thái từ " + currentStatus + " sang " + newStatus + ".");
+        }
         if (session.getReview() == null && DiagnosisSessionStatus.COMPLETED.equals(newStatus)) {
             throw new BadRequestException("Không thể chuyển sang trạng thái hoàn thành khi chưa có kết luận cuối cùng.");
         }
@@ -137,12 +141,8 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         if (DiagnosisSessionStatus.COMPLETED.equals(session.getStatus()) || DiagnosisSessionStatus.FAILED.equals(session.getStatus())) {
             throw new BadRequestException("Không thể cập nhật trạng thái khi ca chẩn đoán này đã hoàn thành hoặc thất bại.");
         }
-        DiagnosisSessionStatus currentStatus = session.getStatus();
         if (currentStatus.equals(newStatus)) {
             throw new BadRequestException("Trạng thái mới đang trùng với trạng thái hiện tại.");
-        }
-        if (!ALLOWED_TRANSITIONS.getOrDefault(currentStatus, Set.of()).contains(newStatus)) {
-            throw new BadRequestException("Không thể chuyển trạng thái từ " + currentStatus + " sang " + newStatus + ".");
         }
 
         session.setStatus(newStatus);
@@ -204,6 +204,7 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
     /** Saves or updates clinical symptoms associated with a diagnosis session. */
     @Override
     @Transactional
+    @DoctorActionLog(action = "UPDATE_CLINICAL_SYMPTOMS", targetType = "SymptomResult")
     public void updateClinicalSymptoms(Integer doctorId, Integer sessionId, UpdateClinicalSymptomsRequest request) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException(MESSAGE + sessionId));

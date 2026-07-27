@@ -28,6 +28,7 @@
                         <option value="CREATE_STAFF" th:selected="${param.action == 'CREATE_STAFF'}">Tạo tài khoản nhân viên</option>
                         <option value="CREATE_DOCTOR" th:selected="${param.action == 'CREATE_DOCTOR'}">Tạo bác sĩ</option>
                         <option value="RECEPTIONIST_CREATE_PATIENT_ACCOUNT" th:selected="${param.action == 'RECEPTIONIST_CREATE_PATIENT_ACCOUNT'}">Tạo tài khoản bệnh nhân</option>
+                        <option value="FAILED_UPDATE_USER_STATUS" th:selected="${param.action == 'FAILED_UPDATE_USER_STATUS' || param.action == 'FAILED_CREATE_STAFF'}">Thất bại</option>
                     </optgroup>
                     <optgroup label="Bảo mật IP">
                         <option value="BLOCKED_IP" th:selected="${param.action == 'BLOCK_IP'}">Chặn IP</option>
@@ -38,6 +39,7 @@
                         <option value="UPDATE_SESSION_STATUS" th:selected="${param.action == 'UPDATE_SESSION_STATUS'}">Cập nhật ca khám</option>
                         <option value="UPDATE_SESSION_SHARE" th:selected="${param.action == 'UPDATE_SESSION_SHARE'}">Chia sẻ ca khám</option>
                         <option value="VIEW_DIAGNOSIS_SESSIONS" th:selected="${param.action == 'VIEW_DIAGNOSIS_SESSIONS'}">Xem chẩn đoán</option>
+                        <option value="ACCESS_MEDICAL_RECORD" th:selected="${param.action == 'ACCESS_MEDICAL_RECORD'}">Xem bệnh án</option>
                         <option value="CREATE_FINAL_DIAGNOSIS" th:selected="${param.action == 'CREATE_FINAL_DIAGNOSIS'}">Tạo chẩn đoán cuối</option>
                         <option value="UPDATE_CLINICAL_SYMPTOMS" th:selected="${param.action == 'UPDATE_CLINICAL_SYMPTOMS'}">Cập nhật triệu chứng</option>
                         <option value="PATIENT_FILL_CLINLCAL_SYMPTOMS_FORM" th:selected="${param.action == 'PATIENT_FILL_CLINLCAL_SYMPTOMS_FORM'}">Nhập triệu chứng</option>
@@ -121,6 +123,7 @@
                             <span th:case="'Đăng nhập'" class="badge badge-login">Đăng nhập</span>
                             <span th:case="'Đăng xuất'" class="badge badge-logout">Đăng xuất</span>
                             <span th:case="'Khóa User'" class="badge badge-ban">Khóa User</span>
+                            <span th:case="'Thất bại'" class="badge badge-ban">Thất bại</span>
                             <span th:case="'Mở khóa'" class="badge badge-unban">Mở khóa</span>
                             <span th:case="'Tạo'" class="badge badge-create">Tạo</span>
                             <span th:case="'Đổi trạng thái'" class="badge badge-update">Đổi trạng thái</span>
@@ -140,6 +143,7 @@
                             <span th:case="'Nộp'" class="badge badge-input">Nộp</span>
                             <span th:case="'Tạo nhắc nhở'" class="badge badge-create">Tạo nhắc nhở</span>
                             <span th:case="'Xem chẩn đoán'" class="badge badge-diagnosis">Xem chẩn đoán</span>
+                            <span th:case="'Xem bệnh án'" class="badge badge-diagnosis">Xem chẩn đoán</span>
                             <span th:case="'Xoá nhắc nhở'" class="badge badge-delete">Xoá nhắc nhở</span>
                             <span th:case="'Yêu cầu'" class="badge badge-request">Yêu cầu</span>
                             <span th:case="'Xoá ảnh'" class="badge badge-delete">Xoá ảnh</span>
