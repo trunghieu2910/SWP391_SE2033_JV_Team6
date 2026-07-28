@@ -92,8 +92,14 @@ public class ReceptionistCreateSessionController {
             RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
+            String errorMsg = bindingResult.getAllErrors().stream()
+                    .map(e -> e.getDefaultMessage())
+                    .findFirst()
+                    .orElse("Dữ liệu không hợp lệ");
+            model.addAttribute("errorMessage", errorMsg);
             model.addAttribute("selectedPatient", patientSearchService.getPatientEntityById(request.getPatientId()));
             model.addAttribute("doctors", getDoctorsWithWorkload());
+            model.addAttribute("createRequest", request);
             return "receptionist/create-session";
         }
 
@@ -113,6 +119,7 @@ public class ReceptionistCreateSessionController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("selectedPatient", patientSearchService.getPatientEntityById(request.getPatientId()));
             model.addAttribute("doctors", getDoctorsWithWorkload());
+            model.addAttribute("createRequest", request);
             return "receptionist/create-session";
         }
     }
