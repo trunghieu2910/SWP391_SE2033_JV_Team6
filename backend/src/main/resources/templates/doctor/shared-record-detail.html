@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{doctor/layout :: main-layout(~{::main}, 'Chi tiết Bảng Hội Chẩn', 'shared-records')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/doctor/session-detail.css}">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a th:href="@{/doctor/library}">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+        <span class="separator">/</span>
+        <span>Chi tiết hội chẩn #<span th:text="${sessionDetail.sessionId}">1</span></span>
+    </nav>
+
+    <!-- Header -->
+    <div class="session-header">
+        <div class="session-title">
+            <h1>Chi tiết hội chẩn #<span th:text="${sessionDetail.sessionId}">1</span></h1>
+        </div>
+    </div>
+
+    <!-- Main Content: 3-7 Layout -->
+    <div class="detail-container">
+        <!-- Left: Patient Info (3) -->
+        <div class="patient-card">
+            <h3><i class="fa-solid fa-user-circle"></i> Thông tin bệnh nhân (Ẩn danh)</h3>
+            <div class="patient-info">
+                <div class="info-row">
+                    <span class="label">Mã bệnh nhân</span>
+                    <span class="value" th:text="'#' + ${sessionDetail.patientId}">#1</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Tên bệnh nhân</span>
+                    <span class="value" style="font-style: italic; color: #777;" th:text="${sessionDetail.patientName}">Ẩn danh</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Giới tính</span>
+                    <span class="value" th:text="${sessionDetail.patientGender == 'Male' ? 'Nam' : sessionDetail.patientGender == 'Female' ? 'Nữ' : '—'}">Nữ</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Địa chỉ</span>
+                    <span class="value" style="font-style: italic; color: #777;" th:text="${sessionDetail.patientAddress}">Ẩn danh</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Bác sĩ phụ trách</span>
+                    <span class="value" th:text="${sessionDetail.doctorName}">Bác sĩ A</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Chiều cao</span>
+                    <span class="value" th:text="${sessionDetail.height != null ? sessionDetail.height + ' cm' : '—'}">165 cm</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Cân nặng</span>
+                    <span class="value" th:text="${sessionDetail.weight != null ? sessionDetail.weight + ' kg' : '—'}">55 kg</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Ngày tạo</span>
+                    <span class="value" th:text="${#temporals.format(sessionDetail.createdAt, 'dd/MM/yyyy HH:mm')}">30/06/2026</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Content (7) -->
+        <div class="content-section">
+
+            <!-- 1. KẾT LUẬN BỆNH -->
+            <div class="accordion-item review-accordion" style="border: 2px solid #0284c7; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12);">
+                <div class="accordion-header" onclick="toggleAccordion('reviewAccordion')" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-stethoscope" style="color: #0284c7;"></i>
+                        <span style="color: #0369a1; font-weight: 700;">Kết luận bệnh</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="reviewIcon"></i>
+                </div>
+                <div class="accordion-body review-section" id="reviewAccordion" style="display: block; padding: 24px;">
+                        <div style="display: flex; flex-direction: column; gap: 18px;">
+
+                            <div class="form-group">
+                                <label class="form-label">Loại bệnh</label>
+                                <input type="text" class="form-control" readonly th:value="${sessionDetail.review != null ? sessionDetail.review.finalDiagnosis : 'Chưa có kết luận'}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Kế hoạch điều trị (Phác đồ)</label>
+                                <textarea class="form-control" rows="3" readonly th:text="${sessionDetail.review != null ? sessionDetail.review.treatmentPlan : '—'}"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Lời khuyên của Bác sĩ</label>
+                                <textarea class="form-control" rows="2" readonly th:text="${sessionDetail.review != null ? sessionDetail.review.doctorAdvice : '—'}"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ghi chú thêm</label>
+                                <textarea class="form-control" rows="2" readonly th:text="${sessionDetail.review != null ? sessionDetail.review.note : '—'}"></textarea>
+                            </div>
+                            
+                            <div th:if="${sessionDetail.review != null}" style="text-align: right; color: #666; font-size: 0.9em;">
+                                Cập nhật lần cuối: <span th:text="${#temporals.format(sessionDetail.review.reviewedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+            <!-- 2. TRIỆU CHỨNG LÂM SÀNG -->
+            <div class="accordion-item" style="margin-top: 20px;">
+                <div class="accordion-header" onclick="toggleAccordion('symptomAccordion')">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-notes-medical"></i>
+                        <span>Triệu chứng lâm sàng</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="symptomIcon"></i>
+                </div>
+                <div class="accordion-body" id="symptomAccordion" style="display: none;">
+                    <div th:replace="~{doctor/fragments/clinical-symptoms :: form(sessionDetail=${sessionDetail})}"></div>
+                </div>
+            </div>
+
+            <!-- 3. XÉT NGHIỆM Y TẾ -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('labAccordion')">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-flask"></i>
+                        <span>Xét nghiệm y tế</span>
+                        <span class="accordion-badge" th:text="${sessionDetail.labResults != null ? sessionDetail.labResults.size() : 0} + ' xét nghiệm'">0 xét nghiệm</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="labIcon"></i>
+                </div>
+                <div class="accordion-body" id="labAccordion" style="display: none;">
+                    <div th:replace="~{doctor/fragments/lab-results :: list(labResults=${sessionDetail.labResults}, sessionId=${sessionDetail.sessionId})}"></div>
+                </div>
+            </div>
+
+            <!-- 4. HÌNH ẢNH Y TẾ -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('imageAccordion')">
+                    <div class="accordion-title">
+                        <i class="fa-solid fa-image"></i>
+                        <span>Hình ảnh y tế</span>
+                        <span class="accordion-badge" th:text="${sessionDetail.medicalImages != null ? sessionDetail.medicalImages.?[status.name() == 'COMPLETED'].size() : 0} + ' hình ảnh'">0 hình ảnh</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down accordion-icon" id="imageIcon"></i>
+                </div>
+                <div class="accordion-body" id="imageAccordion" style="display: none;">
+                    <div th:replace="~{doctor/fragments/medical-images :: list(medicalImages=${sessionDetail.medicalImages}, sessionId=${sessionDetail.sessionId}, hasReview=${sessionDetail.review != null})}"></div>
+                </div>
+            </div>
+            
+            <style>
+                /* Overriding the fragments so they look read-only */
+                .accordion-body input, 
+                .accordion-body select, 
+                .accordion-body textarea {
+                    pointer-events: none;
+                    background-color: #f9f9f9;
+                }
+                
+                /* Hide all buttons inside fragments for read-only view */
+                .accordion-body button,
+                .accordion-body .btn,
+                .accordion-body .btn-action,
+                .accordion-body .btn-primary,
+                .accordion-body .btn-danger,
+                .accordion-body .btn-sm {
+                    display: none !important;
+                }
+                
+                /* Explicitly show links that act as view buttons if they exist */
+                .accordion-body a.btn-view,
+                .accordion-body a.btn-primary {
+                    display: inline-block !important;
+                    pointer-events: auto;
+                }
+            </style>
+
+        </div>
+    </div>
+
+    <script th:src="@{/js/doctor/session-detail.js}"></script>
+</main>
+</body>
+</html>

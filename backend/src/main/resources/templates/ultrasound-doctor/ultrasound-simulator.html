@@ -49,7 +49,7 @@
         <form id="uploadForm">
             <div class="form-group">
                 <label for="sessionId"><i class="fa-solid fa-hospital-user"></i> Mã Phiên Khám (Session ID)</label>
-                <input type="number" id="sessionId" class="form-control" placeholder="Nhập ID ca khám (ví dụ: 1)" required>
+                <input type="number" id="sessionId" class="form-control" placeholder="Nhập ID ca khám (ví dụ: 1)" th:value="${sessionId}" th:readonly="${sessionId != null}" th:style="${sessionId != null ? 'background-color: #334155; color: #94a3b8; cursor: not-allowed;' : ''}" required>
             </div>
             
             <div class="form-group">
@@ -85,17 +85,6 @@
         
         let selectedFile = null;
 
-        // Tự động điền Session ID từ URL nếu có
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlSessionId = urlParams.get('sessionId');
-        if (urlSessionId) {
-            const sessionIdInput = document.getElementById('sessionId');
-            sessionIdInput.value = urlSessionId;
-            sessionIdInput.readOnly = true;
-            sessionIdInput.style.backgroundColor = '#334155';
-            sessionIdInput.style.color = '#94a3b8';
-            sessionIdInput.style.cursor = 'not-allowed';
-        }
 
         fileInput.addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
@@ -130,27 +119,31 @@
             formData.append('file', selectedFile);
             formData.append('sessionId', sessionId);
             
+            // Khoa nut bam de tranh click nhieu lan
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải lên và chạy AI...';
             resultMessage.style.display = 'none';
             
             try {
-                // Gọi API backend Java
+                // Goi API backend Java (Cho doi trong im lang)
                 const response = await fetch('/api/ultrasound/upload', {
                     method: 'POST',
                     body: formData
                 });
                 
                 if (response.ok) {
+                    // Neu thanh cong, lay du lieu va chuyen sang trang ket qua AI
                     const data = await response.json();
                     window.location.href = `/ai-result?imageId=${data.imageId}`;
                 } else {
+                    // Neu loi (VD: anh sai dinh dang), hien thi canh bao loi
                     const errText = await response.text();
                     showResult(`Lỗi từ máy chủ: ${errText}`, 'error');
                 }
             } catch (error) {
                 showResult('Lỗi kết nối mạng hoặc máy chủ không phản hồi!', 'error');
             } finally {
+                // Bat ke thanh cong hay that bai, mo khoa nut bam va khoi phuc trang thai
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<i class="fa-solid fa-upload"></i> Truyền Dữ Liệu Lên Hệ Thống';
             }

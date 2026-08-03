@@ -23,39 +23,39 @@
                 </div>
             </div>
             
-            <div class="card-info">
+            <div class="card-info" th:if="${detail != null}">
                 <div class="info-group">
                     <label>MÃ HÌNH ẢNH</label>
-                    <p id="image-id">#MI...</p>
+                    <p id="image-id" th:text="'#MI' + ${detail.imageId}">#MI...</p>
                 </div>
                 <div class="info-group">
                     <label>LOẠI HÌNH ẢNH</label>
-                    <p id="image-type">Siêu âm bụng</p>
+                    <p id="image-type" th:text="${detail.medicalImage != null ? detail.medicalImage.imageType : 'Siêu âm bụng'}">Siêu âm bụng</p>
                 </div>
                 <div class="info-group">
                     <label>TRẠNG THÁI AI</label>
-                    <div class="status-pill pending">
-                        <i class="fa-solid fa-circle"></i> <span id="ai-status">ĐANG TẢI...</span>
+                    <div class="status-pill" th:classappend="${detail.aiImageUrl != null ? 'success' : 'pending'}">
+                        <i class="fa-solid fa-circle"></i> <span id="ai-status" th:text="${detail.aiImageUrl != null ? 'HOÀN THÀNH' : 'CHƯA PHÂN TÍCH'}">ĐANG TẢI...</span>
                     </div>
                 </div>
                 <div class="info-group">
                     <label>NGÀY CHỈ ĐỊNH</label>
-                    <p id="upload-date">--/--/----</p>
+                    <p id="upload-date" th:text="${detail.medicalImage != null ? #temporals.format(detail.medicalImage.diagnosisSession.createdAt, 'dd/MM/yyyy') : '--/--/----'}">--/--/----</p>
                 </div>
                 <div class="info-group">
                     <label>ĐỘ TIN CẬY AI</label>
-                    <p id="ai-confidence" class="confidence-text">--%</p>
+                    <p id="ai-confidence" class="confidence-text" th:text="${detail.confidenceScore != null ? #numbers.formatDecimal(detail.confidenceScore * 100, 1, 2) + '%' : '--%'}">--%</p>
                 </div>
             </div>
             
             <div class="card-body">
                 <h3><i class="fa-solid fa-images"></i> Danh sách ảnh ( 2 )</h3>
                 
-                <div class="image-comparison-container">
+                <div class="image-comparison-container" th:if="${detail != null}">
                     <div class="image-box">
                         <h4>Ảnh Gốc</h4>
                         <div class="img-wrapper" id="orig-wrapper" style="position: relative;">
-                            <img id="original-img" src="" alt="Ảnh Gốc" class="placeholder">
+                            <img id="original-img" th:src="${detail.imageUrl}" alt="Ảnh Gốc">
                             <canvas id="draw-canvas" style="position: absolute; top: 0; left: 0; z-index: 10; display: none; cursor: crosshair;"></canvas>
                             <div class="loading-overlay" id="loading-orig" style="display: none;">
                                 <i class="fa-solid fa-spinner fa-spin"></i>
@@ -67,7 +67,7 @@
                     <div class="image-box">
                         <h4>Ảnh Phân Tích AI</h4>
                         <div class="img-wrapper">
-                            <img id="ai-img" src="" alt="Ảnh AI" class="placeholder">
+                            <img id="ai-img" th:src="${detail.aiImageUrl}" th:classappend="${detail.aiImageUrl == null ? 'placeholder' : ''}" alt="Ảnh AI">
                             <div class="loading-overlay" id="loading-ai" style="display: none;">
                                 <i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...
                             </div>
@@ -75,28 +75,28 @@
                         <p class="img-name ai-name">Kết quả khoanh vùng U xơ</p>
                     </div>
 
-                    <div class="image-box" id="manual-img-box" style="display: none;">
+                    <div class="image-box" id="manual-img-box" th:style="${detail.imgResultConclusion != null ? 'display: block;' : 'display: none;'}">
                         <h4>Ảnh Bác Sĩ Siêu Âm Vẽ</h4>
                         <div class="img-wrapper">
-                            <img id="manual-img" src="" alt="Ảnh Vẽ Tay" class="placeholder">
+                            <img id="manual-img" th:src="${detail.imgResultConclusion}" th:classappend="${detail.imgResultConclusion == null ? 'placeholder' : ''}" alt="Ảnh Vẽ Tay">
                         </div>
                         <p class="img-name">Đã khoanh vùng thủ công</p>
                     </div>
                 </div>
 
-                <div id="ultrasound-conclusion-view" style="display: none; margin-top: 1.5rem; background: #1e293b; padding: 1rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                <div id="ultrasound-conclusion-view" th:style="${detail.ultrasoundConclusion != null ? 'display: block; margin-top: 1.5rem; background: #1e293b; padding: 1rem; border-radius: 8px; border-left: 4px solid #f59e0b;' : 'display: none; margin-top: 1.5rem; background: #1e293b; padding: 1rem; border-radius: 8px; border-left: 4px solid #f59e0b;'}">
                     <h4 style="margin: 0 0 0.5rem 0; color: #cbd5e1;"><i class="fa-solid fa-user-doctor"></i> Kết luận của Bác sĩ siêu âm:</h4>
-                    <p id="ultrasound-conclusion-text" style="margin: 0; color: #f8fafc; font-style: italic; white-space: pre-wrap;"></p>
+                    <p id="ultrasound-conclusion-text" style="margin: 0; color: #f8fafc; font-style: italic; white-space: pre-wrap;" th:text="${detail.ultrasoundConclusion}"></p>
                 </div>
                 
                 <div class="action-buttons">
-                    <button id="btn-process-ai" class="btn-primary" onclick="processAI()"><i class="fa-solid fa-robot"></i> Chạy Phân Tích AI</button>
+                    <button id="btn-process-ai" class="btn-primary" onclick="processAI()" th:style="${detail.aiImageUrl != null ? 'display: none;' : ''}"><i class="fa-solid fa-robot"></i> Chạy Phân Tích AI</button>
                 </div>
 
-                <div sec:authorize="hasRole('ULTRASOUND_DOCTOR')" class="ultrasound-controls" style="margin-top: 2rem; border-top: 1px solid #334155; padding-top: 1rem;">
+                <div sec:authorize="hasRole('ULTRASOUND_DOCTOR')" class="ultrasound-controls" th:style="${detail.ultrasoundConclusion != null ? 'display: none;' : 'margin-top: 2rem; border-top: 1px solid #334155; padding-top: 1rem;'}">
                     <h3><i class="fa-solid fa-user-doctor"></i> Nhận định của Bác sĩ siêu âm</h3>
                     <div style="margin-bottom: 1rem;">
-                        <textarea id="ultrasound-conclusion" rows="3" placeholder="Nhập kết luận hoặc ghi chú về kết quả siêu âm..." style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #1e293b; color: white; resize: vertical; font-family: inherit; font-size: 1rem;"></textarea>
+                        <textarea id="ultrasound-conclusion" rows="3" placeholder="Nhập kết luận hoặc ghi chú về kết quả siêu âm..." style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid #475569; background: #1e293b; color: white; resize: vertical; font-family: inherit; font-size: 1rem;" th:text="${detail.ultrasoundConclusion}"></textarea>
                         <div id="conclusion-error" style="color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; display: none;"><i class="fa-solid fa-circle-exclamation"></i> <span></span></div>
                     </div>
                     <div class="action-buttons" style="justify-content: flex-start; gap: 1rem;">

@@ -44,4 +44,13 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Inte
         @Param("fromDate") java.time.LocalDateTime fromDate,
         @Param("toDate") java.time.LocalDateTime toDate,
         Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.patient.patientId = :patientId " +
+           "AND (cast(:fromDate as timestamp) IS NULL OR p.prescriptionDate >= :fromDate) " +
+           "AND (cast(:toDate as timestamp) IS NULL OR p.prescriptionDate <= :toDate) " +
+           "ORDER BY p.prescriptionDate DESC")
+    List<Prescription> findByPatientIdAndDateFilter(
+        @Param("patientId") Integer patientId,
+        @Param("fromDate") java.time.LocalDateTime fromDate,
+        @Param("toDate") java.time.LocalDateTime toDate);
 }

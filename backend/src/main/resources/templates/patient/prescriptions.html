@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{patient/layout :: main-layout(~{::main}, 'Đơn thuốc', 'prescriptions')}">
+<body>
+<main>
+    <link rel="stylesheet" th:href="@{/css/patient/records.css}"/>
+    <style>
+        .filter-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .filter-group input {
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            color: #1e293b;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .filter-group input:focus { border-color: #3b82f6; }
+        
+        .btn-filter {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            height: 42px;
+        }
+        .btn-filter:hover { background: #2563eb; }
+        .btn-clear {
+            background: #f1f5f9;
+            color: #475569;
+            text-decoration: none;
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .btn-clear:hover { background: #e2e8f0; color: #1e293b; }
+
+        .prescription-card {
+            background: white;
+            border: 1px solid #f1f5f9;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .prescription-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .presc-header {
+            padding: 24px;
+            border-bottom: 1px dashed #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .presc-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .presc-icon {
+            width: 52px;
+            height: 52px;
+            background: #eff6ff;
+            color: #3b82f6;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .presc-details h3 {
+            margin: 0 0 6px 0;
+            color: #1e293b;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .presc-details .presc-code {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+        .presc-meta {
+            display: flex;
+            gap: 16px;
+            color: #64748b;
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+        .presc-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8fafc;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .status-badge {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .status-dispensed { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+
+        /* Drugs List */
+        .drugs-list {
+            padding: 0;
+        }
+        .drug-item {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            gap: 20px;
+        }
+        .drug-item:last-child { border-bottom: none; }
+        
+        .drug-icon {
+            width: 44px;
+            height: 44px;
+            background: #f8fafc;
+            color: #64748b;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .drug-content { flex-grow: 1; }
+        .drug-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .drug-qty {
+            font-size: 14px;
+            color: #3b82f6;
+            background: #eff6ff;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+        .drug-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .drug-detail-item {
+            font-size: 13px;
+            color: #475569;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .drug-instruction {
+            background: #fffbeb;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #92400e;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .doctor-notes {
+            margin: 0 24px 24px 24px;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            font-size: 14px;
+            color: #334155;
+        }
+        .doctor-notes strong { color: #1e293b; margin-bottom: 4px; display: block; }
+    </style>
+
+    <div class="hero-header" style="margin-bottom: 24px;">
+        <p>Danh sách các đơn thuốc đã được bác sĩ kê cho bạn. Dưới đây là chi tiết cách sử dụng từng loại thuốc.</p>
+    </div>
+
+    <form th:action="@{/patient/prescriptions}" method="GET" id="filterForm" class="filter-card">
+        <div class="filter-group">
+            <label>Từ ngày</label>
+            <input type="date" id="startDate" name="startDate" th:value="${startDate}">
+        </div>
+        <div class="filter-group">
+            <label>Đến ngày</label>
+            <input type="date" id="endDate" name="endDate" th:value="${endDate}">
+        </div>
+        <button type="submit" class="btn-filter">
+            <i class="fa-solid fa-filter"></i> Lọc
+        </button>
+        <a th:href="@{/patient/prescriptions}" class="btn-clear">Xóa</a>
+    </form>
+
+    <div th:if="${prescriptions != null and !prescriptions.isEmpty()}" style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="prescription-card" th:each="p : ${prescriptions}">
+            <div class="presc-header">
+                <div class="presc-info">
+                    <div class="presc-icon">
+                        <i class="fa-solid fa-file-prescription"></i>
+                    </div>
+                    <div class="presc-details">
+                        <!-- Tên Đơn Thuốc thay đổi thành Ngày khám -->
+                        <h3>Đơn thuốc ngày <span th:text="${#temporals.format(p.prescriptionDate, 'dd/MM/yyyy')}"></span> <span class="presc-code" th:text="'(Mã: ' + ${p.prescriptionCode} + ')'"></span></h3>
+                        <div class="presc-meta">
+                            <span><i class="fa-solid fa-user-doctor"></i> Bác sĩ <span th:text="${p.doctor.fullName}"></span></span>
+                            <span><i class="fa-solid fa-stethoscope"></i> Chẩn đoán: <span th:text="${p.diagnosis}"></span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-badge" 
+                     th:classappend="${p.status != null && p.status.name() == 'DISPENSED'} ? 'status-dispensed' : 'status-pending'"
+                     th:text="${p.status != null && p.status.name() == 'DISPENSED' ? 'Đã phát' : 'Chưa phát'}">
+                </div>
+            </div>
+            
+            <!-- Danh sách thuốc trực tiếp -->
+            <div class="drugs-list">
+                <div class="drug-item" th:each="detail : ${p.details}">
+                    <div class="drug-icon">
+                        <i class="fa-solid fa-pills"></i>
+                    </div>
+                    <div class="drug-content">
+                        <div class="drug-name">
+                            <span th:text="${detail.drug.drugName}"></span>
+                            <span class="drug-qty" th:text="${detail.quantityPrescribed + ' ' + (detail.dispenseUnit != null ? detail.dispenseUnit : (detail.drug.baseUnit != null ? detail.drug.baseUnit.unitName : ''))}"></span>
+                        </div>
+                        <div class="drug-details">
+                            <div class="drug-detail-item">
+                                <i class="fa-solid fa-clock"></i> Mỗi lần: <strong th:text="${detail.dosePerTime}"></strong>
+                            </div>
+                            <div class="drug-detail-item">
+                                <i class="fa-solid fa-calendar-day"></i> Số lần/ngày: <strong th:text="${detail.timesPerDay}"></strong>
+                            </div>
+                            <div class="drug-detail-item">
+                                <i class="fa-solid fa-calendar-week"></i> Số ngày: <strong th:text="${detail.daysOfTreatment}"></strong>
+                            </div>
+                        </div>
+                        <div class="drug-instruction" th:if="${detail.instruction != null && !detail.instruction.isEmpty()}">
+                            <i class="fa-solid fa-circle-info" style="margin-right: 4px;"></i> 
+                            <span th:text="${detail.instruction}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lời dặn chung -->
+            <div class="doctor-notes" th:if="${p.notes != null && !p.notes.isEmpty()}">
+                <strong><i class="fa-solid fa-comment-medical"></i> Lời dặn của bác sĩ:</strong>
+                <span th:text="${p.notes}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Records -->
+    <div th:if="${prescriptions == null or prescriptions.isEmpty()}">
+        <div class="empty-state">
+            <div class="empty-state-icon">💊</div>
+            <h3 class="empty-state-title">Không có đơn thuốc nào</h3>
+            <p class="empty-state-desc">Không tìm thấy đơn thuốc nào trong khoảng thời gian bạn chọn.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

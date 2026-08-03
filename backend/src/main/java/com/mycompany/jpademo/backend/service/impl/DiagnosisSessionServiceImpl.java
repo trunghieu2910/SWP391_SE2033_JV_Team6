@@ -332,88 +332,80 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
     // 4. ULTRASOUND DOCTOR SCREEN (MÀN HÌNH BÁC SĨ SIÊU ÂM)
     // =========================================================================
 
-    // Màn hình Bác sĩ siêu âm: Danh sách ca chờ chụp siêu âm
+    // Man hinh Bac si sieu am: Danh sach ca cho chup sieu am
     @Override
     @Transactional(readOnly = true)
     public List<DiagnosisSessionResponse> getPendingUltrasoundSessions() {
-        var sessions = diagnosisSessionRepository.findByStatusInOrderByCreatedAtDesc(
-                List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING)
+        List<DiagnosisSession> filteredSessions = diagnosisSessionRepository.findSessionsWithMedicalImageStatus(
+                List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING),
+                MedicalImageStatus.PENDING
         );
-        // Lọc những session có ít nhất 1 hình ảnh siêu âm đang chờ xử lý (PENDING)
-        var filteredSessions = sessions.stream().filter(s -> {
-            if (s.getMedicalImages() != null) {
-                for (var image : s.getMedicalImages()) {
-                    if (image.getStatus() == MedicalImageStatus.PENDING) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }).collect(Collectors.toList());
 
-        return filteredSessions.stream().map(s -> {
+        List<DiagnosisSessionResponse> responseList = new java.util.ArrayList<>();
+        for (DiagnosisSession s : filteredSessions) {
             String types = "";
             if (s.getMedicalImages() != null) {
-                types = s.getMedicalImages().stream()
-                        .filter(img -> img.getStatus() == MedicalImageStatus.PENDING)
-                        .map(MedicalImage::getImageType)
-                        .filter(java.util.Objects::nonNull)
-                        .collect(Collectors.joining(", "));
+                java.util.StringJoiner joiner = new java.util.StringJoiner(", ");
+                for (MedicalImage img : s.getMedicalImages()) {
+                    if (img.getStatus() == MedicalImageStatus.PENDING && img.getImageType() != null) {
+                        joiner.add(img.getImageType());
+                    }
+                }
+                types = joiner.toString();
             }
-            return DiagnosisSessionResponse.builder()
+
+            DiagnosisSessionResponse dto = DiagnosisSessionResponse.builder()
                     .sessionId(s.getSessionId())
-                    .patientId(s.getPatient() != null ? s.getPatient().getPatientId() : null)
-                    .patientName((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getFullName() : "Không xác định")
-                    .patientCccd((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getNationalID() : "Không xác định")
+                    .patientId(s.getPatient().getPatientId())
+                    .patientName(s.getPatient().getUser().getFullName())
+                    .patientCccd(s.getPatient().getUser().getNationalID())
                     .status(s.getStatus())
                     .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
                     .clinicalInputMode(s.getClinicalInputMode())
                     .createdAt(s.getCreatedAt())
                     .imageType(types)
                     .build();
-        }).toList();
+            responseList.add(dto);
+        }
+        return responseList;
     }
 
-    // Màn hình Bác sĩ siêu âm: Danh sách ca đã chụp siêu âm xong
+    // Man hinh Bac si sieu am: Danh sach ca da chup sieu am xong
     @Override
     @Transactional(readOnly = true)
     public List<DiagnosisSessionResponse> getCompletedUltrasoundSessions() {
-        var sessions = diagnosisSessionRepository.findByStatusInOrderByCreatedAtDesc(
-                List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING, DiagnosisSessionStatus.COMPLETED)
+        List<DiagnosisSession> filteredSessions = diagnosisSessionRepository.findSessionsWithMedicalImageStatus(
+                List.of(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING, DiagnosisSessionStatus.COMPLETED),
+                MedicalImageStatus.COMPLETED
         );
 
-        return sessions.stream().filter(s -> {
-            if (s.getMedicalImages() != null) {
-                for (var image : s.getMedicalImages()) {
-                    if (image.getStatus() == MedicalImageStatus.COMPLETED) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }).map(s -> {
+        List<DiagnosisSessionResponse> responseList = new java.util.ArrayList<>();
+        for (DiagnosisSession s : filteredSessions) {
             Integer imageId = null;
             String types = "";
+            
             if (s.getMedicalImages() != null) {
-                for (var image : s.getMedicalImages()) {
-                    if (image.getStatus() == MedicalImageStatus.COMPLETED) {
-                        if (image.getMedicalImageDetailsList() != null && !image.getMedicalImageDetailsList().isEmpty()) {
-                            imageId = image.getMedicalImageDetailsList().get(0).getImageId();
+                java.util.StringJoiner joiner = new java.util.StringJoiner(", ");
+                for (MedicalImage img : s.getMedicalImages()) {
+                    if (img.getStatus() == MedicalImageStatus.COMPLETED) {
+                        // Lay imageId cua buc anh hoan thanh dau tien
+                        if (imageId == null && img.getMedicalImageDetailsList() != null && !img.getMedicalImageDetailsList().isEmpty()) {
+                            imageId = img.getMedicalImageDetailsList().get(0).getImageId();
+                        }
+                        // Ghep ten loai sieu am
+                        if (img.getImageType() != null) {
+                            joiner.add(img.getImageType());
                         }
                     }
                 }
-
-                types = s.getMedicalImages().stream()
-                        .filter(img -> img.getStatus() == MedicalImageStatus.COMPLETED)
-                        .map(MedicalImage::getImageType)
-                        .filter(java.util.Objects::nonNull)
-                        .collect(Collectors.joining(", "));
+                types = joiner.toString();
             }
-            return DiagnosisSessionResponse.builder()
+
+            DiagnosisSessionResponse dto = DiagnosisSessionResponse.builder()
                     .sessionId(s.getSessionId())
-                    .patientId(s.getPatient() != null ? s.getPatient().getPatientId() : null)
-                    .patientName((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getFullName() : "Không xác định")
-                    .patientCccd((s.getPatient() != null && s.getPatient().getUser() != null) ? s.getPatient().getUser().getNationalID() : "Không xác định")
+                    .patientId(s.getPatient().getPatientId())
+                    .patientName(s.getPatient().getUser().getFullName())
+                    .patientCccd(s.getPatient().getUser().getNationalID())
                     .status(s.getStatus())
                     .symptomResultStatus(s.getSymptomResult() != null ? s.getSymptomResult().getStatus() : null)
                     .clinicalInputMode(s.getClinicalInputMode())
@@ -421,7 +413,9 @@ public class DiagnosisSessionServiceImpl implements DiagnosisSessionService {
                     .medicalImageDetailsId(imageId)
                     .imageType(types)
                     .build();
-        }).collect(Collectors.toList());
+            responseList.add(dto);
+        }
+        return responseList;
     }
 
 

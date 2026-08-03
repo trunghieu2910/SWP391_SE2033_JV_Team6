@@ -24,6 +24,12 @@ public interface DoctorDiagnosisService {
                                                     String keyword, DiagnosisSessionStatus status,
                                                     LocalDate startDate, LocalDate endDate);
 
+    /** Retrieves all shared diagnosis sessions (Tumor Board) with pagination and filtering */
+    Page<com.mycompany.jpademo.backend.dto.response.SharedRecordResponse> getSharedRecords(String diseaseType, Pageable pageable);
+
+    /** Retrieves detailed session overview for a shared record, anonymizing patient data. */
+    DoctorSessionDetailResponse getSharedSessionDetail(Integer sessionId);
+
     /** Updates the status of a specific diagnosis session. */
     void updateSessionStatus(Integer doctorId, UpdateSessionStatusRequest request);
 

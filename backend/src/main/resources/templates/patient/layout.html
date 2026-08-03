@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:fragment="main-layout(content, title, currentTab)" lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -31,6 +31,10 @@
             <a th:href="@{/patient/medical-records}" class="nav-item" th:classappend="${currentTab == 'records' ? 'active' : ''}">
                 <i class="fa-solid fa-file-medical"></i>
                 <span>Hồ sơ bệnh án</span>
+            </a>
+            <a th:href="@{/patient/prescriptions}" class="nav-item" th:classappend="${currentTab == 'prescriptions' ? 'active' : ''}">
+                <i class="fa-solid fa-prescription-bottle-medical"></i>
+                <span>Đơn Thuốc</span>
             </a>
             <a th:href="@{/patient/reminders/new}" class="nav-item" th:classappend="${currentTab == 'reminders' ? 'active' : ''}">
                 <i class="fa-solid fa-bell"></i>

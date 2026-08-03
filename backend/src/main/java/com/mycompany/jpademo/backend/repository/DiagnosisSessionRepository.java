@@ -2,6 +2,7 @@ package com.mycompany.jpademo.backend.repository;
 
 import com.mycompany.jpademo.backend.entity.DiagnosisSession;
 import com.mycompany.jpademo.backend.enums.DiagnosisSessionStatus;
+import com.mycompany.jpademo.backend.enums.MedicalImageStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -177,6 +178,9 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
      */
     List<DiagnosisSession> findByStatusInOrderByCreatedAtDesc(List<DiagnosisSessionStatus> statuses);
 
+    @Query("SELECT DISTINCT s FROM DiagnosisSession s JOIN s.medicalImages m WHERE s.status IN :sessionStatuses AND m.status = :imageStatus ORDER BY s.createdAt DESC")
+    List<DiagnosisSession> findSessionsWithMedicalImageStatus(@Param("sessionStatuses") List<DiagnosisSessionStatus> sessionStatuses, @Param("imageStatus") MedicalImageStatus imageStatus);
+
     // [Nguyen The Hieu]: Bước 1 - Repository: Đếm số ca khám của một bác sĩ dựa theo một trạng thái (status) cụ thể.
     long countByUserUserIdAndStatus(Integer userId, DiagnosisSessionStatus status);
 
@@ -247,5 +251,19 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             @Param("diseaseType") String diseaseType,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * [Role: Bác sĩ]
+     * Lấy danh sách các ca bệnh được đánh dấu isShared = true (Bảng Hội Chẩn)
+     */
+    List<DiagnosisSession> findByIsSharedTrueOrderByCreatedAtDesc();
+
+    @Query("SELECT ds FROM DiagnosisSession ds " +
+           "LEFT JOIN ds.review r " +
+           "LEFT JOIN r.diseaseType dt " +
+           "WHERE ds.isShared = true " +
+           "AND (:diseaseType IS NULL OR dt.name = :diseaseType) " +
+           "ORDER BY ds.createdAt DESC")
+    Page<DiagnosisSession> findSharedRecords(@Param("diseaseType") String diseaseType, Pageable pageable);
 }
 
