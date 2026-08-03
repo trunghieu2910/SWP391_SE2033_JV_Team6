@@ -124,9 +124,7 @@ public class PatientController {
 
         DiagnosisSession session = sessionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hồ sơ bệnh án: " + id));
-        if (!session.getPatient().getPatientId().equals(patient.getPatientId())) {
-            throw new IllegalArgumentException("Bạn không có quyền truy cập hồ sơ này.");
-        }
+
 
         MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordDetail(id, true);
 
@@ -151,7 +149,7 @@ public class PatientController {
             throw new IllegalArgumentException("Bạn không có quyền truy cập hồ sơ này.");
         }
 
-        // Bệnh nhân chỉ xuất được bản có che/mask chẩn đoán nếu bác sĩ chưa công bố
+      // xuat file pdf
         MedicalRecordDetailResponse record = medicalRecordService.getMedicalRecordDetail(id, true);
         byte[] pdfBytes = pdfService.generateMedicalRecordPdf(record, true);
 

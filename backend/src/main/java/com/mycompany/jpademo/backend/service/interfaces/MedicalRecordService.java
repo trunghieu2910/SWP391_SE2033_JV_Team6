@@ -23,10 +23,10 @@ public interface MedicalRecordService {
     // 3. Hàm bóc tách chi tiết toàn bộ dữ liệu sạch của 1 ca khám cụ thể
     MedicalRecordDetailResponse getMedicalRecordDetail(Integer sessionID, boolean isPatient);
 
-    // 4. Đếm số ca theo trạng thái — dùng COUNT trực tiếp ở DB, không tải toàn bộ dữ liệu lên
+    // 4. Đếm số ca theo trạng thái — dùng COUNT trực tiếp ở DB
     long countByStatus(String keyword, String status, String diseaseType, LocalDateTime startDate, LocalDateTime endDate);
 
-    // 5. Đếm số ca đã có kết luận (diagnosis) — dùng COUNT trực tiếp ở DB
+    // 5. Đếm số ca đã có kết luận (diagnosis)
     long countWithDiagnosis(String keyword, String diseaseType, LocalDateTime startDate, LocalDateTime endDate);
 
 }

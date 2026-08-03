@@ -54,16 +54,20 @@ public class ReceptionistCreateSessionController {
     public String createSessionPage(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "patientId", required = false) Integer patientId,
+            @RequestParam(value = "doctorId", required = false) Integer doctorId,
             Model model) {
+
+
+        model.addAttribute("doctors", getDoctorsWithWorkload());
+        model.addAttribute("selectedDoctorId", doctorId);
 
         if (patientId != null) {
             Patient patient = patientSearchService.getPatientEntityById(patientId);
             if (patient != null) {
                 model.addAttribute("selectedPatient", patient);
-                model.addAttribute("doctors", getDoctorsWithWorkload());
-                // Create an empty request object for the form
                 CreateDiagnosisSessionRequest request = new CreateDiagnosisSessionRequest();
                 request.setPatientId(patientId);
+                request.setDoctorId(doctorId);
                 model.addAttribute("createRequest", request);
                 return "receptionist/create-session";
             } else {
@@ -98,6 +102,7 @@ public class ReceptionistCreateSessionController {
                     .orElse("Dữ liệu không hợp lệ");
             model.addAttribute("errorMessage", errorMsg);
             model.addAttribute("selectedPatient", patientSearchService.getPatientEntityById(request.getPatientId()));
+            model.addAttribute("selectedDoctorId", request.getDoctorId());
             model.addAttribute("doctors", getDoctorsWithWorkload());
             model.addAttribute("createRequest", request);
             return "receptionist/create-session";
@@ -118,6 +123,7 @@ public class ReceptionistCreateSessionController {
             log.error("Error creating session", e);
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("selectedPatient", patientSearchService.getPatientEntityById(request.getPatientId()));
+            model.addAttribute("selectedDoctorId", request.getDoctorId());
             model.addAttribute("doctors", getDoctorsWithWorkload());
             model.addAttribute("createRequest", request);
             return "receptionist/create-session";

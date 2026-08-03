@@ -811,6 +811,7 @@ public class AdminServiceImpl implements AdminService {
         return DashboardStatsResponse.builder()
                 .totalUsers(userRepository.countUsersWithDateFilter(start, end))
                 .totalDoctors(userRepository.countUsersByRoleWithDateFilter(RoleName.DOCTOR, start, end))
+                .totalAdmin(userRepository.countUsersByRoleWithDateFilter(RoleName.ADMIN, start, end))
                 .totalPatients(userRepository.countUsersByRoleWithDateFilter(RoleName.PATIENT, start, end))
                 .totalPharmacist(userRepository.countUsersByRoleWithDateFilter(RoleName.PHARMACIST, start, end))
                 .totalUltrasoundDoctor(userRepository.countUsersByRoleWithDateFilter(RoleName.ULTRASOUND_DOCTOR, start, end))

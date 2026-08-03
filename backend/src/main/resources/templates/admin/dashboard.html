@@ -105,6 +105,16 @@
                     <p th:text="${stats.blockedUsers}">0</p>
                 </div>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                    <i class="fa-solid fa-user-slash"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Tổng Quản trị viên</h3>
+                    <p th:text="${stats.totalAdmin}">0</p>
+                </div>
+            </div>
         </div>
 
         <div class="stat-row">

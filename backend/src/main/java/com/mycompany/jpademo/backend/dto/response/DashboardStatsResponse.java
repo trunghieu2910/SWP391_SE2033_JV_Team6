@@ -10,6 +10,8 @@ public class DashboardStatsResponse {
 
     private Long totalDoctors;
 
+    private Long totalAdmin;
+
     private Long totalPatients;
 
     private Long blockedUsers;

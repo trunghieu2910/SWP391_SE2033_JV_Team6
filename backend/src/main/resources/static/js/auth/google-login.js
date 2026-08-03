@@ -3,10 +3,10 @@ import { getAuth, GoogleAuthProvider, signInWithPopup }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey:     "AIzaSyBQZMaY2_1gdl-LynAG6k5TDmLXobd7_xw",
-    authDomain: "medai-diagnosis-5efd5.firebaseapp.com",
-    projectId:  "medai-diagnosis-5efd5",
-    appId:      "1:172414625801:web:c2390692e107c4f27a30d8",
+    apiKey: "AIzaSyAMO6sJbcI1eh3dEP-kqeCAw9jEqM1vqo8",
+    authDomain: "medai-diagnosis-v2.firebaseapp.com",
+    projectId: "medai-diagnosis-v2",
+    appId: "1:151555643458:web:5e33b2673a51531e0775db"
 };
 
 const app = initializeApp(firebaseConfig);
