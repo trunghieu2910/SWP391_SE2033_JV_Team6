@@ -49,28 +49,28 @@ public class UltrasoundAIController {
     public ResponseEntity<?> uploadFromSimulator(@RequestParam("file") MultipartFile file, 
                                                  @RequestParam("sessionId") Integer sessionId) {
         try {
-            // 1. Kiểm tra session
+            // 1. Kiem tra session (Validation)
             Optional<DiagnosisSession> sessionOpt = diagnosisSessionRepository.findById(sessionId);
             if (sessionOpt.isEmpty()) {
                 return ResponseEntity.badRequest().body("Không tìm thấy ca khám (Session ID: " + sessionId + ")");
             }
 
-            // Kiểm tra dung lượng file tối thiểu (10KB)
+            // Kiem tra dung luong file toi thieu (Ngan chan anh qua mo hoac loi)
             if (file.getSize() < 10240) {
                 return ResponseEntity.badRequest().body("Vui lòng chọn ảnh chất lượng hơn.");
             }
 
-            // Kiểm tra định dạng file
+            // Kiem tra dinh dang file (Chi cho phep anh thong thuong hoac DICOM)
             String originalName = file.getOriginalFilename();
             String ext = "";
             if (originalName != null && originalName.contains(".")) {
                 ext = originalName.substring(originalName.lastIndexOf(".")).toLowerCase();
             }
-            if (!ext.equals(".jpg") && !ext.equals(".jpeg") && !ext.equals(".png") && !ext.equals(".dcm") && !ext.equals(".dicom")) {
-                return ResponseEntity.badRequest().body("Định dạng file không hỗ trợ. Hệ thống chỉ chấp nhận JPG, PNG hoặc DICOM.");
+            if (!ext.equals(".jpg") && !ext.equals(".jpeg") && !ext.equals(".png")) {
+                return ResponseEntity.badRequest().body("Định dạng file không hỗ trợ. Hệ thống chỉ chấp nhận JPG, JPEG hoặc PNG.");
             }
             
-            // 2. Tạo thư mục lưu file
+            // 2. Tao thu muc va luu buc anh goc vao server
             Path uploadDir = Paths.get("uploads");
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
@@ -80,62 +80,15 @@ public class UltrasoundAIController {
             Path originalPath = uploadDir.resolve(originalFileName);
             Files.copy(file.getInputStream(), originalPath, StandardCopyOption.REPLACE_EXISTING);
             
-            String originalUrlPath = null;
-            byte[] predictImageBytes = null;
-
-            // 3. Nếu là file DICOM, gọi Python chuyển đổi sang JPEG trước khi lưu và phân tích
-            if (ext.equals(".dcm") || ext.equals(".dicom")) {
-                String convertUrl = "http://localhost:5000/convert-dicom";
-                HttpHeaders convertHeaders = new HttpHeaders();
-                convertHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
-                
-                final String finalExt = ext;
-                MultiValueMap<String, Object> convertBody = new LinkedMultiValueMap<>();
-                convertBody.add("file", new ByteArrayResource(file.getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return "image" + finalExt;
-                    }
-                });
-                
-                HttpEntity<MultiValueMap<String, Object>> convertRequestEntity = new HttpEntity<>(convertBody, convertHeaders);
-                ResponseEntity<byte[]> convertResponse;
-                try {
-                    convertResponse = restTemplate.postForEntity(convertUrl, convertRequestEntity, byte[].class);
-                } catch (org.springframework.web.client.HttpStatusCodeException e) {
-                    String errorBody = e.getResponseBodyAsString();
-                    try {
-                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                        com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(errorBody);
-                        if (node.has("error")) {
-                            return ResponseEntity.badRequest().body(node.get("error").asText());
-                        }
-                    } catch (Exception jsonEx) {}
-                    return ResponseEntity.badRequest().body("Lỗi kiểm tra chất lượng DICOM: " + errorBody);
-                } catch (Exception e) {
-                    return ResponseEntity.status(500).body("Không thể kết nối Python AI Service ở cổng 5000");
-                }
-
-                if (convertResponse.getStatusCode() == HttpStatus.OK && convertResponse.getBody() != null) {
-                    // Lưu ảnh JPEG được trích xuất từ DICOM để trình duyệt có thể hiển thị
-                    String origJpgName = "orig_" + UUID.randomUUID().toString() + ".jpg";
-                    Path origJpgPath = uploadDir.resolve(origJpgName);
-                    Files.write(origJpgPath, convertResponse.getBody());
-                    originalUrlPath = "/uploads/" + origJpgName;
-                    predictImageBytes = convertResponse.getBody();
-                } else {
-                    return ResponseEntity.status(500).body("Lỗi chuyển đổi file DICOM sang ảnh JPEG.");
-                }
-            } else {
-                originalUrlPath = "/uploads/" + originalFileName;
-                predictImageBytes = file.getBytes();
-            }
+            String originalUrlPath = "/uploads/" + originalFileName;
+            byte[] predictImageBytes = file.getBytes();
             
-            // 4. Gửi sang Python AI
+            // 4. Dong goi va gui buc anh sang cho may chu Python AI (localhost:5000/predict)
             String aiServiceUrl = "http://localhost:5000/predict";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             
+            // DONG GOI: Nhet buc anh vao trong hop hang (body) va gia bo dat ten no la "image.jpg"
             final byte[] bytesToSend = predictImageBytes;
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", new ByteArrayResource(bytesToSend) {
@@ -145,9 +98,11 @@ public class UltrasoundAIController {
                 }
             });
             
+            // Gop hop hang va nhan dan thanh 1 kien hang hoan chinh
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             ResponseEntity<byte[]> aiResponse;
             try {
+                // GUI DI: Mang kien hang quang sang dia chi may chu AI
                 aiResponse = restTemplate.postForEntity(aiServiceUrl, requestEntity, byte[].class);
             } catch (org.springframework.web.client.HttpStatusCodeException e) {
                 String errorBody = e.getResponseBodyAsString();
@@ -166,9 +121,11 @@ public class UltrasoundAIController {
             String aiUrlPath = null;
             Double confidenceScore = null;
             
+            // NHAN KET QUA: Kiem tra xem co tra ve thanh cong va co anh ben trong khong
             if (aiResponse.getStatusCode() == HttpStatus.OK && aiResponse.getBody() != null) {
                 String aiFileName = "ai_" + UUID.randomUUID().toString() + ".jpg";
                 Path aiPath = uploadDir.resolve(aiFileName);
+                // Ghi toan bo tam anh nhan tu AI (aiResponse.getBody()) vao o cung cua may chu Java
                 Files.write(aiPath, aiResponse.getBody());
                 aiUrlPath = "/uploads/" + aiFileName;
                 
@@ -182,7 +139,7 @@ public class UltrasoundAIController {
                 return ResponseEntity.status(500).body("Lỗi xử lý AI");
             }
 
-            // 5. Lưu vào Database
+            // 5. Luu ket qua vao Database va tra Json ve cho giao dien
             List<MedicalImage> existingImages = medicalImageRepository.findByDiagnosisSessionSessionId(sessionId);
             MedicalImage mi = null;
             for(MedicalImage img : existingImages) {

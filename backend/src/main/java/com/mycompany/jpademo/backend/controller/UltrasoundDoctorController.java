@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -34,7 +35,10 @@ public class UltrasoundDoctorController {
     }
 
     @GetMapping("/ultrasound-simulator")
-    public String getUltrasoundSimulator() {
+    public String getUltrasoundSimulator(@RequestParam(value = "sessionId", required = false) Integer sessionId, Model model) {
+        if (sessionId != null) {
+            model.addAttribute("sessionId", sessionId);
+        }
         return "ultrasound-doctor/ultrasound-simulator";
     }
 }
