@@ -130,6 +130,24 @@ public class PharmacistServiceImpl implements PharmacistService {
         if (request.getBaseUnitId() == null) {
             throw new RuntimeException("Vui lòng chọn Đơn vị gốc kê đơn.");
         }
+
+        // Validate mã thuốc do người dùng nhập
+        String drugCode = request.getDrugCode();
+        if (drugCode == null || drugCode.trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng nhập mã thuốc.");
+        }
+        drugCode = drugCode.trim().toUpperCase();
+        if (drugCode.length() > 8) {
+            throw new RuntimeException("Mã thuốc không được vượt quá 8 ký tự.");
+        }
+        if (!drugCode.matches("^[A-Z0-9\\-]+$")) {
+            throw new RuntimeException("Mã thuốc chỉ được chứa chữ cái, số và dấu gạch ngang (-).");
+        }
+        if (drugRepository.findByDrugCode(drugCode).isPresent()) {
+            throw new RuntimeException("Mã thuốc \"" + drugCode + "\" đã tồn tại. Vui lòng chọn mã khác.");
+        }
+        request.setDrugCode(drugCode);
+
         validateDrugRequest(request, request.getBaseUnitId());
 
         User pharmacist = userRepository.findById(pharmacistId)

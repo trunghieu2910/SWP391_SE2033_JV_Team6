@@ -7,3 +7,4 @@ env
 backend/target/
 **/target/
 *.class
+firebase-service-account.json

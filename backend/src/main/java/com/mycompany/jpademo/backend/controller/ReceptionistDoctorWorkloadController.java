@@ -34,18 +34,16 @@ public class ReceptionistDoctorWorkloadController {
     private final UserRepository userRepository;
 
     // ==================== Màn hình 1: Danh sách tải bác sĩ ====================
-    // [Nguyen The Hieu]: Bước 4 - Controller: Nhận request GET /receptionist/doctor-workload
+    // [Nguyen The Hieu]
     @GetMapping("/doctor-workload")
     public String doctorWorkloadPage(Model model) {
-        // Gọi Service ở Bước 3 để lấy data tổng hợp
         List<DoctorWorkloadResponse> workloads = diagnosisSessionService.getDoctorWorkloads();
         model.addAttribute("workloads", workloads);
-        // Trả về view HTML: templates/receptionist/doctor-workload.html (Bước 5)
         return "receptionist/doctor-workload";
     }
 
     // ==================== Màn hình 2: Chi tiết ca của bác sĩ ====================
-    // [Nguyen The Hieu]: Bước 4 - Controller: Nhận request GET /receptionist/doctor-workload/{doctorId}
+    // [Nguyen The Hieu]
     @GetMapping("/doctor-workload/{doctorId}")
     public String doctorWorkloadDetail(
             @PathVariable Integer doctorId,
@@ -64,7 +62,7 @@ public class ReceptionistDoctorWorkloadController {
         model.addAttribute("doctorName", doctor.getFullName());
         model.addAttribute("doctorId", doctorId);
 
-        // [Nguyen The Hieu]: Xử lý logic tính toán khoảng ngày (startDateTime, endDateTime) dựa trên filter được chọn trên giao diện
+
         LocalDateTime startDateTime = null;
         LocalDateTime endDateTime = null;
         LocalDate today = LocalDate.now();
@@ -90,7 +88,7 @@ public class ReceptionistDoctorWorkloadController {
                     endDateTime = endDate.atTime(LocalTime.MAX);
                 }
                 break;
-            default: // ALL - Mặc định không set limit thời gian
+            default:
                 break;
         }
 List<DiagnosisSessionStatus> statuses = Arrays.asList(DiagnosisSessionStatus.PENDING, DiagnosisSessionStatus.PROCESSING);
@@ -106,7 +104,7 @@ List<DiagnosisSessionStatus> statuses = Arrays.asList(DiagnosisSessionStatus.PEN
         model.addAttribute("totalPages", sessions.getTotalPages());
         model.addAttribute("totalElements", sessions.getTotalElements());
 
-        // Trả về view HTML: templates/receptionist/doctor-workload-detail.html (Bước 5)
+
         return "receptionist/doctor-workload-detail";
     }
 }
