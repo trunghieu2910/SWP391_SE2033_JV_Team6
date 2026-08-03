@@ -63,7 +63,7 @@
                                     <span class="doctor-workload"
                                           th:classappend="${workload.pendingCount > 5 ? 'workload-high' : (workload.pendingCount > 0 ? 'workload-mid' : 'workload-low')}">
                                         <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
-                                        <span th:text="${workload.pendingCount}">0</span> ca đang chờ
+                                        <span th:text="${workload.pendingCount}"></span> ca đang chờ
                                     </span>
                                 </label>
                             </li>
@@ -191,25 +191,7 @@
                 <form id="sessionForm" class="session-form" th:action="@{/receptionist/create-session}" method="POST" th:object="${createRequest}">
                     <input type="hidden" th:field="*{patientId}" />
                     <input type="hidden" th:field="*{doctorId}" />
-
-                    <fieldset>
-                        <legend class="form-section-title">
-                            <i class="fa-solid fa-stethoscope" aria-hidden="true"></i> Nhập triệu chứng
-                        </legend>
-                        <div class="form-group full-width">
-                            <p>Chọn người nhập triệu chứng <span class="required" style="color: red;">*</span></p>
-                            <div style="display: flex; gap: 30px; margin-top: 10px; flex-wrap: wrap;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; white-space: nowrap;">
-                                    <input type="radio" th:field="*{clinicalInputMode}" value="PATIENT" required style="width: auto; height: auto; margin: 0;">
-                                    Bệnh nhân tự nhập
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; white-space: nowrap;">
-                                    <input type="radio" th:field="*{clinicalInputMode}" value="DOCTOR" required style="width: auto; height: auto; margin: 0;">
-                                    Bác sĩ hỏi bệnh và nhập
-                                </label>
-                            </div>
-                        </div>
-                    </fieldset>
+                    <input type="hidden" th:field="*{clinicalInputMode}" value="DOCTOR" required style="width: auto; height: auto; margin: 0;">
 
                     <!-- Thông báo lỗi -->
                     <div th:if="${errorMessage != null}" class="alert alert-danger"

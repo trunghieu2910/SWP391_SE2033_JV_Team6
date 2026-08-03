@@ -57,7 +57,6 @@ public class ReceptionistCreateSessionController {
             @RequestParam(value = "doctorId", required = false) Integer doctorId,
             Model model) {
 
-
         model.addAttribute("doctors", getDoctorsWithWorkload());
         model.addAttribute("selectedDoctorId", doctorId);
 

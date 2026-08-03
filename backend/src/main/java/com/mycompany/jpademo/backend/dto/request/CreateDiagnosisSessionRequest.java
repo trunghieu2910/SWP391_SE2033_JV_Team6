@@ -16,6 +16,5 @@ public class CreateDiagnosisSessionRequest {
     @NotNull(message = "Vui lòng chọn bác sĩ")
     private Integer doctorId;
 
-    @NotNull(message = "Vui lòng chọn người nhập triệu chứng")
     private ClinicalInputMode clinicalInputMode;
 }
