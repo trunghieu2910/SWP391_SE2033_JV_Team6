@@ -112,6 +112,55 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
                 .build());
     }
 
+    /** Retrieves all shared diagnosis sessions (Tumor Board) with pagination and filtering */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<com.mycompany.jpademo.backend.dto.response.SharedRecordResponse> getSharedRecords(String diseaseType, Pageable pageable) {
+        String normalizedDiseaseType = (diseaseType == null || diseaseType.trim().isEmpty()) ? null : diseaseType.trim();
+        Page<DiagnosisSession> sharedSessions = sessionRepository.findSharedRecords(normalizedDiseaseType, pageable);
+        
+        return sharedSessions.map(session -> {
+            String doctorName = session.getUser() != null ? session.getUser().getFullName() : "Bác sĩ ẩn danh";
+            String gender = session.getPatient() != null ? session.getPatient().getGender() : "Không rõ";
+            
+            Integer age = null;
+            if (session.getPatient() != null && session.getPatient().getDob() != null) {
+                age = LocalDate.now().getYear() - session.getPatient().getDob().getYear();
+            }
+
+            String currentDiseaseType = null;
+            if (session.getReview() != null && session.getReview().getDiseaseType() != null) {
+                currentDiseaseType = session.getReview().getDiseaseType().getName();
+            }
+
+            String aiImageUrl = null;
+            // Get the first available AI image from MedicalImage list
+            if (session.getMedicalImages() != null) {
+                for (MedicalImage img : session.getMedicalImages()) {
+                    if (img.getMedicalImageDetailsList() != null) {
+                        for (MedicalImageDetails detail : img.getMedicalImageDetailsList()) {
+                            if (detail.getAiImageUrl() != null && !detail.getAiImageUrl().isEmpty()) {
+                                aiImageUrl = detail.getAiImageUrl();
+                                break;
+                            }
+                        }
+                    }
+                    if (aiImageUrl != null) break;
+                }
+            }
+
+            return com.mycompany.jpademo.backend.dto.response.SharedRecordResponse.builder()
+                    .sessionId(session.getSessionId())
+                    .doctorName(doctorName)
+                    .gender(gender)
+                    .age(age)
+                    .diseaseType(currentDiseaseType)
+                    .aiImageUrl(aiImageUrl)
+                    .createdAt(session.getCreatedAt())
+                    .build();
+        });
+    }
+
     /** Updates the status of a specific diagnosis session. */
     @Override
     @Transactional
@@ -315,13 +364,15 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
 
     /** Retrieves detailed session overview, patient data, and logs for a doctor. */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public DoctorSessionDetailResponse getSessionDetail(Integer sessionId, Integer doctorId) {
         DiagnosisSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán với: " + sessionId));
+                
         if (!session.getUser().getUserId().equals(doctorId)) {
             throw new UnauthorizedActionException("Bạn không có quyền xem ca chẩn đoán này.");
         }
+        
         Patient patient = session.getPatient();
         User patientUser = patient.getUser();
         SymptomResult symptomResult = symptomResultRepository
@@ -332,6 +383,39 @@ public class DoctorDiagnosisServiceImpl implements DoctorDiagnosisService {
         Review review = reviewRepository.findByDiagnosisSessionSessionId(sessionId).orElse(null);
 
         return mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages, review);
+    }
+
+    /** Retrieves detailed session overview for a shared record, anonymizing patient data. */
+    @Override
+    @Transactional(readOnly = true)
+    public DoctorSessionDetailResponse getSharedSessionDetail(Integer sessionId) {
+        DiagnosisSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ca chẩn đoán với: " + sessionId));
+        
+        if (!Boolean.TRUE.equals(session.getIsShared())) {
+            throw new BadRequestException("Ca chẩn đoán này không được chia sẻ.");
+        }
+        
+        Patient patient = session.getPatient();
+        User patientUser = patient.getUser();
+        SymptomResult symptomResult = symptomResultRepository
+                .findBySessionIdWithDetails(sessionId)
+                .orElse(null);
+        List<LabResult> labResults = labResultRepository.findByDiagnosisSessionSessionId(sessionId);
+        List<MedicalImage> medicalImages = medicalImageRepository.findByDiagnosisSession_SessionId(sessionId);
+        Review review = reviewRepository.findByDiagnosisSessionSessionId(sessionId).orElse(null);
+
+        DoctorSessionDetailResponse response = mapToDoctorSessionDetailResponse(session, patient, patientUser, symptomResult, labResults, medicalImages, review);
+        
+        // Anonymize patient data
+        response.setPatientName("Bệnh nhân ẩn danh");
+        response.setPatientAddress("Ẩn danh");
+        response.setPatientDob(null);
+        // We can keep gender and calculated age if we want, but DOB is nullified to prevent displaying exact birth date.
+        // Wait, the template might still use patientDob to calculate age, but DoctorSessionDetailResponse does not have 'age'.
+        // Let's leave patientDob null, and the UI will just say "Bệnh nhân ẩn danh"
+        
+        return response;
     }
 
     /** Saves the final review diagnosis and conclusions for a session. */

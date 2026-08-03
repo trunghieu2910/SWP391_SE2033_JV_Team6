@@ -164,6 +164,30 @@ public class PatientController {
                 .body(pdfBytes);
     }
 
+    @GetMapping("/prescriptions")
+    public String getPrescriptions(Model model,
+                                   @AuthenticationPrincipal CustomUserDetails userDetails,
+                                   @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                   @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        ProfileResponse profile = profileService.getProfile(userDetails.getUsername());
+        Patient patient = getPatient(userDetails);
+        
+        java.time.LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        java.time.LocalDateTime endDateTime = endDate != null ? endDate.atTime(java.time.LocalTime.MAX) : null;
+        
+        List<com.mycompany.jpademo.backend.entity.Prescription> prescriptions = prescriptionRepository.findByPatientIdAndDateFilter(
+                patient.getPatientId(), startDateTime, endDateTime);
+
+        model.addAttribute("profile", profile);
+        model.addAttribute("prescriptions", prescriptions);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
+        return "patient/prescriptions";
+    }
+
+
+
     @GetMapping("/new-session")
     public String newSession(Model model,
                              @AuthenticationPrincipal CustomUserDetails userDetails,

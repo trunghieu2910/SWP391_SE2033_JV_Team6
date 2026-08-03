@@ -6,6 +6,7 @@ import com.mycompany.jpademo.backend.security.userdetails.CustomUserDetails;
 import com.mycompany.jpademo.backend.service.interfaces.MedicalRecordService;
 import com.mycompany.jpademo.backend.service.interfaces.PdfService;
 import com.mycompany.jpademo.backend.repository.PrescriptionRepository;
+import com.mycompany.jpademo.backend.service.interfaces.DiseaseTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +38,7 @@ public class DoctorMedicalRecordViewController {
     private final MedicalRecordService medicalRecordService;
     private final PdfService pdfService;
     private final PrescriptionRepository prescriptionRepository;
+    private final DiseaseTypeService diseaseTypeService;
 
     private static final int DEFAULT_PAGE_SIZE = 9;
 
@@ -92,6 +94,7 @@ public class DoctorMedicalRecordViewController {
         model.addAttribute("selectedDiseaseType", diseaseType);
         model.addAttribute("selectedStartDate", startDate);
         model.addAttribute("selectedEndDate", endDate);
+        model.addAttribute("diseaseTypes", diseaseTypeService.getAllDiseaseTypes());
         
         if (userDetails != null && userDetails.getUser() != null) {
             model.addAttribute("doctorName", userDetails.getUser().getFullName());

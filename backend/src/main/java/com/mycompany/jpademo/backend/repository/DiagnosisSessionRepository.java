@@ -247,5 +247,19 @@ public interface DiagnosisSessionRepository extends JpaRepository<DiagnosisSessi
             @Param("diseaseType") String diseaseType,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * [Role: Bác sĩ]
+     * Lấy danh sách các ca bệnh được đánh dấu isShared = true (Bảng Hội Chẩn)
+     */
+    List<DiagnosisSession> findByIsSharedTrueOrderByCreatedAtDesc();
+
+    @Query("SELECT ds FROM DiagnosisSession ds " +
+           "LEFT JOIN ds.review r " +
+           "LEFT JOIN r.diseaseType dt " +
+           "WHERE ds.isShared = true " +
+           "AND (:diseaseType IS NULL OR dt.name = :diseaseType) " +
+           "ORDER BY ds.createdAt DESC")
+    Page<DiagnosisSession> findSharedRecords(@Param("diseaseType") String diseaseType, Pageable pageable);
 }
 
